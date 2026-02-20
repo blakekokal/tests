@@ -236,7 +236,27 @@ const handicapData = {
 };
 
 const putCombines={short:[4,9,13,5,7,14,11,6,8,12,15,6,10,14,4,10,9,7],normal:[4,9,14,30,6,18,25,7,11,35,22,5,10,16,4,10,20,7]};
-const chipScen=[{d:10,l:'Fairway'},{d:15,l:'Rough'},{d:20,l:'Sand'},{d:25,l:'Fairway'},{d:30,l:'Rough'},{d:12,l:'Sand'},{d:18,l:'Fairway'},{d:22,l:'Rough'},{d:28,l:'Sand'},{d:8,l:'Fairway'},{d:14,l:'Rough'},{d:19,l:'Sand'},{d:24,l:'Fairway'},{d:29,l:'Rough'},{d:11,l:'Sand'},{d:16,l:'Fairway'},{d:21,l:'Rough'},{d:27,l:'Sand'}];
+// Fixed combine scenarios with exact lie distributions
+// 6-hole:  1 Sand, 3 Fairway, 2 Rough
+// 9-hole:  2 Sand, 4 Fairway, 3 Rough
+// 18-hole: 4 Sand, 8 Fairway, 6 Rough
+const chipCombines = {
+    6: [
+        {d:10,l:'Sand'},
+        {d:10,l:'Fairway'},{d:20,l:'Fairway'},{d:30,l:'Fairway'},
+        {d:15,l:'Rough'},{d:25,l:'Rough'}
+    ],
+    9: [
+        {d:10,l:'Sand'},{d:20,l:'Sand'},
+        {d:10,l:'Fairway'},{d:15,l:'Fairway'},{d:20,l:'Fairway'},{d:30,l:'Fairway'},
+        {d:10,l:'Rough'},{d:20,l:'Rough'},{d:25,l:'Rough'}
+    ],
+    18: [
+        {d:10,l:'Sand'},{d:15,l:'Sand'},{d:20,l:'Sand'},{d:30,l:'Sand'},
+        {d:10,l:'Fairway'},{d:15,l:'Fairway'},{d:20,l:'Fairway'},{d:20,l:'Fairway'},{d:25,l:'Fairway'},{d:25,l:'Fairway'},{d:30,l:'Fairway'},{d:30,l:'Fairway'},
+        {d:10,l:'Rough'},{d:15,l:'Rough'},{d:20,l:'Rough'},{d:25,l:'Rough'},{d:25,l:'Rough'},{d:30,l:'Rough'}
+    ]
+};
 
 /* ── APP ── */
 let curMode='custom',curType='',wedgeMode='sg',state={};
@@ -282,7 +302,8 @@ function setupSpreadsheet(){
     if(curMode==='combine'){
         if(curType==='putting') pD=putCombines[document.getElementById('p-type').value].slice(0,holes).sort(()=>Math.random()-.5);
         if(curType==='wedge'){const t=document.getElementById('w-type').value,mn=t==='std'?50:t==='jr'?30:10,mx=t==='std'?125:t==='jr'?75:50;wD=genU(holes,mn,mx,5);}
-        cS=chipScen.slice(0,holes).sort(()=>Math.random()-.5);
+        const src = chipCombines[holes] || chipCombines[18].slice(0,holes);
+        cS = [...src].sort(()=>Math.random()-.5);
     } else if(curType==='wedge'){wD=genU(holes,+document.getElementById('w-min').value,+document.getElementById('w-max').value,5);}
 
     for(let i=1;i<=holes;i++){
