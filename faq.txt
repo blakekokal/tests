@@ -1,0 +1,79 @@
+FAQ
+
+
+GENERAL
+
+Q: What is Strokes Gained?
+A: Strokes Gained is a stat that measures how well you perform compared to a benchmark handicap. It breaks your game into categories — Off the Tee, Approach, Short Game, and Putting — so you can see exactly where you're gaining or losing strokes.
+
+Q: Is this app free?
+A: [Your answer here]
+
+Q: What courses are available?
+A: [Your answer here]
+
+Q: Do I need to know my handicap to use the app?
+A: Yes, your handicap is used to set your Strokes Gained benchmarks. If you don't have an official handicap, just enter your best estimate and you can update it anytime.
+
+
+ENTERING ROUNDS
+
+Q: What's the difference between shot by shot and hole by hole entry?
+A: Shot by shot tracks every individual shot with lie and distance, giving you the most detailed Strokes Gained breakdown. Hole by hole is faster — you just enter your score, fairways hit, greens in regulation, and putts for each hole.
+
+Q: Can I edit a round after I submit it?
+A: [Your answer here]
+
+Q: Can I delete a round?
+A: [Your answer here]
+
+Q: Do I have to finish a full 18 holes?
+A: [Your answer here]
+
+Q: Can I enter a 9-hole round?
+A: [Your answer here]
+
+
+STATS & HANDICAP COMPARISONS
+
+Q: How do I change the handicap I'm comparing against?
+A: Go to your Stats page and tap the handicap selector. You can compare your performance against any handicap level — scratch, 5, 10, 15, 20, etc.
+
+Q: Why would I compare against a different handicap?
+A: It helps you set goals. For example, if you're a 15 handicap and want to get to 10, comparing against a 10 shows you exactly which parts of your game need the most improvement.
+
+Q: How many rounds do I need before my stats are useful?
+A: You'll start seeing data after your first round, but trends become more reliable after 3-5 rounds. The more rounds you log, the clearer the picture.
+
+Q: What do positive and negative Strokes Gained numbers mean?
+A: Positive means you're performing better than the benchmark in that category. Negative means you're losing strokes compared to the benchmark.
+
+
+COACH & STUDENT
+
+Q: How do I link to my coach?
+A: Go to your Profile or Settings, tap "Link to Coach," and enter the coach code your coach gave you.
+
+Q: Can I switch coaches?
+A: [Your answer here]
+
+Q: What can my coach see?
+A: Your coach can view all of your logged rounds, shot-level data, stats, and progress over time.
+
+Q: Can a coach have multiple students?
+A: Yes, coaches can manage multiple students from one account. Each student links using the same coach code.
+
+Q: Can a student have multiple coaches?
+A: [Your answer here]
+
+
+ACCOUNT & SETTINGS
+
+Q: How do I change my handicap in the app?
+A: Go to your Profile or Settings and update your handicap. This will adjust your Strokes Gained benchmarks going forward.
+
+Q: Can I change my email or password?
+A: [Your answer here]
+
+Q: How do I delete my account?
+A: [Your answer here]

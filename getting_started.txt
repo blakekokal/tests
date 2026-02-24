@@ -1,0 +1,65 @@
+GETTING STARTED
+
+
+1. ENTERING A ROUND
+
+You can log your rounds two ways: Shot by Shot or Hole by Hole.
+
+Shot by Shot
+- Tap "New Round" and select your course
+- For each shot, enter the lie (tee, fairway, rough, sand, green, etc.) and the distance to the hole
+- After each shot, the app calculates your expected strokes from that position based on your handicap benchmark
+- Continue logging shots until you hole out, then move to the next hole
+- This gives you the most detailed Strokes Gained breakdown — you'll see exactly where you're gaining or losing strokes
+
+Hole by Hole
+- Tap "New Round" and select your course
+- For each hole, just enter your total score and basic shot info (fairways hit, greens in regulation, putts)
+- This is faster if you don't want to track every shot during your round
+- You'll still get Strokes Gained data at the hole level, but without the shot-by-shot detail
+
+Tip: Shot by shot entry gives you the best insights. If you're short on time during a round, you can always enter hole by hole and switch to shot by shot when you're practicing or playing a casual round.
+
+
+2. CREATING AN ACCOUNT & LINKING COACH/STUDENT CODES
+
+Creating Your Account
+- Download the app and tap "Sign Up"
+- Enter your name, email, and set a password
+- Set your handicap — this is used for all your Strokes Gained benchmarks
+
+Linking as a Student
+- Go to your Profile or Settings
+- Tap "Link to Coach"
+- Enter the coach code your coach gave you
+- Once linked, your coach can view your rounds, stats, and progress
+
+Linking as a Coach
+- Go to your Profile or Settings
+- Find your unique coach code and share it with your students
+- Once a student enters your code, they'll appear in your dashboard
+- You can view all of their rounds, drill into shot-level data, and track their improvement over time
+
+Tip: Coaches can manage multiple students from one account. Students can be linked to one coach at a time.
+
+
+3. READING YOUR STATS & CHANGING HANDICAP COMPARISONS
+
+Understanding Strokes Gained
+- Strokes Gained shows how many strokes you gain or lose compared to a benchmark handicap
+- Positive numbers = you're performing better than the benchmark in that area
+- Negative numbers = you're losing strokes compared to the benchmark
+- Categories include: Off the Tee, Approach, Short Game, and Putting
+
+Your Dashboard
+- After logging rounds, your dashboard shows your overall Strokes Gained trends
+- Tap into any category to see a detailed breakdown
+- You can view stats per round, over a date range, or as a rolling average
+
+Changing Handicap Comparisons
+- By default, your stats compare against your own handicap benchmark
+- To change the comparison, go to your Stats page and tap the handicap selector
+- You can compare yourself against any handicap level (scratch, 5, 10, 15, 20, etc.)
+- This is useful for seeing what it would take to get to the next level — for example, if you're a 10 handicap, compare against a 5 to see where you need to improve most
+
+Tip: Regularly check your stats after a few rounds to spot trends. Changing the handicap comparison is a great way to set goals and see exactly what areas of your game need work to drop to the next level.
