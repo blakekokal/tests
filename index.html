@@ -12380,4 +12380,27 @@ async function deleteSvNote(noteId) {
 
 async function checkCoachingStudentNotifications() {
   if (!currentUser) return;
-  var { data } = await _sb.from('notifications'
+  var { data } = await _sb.from('notifications').select('id').eq('user_id', currentUser.id).eq('read', false).limit(1);
+  if (!data) return;
+  var hasUnread = data.length > 0;
+  var dot = document.getElementById('coachingNotifDot');
+  if (dot) dot.style.display = hasUnread ? 'inline-block' : 'none';
+}
+
+/* ── Update showStudentTab to include combines ── */
+var _origShowStudentTab = showStudentTab;
+showStudentTab = function(tab){
+  document.getElementById('svCombinesTab').style.display = tab==='combines' ? 'block' : 'none';
+  var cBtn = document.getElementById('svTabCombines');
+  if(cBtn){
+    cBtn.style.background = tab==='combines' ? '#333' : '#222';
+    cBtn.style.color      = tab==='combines' ? '#fff' : '#888';
+    cBtn.style.fontWeight = tab==='combines' ? '700' : '600';
+  }
+  if(tab==='combines'){ loadStudentCombines(); return; }
+  _origShowStudentTab(tab);
+};
+
+</script>
+</body>
+</html>
