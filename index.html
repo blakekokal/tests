@@ -1794,6 +1794,9 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
 <button id="persistentBackBtn" onclick="persistentBack()">← BACK</button>
 
 <script>
+var hcpLabels={'pro':'Tour Pro','0':'Scratch','5':'5 HCP','10':'10 HCP','15':'15 HCP','20':'20 HCP','25':'25 HCP','30':'30 HCP'};
+var _activeDashTarget = 'dashContent';
+
 function show(id){
   processingClick=false; // Reset processing flag when changing pages
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -1868,7 +1871,6 @@ function persistentBack() {
 // v3.0.0 - Simplified goBack - stats only counted when hole finishes
 function goBack(){
   const currentPage=document.querySelector('.page.active').id;
-  console.log('goBack from:', currentPage, 'shots=', shots, 'putts=', putts);
   
   // FROM PAR PAGE - Go back to round info OR undo previous hole
   if(currentPage==='parPage'){
@@ -1978,10 +1980,6 @@ function goBack(){
   }
 }
 
-// No longer needed - stats counted in finishHole only
-function reverseStatsForShot(shot){
-  // Intentionally empty in v3.0.0
-}
 
 function undoLastHole(){
   // Get the last completed hole from allHoles
@@ -2011,13 +2009,10 @@ function undoLastHole(){
       hadGIR=true;
       gir--;
       firstPuttDist=s.distanceAfter||0;
-      console.log('UNDO: Reversing GIR. gir is now: '+gir+', removing proximity: '+firstPuttDist);
     }
   });
   if(hadGIR&&firstPuttDist>0){
-    console.log('UNDO: girFirstPuttDist before: '+girFirstPuttDist);
     girFirstPuttDist-=firstPuttDist;
-    console.log('UNDO: girFirstPuttDist after: '+girFirstPuttDist);
     girPutts-=lastHole.putts;
   }
   
@@ -2116,7 +2111,6 @@ let bunOpp=0,bun=0;
 let p3=0,p4=0,p5=0,c3=0,c4=0,c5=0;
 let firstPuttThisHole=null;
 let girThisHole=false;
-let fwCountedThisHole=false;
 let scrCountedThisHole=false;
 let totalPutts=0;
 let girPutts=0;
@@ -2535,12 +2529,11 @@ function startHole(){
   putts=0;
   firstPuttThisHole=null;
   girThisHole=false;
-  fwCountedThisHole=false;
   scrCountedThisHole=false;
   lieTitle.innerText='Where did your tee shot end?';
   currentHoleData={hole:currentHole,par:par,yards:parseInt(holeYards.value)};
   currentHoleShots=[];
-  currentHoleShots.push({shotNum:1,lie:null,distanceBefore:currentHoleData.yards,distanceAfter:null,isPutt:false,fwCounted:false,bunkerCounted:false});
+  currentHoleShots.push({shotNum:1,lie:null,distanceBefore:currentHoleData.yards,distanceAfter:null,isPutt:false});
   show('liePage');
 }
 function ordinal(n){return n===1?'1st':n===2?'2nd':n===3?'3rd':`${n}th`;}
@@ -2548,7 +2541,6 @@ function ordinal(n){return n===1?'1st':n===2?'2nd':n===3?'3rd':`${n}th`;}
 function selectLie(lie){
   // Prevent double-clicking
   if(processingClick){
-    console.log('Already processing a click, ignoring duplicate');
     return;
   }
   processingClick=true;
@@ -2557,7 +2549,6 @@ function selectLie(lie){
   
   // Prevent double-clicking - if lie is already set to this value, ignore
   if(lastShot.lie===lie){
-    console.log('Lie already set to '+lie+', ignoring duplicate click');
     processingClick=false;
     return;
   }
@@ -2565,7 +2556,6 @@ function selectLie(lie){
   // v3.0.0: Just record the lie - NO stat counting here
   lastShot.lie=lie;
   
-  console.log('Shot #'+shots+', lie='+lie);
   
   if(lie==='GREEN'){
     putts=0;
@@ -2586,7 +2576,7 @@ function selectLie(lie){
     // Track for SG calc but don't count aggregate stats yet
     girThisHole = (shots <= par - 2);
     
-    currentHoleShots.push({shotNum:shots+1,lie:'PUTT',distanceBefore:defaultPutt,distanceAfter:null,isPutt:true,fwCounted:false,bunkerCounted:false});
+    currentHoleShots.push({shotNum:shots+1,lie:'PUTT',distanceBefore:defaultPutt,distanceAfter:null,isPutt:true});
     const puttInput = document.getElementById('puttDistance');
     puttInput.value = defaultPutt;
     puttInput.setAttribute('value', defaultPutt);
@@ -2615,7 +2605,7 @@ function selectLie(lie){
   if(lie==='MISS LEFT'||lie==='MISS RIGHT'||lie==='MISS SHORT'||lie==='MISS LONG'){
     lastShot.lie=lie;
     shots++;
-    currentHoleShots.push({shotNum:shots,lie:null,distanceBefore:15,distanceAfter:null,isPutt:false,fwCounted:false,bunkerCounted:false});
+    currentHoleShots.push({shotNum:shots,lie:null,distanceBefore:15,distanceAfter:null,isPutt:false});
     distanceTitle.innerText=`${ordinal(shots)} Shot Distance`;
     shotDistance.value=15;
     lieTitle.innerText=`Where did your ${ordinal(shots)} shot end?`;
@@ -2625,7 +2615,7 @@ function selectLie(lie){
   if(lie==='GS BUNKER'){
     lastShot.lie=lie;
     shots++;
-    currentHoleShots.push({shotNum:shots,lie:null,distanceBefore:30,distanceAfter:null,isPutt:false,fwCounted:false,bunkerCounted:false});
+    currentHoleShots.push({shotNum:shots,lie:null,distanceBefore:30,distanceAfter:null,isPutt:false});
     distanceTitle.innerText=`${ordinal(shots)} Shot Distance`;
     shotDistance.value=30;
     lieTitle.innerText=`Where did your ${ordinal(shots)} shot end?`;
@@ -2637,7 +2627,7 @@ function selectLie(lie){
   if(shots===2&&par===5){
     defaultDist=250;
   }
-  currentHoleShots.push({shotNum:shots,lie:null,distanceBefore:defaultDist,distanceAfter:null,isPutt:false,fwCounted:false,bunkerCounted:false});
+  currentHoleShots.push({shotNum:shots,lie:null,distanceBefore:defaultDist,distanceAfter:null,isPutt:false});
   distanceTitle.innerText=`${ordinal(shots)} Shot Distance`;
   shotDistance.value=defaultDist;
   lieTitle.innerText=`Where did your ${ordinal(shots)} shot end?`;
@@ -2659,7 +2649,6 @@ function confirmDistance(){
     // This is the real shot before penalties
     if(ps.distanceAfter === null || ps.distanceAfter === undefined){
       ps.distanceAfter = distance;
-      console.log('Set shot '+ps.shotNum+' distanceAfter to:', distance);
     }
     break;
   }
@@ -2672,9 +2661,9 @@ function handlePenalty(choice){
   const lastDistance=lastShot.distanceBefore||100;
   // Don't set distanceAfter yet - it will be backfilled when user enters drop distance
   lastShot.lie='WATER';
-  currentHoleShots.push({shotNum:shots+1,lie:'PENALTY',distanceBefore:lastDistance,distanceAfter:null,isPutt:false,fwCounted:false,bunkerCounted:false});
+  currentHoleShots.push({shotNum:shots+1,lie:'PENALTY',distanceBefore:lastDistance,distanceAfter:null,isPutt:false});
   shots += 2;
-  currentHoleShots.push({shotNum:shots,lie:null,distanceBefore:lastDistance,distanceAfter:null,isPutt:false,fwCounted:false,bunkerCounted:false});
+  currentHoleShots.push({shotNum:shots,lie:null,distanceBefore:lastDistance,distanceAfter:null,isPutt:false});
   distanceTitle.innerText=`${ordinal(shots)} Shot Distance`;
   shotDistance.value=lastDistance;
   lieTitle.innerText=`Where did your ${ordinal(shots)} shot end?`;
@@ -2688,7 +2677,7 @@ function handleRecovery(direction){
   
   // Move to next shot
   shots++;
-  currentHoleShots.push({shotNum:shots,lie:null,distanceBefore:150,distanceAfter:null,isPutt:false,fwCounted:false,bunkerCounted:false});
+  currentHoleShots.push({shotNum:shots,lie:null,distanceBefore:150,distanceAfter:null,isPutt:false});
   distanceTitle.innerText=`${ordinal(shots)} Shot Distance`;
   shotDistance.value=150;
   lieTitle.innerText=`Where did your ${ordinal(shots)} shot end?`;
@@ -2701,7 +2690,7 @@ function handleMissedGreen(direction){
   
   // Move to next shot with default 15 yards
   shots++;
-  currentHoleShots.push({shotNum:shots,lie:null,distanceBefore:15,distanceAfter:null,isPutt:false,fwCounted:false,bunkerCounted:false});
+  currentHoleShots.push({shotNum:shots,lie:null,distanceBefore:15,distanceAfter:null,isPutt:false});
   distanceTitle.innerText=`${ordinal(shots)} Shot Distance`;
   shotDistance.value=15;
   lieTitle.innerText=`Where did your ${ordinal(shots)} shot end?`;
@@ -2713,7 +2702,6 @@ function nextPutt(){
   const distInput = document.getElementById('puttDistance');
   // The input value is the distance of THIS putt that was just taken
   const thisPuttDist = parseInt(distInput.value) || 0;
-  console.log('nextPutt - this putt was from:', thisPuttDist, 'ft');
   
   const lastShot = currentHoleShots[currentHoleShots.length-1];
   
@@ -2728,7 +2716,6 @@ function nextPutt(){
     const prevShot = currentHoleShots[currentHoleShots.length - 2];
     if(prevShot.isPutt && prevShot.distanceAfter === null){
       prevShot.distanceAfter = thisPuttDist;
-      console.log('Set previous putt distanceAfter to:', thisPuttDist);
     }
   }
   
@@ -2742,17 +2729,15 @@ function nextPutt(){
   distInput.setAttribute('value', 3);
   
   // Create placeholder for next putt
-  const newShot = {shotNum:shots+putts+1, lie:'PUTT', distanceBefore:3, distanceAfter:null, isPutt:true, fwCounted:false, bunkerCounted:false};
+  const newShot = {shotNum:shots+putts+1, lie:'PUTT', distanceBefore:3, distanceAfter:null, isPutt:true};
   currentHoleShots.push(newShot);
   
-  console.log('Ready for putt', putts+1);
 }
 
 function holeOut(){
   totalPutts++;
   const distInput = document.getElementById('puttDistance');
   const thisPuttDist = parseInt(distInput.value) || 0;
-  console.log('holeOut - this putt was from:', thisPuttDist, 'ft');
   
   const lastShot = currentHoleShots[currentHoleShots.length-1];
   
@@ -2870,7 +2855,6 @@ function finishHole(){
     s.sg = 0; // Initialize SG for this shot
     if(!s.lie || s.lie === 'PENALTY') return;
     
-    const nextShot = currentHoleShots[idx + 1];
     const distBefore = s.distanceBefore || 0;
     const distAfter = s.distanceAfter || 0;
     
@@ -2923,7 +2907,6 @@ function finishHole(){
       const sg = expectedBefore - expectedAfter - 1;
       s.sg = sg;
       holeSgOTT += sg;
-      console.log(`OTT: ${currentHoleData.yards}yds TEE -> ${s.lie === 'GREEN' ? distAfter + 'ft' : distAfter + 'yds'} ${s.lie}, expected ${expectedBefore.toFixed(2)} -> ${expectedAfter.toFixed(2)}, SG: ${sg.toFixed(2)}`);
     } else if(isTeeShotPar3){
       // Par 3 tee shot counts as approach
       const expectedBefore = getExpectedStrokes(currentHoleData.yards, 'TEE');
@@ -2937,7 +2920,6 @@ function finishHole(){
       const sg = expectedBefore - expectedAfter - 1;
       s.sg = sg;
       holeSgAPP += sg;
-      console.log(`APP (Par 3): ${currentHoleData.yards}yds TEE -> ${s.lie === 'GREEN' ? distAfter + 'ft' : distAfter + 'yds'} ${s.lie}, expected ${expectedBefore.toFixed(2)} -> ${expectedAfter.toFixed(2)}, SG: ${sg.toFixed(2)}`);
     } else if(isShortGame){
       // Around the green (30 yards and in, not putting)
       const prevShot = currentHoleShots[idx - 1];
@@ -2953,7 +2935,6 @@ function finishHole(){
       const sg = expectedBefore - expectedAfter - 1;
       s.sg = sg;
       holeSgARG += sg;
-      console.log(`ARG: ${distBefore}yds ${prevLie} -> ${s.lie === 'GREEN' ? distAfter + 'ft' : distAfter + 'yds'} ${s.lie}, expected ${expectedBefore.toFixed(2)} -> ${expectedAfter.toFixed(2)}, SG: ${sg.toFixed(2)}`);
     } else if(isApproach){
       // Approach shot (>30 yards, not tee shot on par 4/5)
       const prevShot = currentHoleShots[idx - 1];
@@ -2969,7 +2950,6 @@ function finishHole(){
       const sg = expectedBefore - expectedAfter - 1;
       s.sg = sg;
       holeSgAPP += sg;
-      console.log(`APP: ${distBefore}yds ${prevLie} -> ${s.lie === 'GREEN' ? distAfter + 'ft' : distAfter + 'yds'} ${s.lie}, expected ${expectedBefore.toFixed(2)} -> ${expectedAfter.toFixed(2)}, SG: ${sg.toFixed(2)}`);
     }
   });
   
@@ -3000,7 +2980,6 @@ function finishHole(){
   currentHoleData.firstPuttDist = firstPuttDist;
   currentHoleData.expectedPutts = firstPuttDist > 0 ? getExpectedPutts(firstPuttDist) : 0;
   if(numPutts > 0){
-    console.log(`Hole ${currentHole}: ${numPutts} putts from ${firstPuttDist}ft, SG Putting: ${holeSgPutt.toFixed(2)}`);
   }
   
   // Store hole SG data
@@ -3015,7 +2994,6 @@ function finishHole(){
   sgARGTotal += holeSgARG;
   sgPuttingTotal += holeSgPutt;
   
-  console.log(`Hole ${currentHole} SG: OTT=${holeSgOTT.toFixed(2)}, APP=${holeSgAPP.toFixed(2)}, ARG=${holeSgARG.toFixed(2)}, Putt=${holeSgPutt.toFixed(2)}`);
   
   allHoles.push(currentHoleData);
   
@@ -3185,6 +3163,17 @@ function exportToCSV(){
   window.URL.revokeObjectURL(url);
 }
 
+function categorizeLie(lie, isPutt, isFromTee){
+  if(isFromTee) return 'Tee';
+  if(isPutt || lie === 'GREEN' || lie === 'PUTT') return 'Green';
+  if(lie === 'FAIRWAY') return 'Fairway';
+  if(lie === 'LEFT ROUGH' || lie === 'RIGHT ROUGH') return 'Rough';
+  if(lie === 'MISS LEFT' || lie === 'MISS RIGHT' || lie === 'MISS SHORT' || lie === 'MISS LONG') return 'Rough';
+  if(lie === 'GS BUNKER' || lie === 'FW BUNKER') return 'Sand';
+  if(lie === 'RECOVERY' || lie === 'PENALTY' || lie === 'OB' || lie === 'WATER') return 'Recovery';
+  return 'Rough';
+}
+
 function generateExcelWorkbook(){
   const wb = XLSX.utils.book_new();
   
@@ -3201,7 +3190,8 @@ function generateExcelWorkbook(){
   
   let totalYards=0;
   allHoles.forEach(h=>totalYards+=h.yards);
-  
+  const THIN_BORDER={top:{style:'thin',color:{rgb:'000000'}},bottom:{style:'thin',color:{rgb:'000000'}},left:{style:'thin',color:{rgb:'000000'}},right:{style:'thin',color:{rgb:'000000'}}};
+
   // Calculate penalties
   let par3TeePenalties=0, par45TeePenalties=0, approachPenalties=0, shortGamePenalties=0;
   allHoles.forEach(h=>{
@@ -3282,17 +3272,6 @@ function generateExcelWorkbook(){
   const sgTotal = sgOTTTotal + sgAPPTotal + sgARGTotal + sgPuttingTotal;
   
   // Helper function to categorize lies for strokes gained
-  function categorizeLie(lie, isPutt, isFromTee){
-    if(isFromTee) return 'Tee';
-    if(isPutt || lie === 'GREEN' || lie === 'PUTT') return 'Green';
-    if(lie === 'FAIRWAY') return 'Fairway';
-    if(lie === 'LEFT ROUGH' || lie === 'RIGHT ROUGH') return 'Rough';
-    if(lie === 'MISS LEFT' || lie === 'MISS RIGHT' || lie === 'MISS SHORT' || lie === 'MISS LONG') return 'Rough';
-    if(lie === 'GS BUNKER' || lie === 'FW BUNKER') return 'Sand';
-    if(lie === 'RECOVERY' || lie === 'PENALTY' || lie === 'OB' || lie === 'WATER') return 'Recovery';
-    return 'Rough';
-  }
-  
   let sgSummaryData = [
     ['STROKES GAINED'],
     [],
@@ -3911,26 +3890,20 @@ function generateExcelWorkbook(){
         if(!isNaN(val)){
           const cellRef = XLSX.utils.encode_cell({ r: rowIdx, c: sgColIndex });
           if(ws[cellRef]){
-            const border = {
-              top: { style: 'thin', color: { rgb: '000000' } },
-              bottom: { style: 'thin', color: { rgb: '000000' } },
-              left: { style: 'thin', color: { rgb: '000000' } },
-              right: { style: 'thin', color: { rgb: '000000' } }
-            };
             if(val > 0){
               ws[cellRef].s = {
                 font: { color: { rgb: "008000" } },
                 fill: { fgColor: { rgb: "E8F5E9" } },
-                border: border
+                border: THIN_BORDER
               };
             } else if(val < 0){
               ws[cellRef].s = {
                 font: { color: { rgb: "CC0000" } },
                 fill: { fgColor: { rgb: "FFEBEE" } },
-                border: border
+                border: THIN_BORDER
               };
             } else {
-              ws[cellRef].s = { border: border };
+              ws[cellRef].s = { border: THIN_BORDER };
             }
           }
         }
@@ -3945,12 +3918,7 @@ function generateExcelWorkbook(){
         const cellRef = XLSX.utils.encode_cell({ r: r, c: c });
         if(ws[cellRef]){
           ws[cellRef].s = ws[cellRef].s || {};
-          ws[cellRef].s.border = {
-            top: { style: 'thin', color: { rgb: '000000' } },
-            bottom: { style: 'thin', color: { rgb: '000000' } },
-            left: { style: 'thin', color: { rgb: '000000' } },
-            right: { style: 'thin', color: { rgb: '000000' } }
-          };
+          ws[cellRef].s.border = THIN_BORDER;
         }
       }
     }
@@ -3979,12 +3947,7 @@ function generateExcelWorkbook(){
         if(!isNaN(score) && !isNaN(par)){
           const diff = score - par;
           ws[scoreRef].s = ws[scoreRef].s || {};
-          ws[scoreRef].s.border = {
-            top: { style: 'thin', color: { rgb: '000000' } },
-            bottom: { style: 'thin', color: { rgb: '000000' } },
-            left: { style: 'thin', color: { rgb: '000000' } },
-            right: { style: 'thin', color: { rgb: '000000' } }
-          };
+          ws[scoreRef].s.border = THIN_BORDER;
           if(diff <= -2){ // Eagle or better
             ws[scoreRef].s.font = { color: { rgb: "FFD700" }, bold: true }; // Gold
             ws[scoreRef].s.fill = { fgColor: { rgb: "FFFDE7" } };
@@ -4047,12 +4010,7 @@ function generateExcelWorkbook(){
       if(wsSG[cellRef]){
         wsSG[cellRef].s = wsSG[cellRef].s || {};
         wsSG[cellRef].s.font = { bold: true };
-        wsSG[cellRef].s.border = {
-          top: { style: 'thin', color: { rgb: '000000' } },
-          bottom: { style: 'thin', color: { rgb: '000000' } },
-          left: { style: 'thin', color: { rgb: '000000' } },
-          right: { style: 'thin', color: { rgb: '000000' } }
-        };
+        wsSG[cellRef].s.border = THIN_BORDER;
       }
     }
   });
@@ -4068,37 +4026,24 @@ function generateExcelWorkbook(){
       if(ws7[cellRef2]){
         const val = parseFloat(row[2]);
         if(!isNaN(val)){
-          const border = {
-            top: { style: 'thin', color: { rgb: '000000' } },
-            bottom: { style: 'thin', color: { rgb: '000000' } },
-            left: { style: 'thin', color: { rgb: '000000' } },
-            right: { style: 'thin', color: { rgb: '000000' } }
-          };
           if(val > 0){
             ws7[cellRef2].s = {
               font: { color: { rgb: "008000" } },
               fill: { fgColor: { rgb: "E8F5E9" } },
-              border: border
+              border: THIN_BORDER
             };
           } else if(val < 0){
             ws7[cellRef2].s = {
               font: { color: { rgb: "CC0000" } },
               fill: { fgColor: { rgb: "FFEBEE" } },
-              border: border
+              border: THIN_BORDER
             };
           } else {
             ws7[cellRef2].s = { border: border };
           }
         } else {
           // Non-SG cells in column 2 - just border, no color
-          ws7[cellRef2].s = {
-            border: {
-              top: { style: 'thin', color: { rgb: '000000' } },
-              bottom: { style: 'thin', color: { rgb: '000000' } },
-              left: { style: 'thin', color: { rgb: '000000' } },
-              right: { style: 'thin', color: { rgb: '000000' } }
-            }
-          };
+          ws7[cellRef2].s = { border: THIN_BORDER };
         }
       }
     }
@@ -4535,17 +4480,6 @@ function generateCSV(){
   csv+='\n\nSTROKES GAINED DATA\n';
   csv+='Hole,Par,Shot #,Start Distance,Start Lie,End Lie,End Distance\n';
   
-  function categorizeLieCSV(lie, isPutt, isFromTee){
-    if(isFromTee) return 'Tee';
-    if(isPutt || lie === 'GREEN' || lie === 'PUTT') return 'Green';
-    if(lie === 'FAIRWAY') return 'Fairway';
-    if(lie === 'LEFT ROUGH' || lie === 'RIGHT ROUGH') return 'Rough';
-    if(lie === 'MISS LEFT' || lie === 'MISS RIGHT' || lie === 'MISS SHORT' || lie === 'MISS LONG') return 'Rough';
-    if(lie === 'GS BUNKER' || lie === 'FW BUNKER') return 'Sand';
-    if(lie === 'RECOVERY' || lie === 'PENALTY' || lie === 'OB' || lie === 'WATER') return 'Recovery';
-    return 'Rough';
-  }
-  
   allHoles.forEach(h=>{
     h.shots.forEach((s, idx)=>{
       const nextShot = h.shots[idx+1];
@@ -4558,7 +4492,7 @@ function generateCSV(){
       } else if(s.isPutt){
         startLieCat = 'Green';
       } else if(prevShot && prevShot.lie){
-        startLieCat = categorizeLieCSV(prevShot.lie, false, false);
+        startLieCat = categorizeLie(prevShot.lie, false, false);
       } else {
         startLieCat = 'Unknown';
       }
@@ -4577,7 +4511,7 @@ function generateCSV(){
       if(s.lie === 'HOLED'){
         endLieCat = 'Holed';
       } else {
-        endLieCat = categorizeLieCSV(s.lie, s.isPutt, false);
+        endLieCat = categorizeLie(s.lie, s.isPutt, false);
       }
       
       // End distance - yards off green, feet on green
@@ -4823,17 +4757,8 @@ _sb.auth.onAuthStateChange((event, session) => {
   }
 });
 
-// Save round to Supabase
-// Auto-save round when completed (if logged in)
-async function autoSaveRound() {
-  if (!currentUser || allHoles.length === 0) return;
-  
-  const status = document.getElementById('saveStatus');
-  status.textContent = 'Auto-saving...';
-  status.style.color = '#888';
-  
-  // Collect all round stats for the JSON blob
-  const roundBlob = {
+function buildRoundBlob() {
+  return {
     allHoles: allHoles.map(h => ({
       hole: h.hole, par: h.par, yards: h.yards, score: h.score, putts: h.putts,
       firstPuttDist: h.firstPuttDist, expectedPutts: h.expectedPutts,
@@ -4854,11 +4779,23 @@ async function autoSaveRound() {
       avgDrive: (function(){ let t=0,c=0; allHoles.forEach(h=>{ if(h.par>=4){ const ts=h.shots.find(s=>s.shotNum===1); if(ts&&ts.distanceAfter>0&&ts.lie!=='PENALTY'&&ts.lie!=='OB'&&ts.lie!=='WATER'){ t+=ts.distanceBefore-ts.distanceAfter; c++; }}});  return c>0?Math.round(t/c):0; })()
     }
   };
+}
+
+// Save round to Supabase
+// Auto-save round when completed (if logged in)
+async function autoSaveRound() {
+  if (!currentUser || allHoles.length === 0) return;
   
+  const status = document.getElementById('saveStatus');
+  status.textContent = 'Auto-saving...';
+  status.style.color = '#888';
+  
+  const roundBlob = buildRoundBlob();
+
   const playerName = document.getElementById('playerName').value || 'Player';
   const courseName = document.getElementById('courseName').value || 'Course';
   const roundDate = document.getElementById('roundDate').value || new Date().toISOString().split('T')[0];
-  
+
   const { data, error } = await _sb.from('rounds').insert({
     user_id: currentUser.id,
     player_name: playerName,
@@ -4936,29 +4873,8 @@ async function saveRoundToAccount() {
   status.textContent = 'Saving...';
   status.style.color = '#888';
   
-  // Collect all round stats for the JSON blob
-  const roundBlob = {
-    allHoles: allHoles.map(h => ({
-      hole: h.hole, par: h.par, yards: h.yards, score: h.score, putts: h.putts,
-      firstPuttDist: h.firstPuttDist, expectedPutts: h.expectedPutts,
-      sgOTT: h.sgOTT, sgAPP: h.sgAPP, sgARG: h.sgARG, sgPutting: h.sgPutting,
-      shots: h.shots.map(s => ({
-        shotNum: s.shotNum, lie: s.lie, distanceBefore: s.distanceBefore,
-        distanceAfter: s.distanceAfter, isPutt: s.isPutt
-      }))
-    })),
-    stats: {
-      fwHit, fwOpp, fwLeft, fwRight,
-      girHit: gir, girOpp: girOpp,
-      scrMade: scr, scrOpp: scrOpp,
-      bunMade: bun, bunOpp: bunOpp,
-      totalPutts: allHoles.reduce((s,h)=>s+h.putts,0),
-      onePutts: onePuttMade,
-      threePutts: threePlusPutts,
-      avgDrive: (function(){ let t=0,c=0; allHoles.forEach(h=>{ if(h.par>=4){ const ts=h.shots.find(s=>s.shotNum===1); if(ts&&ts.distanceAfter>0&&ts.lie!=='PENALTY'&&ts.lie!=='OB'&&ts.lie!=='WATER'){ t+=ts.distanceBefore-ts.distanceAfter; c++; }}});  return c>0?Math.round(t/c):0; })()
-    }
-  };
-  
+  const roundBlob = buildRoundBlob();
+
   var payload = {
     player_name: document.getElementById('playerName').value || 'Player',
     course_name: document.getElementById('courseName').value || 'Course',
@@ -5039,7 +4955,6 @@ function filterRoundsList() {
   var timeFilter = document.getElementById('roundFilterTime').value;
   var sortBy = document.getElementById('roundSortBy').value;
   
-  var now = new Date();
   var cutoff = null;
   if (timeFilter !== 'all') {
     cutoff = new Date();
@@ -5269,7 +5184,7 @@ function resetRoundState() {
   scrOpp = 0; scr = 0; bunOpp = 0; bun = 0;
   p3 = 0; p4 = 0; p5 = 0; c3 = 0; c4 = 0; c5 = 0;
   firstPuttThisHole = null;
-  girThisHole = false; fwCountedThisHole = false; scrCountedThisHole = false;
+  girThisHole = false; scrCountedThisHole = false;
   totalPutts = 0; girPutts = 0; threePlusPutts = 0;
   onePuttOpp = 0; onePuttMade = 0;
   sgPuttingTotal = 0; sgOTTTotal = 0; sgAPPTotal = 0; sgARGTotal = 0;
@@ -5547,9 +5462,7 @@ function submitHoleByHole() {
         lie: normLie,
         distanceBefore: distBefore,
         distanceAfter: distLeft,
-        isPutt: isPutt,
-        fwCounted: false,
-        bunkerCounted: false
+        isPutt: isPutt
       });
     }
 
@@ -5579,7 +5492,6 @@ function submitHoleByHole() {
     }
 
     girThisHole = false;
-    fwCountedThisHole = false;
     scrCountedThisHole = false;
 
     finishHole_hbh();
@@ -6995,7 +6907,7 @@ function setRole(role) {
   }
   // Save role to profiles table
   if (currentUser) {
-    _sb.from('profiles').update({ role: role }).eq('id', currentUser.id).then(function(){});
+    _sb.from('profiles').update({ role: role }).eq('id', currentUser.id);
   }
 }
 
@@ -7039,7 +6951,7 @@ function goToStudents() {
   var dot = document.getElementById('studentsNotifDot');
   if (dot) dot.style.display = 'none';
   // Mark all notifications read
-  _sb.from('notifications').update({ read: true }).eq('user_id', currentUser.id).eq('read', false).then(function(){});
+  _sb.from('notifications').update({ read: true }).eq('user_id', currentUser.id).eq('read', false);
   show('studentsPage');
   loadStudents();
 }
@@ -8060,37 +7972,6 @@ function buildMinimalShots(par, score, putts, yards) {
   return shots;
 }
 
-function computeImportStats(allHoles) {
-  var fwHit = 0, fwOpp = 0, girHit = 0, totalPutts = 0;
-  var onePutts = 0, threePutts = 0;
-  
-  allHoles.forEach(function(h) {
-    totalPutts += h.putts || 0;
-    if (h.putts === 1) onePutts++;
-    if (h.putts >= 3) threePutts++;
-    
-    // GIR estimate: if score - putts <= par - 2, they hit in regulation
-    var nonPuttShots = h.score - (h.putts || 0);
-    if (nonPuttShots <= h.par - 2) girHit++;
-    
-    // Fairway opportunities on par 4/5
-    if (h.par >= 4) fwOpp++;
-  });
-  
-  return {
-    fwHit: fwHit,
-    fwOpp: fwOpp,
-    fwLeft: 0, fwRight: 0,
-    girHit: girHit,
-    girOpp: allHoles.length,
-    scrMade: 0, scrOpp: Math.max(0, allHoles.length - girHit),
-    bunMade: 0, bunOpp: 0,
-    totalPutts: totalPutts,
-    onePutts: onePutts,
-    threePutts: threePutts,
-    avgDrive: 0
-  };
-}
 
 function loadProfileInfo() {
   document.getElementById('profileEmail').textContent = currentUser.email;
@@ -8194,8 +8075,6 @@ function applyDashFilters() {
   var hcp = hcpSel ? hcpSel.value : savedHcp;
   renderDashboard(filtered, hcp);
 }
-
-var _activeDashTarget = 'dashContent';
 
 function recalcDashSG(hcpVal) {
   if (_activeDashTarget === 'svDashContent' && _svDashData) {
@@ -8472,9 +8351,8 @@ function renderDashboard(data, hcp, targetId) {
   };
   
   // Handicap label
-  var hcpLabels={'pro':'Tour Pro','0':'Scratch','5':'5 HCP','10':'10 HCP','15':'15 HCP','20':'20 HCP','25':'25 HCP','30':'30 HCP'};
   var hcpLabel=hcpLabels[hcp]||hcp;
-  
+
   // ===== COACHING-STYLE TABS =====
   var html='';
   var tabNames=['SG','Scoring','OTT','Approach','ARG','Putting'];
@@ -8714,23 +8592,19 @@ async function changePassword() {
 var _editingHoleIndex = null;
 
 function editHole(holeIdx) {
-  console.log('editHole called with index:', holeIdx, 'allHoles.length:', allHoles.length);
   
   if (holeIdx < 0 || holeIdx >= allHoles.length) {
-    console.log('Invalid hole index, aborting edit');
     return;
   }
   
   // Make sure we're not already editing
   if (_editingHoleIndex !== null) {
-    console.log('WARNING: Already editing hole', _editingHoleIndex, '- forcing reset');
     _editingHoleIndex = null;
   }
   
   var hole = allHoles[holeIdx];
   _editingHoleIndex = holeIdx;
   
-  console.log('Starting edit of hole', holeIdx + 1, ', _editingHoleIndex =', _editingHoleIndex);
   
   // Set up state to re-enter this hole
   currentHole = hole.hole;
@@ -8742,7 +8616,6 @@ function editHole(holeIdx) {
   shots = 1;
   putts = 0;
   currentHoleShots = [];
-  fwCountedThisHole = false;
   girThisHole = false;
   scrCountedThisHole = false;
   firstPuttThisHole = null;
@@ -8780,7 +8653,6 @@ function editHole(holeIdx) {
 }
 
 function finishEditedHole() {
-  console.log('finishEditedHole called, _editingHoleIndex:', _editingHoleIndex);
   
   var holeStrokes = shots + putts;
   
@@ -8805,19 +8677,16 @@ function finishEditedHole() {
   // Replace in allHoles
   allHoles[_editingHoleIndex] = holeData;
   
-  console.log('Replaced hole at index', _editingHoleIndex, 'with new data. allHoles.length:', allHoles.length);
   
   // Reset editing state BEFORE recalculating
   var wasEditing = _editingHoleIndex;
   _editingHoleIndex = null;
   
-  console.log('Reset _editingHoleIndex to null');
   
   // Recalculate all stats from scratch
   recalculateAllStatsFromHoles();
   
   // Reset hole-level flags for next use
-  fwCountedThisHole = false;
   girThisHole = false;
   scrCountedThisHole = false;
   firstPuttThisHole = null;
@@ -8829,7 +8698,6 @@ function finishEditedHole() {
   refreshFullStats(6);
   show('fullStatsPage');
   
-  console.log('Finished editing hole', wasEditing + 1, ', _editingHoleIndex is now:', _editingHoleIndex);
   
   // If we're viewing a saved round, update it in the database
   if (_currentRoundId && currentUser) {
@@ -8841,7 +8709,6 @@ function finishEditedHole() {
 async function updateSavedRound() {
   if (!_currentRoundId || !currentUser) return;
   
-  console.log('Updating saved round:', _currentRoundId);
   
   // Collect all round stats for the JSON blob
   const roundBlob = {
@@ -8878,7 +8745,6 @@ async function updateSavedRound() {
     document.getElementById('saveStatus').textContent = 'Error saving changes';
     document.getElementById('saveStatus').style.color = '#f44';
   } else {
-    console.log('Round updated successfully');
     document.getElementById('saveStatus').textContent = '✓ Changes saved';
     document.getElementById('saveStatus').style.color = '#4CAF50';
   }
@@ -9056,7 +8922,6 @@ function refreshFullStats(tabIndex) {
 // ===== FULL STATS VIEWER =====
 function showFullStats() {
   var hcp = document.getElementById('summaryHandicapSelect').value || 'pro';
-  var hcpLabels = {'pro':'Tour Pro','0':'Scratch','5':'5 HCP','10':'10 HCP','15':'15 HCP','20':'20 HCP','25':'25 HCP','30':'30 HCP'};
   var hcpLabel = hcpLabels[hcp] || hcp;
   
   var player = document.getElementById('playerName').value || 'Player';
@@ -10206,7 +10071,7 @@ function renderSGRadar(canvas, values, instance) {
   }
   
   // Draw zero ring (middle circle) 
-  var zeroR = (scaleMax > 0) ? radius * (scaleMax / (2 * scaleMax)) : radius / 2;
+  var zeroR = radius / 2;
   ctx.beginPath();
   for (var i = 0; i <= n; i++) {
     var angle = startAngle + (2 * Math.PI / n) * (i % n);
@@ -11291,14 +11156,14 @@ function renderCombCard(c, canDelete){
   var dateStr=c.combine_date?new Date(c.combine_date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'';
   var combBadge = c.is_combine ? '<span style="font-size:10px;background:#1565c0;color:#fff;padding:2px 6px;border-radius:4px;margin-left:6px;font-weight:600;">COMBINE</span>' : '';
   var delBtn = canDelete ? '<button class="comb-hist-del" onclick="deleteCombScore(\''+c.id+'\')" title="Delete">🗑 Delete</button>' : '';
-  var metaStr = c.holes_count + '-hole • vs '+c.handicap+strokesLine+(c.note?' • <em style="color:#aaa;">'+escHtml(c.note)+'</em>':'');
+  var metaStr = c.holes_count + '-hole • vs '+c.handicap+strokesLine+(c.note?' • <em style="color:#aaa;">'+escapeHtml(c.note)+'</em>':'');
   var detailsBtn = c.row_data ? '<button onclick="toggleCombDetails(\''+c.id+'\')" style="background:transparent;border:1px solid #333;border-radius:6px;color:#888;font-size:11px;font-weight:600;padding:3px 8px;cursor:pointer;height:auto;width:auto;max-width:none;margin-top:6px;">📊 Details</button>' : '';
   // Store row_data globally for details view
   if (!window._combRowDataMap) window._combRowDataMap = {};
   if (c.row_data) window._combRowDataMap[c.id] = { data: c.row_data, type: c.combine_type };
   return '<div class="comb-hist-card" id="combcard-'+c.id+'">'
     +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">'
-    +'<div><span style="font-weight:700;color:#4caf50;font-size:14px;">'+escHtml(c.combine_type||'')+combBadge+'</span></div>'
+    +'<div><span style="font-weight:700;color:#4caf50;font-size:14px;">'+escapeHtml(c.combine_type||'')+combBadge+'</span></div>'
     +'<div style="display:flex;align-items:center;gap:8px;"><span style="font-size:11px;color:#888;">'+dateStr+'</span>'+delBtn+'</div>'
     +'</div>'
     +scoreStr
@@ -11308,9 +11173,7 @@ function renderCombCard(c, canDelete){
     +'</div>';
 }
 
-function escHtml(s){
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+
 
 function toggleCombDetails(id) {
   var detail = document.getElementById('combdetail-' + id);
@@ -11481,7 +11344,7 @@ async function goToCoaching() {
     document.getElementById('coachingMyCode').textContent = code;
     loadCoachingPageStudentView();
     // Mark student notifications as read and clear dot
-    _sb.from('notifications').update({ read: true }).eq('user_id', currentUser.id).eq('read', false).then(function(){});
+    _sb.from('notifications').update({ read: true }).eq('user_id', currentUser.id).eq('read', false);
     var dot = document.getElementById('coachingNotifDot');
     if (dot) dot.style.display = 'none';
   }
