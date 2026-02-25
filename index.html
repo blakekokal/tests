@@ -522,7 +522,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
 
   <!-- Centered brand -->
   <div style="text-align:center;margin-bottom:6px;">
-    <div style="font-family:'Barlow Condensed',system-ui,sans-serif;font-size:2.2rem;font-weight:900;letter-spacing:1px;line-height:1.0;color:#fff;">Blake Kokal<br><span style="display:inline-flex;align-items:baseline;justify-content:center;"><span style="font-size:13px;visibility:hidden;font-weight:700;">v4.5.4</span>Golf<span onclick="show('whatsNewPage')" style="font-size:13px;color:#555;font-weight:700;cursor:pointer;margin-left:6px;">v4.5.4</span></span></div>
+    <div style="font-family:'Barlow Condensed',system-ui,sans-serif;font-size:2.2rem;font-weight:900;letter-spacing:1px;line-height:1.0;color:#fff;">Blake Kokal<br><span style="display:inline-flex;align-items:baseline;justify-content:center;"><span style="font-size:13px;visibility:hidden;font-weight:700;">v4.5.5</span>Golf<span onclick="show('whatsNewPage')" style="font-size:13px;color:#555;font-weight:700;cursor:pointer;margin-left:6px;">v4.5.5</span></span></div>
     <div id="homeAuthStatus" style="font-size:11px;color:#3a3a3a;margin-top:3px;"></div>
   </div>
 
@@ -591,7 +591,18 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
 
     <div style="background:#1a1a1a;border-radius:12px;padding:16px 18px;">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-        <span style="background:#166534;color:#fff;font-size:12px;font-weight:800;border-radius:6px;padding:3px 10px;">v4.5.4</span>
+        <span style="background:#166534;color:#fff;font-size:12px;font-weight:800;border-radius:6px;padding:3px 10px;">v4.5.5</span>
+        <span style="font-size:11px;color:#666;">Feb 25, 2026</span>
+      </div>
+      <ul style="margin:0;padding-left:18px;font-size:13px;color:#ccc;line-height:1.8;">
+        <li>Added error logging for coach notifications — check browser console for "[notify]" messages</li>
+        <li>Added fallback insert without student fields if Supabase rejects the full insert</li>
+      </ul>
+    </div>
+
+    <div style="background:#1a1a1a;border-radius:12px;padding:16px 18px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <span style="background:#14532d;color:#fff;font-size:12px;font-weight:800;border-radius:6px;padding:3px 10px;">v4.5.4</span>
         <span style="font-size:11px;color:#666;">Feb 25, 2026</span>
       </div>
       <ul style="margin:0;padding-left:18px;font-size:13px;color:#ccc;line-height:1.8;">
@@ -4933,14 +4944,13 @@ async function notifyCoachOfNewRound(playerName, courseName, roundDate, score, p
       }
     }
 
-    if (!coachId) return;
+    if (!coachId) { console.log('[notify] No coach found for round notification'); return; }
 
-    // Send notification via edge function (if configured) or store in notifications table
     var toPar = score - par;
     var toParStr = toPar === 0 ? 'E' : (toPar > 0 ? '+' : '') + toPar;
 
     // Store notification in database for coach to see
-    await _sb.from('notifications').insert({
+    var { error: insertErr } = await _sb.from('notifications').insert({
       user_id: coachId,
       type: 'new_round',
       title: 'New Round from ' + playerName,
@@ -4950,7 +4960,20 @@ async function notifyCoachOfNewRound(playerName, courseName, roundDate, score, p
       read: false,
       created_at: new Date().toISOString()
     });
-  } catch(e) { /* silent */ }
+    if (insertErr) {
+      console.warn('[notify] Round notification insert failed:', insertErr.message, '— retrying without student fields');
+      // Fallback: insert without student_id/student_name in case columns don't exist
+      var { error: retryErr } = await _sb.from('notifications').insert({
+        user_id: coachId,
+        type: 'new_round',
+        title: 'New Round from ' + playerName,
+        message: playerName + ' shot ' + score + ' (' + toParStr + ') at ' + courseName + ' on ' + roundDate,
+        read: false,
+        created_at: new Date().toISOString()
+      });
+      if (retryErr) console.error('[notify] Round notification retry also failed:', retryErr.message);
+    }
+  } catch(e) { console.error('[notify] Round notification exception:', e); }
 }
 
 async function saveRoundToAccount() {
@@ -11140,7 +11163,7 @@ async function combSave(){
     }
     if (coachId) {
       var playerName = (prof && prof.display_name) || currentUser.email || 'A student';
-      await _sb.from('notifications').insert({
+      var { error: insertErr } = await _sb.from('notifications').insert({
         user_id: coachId,
         type: 'new_combine',
         title: 'New Combine from ' + playerName,
@@ -11150,8 +11173,22 @@ async function combSave(){
         read: false,
         created_at: new Date().toISOString()
       });
+      if (insertErr) {
+        console.warn('[notify] Combine notification insert failed:', insertErr.message, '— retrying without student fields');
+        var { error: retryErr } = await _sb.from('notifications').insert({
+          user_id: coachId,
+          type: 'new_combine',
+          title: 'New Combine from ' + playerName,
+          message: playerName + ' completed a ' + combineType + ' ' + (isCombine ? 'combine' : 'practice') + ' (' + filled + ' shots)',
+          read: false,
+          created_at: new Date().toISOString()
+        });
+        if (retryErr) console.error('[notify] Combine notification retry also failed:', retryErr.message);
+      }
+    } else {
+      console.log('[notify] No coach found for combine notification');
     }
-  } catch(e) { /* silent */ }
+  } catch(e) { console.error('[notify] Combine notification exception:', e); }
 }
 
 /* ── LOAD history on the Combines page ── */
