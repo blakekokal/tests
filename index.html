@@ -4842,14 +4842,12 @@ async function doResetPassword() {
 }
 
 // Listen for auth changes
-_sb.auth.onAuthStateChange(async (event, session) => {
+_sb.auth.onAuthStateChange((event, session) => {
   if (session) {
     currentUser = session.user;
     updateAuthUI(true);
-    // Sync email to profiles so other users (e.g. students) can see it
-    try {
-      await _sb.from('profiles').update({ email: currentUser.email }).eq('id', currentUser.id);
-    } catch(e) { /* email column may not exist yet */ }
+    // Fire-and-forget: sync email to profiles (no await, won't block auth)
+    _sb.from('profiles').update({ email: currentUser.email }).eq('id', currentUser.id).then(function(){}).catch(function(){});
   } else {
     currentUser = null;
     updateAuthUI(false);
@@ -11546,8 +11544,9 @@ async function loadCoachingPageStudentView() {
   }
 
   if (coachId) {
-    var { data: coach } = await _sb.from('profiles').select('display_name, email').eq('id', coachId).single();
-    if (!coach) {
+    var coachRes = await _sb.from('profiles').select('display_name, email').eq('id', coachId).single();
+    var coach = coachRes.data;
+    if (!coach || coachRes.error) {
       // email column might not exist yet — retry without it
       var { data: coach2 } = await _sb.from('profiles').select('display_name').eq('id', coachId).single();
       coach = coach2;
