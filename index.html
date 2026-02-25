@@ -7015,13 +7015,22 @@ async function loadUserRole() {
   }
 }
 
-function goToStudents() {
+async function goToStudents() {
   if (!currentUser) { showAuthPage(); return; }
-  // Clear the notification dot when coach visits the page
+  // Clear both notification dots when coach visits the page
   var dot = document.getElementById('studentsNotifDot');
   if (dot) dot.style.display = 'none';
-  // Mark all notifications read
-  _sb.from('notifications').update({ read: true }).eq('user_id', currentUser.id).eq('read', false);
+  var dot2 = document.getElementById('coachingNotifDot');
+  if (dot2) dot2.style.display = 'none';
+  // Mark all notifications read (await so it completes before any re-check)
+  await _sb.from('notifications').update({ read: true }).eq('user_id', currentUser.id).eq('read', false);
+  // Verify — if still unread (RLS may silently block), delete them
+  var { data: stillUnread } = await _sb.from('notifications').select('id').eq('user_id', currentUser.id).eq('read', false);
+  if (stillUnread && stillUnread.length > 0) {
+    for (var i = 0; i < stillUnread.length; i++) {
+      await _sb.from('notifications').delete().eq('id', stillUnread[i].id);
+    }
+  }
   show('studentsPage');
   loadStudents();
 }
@@ -11878,7 +11887,7 @@ async function loadCoachActivityFeed() {
   el.innerHTML = data.map(function(n) {
     var d = new Date(n.created_at);
     var dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-    var icon = n.type === 'new_round' ? '⛳' : n.type === 'combine' ? '🎯' : '📌';
+    var icon = n.type === 'new_round' ? '⛳' : n.type === 'combine' ? '🎯' : n.type === 'new_signup' ? '👤' : '📌';
     var unreadStyle = !n.read ? 'border-left:3px solid #7e22ce;padding-left:10px;' : 'padding-left:13px;';
     return '<div style="' + unreadStyle + 'margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #222;">'
       + '<div style="display:flex;align-items:flex-start;gap:8px;">'
@@ -11892,7 +11901,15 @@ async function loadCoachActivityFeed() {
 }
 
 async function markCoachNotificationsRead() {
+  // Mark all as read
   await _sb.from('notifications').update({ read: true }).eq('user_id', currentUser.id).eq('read', false);
+  // Verify it worked — if unread still remain (RLS may silently block update), delete them
+  var { data: stillUnread } = await _sb.from('notifications').select('id').eq('user_id', currentUser.id).eq('read', false);
+  if (stillUnread && stillUnread.length > 0) {
+    for (var i = 0; i < stillUnread.length; i++) {
+      await _sb.from('notifications').delete().eq('id', stillUnread[i].id);
+    }
+  }
   var dot = document.getElementById('coachingNotifDot');
   if (dot) dot.style.display = 'none';
   var dot2 = document.getElementById('studentsNotifDot');
