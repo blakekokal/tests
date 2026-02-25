@@ -5209,6 +5209,7 @@ function resetRoundState() {
   _viewingStudentRound = false;
   _editingHoleIndex = null;
   
+  if(document.getElementById('playerName')) document.getElementById('playerName').value = '';
   if(document.getElementById('courseName')) document.getElementById('courseName').value = '';
   if(document.getElementById('roundDate')) document.getElementById('roundDate').value = new Date().toISOString().split('T')[0];
   if(document.getElementById('holeHeader')) document.getElementById('holeHeader').innerText = 'Hole 1';
@@ -5221,7 +5222,7 @@ function goToNewRound() {
   if (currentUser) {
     var dname = currentUser.user_metadata?.display_name;
     var nameField = document.getElementById('playerName');
-    if (dname && !nameField.value) nameField.value = dname;
+    if (dname) nameField.value = dname;
   }
 }
 
