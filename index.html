@@ -522,7 +522,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
 
   <!-- Centered brand -->
   <div style="text-align:center;margin-bottom:6px;">
-    <div style="font-family:'Barlow Condensed',system-ui,sans-serif;font-size:2.2rem;font-weight:900;letter-spacing:1px;line-height:1.0;color:#fff;">Blake Kokal<br><span style="display:inline-flex;align-items:baseline;justify-content:center;"><span style="font-size:13px;visibility:hidden;font-weight:700;">v4.5.3</span>Golf<span onclick="show('whatsNewPage')" style="font-size:13px;color:#555;font-weight:700;cursor:pointer;margin-left:6px;">v4.5.3</span></span></div>
+    <div style="font-family:'Barlow Condensed',system-ui,sans-serif;font-size:2.2rem;font-weight:900;letter-spacing:1px;line-height:1.0;color:#fff;">Blake Kokal<br><span style="display:inline-flex;align-items:baseline;justify-content:center;"><span style="font-size:13px;visibility:hidden;font-weight:700;">v4.5.4</span>Golf<span onclick="show('whatsNewPage')" style="font-size:13px;color:#555;font-weight:700;cursor:pointer;margin-left:6px;">v4.5.4</span></span></div>
     <div id="homeAuthStatus" style="font-size:11px;color:#3a3a3a;margin-top:3px;"></div>
   </div>
 
@@ -591,7 +591,18 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
 
     <div style="background:#1a1a1a;border-radius:12px;padding:16px 18px;">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-        <span style="background:#166534;color:#fff;font-size:12px;font-weight:800;border-radius:6px;padding:3px 10px;">v4.5.3</span>
+        <span style="background:#166534;color:#fff;font-size:12px;font-weight:800;border-radius:6px;padding:3px 10px;">v4.5.4</span>
+        <span style="font-size:11px;color:#666;">Feb 25, 2026</span>
+      </div>
+      <ul style="margin:0;padding-left:18px;font-size:13px;color:#ccc;line-height:1.8;">
+        <li>Fixed coach not receiving notifications when a student saves a round or combine</li>
+        <li>Round and combine notifications now fall back to coach_students table if coach_id is missing from profile</li>
+      </ul>
+    </div>
+
+    <div style="background:#1a1a1a;border-radius:12px;padding:16px 18px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <span style="background:#14532d;color:#fff;font-size:12px;font-weight:800;border-radius:6px;padding:3px 10px;">v4.5.3</span>
         <span style="font-size:11px;color:#666;">Feb 25, 2026</span>
       </div>
       <ul style="margin:0;padding-left:18px;font-size:13px;color:#ccc;line-height:1.8;">
@@ -4902,39 +4913,44 @@ async function autoSaveRound() {
 async function notifyCoachOfNewRound(playerName, courseName, roundDate, score, par) {
   // Check if user is a student with a coach
   if (!currentUser) return;
-  
-  const { data: profile } = await _sb
-    .from('profiles')
-    .select('coach_id, role')
-    .eq('id', currentUser.id)
-    .single();
-  
-  if (!profile || profile.role !== 'student' || !profile.coach_id) return;
-  
-  // Get coach email
-  const { data: coach } = await _sb
-    .from('profiles')
-    .select('email, display_name')
-    .eq('id', profile.coach_id)
-    .single();
-  
-  if (!coach || !coach.email) return;
-  
-  // Send notification via edge function (if configured) or store in notifications table
-  const toPar = score - par;
-  const toParStr = toPar === 0 ? 'E' : (toPar > 0 ? '+' : '') + toPar;
-  
-  // Store notification in database for coach to see
-  await _sb.from('notifications').insert({
-    user_id: profile.coach_id,
-    type: 'new_round',
-    title: 'New Round from ' + playerName,
-    message: playerName + ' shot ' + score + ' (' + toParStr + ') at ' + courseName + ' on ' + roundDate,
-    student_id: currentUser.id,
-    student_name: playerName,
-    read: false,
-    created_at: new Date().toISOString()
-  });
+
+  try {
+    var { data: profile } = await _sb
+      .from('profiles')
+      .select('coach_id, role')
+      .eq('id', currentUser.id)
+      .single();
+
+    var coachId = profile && profile.coach_id ? profile.coach_id : null;
+
+    // Fallback: check coach_students table if coach_id not on profile
+    if (!coachId) {
+      var { data: link } = await _sb.from('coach_students').select('coach_id').eq('student_id', currentUser.id).limit(1);
+      if (link && link.length > 0) {
+        coachId = link[0].coach_id;
+        // Fix the missing coach_id on profile
+        await _sb.from('profiles').update({ coach_id: coachId }).eq('id', currentUser.id);
+      }
+    }
+
+    if (!coachId) return;
+
+    // Send notification via edge function (if configured) or store in notifications table
+    var toPar = score - par;
+    var toParStr = toPar === 0 ? 'E' : (toPar > 0 ? '+' : '') + toPar;
+
+    // Store notification in database for coach to see
+    await _sb.from('notifications').insert({
+      user_id: coachId,
+      type: 'new_round',
+      title: 'New Round from ' + playerName,
+      message: playerName + ' shot ' + score + ' (' + toParStr + ') at ' + courseName + ' on ' + roundDate,
+      student_id: currentUser.id,
+      student_name: playerName,
+      read: false,
+      created_at: new Date().toISOString()
+    });
+  } catch(e) { /* silent */ }
 }
 
 async function saveRoundToAccount() {
@@ -11113,10 +11129,19 @@ async function combSave(){
   // Notify coach of new combine if student has a coach
   try {
     var { data: prof } = await _sb.from('profiles').select('coach_id, display_name').eq('id', currentUser.id).single();
-    if (prof && prof.coach_id) {
-      var playerName = prof.display_name || currentUser.email || 'A student';
+    var coachId = prof && prof.coach_id ? prof.coach_id : null;
+    // Fallback: check coach_students table if coach_id not on profile
+    if (!coachId) {
+      var { data: link } = await _sb.from('coach_students').select('coach_id').eq('student_id', currentUser.id).limit(1);
+      if (link && link.length > 0) {
+        coachId = link[0].coach_id;
+        await _sb.from('profiles').update({ coach_id: coachId }).eq('id', currentUser.id);
+      }
+    }
+    if (coachId) {
+      var playerName = (prof && prof.display_name) || currentUser.email || 'A student';
       await _sb.from('notifications').insert({
-        user_id: prof.coach_id,
+        user_id: coachId,
         type: 'new_combine',
         title: 'New Combine from ' + playerName,
         message: playerName + ' completed a ' + combineType + ' ' + (isCombine ? 'combine' : 'practice') + ' (' + filled + ' shots)',
