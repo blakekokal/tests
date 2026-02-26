@@ -283,7 +283,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
   <!-- SAVED ROUNDS TAB -->
   <div id="profileRoundsTab" style="width:100%;max-width:360px;display:none;">
     <div style="font-size:20px;font-weight:800;text-align:center;margin-bottom:8px;">📋 Round History</div>
-    <button onclick="document.getElementById('uploadRoundFile').click()" style="width:100%;height:40px;font-size:13px;background:#00695C;border-radius:8px;margin-bottom:8px;">📤 Upload Round (.xlsx)</button>
+    <button onclick="document.getElementById('uploadRoundFile').click()" style="width:100%;height:40px;font-size:13px;background:#0f766e;border-radius:8px;margin-bottom:8px;">📤 Upload Round (.xlsx)</button>
     <input type="file" id="uploadRoundFile" accept=".xlsx,.xls,.csv" style="display:none;" onchange="handleRoundUpload(this, currentUser.id)">
     <div id="uploadRoundMsg" style="font-size:12px;min-height:16px;text-align:center;margin-bottom:6px;"></div>
     <input id="roundSearchInput" type="text" placeholder="🔍 Search course name..." oninput="filterRoundsList()" style="width:100%;max-width:360px;box-sizing:border-box;margin-bottom:6px;">
@@ -522,7 +522,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
 
   <!-- Centered brand -->
   <div style="text-align:center;margin-bottom:6px;">
-    <div style="font-family:'Barlow Condensed',system-ui,sans-serif;font-size:2.2rem;font-weight:900;letter-spacing:1px;line-height:1.0;color:#fff;">Blake Kokal<br><span style="display:inline-flex;align-items:baseline;justify-content:center;"><span style="font-size:13px;visibility:hidden;font-weight:700;">v4.5.8</span>Golf<span onclick="show('whatsNewPage')" style="font-size:13px;color:#555;font-weight:700;cursor:pointer;margin-left:6px;">v4.5.8</span></span></div>
+    <div style="font-family:'Barlow Condensed',system-ui,sans-serif;font-size:2.2rem;font-weight:900;letter-spacing:1px;line-height:1.0;color:#fff;">Blake Kokal<br><span style="display:inline-flex;align-items:baseline;justify-content:center;"><span style="font-size:13px;visibility:hidden;font-weight:700;">v4.5.9</span>Golf<span onclick="show('whatsNewPage')" style="font-size:13px;color:#555;font-weight:700;cursor:pointer;margin-left:6px;">v4.5.9</span></span></div>
     <div id="homeAuthStatus" style="font-size:11px;color:#3a3a3a;margin-top:3px;"></div>
   </div>
 
@@ -701,15 +701,15 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
   <div style="font-size:22px;font-weight:800;margin-bottom:6px;">🏌️ Practice Hub</div>
   <div style="font-size:13px;color:#666;margin-bottom:24px;">Choose a practice mode</div>
   <div style="width:100%;max-width:320px;display:flex;flex-direction:column;gap:12px;">
-    <button onclick="goToCombines()" style="display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1e3a5a;border-radius:12px;text-align:left;">
+    <button onclick="goToCombines()" style="display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#0d1f4a;border-radius:12px;text-align:left;">
       <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🏌️</span>
       <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Short Game Combines</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Structured practice sessions</div></div>
     </button>
-    <button onclick="goToDrills()" style="display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#3a1a00;border-radius:12px;text-align:left;">
+    <button onclick="goToDrills()" style="display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#3d1508;border-radius:12px;text-align:left;">
       <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🎯</span>
       <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Drills</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Skill-building drills &amp; exercises</div></div>
     </button>
-    <button onclick="goToGames()" style="display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a1a2e;border-radius:12px;text-align:left;opacity:0.6;cursor:default;">
+    <button onclick="goToGames()" style="display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#2a1150;border-radius:12px;text-align:left;opacity:0.6;cursor:default;">
       <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🎮</span>
       <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Games</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Coming soon...</div></div>
     </button>
@@ -725,7 +725,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
     <div style="font-size:22px;font-weight:800;margin-bottom:2px;text-align:center;">Performance Analysis</div>
     <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
       <div id="perfAnalysisSubtitle" style="font-size:12px;color:#444;">Loading...</div>
-      <div id="perfHcpBadge" style="display:none;background:#1a1a2e;border:1px solid #2a2a4a;border-radius:20px;padding:4px 10px;align-items:center;gap:5px;">
+      <div id="perfHcpBadge" style="display:none;background:#0d1f4a;border:1px solid #1d3a6b;border-radius:20px;padding:4px 10px;align-items:center;gap:5px;">
         <span style="font-size:10px;color:#6b7280;">vs</span>
         <span id="perfHcpLabel" style="font-size:11px;font-weight:700;color:#93c5fd;">—</span>
       </div>
@@ -733,7 +733,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
 
     <!-- Page toggle tabs -->
     <div style="display:flex;gap:6px;margin-bottom:16px;background:#111;border-radius:12px;padding:4px;">
-      <button id="perfTabBtnRounds"   onclick="setPerfPage('rounds')"   style="flex:1;height:38px;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;background:#2563eb;color:#fff;">Past Rounds</button>
+      <button id="perfTabBtnRounds"   onclick="setPerfPage('rounds')"   style="flex:1;height:38px;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;background:#1d4ed8;color:#fff;">Past Rounds</button>
       <button id="perfTabBtnCombines" onclick="setPerfPage('combines')" style="flex:1;height:38px;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;background:transparent;color:#555;">Combines</button>
     </div>
 
@@ -985,7 +985,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
           <!-- Mode: Combine vs Custom -->
           <div id="coachCombModeRow" style="display:none;margin-bottom:8px;">
             <div style="display:flex;gap:6px;">
-              <button id="coachCombModeBtn_combine" onclick="coachCombSetMode('combine')" style="flex:1;height:36px;font-size:12px;font-weight:700;background:#1e3a5a;border:2px solid #4a90d9;border-radius:8px;color:#fff;cursor:pointer;max-width:none;">Combine</button>
+              <button id="coachCombModeBtn_combine" onclick="coachCombSetMode('combine')" style="flex:1;height:36px;font-size:12px;font-weight:700;background:#0d1f4a;border:2px solid #1d4ed8;border-radius:8px;color:#fff;cursor:pointer;max-width:none;">Combine</button>
               <button id="coachCombModeBtn_custom" onclick="coachCombSetMode('custom')" style="flex:1;height:36px;font-size:12px;font-weight:700;background:#222;border:2px solid #444;border-radius:8px;color:#888;cursor:pointer;max-width:none;">Custom</button>
             </div>
             <div id="coachCombModeDesc" style="font-size:10px;color:#555;margin-top:4px;text-align:center;">Fixed set of yardages, scrambled randomly</div>
@@ -1066,7 +1066,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
             <option value="">Select drill...</option>
           </select>
           <input id="coachDrillNote" placeholder="Optional note..." style="width:100%;height:40px;font-size:13px;margin-bottom:8px;">
-          <button onclick="sendCoachDrillAssignment()" style="background:#1565c0;width:100%;height:42px;font-size:14px;font-weight:700;max-width:none;">Assign Drill</button>
+          <button onclick="sendCoachDrillAssignment()" style="background:#1d4ed8;width:100%;height:42px;font-size:14px;font-weight:700;max-width:none;">Assign Drill</button>
           <div id="coachDrillMsg" style="font-size:12px;min-height:14px;text-align:center;margin-top:6px;"></div>
         </div>
       </div>
@@ -1108,7 +1108,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
 
     <!-- Category button tabs -->
     <div style="display:flex;gap:8px;margin-bottom:10px;">
-      <button id="drillTabPutting"   onclick="setDrillCategory('putting')"   style="flex:1;height:44px;font-size:14px;font-weight:700;border:none;border-radius:10px;cursor:pointer;background:#1565c0;color:#fff;min-width:0;max-width:none;width:auto;">Putting</button>
+      <button id="drillTabPutting"   onclick="setDrillCategory('putting')"   style="flex:1;height:44px;font-size:14px;font-weight:700;border:none;border-radius:10px;cursor:pointer;background:#1d4ed8;color:#fff;min-width:0;max-width:none;width:auto;">Putting</button>
       <button id="drillTabShortgame" onclick="setDrillCategory('shortgame')" style="flex:1;height:44px;font-size:14px;font-weight:700;border:none;border-radius:10px;cursor:pointer;background:#222;color:#888;min-width:0;max-width:none;width:auto;">Short Game</button>
       <button id="drillTabFullswing" onclick="setDrillCategory('fullswing')" style="flex:1;height:44px;font-size:14px;font-weight:700;border:none;border-radius:10px;cursor:pointer;background:#222;color:#888;min-width:0;max-width:none;width:auto;">Full Swing</button>
     </div>
@@ -1138,7 +1138,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
     <div style="font-size:13px;color:#888;">Add Student by Invite Code</div>
     <div style="display:flex;gap:6px;width:100%;">
       <input id="addStudentCode" placeholder="Enter code" style="flex:1;text-transform:uppercase;letter-spacing:2px;font-family:monospace;text-align:center;">
-      <button onclick="addStudentByCode()" style="width:80px;height:44px;font-size:13px;background:#00838F;border-radius:10px;">ADD</button>
+      <button onclick="addStudentByCode()" style="width:80px;height:44px;font-size:13px;background:#0f766e;border-radius:10px;">ADD</button>
     </div>
     <div id="addStudentMsg" style="font-size:12px;min-height:16px;"></div>
   </div>
@@ -1159,7 +1159,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
   <div id="studentViewHeader" style="text-align:center;margin-bottom:6px;flex-shrink:0;">
     <div style="display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;">
       <div id="studentViewName" style="font-size:20px;font-weight:800;"></div>
-      <div id="studentViewHcpBadge" onclick="toggleStudentHcpDropdown(event)" style="display:none;position:relative;background:#1a1a2e;border:1px solid #2a2a4a;border-radius:20px;padding:3px 9px;font-size:11px;font-weight:700;color:#93c5fd;white-space:nowrap;cursor:pointer;user-select:none;">
+      <div id="studentViewHcpBadge" onclick="toggleStudentHcpDropdown(event)" style="display:none;position:relative;background:#0d1f4a;border:1px solid #1d3a6b;border-radius:20px;padding:3px 9px;font-size:11px;font-weight:700;color:#93c5fd;white-space:nowrap;cursor:pointer;user-select:none;">
         <span id="studentViewHcpLabel"></span><span style="opacity:0.5;margin-left:4px;font-size:9px;">▼</span>
         <div id="studentHcpDropdown" style="display:none;position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1e1e1e;border:1px solid #333;border-radius:10px;padding:6px;z-index:100;min-width:160px;box-shadow:0 8px 24px rgba(0,0,0,0.6);">
           <div style="font-size:10px;color:#555;text-align:center;padding:2px 0 6px;border-bottom:1px solid #2a2a2a;margin-bottom:4px;">Compare stats to</div>
@@ -1210,7 +1210,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
     <!-- Student Performance Analysis -->
     <div id="svPerfTab" style="width:100%;max-width:360px;display:none;">
       <div style="display:flex;gap:0;border-radius:9px;overflow:hidden;margin-bottom:10px;">
-        <button id="svPerfBtnRounds" onclick="setSvPerfPage('rounds')" style="flex:1;height:36px;border:none;font-size:12px;font-weight:700;cursor:pointer;background:#2563eb;color:#fff;max-width:none;width:auto;padding:0;margin:0;">Past Rounds</button>
+        <button id="svPerfBtnRounds" onclick="setSvPerfPage('rounds')" style="flex:1;height:36px;border:none;font-size:12px;font-weight:700;cursor:pointer;background:#1d4ed8;color:#fff;max-width:none;width:auto;padding:0;margin:0;">Past Rounds</button>
         <button id="svPerfBtnCombines" onclick="setSvPerfPage('combines')" style="flex:1;height:36px;border:none;font-size:12px;font-weight:700;cursor:pointer;background:transparent;color:#555;max-width:none;width:auto;padding:0;margin:0;">Combines</button>
       </div>
       <!-- Rounds sub-page -->
@@ -1252,7 +1252,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
 
     <!-- Student Rounds -->
     <div id="svRoundsTab" style="width:100%;max-width:360px;display:none;">
-      <button onclick="document.getElementById('uploadStudentRoundFile').click()" style="width:100%;height:40px;font-size:13px;background:#00695C;border-radius:8px;margin-bottom:6px;">📤 Upload Round for Student (.xlsx)</button>
+      <button onclick="document.getElementById('uploadStudentRoundFile').click()" style="width:100%;height:40px;font-size:13px;background:#0f766e;border-radius:8px;margin-bottom:6px;">📤 Upload Round for Student (.xlsx)</button>
       <input type="file" id="uploadStudentRoundFile" accept=".xlsx,.xls,.csv" style="display:none;" onchange="handleRoundUpload(this, _currentStudentId)">
       <div id="uploadStudentRoundMsg" style="font-size:12px;min-height:16px;text-align:center;margin-bottom:6px;"></div>
       <input id="svRoundSearch" type="text" placeholder="🔍 Search course name..." oninput="filterSvRounds()" style="width:100%;max-width:360px;box-sizing:border-box;margin-bottom:6px;">
@@ -1304,7 +1304,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
     <div id="svNotesTab" style="width:100%;max-width:360px;display:none;">
 
       <!-- Send note form -->
-      <div style="background:#1a1a2e;border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid #2a2a4a;">
+      <div style="background:#1a0d2e;border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid #3b1a6e;">
         <div style="font-size:12px;font-weight:700;color:#a78bfa;margin-bottom:8px;">Send Feedback</div>
         <div style="display:flex;gap:6px;margin-bottom:8px;">
           <select id="svNoteType" style="flex:1;height:34px;background:#222;color:#fff;border:1px solid #444;border-radius:8px;font-size:12px;padding:0 8px;">
@@ -1376,7 +1376,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
           <div style="display:flex;flex-direction:column;gap:10px;">
             <button class="comb-grid-btn comb-green" onclick="combShowModeSelect('putting')" style="min-height:54px;font-size:1rem;border-radius:10px;">Putting</button>
             <button class="comb-grid-btn comb-blue" onclick="combShowShortGameSelect()" style="min-height:54px;font-size:1rem;border-radius:10px;">Short Game</button>
-            <button class="comb-grid-btn" style="background:#d97706;min-height:54px;font-size:1rem;border-radius:10px;" onclick="combShowModeSelect('wedge')">Wedge Distances</button>
+            <button class="comb-grid-btn" style="background:#c2410c;min-height:54px;font-size:1rem;border-radius:10px;" onclick="combShowModeSelect('wedge')">Wedge Distances</button>
           </div>
         </div><!-- /comb-practice-sub -->
 
@@ -1387,13 +1387,13 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
           </button>
           <div style="font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:14px;text-align:center;">Short Game</div>
           <div style="display:flex;flex-direction:column;gap:12px;">
-            <button onclick="combShowModeSelect('chip-prox')" style="background:#1e3a5a;border:2px solid #4a90d9;border-radius:12px;padding:16px;text-align:left;color:#fff;cursor:pointer;height:auto;max-width:none;width:100%;display:flex;flex-direction:column;gap:6px;box-sizing:border-box;white-space:normal;word-break:break-word;">
+            <button onclick="combShowModeSelect('chip-prox')" style="background:#0d1f4a;border:2px solid #1d4ed8;border-radius:12px;padding:16px;text-align:left;color:#fff;cursor:pointer;height:auto;max-width:none;width:100%;display:flex;flex-direction:column;gap:6px;box-sizing:border-box;white-space:normal;word-break:break-word;">
               <div style="font-size:1rem;font-weight:800;">Proximity Based</div>
-              <div style="font-size:0.82rem;color:#aac8f0;line-height:1.4;white-space:normal;word-break:break-word;">Scored on how close you hit it to the hole. Use this option if you're not able to putt out.</div>
+              <div style="font-size:0.82rem;color:#93c5fd;line-height:1.4;white-space:normal;word-break:break-word;">Scored on how close you hit it to the hole. Use this option if you're not able to putt out.</div>
             </button>
-            <button onclick="combShowModeSelect('chip-hole')" style="background:#2d1f4a;border:2px solid #9c7dd9;border-radius:12px;padding:16px;text-align:left;color:#fff;cursor:pointer;height:auto;max-width:none;width:100%;display:flex;flex-direction:column;gap:6px;box-sizing:border-box;white-space:normal;word-break:break-word;">
+            <button onclick="combShowModeSelect('chip-hole')" style="background:#1a3320;border:2px solid #2E7D32;border-radius:12px;padding:16px;text-align:left;color:#fff;cursor:pointer;height:auto;max-width:none;width:100%;display:flex;flex-direction:column;gap:6px;box-sizing:border-box;white-space:normal;word-break:break-word;">
               <div style="font-size:1rem;font-weight:800;">Up & Downs</div>
-              <div style="font-size:0.82rem;color:#c9b8f0;line-height:1.4;white-space:normal;word-break:break-word;">Chip and hole out each hole. Use this option if you're able to putt.</div>
+              <div style="font-size:0.82rem;color:#81c784;line-height:1.4;white-space:normal;word-break:break-word;">Chip and hole out each hole. Use this option if you're able to putt.</div>
             </button>
           </div>
         </div><!-- /comb-shortgame-select -->
@@ -1405,9 +1405,9 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
           </button>
           <div id="comb-mode-type-label" style="font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:14px;text-align:center;"></div>
           <div style="display:flex;flex-direction:column;gap:12px;">
-            <button onclick="combOpenFromModeSelect('combine')" style="background:#1e3a5a;border:2px solid #4a90d9;border-radius:12px;padding:16px;text-align:left;color:#fff;cursor:pointer;height:auto;max-width:none;width:100%;display:flex;flex-direction:column;gap:6px;box-sizing:border-box;white-space:normal;word-break:break-word;">
+            <button onclick="combOpenFromModeSelect('combine')" style="background:#0d1f4a;border:2px solid #1d4ed8;border-radius:12px;padding:16px;text-align:left;color:#fff;cursor:pointer;height:auto;max-width:none;width:100%;display:flex;flex-direction:column;gap:6px;box-sizing:border-box;white-space:normal;word-break:break-word;">
               <div style="font-size:1rem;font-weight:800;">Combine</div>
-              <div style="font-size:0.82rem;color:#aac8f0;line-height:1.4;white-space:normal;word-break:break-word;">Fixed set of yardages scrambled into a new random order each session. Use this to benchmark and track progress over time.</div>
+              <div style="font-size:0.82rem;color:#93c5fd;line-height:1.4;white-space:normal;word-break:break-word;">Fixed set of yardages scrambled into a new random order each session. Use this to benchmark and track progress over time.</div>
             </button>
             <button onclick="combOpenFromModeSelect('custom')" style="background:#1a3320;border:2px solid #4caf50;border-radius:12px;padding:16px;text-align:left;color:#fff;cursor:pointer;height:auto;max-width:none;width:100%;display:flex;flex-direction:column;gap:6px;box-sizing:border-box;white-space:normal;word-break:break-word;">
               <div style="font-size:1rem;font-weight:800;">Custom</div>
@@ -5142,7 +5142,7 @@ function filterRoundsList() {
       + '</div></div>'
       + '<div style="display:flex;gap:6px;margin-top:8px;">'
             + '<button onclick=\"event.stopPropagation();openEditRoundInfo(\'' + r.id + '\', event)\" style=\"flex:1;height:30px;font-size:12px;background:#2e7d32;border-radius:6px;font-weight:700;margin-right:4px;\">Edit</button>'
-+ '<button onclick="event.stopPropagation();viewSavedRound(\'' + r.id + '\')" style="flex:1;height:30px;font-size:12px;background:#1565c0;border-radius:6px;">Stats</button>'
++ '<button onclick="event.stopPropagation();viewSavedRound(\'' + r.id + '\')" style="flex:1;height:30px;font-size:12px;background:#1d4ed8;border-radius:6px;">Stats</button>'
       + '<button onclick="event.stopPropagation();deleteSavedRound(\'' + r.id + '\',this)" style="width:60px;height:30px;font-size:12px;background:#c62828;border-radius:6px;">Del</button>'
       + '</div>';
     list.appendChild(card);
@@ -5908,15 +5908,15 @@ function getSubcategoriesForCategory(cat) {
 
 // Category colors for drill cards
 var drillCatColors = {
-  putting:   { bg: '#0d2a4a', border: '#1565c0', tag: '#64b5f6' },
+  putting:   { bg: '#0d1f4a', border: '#1d4ed8', tag: '#64b5f6' },
   shortgame: { bg: '#1a3320', border: '#2e7d32', tag: '#81c784' },
-  fullswing: { bg: '#3a1a00', border: '#e65100', tag: '#ffb74d' }
+  fullswing: { bg: '#3d1508', border: '#c2410c', tag: '#ffb74d' }
 };
 
 function setDrillCategory(cat) {
   // Update tab button styles
   var tabs = { putting: 'drillTabPutting', shortgame: 'drillTabShortgame', fullswing: 'drillTabFullswing' };
-  var activeColors = { putting: '#1565c0', shortgame: '#2e7d32', fullswing: '#e65100' };
+  var activeColors = { putting: '#1d4ed8', shortgame: '#2e7d32', fullswing: '#e65100' };
   Object.keys(tabs).forEach(function(k) {
     var btn = document.getElementById(tabs[k]);
     if (!btn) return;
@@ -6055,8 +6055,8 @@ function setPerfPage(page) {
   document.getElementById('perfPageCombines').style.display = isRounds ? 'none' : '';
   var btnR = document.getElementById('perfTabBtnRounds');
   var btnC = document.getElementById('perfTabBtnCombines');
-  if (btnR) { btnR.style.background = isRounds ? '#2563eb' : 'transparent'; btnR.style.color = isRounds ? '#fff' : '#555'; }
-  if (btnC) { btnC.style.background = isRounds ? 'transparent' : '#2563eb'; btnC.style.color = isRounds ? '#555' : '#fff'; }
+  if (btnR) { btnR.style.background = isRounds ? '#1d4ed8' : 'transparent'; btnR.style.color = isRounds ? '#fff' : '#555'; }
+  if (btnC) { btnC.style.background = isRounds ? 'transparent' : '#1d4ed8'; btnC.style.color = isRounds ? '#555' : '#fff'; }
   if (!isRounds && !_perfCombineLoaded) {
     _perfCombineLoaded = true;
     loadPerfCombineData();
@@ -7015,7 +7015,7 @@ function setRole(role) {
     document.getElementById('coachInfoSection').style.display = 'none';
     document.getElementById('homeStudentsBtn').style.display = 'none';
   } else {
-    cBtn.style.background = '#00838F'; cBtn.style.color = '#fff'; cBtn.style.fontWeight = '700';
+    cBtn.style.background = '#0f766e'; cBtn.style.color = '#fff'; cBtn.style.fontWeight = '700';
     sBtn.style.background = '#333'; sBtn.style.color = '#888'; sBtn.style.fontWeight = '600';
     document.getElementById('studentCodeSection').style.display = 'none';
     document.getElementById('coachInfoSection').style.display = 'flex';
@@ -7160,7 +7160,7 @@ function renderStudentsList(data) {
       + '<button onclick="editStudentName(\'' + s.student_id + '\',\'' + (s.student_name||'Student').replace(/'/g,"\\'") + '\')" style="width:32px;height:32px;font-size:14px;background:#555;border-radius:6px;padding:0;">✏️</button>'
       + '</div>'
       + '<div style="display:flex;gap:6px;margin-top:8px;">'
-      + '<button onclick="viewStudent(\'' + s.student_id + '\',\'' + (s.student_name||'Student').replace(/'/g,"\\'") + '\',\'' + (s.student_email||'').replace(/'/g,"\\'") + '\')" style="flex:1;height:36px;font-size:13px;background:#1565c0;border-radius:6px;">View Profile</button>'
+      + '<button onclick="viewStudent(\'' + s.student_id + '\',\'' + (s.student_name||'Student').replace(/'/g,"\\'") + '\',\'' + (s.student_email||'').replace(/'/g,"\\'") + '\')" style="flex:1;height:36px;font-size:13px;background:#1d4ed8;border-radius:6px;">View Profile</button>'
       + '<button onclick="removeStudent(\'' + s.student_id + '\',this)" style="width:70px;height:36px;font-size:12px;background:#c62828;border-radius:6px;">Remove</button>'
       + '</div>';
     list.appendChild(card);
@@ -7328,7 +7328,7 @@ function toggleStudentHcpDropdown(e) {
   _hcpOptions.forEach(function(o) {
     var row = document.createElement('div');
     var isActive = o.value === _currentStudentHcp;
-    row.style.cssText = 'padding:7px 10px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:' + (isActive ? '700' : '500') + ';color:' + (isActive ? '#93c5fd' : '#ccc') + ';background:' + (isActive ? '#1a2a4a' : 'transparent') + ';display:flex;align-items:center;gap:8px;white-space:nowrap;';
+    row.style.cssText = 'padding:7px 10px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:' + (isActive ? '700' : '500') + ';color:' + (isActive ? '#93c5fd' : '#ccc') + ';background:' + (isActive ? '#0d1f4a' : 'transparent') + ';display:flex;align-items:center;gap:8px;white-space:nowrap;';
     row.innerHTML = '<span style="width:12px;font-size:10px;">' + (isActive ? '✓' : '') + '</span>' + o.label;
     row.onclick = function(ev) { ev.stopPropagation(); selectStudentHcp(o.value); };
     row.onmouseenter = function() { if (!isActive) this.style.background = '#252525'; };
@@ -7410,8 +7410,8 @@ function setSvPerfPage(page) {
   document.getElementById('svPerfPageCombines').style.display = isRounds ? 'none' : '';
   var btnR = document.getElementById('svPerfBtnRounds');
   var btnC = document.getElementById('svPerfBtnCombines');
-  if (btnR) { btnR.style.background = isRounds ? '#2563eb' : 'transparent'; btnR.style.color = isRounds ? '#fff' : '#555'; }
-  if (btnC) { btnC.style.background = isRounds ? 'transparent' : '#2563eb'; btnC.style.color = isRounds ? '#555' : '#fff'; }
+  if (btnR) { btnR.style.background = isRounds ? '#1d4ed8' : 'transparent'; btnR.style.color = isRounds ? '#fff' : '#555'; }
+  if (btnC) { btnC.style.background = isRounds ? 'transparent' : '#1d4ed8'; btnC.style.color = isRounds ? '#555' : '#fff'; }
   if (!isRounds && !_svPerfCombineLoaded) {
     _svPerfCombineLoaded = true;
     loadSvPerfCombineData();
@@ -7723,7 +7723,7 @@ function filterSvRounds() {
       + '<div style="font-size:13px;color:' + (r.to_par>0?'#ef5350':r.to_par<0?'#66bb6a':'#aaa') + '">' + tp + '</div></div></div>'
       + '<div style="display:flex;gap:6px;margin-top:8px;">'
             + '<button onclick=\"event.stopPropagation();openEditRoundInfo(\'' + r.id + '\', event)\" style=\"flex:1;height:30px;font-size:12px;background:#2e7d32;border-radius:6px;font-weight:700;margin-right:4px;\">Edit</button>'
-+ '<button onclick="viewSavedRound(\'' + r.id + '\')" style="flex:1;height:30px;font-size:12px;background:#1565c0;border-radius:6px;">Stats</button>'
++ '<button onclick="viewSavedRound(\'' + r.id + '\')" style="flex:1;height:30px;font-size:12px;background:#1d4ed8;border-radius:6px;">Stats</button>'
       + '<button onclick="deleteStudentRound(\'' + r.id + '\',this)" style="width:60px;height:30px;font-size:12px;background:#c62828;border-radius:6px;">Del</button>'
       + '</div>';
     list.appendChild(card);
@@ -9400,7 +9400,7 @@ function showFullStats() {
     t6+='<span style="font-weight:700;font-size:13px;">Hole '+h5.hole+' \u00b7 Par '+h5.par+' \u00b7 '+h5.yards+' yds</span>';
     t6+='<div style="display:flex;align-items:center;gap:6px;">';
     t6+='<span style="font-size:12px;font-weight:700;background:'+scoreBg+';padding:2px 8px;border-radius:4px;">'+h5.score+' ('+scoreLabel+')</span>';
-    t6+='<button onclick="editHole('+holeIdx+')" style="width:50px;height:24px;font-size:11px;background:#1565c0;border:none;border-radius:4px;color:#fff;cursor:pointer;">Edit</button>';
+    t6+='<button onclick="editHole('+holeIdx+')" style="width:50px;height:24px;font-size:11px;background:#1d4ed8;border:none;border-radius:4px;color:#fff;cursor:pointer;">Edit</button>';
     t6+='</div></div>';
     (h5.shots||[]).forEach(function(s,idx){
       var nextShot=(h5.shots||[])[idx+1];
@@ -9932,7 +9932,7 @@ function renderSGExplainer() {
     
     // Player comparison cards
     + '<div style="padding:8px 16px 0;display:flex;gap:6px;">'
-    + '<div style="flex:1;background:#0d1b2a;border:1px solid #1565c0;border-radius:10px;padding:10px;">'
+    + '<div style="flex:1;background:#0d1b2a;border:1px solid #1d4ed8;border-radius:10px;padding:10px;">'
     + '<div style="font-size:10px;font-weight:800;color:#64b5f6;text-transform:uppercase;letter-spacing:1px;">Player 1</div>'
     + '<div style="font-size:11px;color:#aaa;margin-top:4px;">250 yd drive → 150 out</div>'
     + '<div style="font-size:10px;color:#666;margin-top:2px;">Expected from 150 yds:</div>'
@@ -11320,7 +11320,7 @@ function renderCombCard(c, canDelete){
     scoreStr = sgLine;
   }
   var dateStr=c.combine_date?new Date(c.combine_date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'';
-  var combBadge = c.is_combine ? '<span style="font-size:10px;background:#1565c0;color:#fff;padding:2px 6px;border-radius:4px;margin-left:6px;font-weight:600;">COMBINE</span>' : '';
+  var combBadge = c.is_combine ? '<span style="font-size:10px;background:#1d4ed8;color:#fff;padding:2px 6px;border-radius:4px;margin-left:6px;font-weight:600;">COMBINE</span>' : '';
   var delBtn = canDelete ? '<button class="comb-hist-del" onclick="deleteCombScore(\''+c.id+'\')" title="Delete">🗑 Delete</button>' : '';
   var metaStr = c.holes_count + '-hole • vs '+c.handicap+strokesLine+(c.note?' • <em style="color:#aaa;">'+escapeHtml(c.note)+'</em>':'');
   var detailsBtn = c.row_data ? '<button onclick="toggleCombDetails(\''+c.id+'\')" style="background:transparent;border:1px solid #333;border-radius:6px;color:#888;font-size:11px;font-weight:600;padding:3px 8px;cursor:pointer;height:auto;width:auto;max-width:none;margin-top:6px;">📊 Details</button>' : '';
@@ -11874,7 +11874,7 @@ function filterCoachingRoster() {
       + '<div style="flex:1;min-width:0;">'
       + '<div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(s.student_name || 'Student') + '</div>'
       + '<div style="font-size:11px;color:#666;">' + escapeHtml(s.student_email || '') + '</div></div>'
-      + '<button onclick="viewStudent(\'' + sid + '\',\'' + sname + '\',\'' + semail + '\')" style="font-size:11px;font-weight:700;background:#1565c0;border-radius:6px;padding:6px 10px;height:auto;max-width:none;width:auto;white-space:nowrap;">View Profile</button>'
+      + '<button onclick="viewStudent(\'' + sid + '\',\'' + sname + '\',\'' + semail + '\')" style="font-size:11px;font-weight:700;background:#1d4ed8;border-radius:6px;padding:6px 10px;height:auto;max-width:none;width:auto;white-space:nowrap;">View Profile</button>'
       + '</div>';
   }).join('');
 }
@@ -11982,7 +11982,7 @@ async function loadCoachActivityFeed() {
     if (n.student_id) {
       var safeName = escapeHtml(n.student_name || 'Student').replace(/'/g, "\\'");
       viewBtn = '<button onclick="viewStudent(\'' + n.student_id + '\',\'' + safeName + '\',\'\')" '
-        + 'style="margin-top:6px;font-size:11px;font-weight:700;background:#1565c0;color:#fff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer;height:auto;max-width:none;width:auto;">'
+        + 'style="margin-top:6px;font-size:11px;font-weight:700;background:#1d4ed8;color:#fff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer;height:auto;max-width:none;width:auto;">'
         + 'View Profile</button>';
     }
     return '<div style="' + unreadStyle + 'margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #222;">'
@@ -12172,7 +12172,7 @@ function coachCombSetMode(mode) {
   var rangeRow = document.getElementById('coachCombRangeRow');
   
   if (mode === 'combine') {
-    combBtn.style.background = '#1e3a5a'; combBtn.style.borderColor = '#4a90d9'; combBtn.style.color = '#fff';
+    combBtn.style.background = '#0d1f4a'; combBtn.style.borderColor = '#1d4ed8'; combBtn.style.color = '#fff';
     custBtn.style.background = '#222'; custBtn.style.borderColor = '#444'; custBtn.style.color = '#888';
     desc.textContent = 'Fixed set of yardages, scrambled randomly';
     combOpts.style.display = 'block';
