@@ -841,7 +841,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
         </div>
 
         <!-- Save button -->
-        <button onclick="savePracticeSession()" style="width:100%;height:46px;background:#1d4ed8;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;max-width:none;">Save Practice Session</button>
+        <button id="ppSaveBtn" onclick="savePracticeSession()" style="width:100%;height:46px;background:#1d4ed8;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;max-width:none;">Save Practice Session</button>
         <div id="ppSaveMsg" style="font-size:12px;text-align:center;min-height:18px;margin-top:6px;"></div>
       </div>
 
@@ -5277,6 +5277,9 @@ show = function(id) {
   const page = document.getElementById(id);
   if(page) {
     page.scrollTop = 0;
+    // Also reset inner scroll containers
+    var inner = page.querySelector('[id$="Scroll"]');
+    if (inner) inner.scrollTop = 0;
   }
   window.scrollTo(0, 0);
 };
@@ -13234,6 +13237,7 @@ async function loadPHCombineHistory() {
 // MY PRACTICE PLAN
 // =============================================
 var _practiceNotes = [];
+var _editingPracticeSessionId = null;
 
 function setPracticePlanSubTab(sub) {
   document.getElementById('ppNewSession').style.display = sub === 'new' ? '' : 'none';
@@ -13248,6 +13252,7 @@ function setPracticePlanSubTab(sub) {
 }
 
 function initPracticeSessionForm() {
+  _editingPracticeSessionId = null;
   var dateInput = document.getElementById('ppSessionDate');
   if (dateInput && !dateInput.value) {
     dateInput.value = new Date().toISOString().split('T')[0];
@@ -13255,6 +13260,8 @@ function initPracticeSessionForm() {
   _practiceNotes = [];
   renderPracticeNotes();
   document.getElementById('ppSaveMsg').textContent = '';
+  var saveBtn = document.getElementById('ppSaveBtn');
+  if (saveBtn) saveBtn.textContent = 'Save Practice Session';
 }
 
 async function loadPracticePlanCombineOptions() {
@@ -13336,6 +13343,27 @@ async function savePracticeSession() {
 
   msg.style.color = '#888'; msg.textContent = 'Saving...';
 
+  if (_editingPracticeSessionId) {
+    // UPDATE existing session
+    var updatePayload = {
+      session_date: dateVal,
+      combine_score_id: combineId,
+      notes: JSON.stringify(_practiceNotes),
+      total_minutes: totalMins
+    };
+    var { error } = await _sb.from('practice_sessions').update(updatePayload).eq('id', _editingPracticeSessionId).eq('user_id', currentUser.id);
+    if (error) { msg.style.color = '#f44'; msg.textContent = 'Update failed: ' + error.message; return; }
+    msg.style.color = '#4CAF50'; msg.textContent = 'Practice session updated!';
+    _editingPracticeSessionId = null;
+    _practiceNotes = [];
+    renderPracticeNotes();
+    document.getElementById('ppSessionCombine').value = '';
+    var saveBtn = document.getElementById('ppSaveBtn');
+    if (saveBtn) saveBtn.textContent = 'Save Practice Session';
+    return;
+  }
+
+  // INSERT new session
   var payload = {
     user_id: currentUser.id,
     session_date: dateVal,
@@ -13388,8 +13416,10 @@ async function loadPracticeHistory() {
     if (combines) combines.forEach(function(c) { combinesMap[c.id] = c; });
   }
 
+  _practiceHistoryCache = {};
   var html = '';
   data.forEach(function(s) {
+    _practiceHistoryCache[s.id] = s;
     var notes = [];
     try { notes = JSON.parse(s.notes || '[]'); } catch(e) {}
     var comb = s.combine_score_id ? combinesMap[s.combine_score_id] : null;
@@ -13419,10 +13449,42 @@ async function loadPracticeHistory() {
       });
     }
 
-    html += '<div style="text-align:right;margin-top:6px;"><button onclick="deletePracticeSession(\'' + s.id + '\')" style="background:transparent;border:none;color:#666;font-size:11px;cursor:pointer;padding:0;height:auto;max-width:none;width:auto;">Delete</button></div>';
+    html += '<div style="display:flex;justify-content:flex-end;gap:12px;margin-top:6px;">';
+    html += '<button onclick="editPracticeSession(\'' + s.id + '\')" style="background:transparent;border:none;color:#1d4ed8;font-size:11px;font-weight:700;cursor:pointer;padding:0;height:auto;max-width:none;width:auto;">Edit</button>';
+    html += '<button onclick="deletePracticeSession(\'' + s.id + '\')" style="background:transparent;border:none;color:#666;font-size:11px;cursor:pointer;padding:0;height:auto;max-width:none;width:auto;">Delete</button>';
+    html += '</div>';
     html += '</div>';
   });
   list.innerHTML = html;
+}
+
+var _practiceHistoryCache = {};
+
+function editPracticeSession(id) {
+  var s = _practiceHistoryCache[id];
+  if (!s) return;
+
+  _editingPracticeSessionId = id;
+  try { _practiceNotes = JSON.parse(s.notes || '[]'); } catch(e) { _practiceNotes = []; }
+
+  // Switch to Practice tab and New Session sub-tab
+  setPracticeHubTab('plan');
+  setPracticePlanSubTab('new');
+
+  // Populate form
+  var dateInput = document.getElementById('ppSessionDate');
+  if (dateInput) dateInput.value = s.session_date || '';
+  var combSel = document.getElementById('ppSessionCombine');
+  if (combSel) combSel.value = s.combine_score_id || '';
+
+  renderPracticeNotes();
+  document.getElementById('ppSaveMsg').textContent = '';
+  var saveBtn = document.getElementById('ppSaveBtn');
+  if (saveBtn) saveBtn.textContent = 'Update Practice Session';
+
+  // Scroll to top so the form is visible
+  var scroll = document.getElementById('practiceHubScroll');
+  if (scroll) scroll.scrollTop = 0;
 }
 
 async function deletePracticeSession(id) {
