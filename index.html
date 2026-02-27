@@ -20,8 +20,9 @@
 html,body{margin:0;padding:0;height:100%;overflow:hidden;}
 * { box-sizing:border-box; }
 body{background:#181818;color:#fff;font-family:system-ui,sans-serif;}
-#scoreBar{position:fixed;top:0;left:0;right:0;background:#111;display:none;flex-direction:column;align-items:center;justify-content:center;font-weight:600;z-index:10;padding:8px 0 6px;}
-#courseLabel{font-size:11px;color:#888;font-weight:500;margin-top:2px;max-width:80%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#scoreBar{position:fixed;top:0;left:0;right:0;background:#111;display:none;flex-direction:column;align-items:center;justify-content:center;font-weight:600;z-index:10;padding:10px 0 8px;}
+#scoreBarText{font-size:18px;}
+#courseLabel{font-size:13px;color:#888;font-weight:500;margin-top:2px;max-width:80%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
 /* ALL NON-START PAGES: BUTTONS STACK FROM BOTTOM CENTER UP */
 .page{
@@ -1617,7 +1618,10 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
   </div>
 
   <button class="holes9" onclick="enterScoring()">CONFIRM</button>
-  <div style="margin-top:6px;"><button onclick="showCreateCourse()" style="background:transparent;border:1px solid #444;border-radius:10px;color:#888;font-size:12px;padding:8px 18px;cursor:pointer;">+ Create Custom Course</button></div>
+  <div style="margin-top:6px;display:flex;gap:8px;justify-content:center;">
+    <button onclick="showCreateCourse()" style="background:transparent;border:1px solid #444;border-radius:10px;color:#888;font-size:12px;padding:8px 18px;cursor:pointer;">+ Create Custom Course</button>
+    <button onclick="showMyCoursesPage()" style="background:transparent;border:1px solid #444;border-radius:10px;color:#888;font-size:12px;padding:8px 18px;cursor:pointer;">My Courses</button>
+  </div>
 </div>
 
 <!-- CREATE CUSTOM COURSE PAGE -->
@@ -1646,6 +1650,43 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
     </div>
     <div id="cc_holes_container" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;"></div>
     <button onclick="saveNewCustomCourse()" style="width:100%;height:48px;background:#2E7D32;border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;margin-top:10px;">Save Course & Use It</button>
+  </div>
+</div>
+
+<!-- MY COURSES PAGE -->
+<div id="myCoursesPage" class="page" style="justify-content:flex-start;padding-top:50px;padding-bottom:80px;overflow-y:auto;">
+  <button class="back-btn-top" onclick="show('roundPage')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <div style="font-size:20px;font-weight:800;margin-bottom:4px;">My Courses</div>
+  <div style="font-size:12px;color:#666;margin-bottom:16px;">Edit or delete your custom courses</div>
+  <div id="myCoursesListContainer" style="width:100%;max-width:360px;display:flex;flex-direction:column;gap:10px;"></div>
+</div>
+
+<!-- EDIT CUSTOM COURSE PAGE -->
+<div id="editCoursePage" class="page" style="justify-content:flex-start;padding-top:50px;padding-bottom:80px;overflow-y:auto;">
+  <button class="back-btn-top" onclick="show('myCoursesPage')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <div style="font-size:20px;font-weight:800;margin-bottom:4px;">Edit Course</div>
+  <div style="font-size:12px;color:#666;margin-bottom:16px;">Update course details</div>
+  <div style="width:100%;max-width:360px;display:flex;flex-direction:column;gap:10px;">
+    <input id="ec_name" placeholder="Course Name" style="width:100%;height:40px;background:#222;color:#fff;border:none;border-radius:10px;text-align:center;font-size:14px;box-sizing:border-box;">
+    <div style="display:flex;gap:8px;">
+      <input id="ec_city" placeholder="City" style="flex:1;height:40px;background:#222;color:#fff;border:none;border-radius:10px;text-align:center;font-size:14px;box-sizing:border-box;">
+      <input id="ec_state" placeholder="State" style="width:70px;height:40px;background:#222;color:#fff;border:none;border-radius:10px;text-align:center;font-size:14px;box-sizing:border-box;">
+    </div>
+    <div style="font-size:11px;color:#666;text-align:center;margin-top:4px;text-transform:uppercase;letter-spacing:0.5px;">Tee Box</div>
+    <div style="display:flex;gap:8px;">
+      <input id="ec_tee_name" placeholder="Tee Name (e.g. Blue)" style="flex:1;height:40px;background:#222;color:#fff;border:none;border-radius:10px;text-align:center;font-size:14px;box-sizing:border-box;">
+    </div>
+    <div style="display:flex;gap:8px;">
+      <input id="ec_rating" type="number" step="0.1" placeholder="Rating" style="flex:1;height:40px;background:#222;color:#fff;border:none;border-radius:10px;text-align:center;font-size:14px;box-sizing:border-box;">
+      <input id="ec_slope" type="number" placeholder="Slope" style="flex:1;height:40px;background:#222;color:#fff;border:none;border-radius:10px;text-align:center;font-size:14px;box-sizing:border-box;">
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;justify-content:center;">
+      <div style="font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Holes:</div>
+      <button id="ec_9btn" onclick="setECHoles(9)" style="height:34px;padding:0 16px;border:none;border-radius:8px;background:#333;color:#aaa;font-weight:700;font-size:13px;cursor:pointer;">9</button>
+      <button id="ec_18btn" onclick="setECHoles(18)" style="height:34px;padding:0 16px;border:none;border-radius:8px;background:#2E7D32;color:#fff;font-weight:700;font-size:13px;cursor:pointer;">18</button>
+    </div>
+    <div id="ec_holes_container" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;"></div>
+    <button onclick="saveEditedCourse()" style="width:100%;height:48px;background:#2E7D32;border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;margin-top:10px;">Save Changes</button>
   </div>
 </div>
 
@@ -1947,7 +1988,9 @@ var _backTargetMap = {
   'editRoundInfoPage': 'summaryPage',
   'authPage': 'homePage',
   'combinesPage': 'homePage',
-  'whatsNewPage': 'homePage'
+  'whatsNewPage': 'homePage',
+  'myCoursesPage': 'roundPage',
+  'editCoursePage': 'myCoursesPage'
 };
 // Pages that should NOT show the persistent back button (home + scoring flow pages that use their own back-wrap)
 var _noBackBtnPages = ['homePage','parPage','shotPage','liePage','distancePage','puttPage','penaltyPage','obPenaltyPage','recoveryPage','missedGreenPage'];
@@ -2417,6 +2460,170 @@ async function deleteCustomCourse(courseId) {
   if (!error) {
     _userCustomCourses = _userCustomCourses.filter(function(c) { return c._id !== courseId; });
   }
+}
+
+// ─── MY COURSES (MANAGE/EDIT/DELETE) ──────────────────────
+var _editingCourseId = null;
+var _ecHoleCount = 18;
+
+function showMyCoursesPage() {
+  if (!currentUser) { alert('Please log in to manage courses.'); return; }
+  renderMyCoursesPage();
+  show('myCoursesPage');
+}
+
+function renderMyCoursesPage() {
+  var container = document.getElementById('myCoursesListContainer');
+  if (_userCustomCourses.length === 0) {
+    container.innerHTML = '<div style="text-align:center;color:#666;font-size:13px;padding:20px 0;">No custom courses yet.<br>Create one from the round setup screen.</div>';
+    return;
+  }
+  var html = '';
+  for (var i = 0; i < _userCustomCourses.length; i++) {
+    var c = _userCustomCourses[i];
+    var teeInfo = c.t && c.t[0] ? c.t[0].n + ' · ' + c.t[0].y + ' yds · Par ' + c.t[0].p : '';
+    html += '<div style="background:#1a1a1a;border-radius:12px;padding:14px 16px;">'
+      + '<div style="font-weight:700;font-size:14px;color:#fff;">' + c.dn + '</div>';
+    if (c.ci) html += '<div style="font-size:11px;color:#888;margin-top:2px;">' + c.ci + ', ' + c.st + '</div>';
+    if (teeInfo) html += '<div style="font-size:11px;color:#666;margin-top:2px;">' + teeInfo + '</div>';
+    html += '<div style="display:flex;gap:8px;margin-top:10px;">'
+      + '<button onclick="editCustomCourse(\'' + c._id + '\')" style="flex:1;height:34px;border:none;border-radius:8px;background:#1565C0;color:#fff;font-weight:700;font-size:12px;cursor:pointer;">Edit</button>'
+      + '<button onclick="confirmDeleteCourse(\'' + c._id + '\',this)" style="flex:1;height:34px;border:none;border-radius:8px;background:#333;color:#f44336;font-weight:700;font-size:12px;cursor:pointer;">Delete</button>'
+      + '</div></div>';
+  }
+  container.innerHTML = html;
+}
+
+function confirmDeleteCourse(courseId, btn) {
+  if (btn.dataset.confirm) {
+    deleteCustomCourse(courseId).then(function() { renderMyCoursesPage(); });
+    return;
+  }
+  btn.dataset.confirm = '1';
+  btn.innerText = 'Tap Again to Delete';
+  btn.style.background = '#b71c1c';
+  btn.style.color = '#fff';
+  setTimeout(function() { btn.dataset.confirm = ''; btn.innerText = 'Delete'; btn.style.background = '#333'; btn.style.color = '#f44336'; }, 3000);
+}
+
+function editCustomCourse(courseId) {
+  var course = _userCustomCourses.find(function(c) { return c._id === courseId; });
+  if (!course) return;
+  _editingCourseId = courseId;
+  document.getElementById('ec_name').value = course.dn || '';
+  document.getElementById('ec_city').value = course.ci || '';
+  document.getElementById('ec_state').value = course.st || '';
+  var tee = course.t && course.t[0] ? course.t[0] : {};
+  document.getElementById('ec_tee_name').value = tee.n || '';
+  document.getElementById('ec_rating').value = tee.rm || '';
+  document.getElementById('ec_slope').value = tee.sm || '';
+  var holes = tee.h || [];
+  _ecHoleCount = holes.length || 18;
+  setECHoles(_ecHoleCount);
+  // After building, populate the hole values
+  for (var i = 0; i < holes.length; i++) {
+    var h = holes[i];
+    var hNum = i + 1;
+    setCCParOnPage('ec', hNum, h[0]);
+    var yInput = document.getElementById('ec_yards_' + hNum);
+    if (yInput) { yInput.value = h[1]; yInput.dataset.userEdited = '1'; }
+    var hcpInput = document.getElementById('ec_hcp_' + hNum);
+    if (hcpInput) hcpInput.value = h[2];
+  }
+  show('editCoursePage');
+}
+
+function setCCParOnPage(prefix, holeNum, parVal) {
+  [3,4,5].forEach(function(p) {
+    var btn = document.getElementById(prefix + '_par_' + holeNum + '_' + p);
+    if (!btn) return;
+    if (p === parVal) {
+      btn.style.background = p === 3 ? '#4fc3f7' : p === 4 ? '#66bb6a' : '#ffb74d';
+      btn.style.color = '#000';
+    } else {
+      btn.style.background = '#333'; btn.style.color = '#aaa';
+    }
+  });
+}
+
+function setECHoles(n) {
+  _ecHoleCount = n;
+  document.getElementById('ec_9btn').style.background = n === 9 ? '#2E7D32' : '#333';
+  document.getElementById('ec_9btn').style.color = n === 9 ? '#fff' : '#aaa';
+  document.getElementById('ec_18btn').style.background = n === 18 ? '#2E7D32' : '#333';
+  document.getElementById('ec_18btn').style.color = n === 18 ? '#fff' : '#aaa';
+  buildECHoles();
+}
+
+function buildECHoles() {
+  var container = document.getElementById('ec_holes_container');
+  container.innerHTML = '';
+  for (var h = 1; h <= _ecHoleCount; h++) {
+    container.innerHTML += '<div style="display:flex;gap:6px;align-items:center;background:#1a1a1a;border-radius:10px;padding:8px 10px;">'
+      + '<div style="font-size:12px;font-weight:700;color:#fff;width:24px;text-align:center;">' + h + '</div>'
+      + '<div style="display:flex;gap:4px;flex:1;">'
+      + '<button id="ec_par_' + h + '_3" onclick="setECPar(' + h + ',3)" style="flex:1;height:30px;border:none;border-radius:6px;background:#333;color:#aaa;font-weight:700;font-size:12px;cursor:pointer;">3</button>'
+      + '<button id="ec_par_' + h + '_4" onclick="setECPar(' + h + ',4)" style="flex:1;height:30px;border:none;border-radius:6px;background:#66bb6a;color:#000;font-weight:700;font-size:12px;cursor:pointer;">4</button>'
+      + '<button id="ec_par_' + h + '_5" onclick="setECPar(' + h + ',5)" style="flex:1;height:30px;border:none;border-radius:6px;background:#333;color:#aaa;font-weight:700;font-size:12px;cursor:pointer;">5</button>'
+      + '</div>'
+      + '<input id="ec_yards_' + h + '" type="number" inputmode="numeric" placeholder="Yds" value="400" style="width:70px;height:30px;background:#222;color:#fff;border:none;border-radius:6px;text-align:center;font-size:12px;box-sizing:border-box;">'
+      + '<input id="ec_hcp_' + h + '" type="number" inputmode="numeric" placeholder="HCP" value="' + h + '" style="width:46px;height:30px;background:#222;color:#fff;border:none;border-radius:6px;text-align:center;font-size:12px;box-sizing:border-box;">'
+      + '</div>';
+  }
+}
+
+function setECPar(holeNum, parVal) {
+  setCCParOnPage('ec', holeNum, parVal);
+  var yardsInput = document.getElementById('ec_yards_' + holeNum);
+  if (yardsInput && !yardsInput.dataset.userEdited) {
+    yardsInput.value = parVal === 3 ? 170 : parVal === 4 ? 400 : 520;
+  }
+}
+
+async function saveEditedCourse() {
+  var name = document.getElementById('ec_name').value.trim();
+  if (!name) { alert('Please enter a course name.'); return; }
+  var teeName = document.getElementById('ec_tee_name').value.trim() || 'Default';
+  var rating = parseFloat(document.getElementById('ec_rating').value) || null;
+  var slope = parseInt(document.getElementById('ec_slope').value) || null;
+
+  var holes = [];
+  var totalYards = 0, totalPar = 0;
+  for (var h = 1; h <= _ecHoleCount; h++) {
+    var p = 4;
+    if (document.getElementById('ec_par_' + h + '_3').style.background.indexOf('4fc3f7') !== -1) p = 3;
+    else if (document.getElementById('ec_par_' + h + '_5').style.background.indexOf('ffb74d') !== -1) p = 5;
+    var y = parseInt(document.getElementById('ec_yards_' + h).value) || 0;
+    var hcp = parseInt(document.getElementById('ec_hcp_' + h).value) || h;
+    holes.push([p, y, hcp]);
+    totalYards += y;
+    totalPar += p;
+  }
+
+  var { error } = await _sb.from('custom_courses').update({
+    display_name: name,
+    club_name: name,
+    course_name: name,
+    city: document.getElementById('ec_city').value.trim(),
+    state: document.getElementById('ec_state').value.trim(),
+    tees: [{ n: teeName, y: totalYards, p: totalPar, rm: rating, sm: slope, rf: null, sf: null, h: holes }]
+  }).eq('id', _editingCourseId).eq('user_id', currentUser.id);
+
+  if (error) { alert('Could not update course: ' + error.message); return; }
+
+  // Update local cache
+  var idx = _userCustomCourses.findIndex(function(c) { return c._id === _editingCourseId; });
+  if (idx !== -1) {
+    _userCustomCourses[idx] = {
+      dn: name, cn: name, co: name,
+      ci: document.getElementById('ec_city').value.trim(),
+      st: document.getElementById('ec_state').value.trim(),
+      t: [{ n: teeName, y: totalYards, p: totalPar, rm: rating, sm: slope, rf: null, sf: null, h: holes }],
+      _id: _editingCourseId
+    };
+  }
+  show('myCoursesPage');
+  renderMyCoursesPage();
 }
 
 // ─── CREATE CUSTOM COURSE ─────────────────────────────────
