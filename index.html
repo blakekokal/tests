@@ -730,18 +730,24 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
 </div>
 
 <!-- PRACTICE HUB PAGE -->
-<div id="practiceHubPage" class="page" style="justify-content:flex-start;padding-top:30px;overflow-y:auto;padding-bottom:80px;align-items:center;">
-  <button class="back-btn-top" onclick="show('homePage')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
-  <div style="font-size:22px;font-weight:800;margin-bottom:6px;">Practice Hub</div>
-  <div style="font-size:13px;color:#666;margin-bottom:14px;">Combines, Drills & Practice</div>
+<div id="practiceHubPage" class="page" style="justify-content:flex-start;padding:0;overflow:hidden;">
 
-  <!-- 3-tab bar (sticky) -->
-  <div style="display:flex;gap:0;width:100%;max-width:360px;margin-bottom:14px;border-radius:10px;overflow:hidden;position:sticky;top:0;z-index:10;">
-    <button onclick="setPracticeHubTab('combines')" id="phTabCombines" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#1d4ed8;border:none;color:#fff;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Combines</button>
-    <button onclick="setPracticeHubTab('drills')" id="phTabDrills" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#222;border:none;color:#888;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Drills</button>
-    <button onclick="setPracticeHubTab('plan')" id="phTabPlan" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#222;border:none;color:#888;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Practice</button>
+  <!-- Fixed header -->
+  <div style="flex-shrink:0;width:100%;padding:30px 16px 0;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;position:relative;">
+    <button class="back-btn-top" onclick="show('homePage')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <div style="font-size:22px;font-weight:800;margin-bottom:6px;">Practice Hub</div>
+    <div style="font-size:13px;color:#666;margin-bottom:14px;">Combines, Drills & Practice</div>
+
+    <!-- 3-tab bar -->
+    <div style="display:flex;gap:0;width:100%;max-width:360px;margin-bottom:0;border-radius:10px;overflow:hidden;">
+      <button onclick="setPracticeHubTab('combines')" id="phTabCombines" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#1d4ed8;border:none;color:#fff;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Combines</button>
+      <button onclick="setPracticeHubTab('drills')" id="phTabDrills" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#222;border:none;color:#888;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Drills</button>
+      <button onclick="setPracticeHubTab('plan')" id="phTabPlan" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#222;border:none;color:#888;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Practice</button>
+    </div>
   </div>
 
+  <!-- Scrollable body -->
+  <div id="practiceHubScroll" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;width:100%;display:flex;flex-direction:column;align-items:center;padding:14px 16px 80px;">
   <div style="width:100%;max-width:360px;">
 
     <!-- COMBINES TAB -->
@@ -846,6 +852,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
     </div>
 
   </div>
+  </div><!-- /practiceHubScroll -->
 </div>
 
 <!-- COACH'S PICK PAGE -->
