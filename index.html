@@ -562,7 +562,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
 
     <button onclick="goToPracticeHub()" style="display:flex;align-items:center;gap:13px;height:auto;padding:13px 15px;font-size:15px;font-weight:700;background:#c2410c;border-radius:13px;text-align:left;border:none;">
       <span style="font-size:20px;width:28px;text-align:center;flex-shrink:0;">🏌️</span>
-      <div><div style="font-size:0.97rem;font-weight:700;line-height:1;">Practice Hub</div><div style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:3px;">Combines · Drills · Practice Plan</div></div>
+      <div><div style="font-size:0.97rem;font-weight:700;line-height:1;">Practice Hub</div><div style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:3px;">Combines · Drills · Practice</div></div>
     </button>
 
     <button onclick="goToCoaching()" style="display:flex;align-items:center;gap:13px;height:auto;padding:13px 15px;font-size:15px;font-weight:700;background:#7e22ce;border-radius:13px;text-align:left;border:none;">
@@ -715,36 +715,51 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
 <div id="practiceHubPage" class="page" style="justify-content:flex-start;padding-top:30px;overflow-y:auto;padding-bottom:80px;align-items:center;">
   <button class="back-btn-top" onclick="show('homePage')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
   <div style="font-size:22px;font-weight:800;margin-bottom:6px;">Practice Hub</div>
-  <div style="font-size:13px;color:#666;margin-bottom:14px;">Combines, Drills & Practice Plan</div>
+  <div style="font-size:13px;color:#666;margin-bottom:14px;">Combines, Drills & Practice</div>
 
   <!-- 3-tab bar -->
   <div style="display:flex;gap:0;width:100%;max-width:360px;margin-bottom:14px;border-radius:10px;overflow:hidden;">
     <button onclick="setPracticeHubTab('combines')" id="phTabCombines" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#1d4ed8;border:none;color:#fff;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Combines</button>
     <button onclick="setPracticeHubTab('drills')" id="phTabDrills" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#222;border:none;color:#888;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Drills</button>
-    <button onclick="setPracticeHubTab('plan')" id="phTabPlan" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#222;border:none;color:#888;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">My Practice Plan</button>
+    <button onclick="setPracticeHubTab('plan')" id="phTabPlan" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#222;border:none;color:#888;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Practice</button>
   </div>
 
   <div style="width:100%;max-width:360px;">
 
     <!-- COMBINES TAB -->
     <div id="phCombinesContent">
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <button onclick="goToCombines()" style="display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#0d1f4a;border-radius:12px;text-align:left;">
+      <div style="display:flex;flex-direction:column;gap:10px;align-items:center;">
+        <button onclick="goToCombines()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#0d1f4a;border-radius:12px;text-align:left;">
           <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🏌️</span>
           <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Short Game Combines</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Structured practice sessions</div></div>
         </button>
       </div>
-      <!-- Recent Combine History -->
+      <!-- Combine History -->
       <div style="margin-top:16px;">
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:8px;">Recent Combines</div>
-        <div id="phCombineHistory" style="font-size:13px;color:#555;text-align:center;padding:12px 0;">Loading...</div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:8px;">Combine History</div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-bottom:8px;">
+          <select id="phCombFilterType" onchange="loadPHCombineHistory()" style="background:#222;color:#fff;border:1px solid #444;border-radius:6px;padding:5px 8px;font-size:12px;">
+            <option value="all">All Types</option>
+            <option value="Putting">Putting</option>
+            <option value="Chipping (Prox)">Chipping Prox</option>
+            <option value="Chip Hole Out">Chip Hole Out</option>
+            <option value="Wedge">Wedge</option>
+          </select>
+          <select id="phCombFilterMode" onchange="loadPHCombineHistory()" style="background:#222;color:#fff;border:1px solid #444;border-radius:6px;padding:5px 8px;font-size:12px;">
+            <option value="all">Custom &amp; Combine</option>
+            <option value="combine">Combine Only</option>
+            <option value="custom">Custom Only</option>
+          </select>
+        </div>
+        <div id="phCombineHistoryMsg" style="font-size:13px;color:#888;min-height:20px;text-align:center;margin-bottom:4px;"></div>
+        <div id="phCombineHistory" style="width:100%;"></div>
       </div>
     </div>
 
     <!-- DRILLS TAB -->
     <div id="phDrillsContent" style="display:none;">
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <button onclick="goToDrills()" style="display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#3d1508;border-radius:12px;text-align:left;">
+      <div style="display:flex;flex-direction:column;gap:10px;align-items:center;">
+        <button onclick="goToDrills()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#3d1508;border-radius:12px;text-align:left;">
           <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🎯</span>
           <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Drills Library</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Skill-building drills &amp; exercises</div></div>
         </button>
@@ -1472,12 +1487,6 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
       <!-- HOME VIEW (menu grid + history) -->
       <div id="comb-home-view">
 
-        <!-- Tab bar: Practice vs History -->
-        <div style="display:flex;gap:0;border-radius:10px;overflow:hidden;margin-bottom:12px;">
-          <button onclick="combShowHomeTab('practice')" id="ctab-practice" style="flex:1;height:38px;font-size:14px;background:#333;border:none;color:#fff;font-weight:700;cursor:pointer;touch-action:manipulation;padding:0;margin:0;max-width:none;width:auto;">Practice</button>
-          <button onclick="combShowHomeTab('history')" id="ctab-history" style="flex:1;height:38px;font-size:14px;background:#222;border:none;color:#888;font-weight:600;cursor:pointer;touch-action:manipulation;padding:0;margin:0;max-width:none;width:auto;">History</button>
-        </div>
-
         <!-- Practice sub-view: 3 type buttons -->
         <div id="comb-practice-sub">
           <div style="display:flex;flex-direction:column;gap:10px;">
@@ -1522,32 +1531,6 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
             </button>
           </div>
         </div><!-- /comb-mode-select -->
-
-        <!-- History sub-view -->
-        <div id="comb-history-sub" style="display:none;">
-          <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-bottom:8px;">
-            <select id="combHistFilterType" onchange="combLoadHistory()" style="background:#222;color:#fff;border:1px solid #444;border-radius:6px;padding:5px 8px;font-size:12px;-webkit-appearance:none;appearance:none;">
-              <option value="all">All Types</option>
-              <option value="Putting">Putting</option>
-              <option value="Chipping (Prox)">Chipping Prox</option>
-              <option value="Chip Hole Out">Chip Hole Out</option>
-              <option value="Wedge">Wedge</option>
-            </select>
-            <select id="combHistFilterMode" onchange="combLoadHistory()" style="background:#222;color:#fff;border:1px solid #444;border-radius:6px;padding:5px 8px;font-size:12px;-webkit-appearance:none;appearance:none;">
-              <option value="all">Custom &amp; Combine</option>
-              <option value="combine">Combine Only</option>
-              <option value="custom">Custom Only</option>
-            </select>
-          </div>
-          <div style="display:flex;align-items:center;background:#1a1a1a;border:1px solid #333;border-radius:8px;padding:6px 10px;margin-bottom:8px;gap:6px;">
-            <span style="color:#555;font-size:13px;">🔍</span>
-            <input id="combHistSearch" type="text" placeholder="Search notes / putter / tags…" oninput="combFilterBySearch()" style="background:transparent;border:none;color:#fff;font-size:12px;width:100%;outline:none;height:auto;max-width:none;text-align:left;padding:0;">
-            <button id="combHistSearchClear" onclick="document.getElementById('combHistSearch').value='';combFilterBySearch();" style="display:none;background:transparent;border:none;color:#555;font-size:13px;cursor:pointer;padding:0;height:auto;width:auto;max-width:none;line-height:1;">✕</button>
-          </div>
-          <div id="combHistMsg" style="font-size:13px;color:#888;min-height:20px;text-align:center;margin-bottom:8px;"></div>
-          <div id="combHistList" style="width:100%;"></div>
-          <div id="combHistNoMatch" style="display:none;font-size:13px;color:#555;text-align:center;padding:16px 0;">No combines match your search.</div>
-        </div><!-- /comb-history-sub -->
 
       </div><!-- /comb-home-view -->
 
@@ -12088,19 +12071,12 @@ function goToCombines(){
 }
 
 function combShowHomeTab(tab){
-  var isPractice = tab==='practice';
   // always reset all sub-screens when switching tabs
   document.getElementById('comb-mode-select').style.display = 'none';
   document.getElementById('comb-shortgame-select').style.display = 'none';
   _combPendingType = null;
   _combFromShortGame = false;
-  document.getElementById('comb-practice-sub').style.display = isPractice ? '' : 'none';
-  document.getElementById('comb-history-sub').style.display  = isPractice ? 'none' : '';
-  var pb = document.getElementById('ctab-practice');
-  var hb = document.getElementById('ctab-history');
-  if(pb){ pb.style.background = isPractice?'#333':'#222'; pb.style.color = isPractice?'#fff':'#888'; pb.style.fontWeight = isPractice?'700':'600'; }
-  if(hb){ hb.style.background = isPractice?'#222':'#333'; hb.style.color = isPractice?'#888':'#fff'; hb.style.fontWeight = isPractice?'600':'700'; }
-  if(!isPractice) combLoadHistory();
+  document.getElementById('comb-practice-sub').style.display = '';
 }
 
 /* ── Update showProfileTab to include combines ── */
@@ -13201,32 +13177,32 @@ function setPracticeHubTab(tab) {
 
   if (tab === 'combines') loadPHCombineHistory();
   if (tab === 'plan') {
+    setPracticePlanSubTab('new');
     initPracticeSessionForm();
     loadPracticePlanCombineOptions();
   }
 }
 
 async function loadPHCombineHistory() {
-  var el = document.getElementById('phCombineHistory');
-  if (!el || !currentUser) { if(el) el.textContent = 'Log in to see combine history.'; return; }
-  el.textContent = 'Loading...';
-  var { data, error } = await _sb.from('combine_scores').select('*').eq('user_id', currentUser.id).order('combine_date', {ascending: false}).limit(5);
-  if (error) { el.textContent = 'Error loading combines.'; return; }
-  if (!data || data.length === 0) { el.textContent = 'No combines yet. Complete a combine to see history here.'; return; }
-  var html = '';
-  data.forEach(function(c) {
-    var d = c.combine_date || '';
-    var sg = c.total_sg != null ? (c.total_sg >= 0 ? '+' : '') + c.total_sg.toFixed(1) : '';
-    var grade = c.grade_100 != null ? Math.round(c.grade_100) : '';
-    html += '<div style="background:#1a1a1a;border-radius:10px;padding:10px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">';
-    html += '<div><div style="font-size:13px;font-weight:700;color:#fff;">' + (c.combine_type || '') + '</div>';
-    html += '<div style="font-size:11px;color:#888;">' + d + (c.is_combine ? ' · Combine' : ' · Practice') + '</div></div>';
-    html += '<div style="text-align:right;">';
-    if (sg) html += '<div style="font-size:13px;font-weight:700;color:' + (c.total_sg <= 0 ? '#4CAF50' : '#f44') + ';">' + sg + ' SG</div>';
-    if (grade) html += '<div style="font-size:11px;color:#888;">Grade: ' + grade + '</div>';
-    html += '</div></div>';
-  });
-  el.innerHTML = html;
+  var msg  = document.getElementById('phCombineHistoryMsg');
+  var list = document.getElementById('phCombineHistory');
+  if (!msg || !list) return;
+  if (!currentUser) { msg.textContent = 'Log in to see combine history.'; list.innerHTML = ''; return; }
+  msg.textContent = 'Loading...'; list.innerHTML = '';
+
+  var typeF = (document.getElementById('phCombFilterType') || {}).value || 'all';
+  var modeF = (document.getElementById('phCombFilterMode') || {}).value || 'all';
+
+  var query = _sb.from('combine_scores').select('*').eq('user_id', currentUser.id).order('combine_date', {ascending: false}).order('created_at', {ascending: false});
+  if (typeF !== 'all') query = query.eq('combine_type', typeF);
+  if (modeF === 'combine') query = query.eq('is_combine', true);
+  if (modeF === 'custom')  query = query.eq('is_combine', false);
+
+  var { data, error } = await query;
+  if (error) { msg.textContent = 'Error: ' + error.message; return; }
+  if (!data || data.length === 0) { msg.textContent = 'No scores saved yet — complete a session and hit Save!'; return; }
+  msg.textContent = '';
+  list.innerHTML = data.map(function(c) { return renderCombCard(c, true); }).join('');
 }
 
 // =============================================
