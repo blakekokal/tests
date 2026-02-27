@@ -1420,6 +1420,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
     
     <!-- Student Combines Tab -->
     <div id="svCombinesTab" style="width:100%;max-width:360px;display:none;">
+      <button onclick="coachRunCombineForStudent()" style="width:100%;height:46px;background:#0f766e;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:12px;max-width:none;">Run Combine for Student</button>
       <div style="font-size:16px;font-weight:800;text-align:center;margin-bottom:8px;">🏌️ Combine History</div>
       <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-bottom:10px;">
         <select id="svCombFilterType" onchange="loadStudentCombines()" style="background:#222;color:#fff;border:1px solid #444;border-radius:6px;padding:4px 8px;font-size:12px;">
@@ -1503,6 +1504,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
   <div style="background:#111;border-bottom:2px solid #4caf50;width:100%;text-align:center;padding:11px 0;position:relative;flex-shrink:0;">
     <button id="comb-header-back-btn" onclick="combHeaderBack()" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);background:#333;border:none;color:#fff;border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:#fff;stroke-width:2.5;fill:none;"><path d="M15 18l-6-6 6-6"/></svg></button>
     <div style="font-size:1.2rem;font-weight:800;color:#fff;">Short Game Combines</div>
+    <div id="combStudentBanner" style="display:none;background:#0f766e;color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:6px;margin-top:4px;"></div>
   </div>
 
   <!-- Scrollable body -->
@@ -7671,6 +7673,7 @@ function combStatCard(label, col, bg, border, badgeText, infoLine) {
 var _userRole = 'student'; // 'student' or 'coach'
 var _currentStudentId  = null;
 var _currentStudentHcp = 'pro';
+var _combSaveForStudent = null; // { id, name } — set when coach runs a combine for a student
 var _svAllRounds = null;
 var _svDashData = null;
 var _svDashAllData = null;
@@ -11414,6 +11417,13 @@ function combHeaderBack() {
     combModeBack();
   } else if (shortGameVisible) {
     combShortGameBack();
+  } else if (_combSaveForStudent) {
+    // Coach was running combine for student — go back to student profile
+    var banner = document.getElementById('combStudentBanner');
+    if (banner) banner.style.display = 'none';
+    _combSaveForStudent = null;
+    show('studentViewPage');
+    showStudentTab('combines');
   } else {
     show('practiceHubPage');
   }
@@ -11492,12 +11502,22 @@ function combOpen(type, mode) {
   document.getElementById('comb-save-btn').disabled=false;
   document.getElementById('comb-save-btn').textContent='💾 Save to Profile';
 
-  // Set HCP to user's preference
-  var userHcp = (currentUser && currentUser.user_metadata && currentUser.user_metadata.hcp_preference) || 'pro';
+  // Set HCP — use student's HCP if coach is running for a student
+  var userHcp;
+  if (_combSaveForStudent && _combSaveForStudent.hcp) {
+    userHcp = _combSaveForStudent.hcp;
+  } else {
+    userHcp = (currentUser && currentUser.user_metadata && currentUser.user_metadata.hcp_preference) || 'pro';
+  }
   var hcpMap = { 'pro': 'Tour Pro', '0': 'Scratch', '5': '5', '10': '10', '15': '15', '20': '20', '25': '25', '30': '30' };
   var hcpVal = hcpMap[userHcp] || 'Scratch';
   var hcpSel = document.getElementById('comb-handicap');
   if (hcpSel) { for(var oi=0;oi<hcpSel.options.length;oi++) { if(hcpSel.options[oi].value===hcpVal) { hcpSel.selectedIndex=oi; break; } } }
+
+  // Update save button text for student combines
+  if (_combSaveForStudent) {
+    document.getElementById('comb-save-btn').textContent = '💾 Save to ' + _combSaveForStudent.name + "'s Profile";
+  }
 
   combSetup();
 }
@@ -11815,10 +11835,20 @@ async function combSave(){
   var dateVal  = document.getElementById('comb-date').value || new Date().toISOString().split('T')[0];
   var noteVal  = document.getElementById('comb-note').value || '';
 
+  // If coach is running this for a student, tag the note
+  if (_combSaveForStudent) {
+    var coachTag = '[Coach-entered]';
+    if (noteVal && noteVal.indexOf(coachTag) === -1) noteVal = coachTag + ' ' + noteVal;
+    else if (!noteVal) noteVal = coachTag;
+  }
+
   btn.disabled=true; btn.textContent='Saving...'; msg.textContent='';
 
+  // If coach is running this for a student, save to student's profile
+  var saveUserId = (_combSaveForStudent && _combSaveForStudent.id) ? _combSaveForStudent.id : currentUser.id;
+
   var payload = {
-    user_id:       currentUser.id,
+    user_id:       saveUserId,
     combine_date:  dateVal,
     combine_type:  combineType,
     is_combine:    isCombine,
@@ -11842,6 +11872,13 @@ async function combSave(){
     return;
   }
   btn.textContent='✅ Saved!';
+
+  // If coach saved for student, show link back
+  if (_combSaveForStudent) {
+    msg.style.color='#4caf50'; msg.textContent='Saved to ' + _combSaveForStudent.name + "'s profile!";
+    return;
+  }
+
   msg.style.color='#4caf50'; msg.textContent='Saved! View in History tab.';
 
   // Notify coach of new combine if student has a coach
@@ -11960,6 +11997,18 @@ async function loadMyCombines(){
   if(!data||data.length===0){msg.textContent='No combine scores saved yet.';return;}
   msg.textContent='';
   list.innerHTML = data.map(function(c){ return renderCombCard(c, true); }).join('');
+}
+
+/* ── Coach runs a combine for a student in-person ── */
+function coachRunCombineForStudent() {
+  if (!_currentStudentId) return;
+  var name = (document.getElementById('studentViewName') || {}).textContent || 'Student';
+  _combSaveForStudent = { id: _currentStudentId, name: name, hcp: _currentStudentHcp };
+  show('combinesPage');
+  combShowHomeTab('practice');
+  // Show banner
+  var banner = document.getElementById('combStudentBanner');
+  if (banner) { banner.textContent = 'Scoring for: ' + name; banner.style.display = ''; }
 }
 
 /* ── LOAD student combines (coach view) ── */
@@ -12094,6 +12143,10 @@ async function deleteCombScore(id){
 
 /* ── Navigation helpers ── */
 function goToCombines(){
+  // Clear any coach-for-student state
+  _combSaveForStudent = null;
+  var banner = document.getElementById('combStudentBanner');
+  if (banner) banner.style.display = 'none';
   show('combinesPage');
   combShowHomeTab('practice');
 }
