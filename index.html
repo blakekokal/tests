@@ -20,7 +20,8 @@
 html,body{margin:0;padding:0;height:100%;overflow:hidden;}
 * { box-sizing:border-box; }
 body{background:#181818;color:#fff;font-family:system-ui,sans-serif;}
-#scoreBar{position:fixed;top:0;left:0;right:0;height:44px;background:#111;display:none;align-items:center;justify-content:center;font-weight:600;z-index:10;}
+#scoreBar{position:fixed;top:0;left:0;right:0;background:#111;display:none;flex-direction:column;align-items:center;justify-content:center;font-weight:600;z-index:10;padding:8px 0 6px;}
+#courseLabel{font-size:11px;color:#888;font-weight:500;margin-top:2px;max-width:80%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
 /* ALL NON-START PAGES: BUTTONS STACK FROM BOTTOM CENTER UP */
 .page{
@@ -163,7 +164,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
 
 <body>
 
-<div id="scoreBar">E through 0</div>
+<div id="scoreBar"><span id="scoreBarText">E through 0</span><span id="courseLabel"></span></div>
 
 <!-- AUTH BAR - inside round page header -->
 <div id="authBar" style="position:fixed;top:6px;left:0;right:0;z-index:20;display:none;align-items:center;justify-content:flex-end;padding:0 12px;">
@@ -1652,6 +1653,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
 <div id="holeByHolePage" class="page" style="justify-content:flex-start;padding-top:50px;padding-bottom:80px;overflow-y:auto;">
   <button class="back-btn-top" onclick="show('roundPage')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
   <div style="font-size:20px;font-weight:800;margin-bottom:4px;">Hole by Hole Entry</div>
+  <div id="hbhCourseName" style="font-size:13px;color:#888;margin-bottom:2px;display:none;"></div>
   <div style="font-size:12px;color:#666;margin-bottom:16px;">Enter each hole then submit</div>
   <div id="hbhHolesList" style="width:100%;max-width:360px;display:flex;flex-direction:column;gap:14px;"></div>
   <div style="width:100%;max-width:360px;margin-top:16px;">
@@ -3401,7 +3403,7 @@ function finishHole(){
   totalStrokes+=holeStrokes;
   totalPar+=par;
   const d=totalStrokes-totalPar;
-  scoreBar.innerText=d===0?`E through ${currentHole}`:`${d>0?'+':''}${d} through ${currentHole}`;
+  document.getElementById('scoreBarText').innerText=d===0?`E through ${currentHole}`:`${d>0?'+':''}${d} through ${currentHole}`;
   if(currentHole<totalHoles){
     currentHole++;
     holeHeader.innerText=`Hole ${currentHole}`;
@@ -5654,7 +5656,9 @@ function resetRoundState() {
   if(document.getElementById('courseName')) document.getElementById('courseName').value = '';
   if(document.getElementById('roundDate')) document.getElementById('roundDate').value = new Date().toISOString().split('T')[0];
   if(document.getElementById('holeHeader')) document.getElementById('holeHeader').innerText = 'Hole 1';
-  if(document.getElementById('scoreBar')) document.getElementById('scoreBar').innerText = 'E through 0';
+  if(document.getElementById('scoreBarText')) document.getElementById('scoreBarText').innerText = 'E through 0';
+  if(document.getElementById('courseLabel')) document.getElementById('courseLabel').innerText = '';
+  if(document.getElementById('hbhCourseName')) { document.getElementById('hbhCourseName').innerText = ''; document.getElementById('hbhCourseName').style.display = 'none'; }
   if(document.getElementById('teeSelector')) { document.getElementById('teeSelector').style.display = 'none'; document.getElementById('teeSelector').innerHTML = '<option value="">Select Tee Box...</option>'; }
   if(document.getElementById('teeInfo')) document.getElementById('teeInfo').style.display = 'none';
 }
@@ -5726,7 +5730,14 @@ function enterScoring() {
   _currentRoundId = null;
   if (document.getElementById('holeHeader')) document.getElementById('holeHeader').innerText = 'Hole 1';
 
+  // Set course name in score bar
+  var cLabel = document.getElementById('courseLabel');
+  var cName = document.getElementById('courseName').value || '';
+  if (cLabel) cLabel.innerText = cName;
+
   if (_entryMode === 'hole') {
+    var hbhCN = document.getElementById('hbhCourseName');
+    if (hbhCN) { hbhCN.innerText = cName; hbhCN.style.display = cName ? 'block' : 'none'; }
     buildHoleByHoleForm();
     show('holeByHolePage');
   } else {
@@ -9154,9 +9165,10 @@ function editHole(holeIdx) {
   });
   
   // Update score bar
-  scoreBar.style.display = 'block';
-  scoreBar.style.textAlign = 'center';
-  scoreBar.innerText = 'Editing Hole ' + currentHole;
+  scoreBar.style.display = 'flex';
+  var editCLabel = document.getElementById('courseLabel');
+  if (editCLabel) editCLabel.innerText = document.getElementById('courseName').value || '';
+  document.getElementById('scoreBarText').innerText = 'Editing Hole ' + currentHole;
   
   // Go to par page instead of lie page
   show('parPage');
