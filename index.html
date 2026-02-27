@@ -562,7 +562,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
 
     <button onclick="goToPracticeHub()" style="display:flex;align-items:center;gap:13px;height:auto;padding:13px 15px;font-size:15px;font-weight:700;background:#c2410c;border-radius:13px;text-align:left;border:none;">
       <span style="font-size:20px;width:28px;text-align:center;flex-shrink:0;">🏌️</span>
-      <div><div style="font-size:0.97rem;font-weight:700;line-height:1;">Practice Hub</div><div style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:3px;">Combines · Drills · Games</div></div>
+      <div><div style="font-size:0.97rem;font-weight:700;line-height:1;">Practice Hub</div><div style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:3px;">Combines · Drills · Practice Plan</div></div>
     </button>
 
     <button onclick="goToCoaching()" style="display:flex;align-items:center;gap:13px;height:auto;padding:13px 15px;font-size:15px;font-weight:700;background:#7e22ce;border-radius:13px;text-align:left;border:none;">
@@ -712,23 +712,106 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
 </div>
 
 <!-- PRACTICE HUB PAGE -->
-<div id="practiceHubPage" class="page" style="justify-content:flex-start;padding-top:30px;">
+<div id="practiceHubPage" class="page" style="justify-content:flex-start;padding-top:30px;overflow-y:auto;padding-bottom:80px;align-items:center;">
   <button class="back-btn-top" onclick="show('homePage')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
-  <div style="font-size:22px;font-weight:800;margin-bottom:6px;">🏌️ Practice Hub</div>
-  <div style="font-size:13px;color:#666;margin-bottom:24px;">Choose a practice mode</div>
-  <div style="width:100%;max-width:320px;display:flex;flex-direction:column;gap:12px;">
-    <button onclick="goToCombines()" style="display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#0d1f4a;border-radius:12px;text-align:left;">
-      <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🏌️</span>
-      <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Short Game Combines</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Structured practice sessions</div></div>
-    </button>
-    <button onclick="goToDrills()" style="display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#3d1508;border-radius:12px;text-align:left;">
-      <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🎯</span>
-      <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Drills</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Skill-building drills &amp; exercises</div></div>
-    </button>
-    <button onclick="goToGames()" style="display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#2a1150;border-radius:12px;text-align:left;opacity:0.6;cursor:default;">
-      <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🎮</span>
-      <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Games</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Coming soon...</div></div>
-    </button>
+  <div style="font-size:22px;font-weight:800;margin-bottom:6px;">Practice Hub</div>
+  <div style="font-size:13px;color:#666;margin-bottom:14px;">Combines, Drills & Practice Plan</div>
+
+  <!-- 3-tab bar -->
+  <div style="display:flex;gap:0;width:100%;max-width:360px;margin-bottom:14px;border-radius:10px;overflow:hidden;">
+    <button onclick="setPracticeHubTab('combines')" id="phTabCombines" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#1d4ed8;border:none;color:#fff;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Combines</button>
+    <button onclick="setPracticeHubTab('drills')" id="phTabDrills" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#222;border:none;color:#888;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Drills</button>
+    <button onclick="setPracticeHubTab('plan')" id="phTabPlan" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#222;border:none;color:#888;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">My Practice Plan</button>
+  </div>
+
+  <div style="width:100%;max-width:360px;">
+
+    <!-- COMBINES TAB -->
+    <div id="phCombinesContent">
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button onclick="goToCombines()" style="display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#0d1f4a;border-radius:12px;text-align:left;">
+          <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🏌️</span>
+          <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Short Game Combines</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Structured practice sessions</div></div>
+        </button>
+      </div>
+      <!-- Recent Combine History -->
+      <div style="margin-top:16px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:8px;">Recent Combines</div>
+        <div id="phCombineHistory" style="font-size:13px;color:#555;text-align:center;padding:12px 0;">Loading...</div>
+      </div>
+    </div>
+
+    <!-- DRILLS TAB -->
+    <div id="phDrillsContent" style="display:none;">
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button onclick="goToDrills()" style="display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#3d1508;border-radius:12px;text-align:left;">
+          <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🎯</span>
+          <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Drills Library</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Skill-building drills &amp; exercises</div></div>
+        </button>
+      </div>
+    </div>
+
+    <!-- MY PRACTICE PLAN TAB -->
+    <div id="phPlanContent" style="display:none;">
+      <!-- Sub-tabs: New Session / History -->
+      <div style="display:flex;gap:0;border-radius:10px;overflow:hidden;margin-bottom:14px;">
+        <button onclick="setPracticePlanSubTab('new')" id="ppSubNew" style="flex:1;height:36px;font-size:13px;font-weight:700;background:#333;border:none;color:#fff;cursor:pointer;max-width:none;">New Session</button>
+        <button onclick="setPracticePlanSubTab('history')" id="ppSubHistory" style="flex:1;height:36px;font-size:13px;font-weight:700;background:#222;border:none;color:#888;cursor:pointer;max-width:none;">History</button>
+      </div>
+
+      <!-- NEW SESSION SUB-TAB -->
+      <div id="ppNewSession">
+        <div style="background:#1a1a1a;border-radius:12px;padding:16px;margin-bottom:12px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:10px;">Session Details</div>
+
+          <!-- Date -->
+          <div style="margin-bottom:10px;">
+            <label style="font-size:12px;color:#aaa;display:block;margin-bottom:4px;">Date</label>
+            <input type="date" id="ppSessionDate" style="width:100%;height:40px;background:#222;color:#fff;border:1px solid #444;border-radius:8px;padding:0 10px;font-size:14px;box-sizing:border-box;">
+          </div>
+
+          <!-- Combine (optional) -->
+          <div style="margin-bottom:10px;">
+            <label style="font-size:12px;color:#aaa;display:block;margin-bottom:4px;">Combine Completed (optional)</label>
+            <select id="ppSessionCombine" style="width:100%;height:40px;background:#222;color:#fff;border:1px solid #444;border-radius:8px;padding:0 10px;font-size:13px;box-sizing:border-box;">
+              <option value="">None</option>
+            </select>
+            <div style="font-size:10px;color:#555;margin-top:3px;">Select if you completed a combine during this session</div>
+          </div>
+        </div>
+
+        <!-- Practice Notes with Time -->
+        <div style="background:#1a1a1a;border-radius:12px;padding:16px;margin-bottom:12px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:10px;">Practice Notes</div>
+          <div style="font-size:11px;color:#666;margin-bottom:10px;">Add what you practiced and how long (in minutes)</div>
+
+          <div id="ppNotesList"></div>
+
+          <!-- Add note row -->
+          <div style="display:flex;gap:6px;margin-top:8px;">
+            <input type="text" id="ppNoteInput" placeholder="e.g. Short putting 5-25ft" style="flex:1;height:38px;background:#222;color:#fff;border:1px solid #444;border-radius:8px;padding:0 10px;font-size:13px;box-sizing:border-box;">
+            <input type="number" id="ppNoteMinutes" placeholder="mins" min="1" style="width:60px;height:38px;background:#222;color:#fff;border:1px solid #444;border-radius:8px;padding:0 8px;font-size:13px;box-sizing:border-box;text-align:center;">
+            <button onclick="addPracticeNote()" style="width:38px;height:38px;background:#0f766e;border:none;border-radius:8px;color:#fff;font-size:18px;font-weight:700;cursor:pointer;padding:0;">+</button>
+          </div>
+
+          <!-- Total time -->
+          <div style="margin-top:12px;padding-top:10px;border-top:1px solid #333;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:13px;font-weight:700;color:#aaa;">Total Session Time</span>
+            <span id="ppTotalTime" style="font-size:16px;font-weight:800;color:#4CAF50;">0 min</span>
+          </div>
+        </div>
+
+        <!-- Save button -->
+        <button onclick="savePracticeSession()" style="width:100%;height:46px;background:#1d4ed8;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;max-width:none;">Save Practice Session</button>
+        <div id="ppSaveMsg" style="font-size:12px;text-align:center;min-height:18px;margin-top:6px;"></div>
+      </div>
+
+      <!-- HISTORY SUB-TAB -->
+      <div id="ppHistory" style="display:none;">
+        <div id="ppHistoryList" style="font-size:13px;color:#555;text-align:center;padding:12px 0;">Loading...</div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -1115,12 +1198,12 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
 
 <!-- DRILLS & GAMES PAGE -->
 <div id="drillsPage" class="page" style="justify-content:flex-start;padding-top:30px;overflow-y:auto;padding-bottom:80px;align-items:center;">
-  <button class="back-btn-top" onclick="show('homePage')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <button class="back-btn-top" onclick="show('practiceHubPage')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
 
   <!-- Single stable-width container so toggling tabs never shifts layout -->
   <div style="width:320px;max-width:calc(100vw - 32px);display:flex;flex-direction:column;align-items:stretch;gap:0;">
 
-    <div style="font-size:22px;font-weight:800;margin-bottom:12px;text-align:center;">Drills & Games</div>
+    <div style="font-size:22px;font-weight:800;margin-bottom:12px;text-align:center;">Drills Library</div>
 
     <!-- Category button tabs -->
     <div style="display:flex;gap:8px;margin-bottom:10px;">
@@ -1185,11 +1268,12 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
     <div id="studentViewEmail" style="font-size:12px;color:#888;"></div>
   </div>
   <div style="display:flex;gap:0;width:100%;max-width:360px;margin-bottom:0;border-radius:10px;overflow:hidden;flex-shrink:0;">
-    <button onclick="showStudentTab('dashboard')" id="svTabDash" style="flex:1;height:38px;font-size:11px;background:#333;border-radius:0;border:none;color:#fff;font-weight:700;max-width:none;width:auto;padding:0;margin:0;">Dashboard</button>
-    <button onclick="showStudentTab('performance')" id="svTabPerf" style="flex:1;height:38px;font-size:11px;background:#222;border-radius:0;border:none;color:#888;font-weight:600;max-width:none;width:auto;padding:0;margin:0;">Analysis</button>
-    <button onclick="showStudentTab('rounds')" id="svTabRounds" style="flex:1;height:38px;font-size:11px;background:#222;border-radius:0;border:none;color:#888;font-weight:600;max-width:none;width:auto;padding:0;margin:0;">Rounds</button>
-    <button onclick="showStudentTab('combines')" id="svTabCombines" style="flex:1;height:38px;font-size:11px;background:#222;border-radius:0;border:none;color:#888;font-weight:600;max-width:none;width:auto;padding:0;margin:0;">Combines</button>
-    <button onclick="showStudentTab('notes')" id="svTabNotes" style="flex:1;height:38px;font-size:11px;background:#222;border-radius:0;border:none;color:#888;font-weight:600;max-width:none;width:auto;padding:0;margin:0;">Notes</button>
+    <button onclick="showStudentTab('dashboard')" id="svTabDash" style="flex:1;height:38px;font-size:10px;background:#333;border-radius:0;border:none;color:#fff;font-weight:700;max-width:none;width:auto;padding:0;margin:0;">Dashboard</button>
+    <button onclick="showStudentTab('performance')" id="svTabPerf" style="flex:1;height:38px;font-size:10px;background:#222;border-radius:0;border:none;color:#888;font-weight:600;max-width:none;width:auto;padding:0;margin:0;">Analysis</button>
+    <button onclick="showStudentTab('rounds')" id="svTabRounds" style="flex:1;height:38px;font-size:10px;background:#222;border-radius:0;border:none;color:#888;font-weight:600;max-width:none;width:auto;padding:0;margin:0;">Rounds</button>
+    <button onclick="showStudentTab('combines')" id="svTabCombines" style="flex:1;height:38px;font-size:10px;background:#222;border-radius:0;border:none;color:#888;font-weight:600;max-width:none;width:auto;padding:0;margin:0;">Combines</button>
+    <button onclick="showStudentTab('practice')" id="svTabPractice" style="flex:1;height:38px;font-size:10px;background:#222;border-radius:0;border:none;color:#888;font-weight:600;max-width:none;width:auto;padding:0;margin:0;">Practice</button>
+    <button onclick="showStudentTab('notes')" id="svTabNotes" style="flex:1;height:38px;font-size:10px;background:#222;border-radius:0;border:none;color:#888;font-weight:600;max-width:none;width:auto;padding:0;margin:0;">Notes</button>
   </div>
   <div id="studentViewScroll" style="flex:1;overflow-y:auto;width:100%;display:flex;flex-direction:column;align-items:center;padding:12px 0 80px;">
     
@@ -1314,6 +1398,13 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
       </div>
       <div id="svCombMsg" style="font-size:13px;color:#888;min-height:20px;text-align:center;"></div>
       <div id="svCombList" style="width:100%;"></div>
+    </div>
+
+    <!-- Student Practice Plan Tab -->
+    <div id="svPracticePlanTab" style="width:100%;max-width:360px;display:none;">
+      <div style="font-size:16px;font-weight:800;text-align:center;margin-bottom:10px;">Practice Plan</div>
+      <div id="svPracticePlanMsg" style="font-size:13px;color:#888;min-height:20px;text-align:center;"></div>
+      <div id="svPracticePlanList" style="width:100%;"></div>
     </div>
 
     <!-- Student Notes Tab -->
@@ -1962,6 +2053,9 @@ function show(id){
     setPerfPage('rounds');
     setTimeout(loadPerformanceAnalysis, 50);
   }
+  if(id === 'practiceHubPage') {
+    setPracticeHubTab(_currentPHTab || 'combines');
+  }
   // Hide score bar on non-scoring pages
   var scoringPages = ['parPage','shotPage','liePage','distancePage','puttPage','penaltyPage','obPenaltyPage','recoveryPage','missedGreenPage'];
   if(scoringPages.indexOf(id) === -1) { var sb=document.getElementById('scoreBar'); if(sb) sb.style.display='none'; }
@@ -1975,7 +2069,7 @@ var _backTargetMap = {
   'practiceHubPage': 'homePage',
   'performanceAnalysisPage': 'homePage',
   'coachingCornerPage': 'homePage',
-  'drillsPage': 'homePage',
+  'drillsPage': 'practiceHubPage',
   'drillDetailPage': 'drillsPage',
   'studentsPage': 'homePage',
   'sgCalcPage': 'homePage',
@@ -1987,7 +2081,7 @@ var _backTargetMap = {
   'fullStatsPage': 'summaryPage',
   'editRoundInfoPage': 'summaryPage',
   'authPage': 'homePage',
-  'combinesPage': 'homePage',
+  'combinesPage': 'practiceHubPage',
   'whatsNewPage': 'homePage',
   'myCoursesPage': 'roundPage',
   'editCoursePage': 'myCoursesPage'
@@ -5908,11 +6002,8 @@ function goToDrills() {
 }
 
 function goToPracticeHub() {
+  _currentPHTab = 'combines';
   show('practiceHubPage');
-}
-
-function goToGames() {
-  // Coming soon — no-op for now
 }
 
 // ─── ENTRY MODE ───────────────────────────────────────────
@@ -7956,19 +8047,21 @@ async function selectStudentHcp(hcp) {
 }
 
 function showStudentTab(tab) {
-  document.getElementById('svDashTab').style.display        = tab === 'dashboard'   ? 'block' : 'none';
-  document.getElementById('svPerfTab').style.display        = tab === 'performance' ? 'block' : 'none';
-  document.getElementById('svRoundsTab').style.display      = tab === 'rounds'      ? 'block' : 'none';
-  document.getElementById('svCombinesTab').style.display    = tab === 'combines'    ? 'block' : 'none';
-  document.getElementById('svNotesTab').style.display       = tab === 'notes'       ? 'block' : 'none';
+  document.getElementById('svDashTab').style.display          = tab === 'dashboard'   ? 'block' : 'none';
+  document.getElementById('svPerfTab').style.display          = tab === 'performance' ? 'block' : 'none';
+  document.getElementById('svRoundsTab').style.display        = tab === 'rounds'      ? 'block' : 'none';
+  document.getElementById('svCombinesTab').style.display      = tab === 'combines'    ? 'block' : 'none';
+  document.getElementById('svPracticePlanTab').style.display  = tab === 'practice'    ? 'block' : 'none';
+  document.getElementById('svNotesTab').style.display         = tab === 'notes'       ? 'block' : 'none';
 
   var dBtn = document.getElementById('svTabDash');
   var pBtn = document.getElementById('svTabPerf');
   var rBtn = document.getElementById('svTabRounds');
   var cBtn = document.getElementById('svTabCombines');
+  var prBtn = document.getElementById('svTabPractice');
   var nBtn = document.getElementById('svTabNotes');
 
-  [['dashboard', dBtn], ['performance', pBtn], ['rounds', rBtn], ['combines', cBtn], ['notes', nBtn]].forEach(function(pair) {
+  [['dashboard', dBtn], ['performance', pBtn], ['rounds', rBtn], ['combines', cBtn], ['practice', prBtn], ['notes', nBtn]].forEach(function(pair) {
     var active = tab === pair[0];
     if (pair[1]) {
       pair[1].style.background = active ? '#333' : '#222';
@@ -7984,6 +8077,7 @@ function showStudentTab(tab) {
   if (tab === 'performance') loadStudentPerfAnalysis();
   if (tab === 'rounds')      loadStudentRounds();
   if (tab === 'combines')    loadStudentCombines();
+  if (tab === 'practice')    loadStudentPracticeSessions();
   if (tab === 'notes')       loadSvNotes();
 }
 
@@ -13083,6 +13177,314 @@ async function checkCoachingStudentNotifications() {
   var count = data.length;
   var dot = document.getElementById('coachingNotifDot');
   if (dot) dot.style.display = count > 0 ? 'inline-block' : 'none';
+}
+
+// =============================================
+// PRACTICE HUB TABS
+// =============================================
+var _currentPHTab = 'combines';
+
+function setPracticeHubTab(tab) {
+  _currentPHTab = tab;
+  document.getElementById('phCombinesContent').style.display = tab === 'combines' ? '' : 'none';
+  document.getElementById('phDrillsContent').style.display   = tab === 'drills'   ? '' : 'none';
+  document.getElementById('phPlanContent').style.display     = tab === 'plan'     ? '' : 'none';
+
+  var tabs = { combines: 'phTabCombines', drills: 'phTabDrills', plan: 'phTabPlan' };
+  Object.keys(tabs).forEach(function(k) {
+    var btn = document.getElementById(tabs[k]);
+    if (btn) {
+      btn.style.background = k === tab ? '#1d4ed8' : '#222';
+      btn.style.color      = k === tab ? '#fff' : '#888';
+    }
+  });
+
+  if (tab === 'combines') loadPHCombineHistory();
+  if (tab === 'plan') {
+    initPracticeSessionForm();
+    loadPracticePlanCombineOptions();
+  }
+}
+
+async function loadPHCombineHistory() {
+  var el = document.getElementById('phCombineHistory');
+  if (!el || !currentUser) { if(el) el.textContent = 'Log in to see combine history.'; return; }
+  el.textContent = 'Loading...';
+  var { data, error } = await _sb.from('combine_scores').select('*').eq('user_id', currentUser.id).order('combine_date', {ascending: false}).limit(5);
+  if (error) { el.textContent = 'Error loading combines.'; return; }
+  if (!data || data.length === 0) { el.textContent = 'No combines yet. Complete a combine to see history here.'; return; }
+  var html = '';
+  data.forEach(function(c) {
+    var d = c.combine_date || '';
+    var sg = c.total_sg != null ? (c.total_sg >= 0 ? '+' : '') + c.total_sg.toFixed(1) : '';
+    var grade = c.grade_100 != null ? Math.round(c.grade_100) : '';
+    html += '<div style="background:#1a1a1a;border-radius:10px;padding:10px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">';
+    html += '<div><div style="font-size:13px;font-weight:700;color:#fff;">' + (c.combine_type || '') + '</div>';
+    html += '<div style="font-size:11px;color:#888;">' + d + (c.is_combine ? ' · Combine' : ' · Practice') + '</div></div>';
+    html += '<div style="text-align:right;">';
+    if (sg) html += '<div style="font-size:13px;font-weight:700;color:' + (c.total_sg <= 0 ? '#4CAF50' : '#f44') + ';">' + sg + ' SG</div>';
+    if (grade) html += '<div style="font-size:11px;color:#888;">Grade: ' + grade + '</div>';
+    html += '</div></div>';
+  });
+  el.innerHTML = html;
+}
+
+// =============================================
+// MY PRACTICE PLAN
+// =============================================
+var _practiceNotes = [];
+
+function setPracticePlanSubTab(sub) {
+  document.getElementById('ppNewSession').style.display = sub === 'new' ? '' : 'none';
+  document.getElementById('ppHistory').style.display    = sub === 'history' ? '' : 'none';
+
+  var newBtn = document.getElementById('ppSubNew');
+  var hisBtn = document.getElementById('ppSubHistory');
+  if (newBtn) { newBtn.style.background = sub === 'new' ? '#333' : '#222'; newBtn.style.color = sub === 'new' ? '#fff' : '#888'; }
+  if (hisBtn) { hisBtn.style.background = sub === 'history' ? '#333' : '#222'; hisBtn.style.color = sub === 'history' ? '#fff' : '#888'; }
+
+  if (sub === 'history') loadPracticeHistory();
+}
+
+function initPracticeSessionForm() {
+  var dateInput = document.getElementById('ppSessionDate');
+  if (dateInput && !dateInput.value) {
+    dateInput.value = new Date().toISOString().split('T')[0];
+  }
+  _practiceNotes = [];
+  renderPracticeNotes();
+  document.getElementById('ppSaveMsg').textContent = '';
+}
+
+async function loadPracticePlanCombineOptions() {
+  if (!currentUser) return;
+  var sel = document.getElementById('ppSessionCombine');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">None</option>';
+  var { data } = await _sb.from('combine_scores').select('id, combine_date, combine_type, total_sg, is_combine').eq('user_id', currentUser.id).order('combine_date', {ascending: false}).limit(20);
+  if (!data || data.length === 0) return;
+  data.forEach(function(c) {
+    var label = c.combine_date + ' - ' + c.combine_type + (c.is_combine ? ' (Combine)' : ' (Practice)');
+    if (c.total_sg != null) label += ' | SG: ' + (c.total_sg >= 0 ? '+' : '') + c.total_sg.toFixed(1);
+    var opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = label;
+    sel.appendChild(opt);
+  });
+}
+
+function addPracticeNote() {
+  var noteInput = document.getElementById('ppNoteInput');
+  var minsInput = document.getElementById('ppNoteMinutes');
+  var text = (noteInput.value || '').trim();
+  var mins = parseInt(minsInput.value) || 0;
+  if (!text) { noteInput.focus(); return; }
+  if (mins < 1) { minsInput.focus(); return; }
+  _practiceNotes.push({ text: text, minutes: mins });
+  noteInput.value = '';
+  minsInput.value = '';
+  noteInput.focus();
+  renderPracticeNotes();
+}
+
+function removePracticeNote(idx) {
+  _practiceNotes.splice(idx, 1);
+  renderPracticeNotes();
+}
+
+function renderPracticeNotes() {
+  var list = document.getElementById('ppNotesList');
+  var totalEl = document.getElementById('ppTotalTime');
+  if (!list) return;
+  if (_practiceNotes.length === 0) {
+    list.innerHTML = '<div style="text-align:center;color:#555;font-size:12px;padding:8px 0;">No notes yet. Add what you practiced above.</div>';
+    if (totalEl) totalEl.textContent = '0 min';
+    return;
+  }
+  var total = 0;
+  var html = '';
+  _practiceNotes.forEach(function(n, i) {
+    total += n.minutes;
+    html += '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#222;border-radius:8px;margin-bottom:4px;">';
+    html += '<div style="flex:1;font-size:13px;color:#fff;">' + escHtml(n.text) + '</div>';
+    html += '<div style="font-size:12px;font-weight:700;color:#4CAF50;white-space:nowrap;">' + n.minutes + ' min</div>';
+    html += '<button onclick="removePracticeNote(' + i + ')" style="background:transparent;border:none;color:#f44;font-size:16px;cursor:pointer;padding:0 4px;height:auto;max-width:none;width:auto;">×</button>';
+    html += '</div>';
+  });
+  list.innerHTML = html;
+  if (totalEl) totalEl.textContent = total + ' min';
+}
+
+function escHtml(s) {
+  var d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+async function savePracticeSession() {
+  var msg = document.getElementById('ppSaveMsg');
+  if (!currentUser) { msg.style.color = '#f44'; msg.textContent = 'Please log in first.'; return; }
+
+  var dateVal = document.getElementById('ppSessionDate').value;
+  if (!dateVal) { msg.style.color = '#f44'; msg.textContent = 'Please select a date.'; return; }
+  if (_practiceNotes.length === 0) { msg.style.color = '#f44'; msg.textContent = 'Add at least one practice note.'; return; }
+
+  var combineId = document.getElementById('ppSessionCombine').value || null;
+  var totalMins = 0;
+  _practiceNotes.forEach(function(n) { totalMins += n.minutes; });
+
+  msg.style.color = '#888'; msg.textContent = 'Saving...';
+
+  var payload = {
+    user_id: currentUser.id,
+    session_date: dateVal,
+    combine_score_id: combineId,
+    notes: JSON.stringify(_practiceNotes),
+    total_minutes: totalMins,
+    created_at: new Date().toISOString()
+  };
+
+  var { error } = await _sb.from('practice_sessions').insert(payload);
+  if (error) { msg.style.color = '#f44'; msg.textContent = 'Save failed: ' + error.message; return; }
+
+  msg.style.color = '#4CAF50'; msg.textContent = 'Practice session saved!';
+  _practiceNotes = [];
+  renderPracticeNotes();
+  document.getElementById('ppSessionCombine').value = '';
+
+  // Notify coach if linked
+  try {
+    var { data: profile } = await _sb.from('profiles').select('coach_id').eq('id', currentUser.id).single();
+    if (profile && profile.coach_id) {
+      var playerName = currentUser.user_metadata && currentUser.user_metadata.display_name ? currentUser.user_metadata.display_name : (currentUser.email || 'A student');
+      await _sb.from('notifications').insert({
+        user_id: profile.coach_id,
+        type: 'practice_session',
+        title: playerName + ' logged a practice session',
+        message: dateVal + ' - ' + totalMins + ' min total' + (combineId ? ' (with combine)' : ''),
+        read: false,
+        created_at: new Date().toISOString()
+      });
+    }
+  } catch(e) {}
+}
+
+async function loadPracticeHistory() {
+  var list = document.getElementById('ppHistoryList');
+  if (!list) return;
+  if (!currentUser) { list.textContent = 'Log in to see practice history.'; return; }
+  list.textContent = 'Loading...';
+
+  var { data, error } = await _sb.from('practice_sessions').select('*').eq('user_id', currentUser.id).order('session_date', {ascending: false}).order('created_at', {ascending: false});
+  if (error) { list.textContent = 'Error: ' + error.message; return; }
+  if (!data || data.length === 0) { list.textContent = 'No practice sessions yet. Log your first session!'; return; }
+
+  // Fetch any linked combines
+  var combineIds = data.filter(function(s) { return s.combine_score_id; }).map(function(s) { return s.combine_score_id; });
+  var combinesMap = {};
+  if (combineIds.length > 0) {
+    var { data: combines } = await _sb.from('combine_scores').select('id, combine_type, total_sg, is_combine, grade_100').in('id', combineIds);
+    if (combines) combines.forEach(function(c) { combinesMap[c.id] = c; });
+  }
+
+  var html = '';
+  data.forEach(function(s) {
+    var notes = [];
+    try { notes = JSON.parse(s.notes || '[]'); } catch(e) {}
+    var comb = s.combine_score_id ? combinesMap[s.combine_score_id] : null;
+
+    html += '<div style="background:#1a1a1a;border-radius:12px;padding:14px;margin-bottom:10px;">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">';
+    html += '<div style="font-size:14px;font-weight:800;color:#fff;">' + (s.session_date || '') + '</div>';
+    html += '<div style="font-size:13px;font-weight:700;color:#4CAF50;">' + (s.total_minutes || 0) + ' min</div>';
+    html += '</div>';
+
+    if (comb) {
+      var sg = comb.total_sg != null ? (comb.total_sg >= 0 ? '+' : '') + comb.total_sg.toFixed(1) : '';
+      var grade = comb.grade_100 != null ? Math.round(comb.grade_100) : '';
+      html += '<div style="background:#0d1f4a;border-radius:8px;padding:8px 10px;margin-bottom:8px;font-size:12px;">';
+      html += '<span style="color:#93c5fd;font-weight:700;">' + comb.combine_type + (comb.is_combine ? ' Combine' : ' Practice') + '</span>';
+      if (sg) html += ' <span style="color:' + (comb.total_sg <= 0 ? '#4CAF50' : '#f44') + ';">' + sg + ' SG</span>';
+      if (grade) html += ' <span style="color:#888;">Grade: ' + grade + '</span>';
+      html += '</div>';
+    }
+
+    if (notes.length > 0) {
+      notes.forEach(function(n) {
+        html += '<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;">';
+        html += '<span style="color:#ccc;">' + escHtml(n.text) + '</span>';
+        html += '<span style="color:#4CAF50;font-weight:700;white-space:nowrap;margin-left:8px;">' + n.minutes + ' min</span>';
+        html += '</div>';
+      });
+    }
+
+    html += '<div style="text-align:right;margin-top:6px;"><button onclick="deletePracticeSession(\'' + s.id + '\')" style="background:transparent;border:none;color:#666;font-size:11px;cursor:pointer;padding:0;height:auto;max-width:none;width:auto;">Delete</button></div>';
+    html += '</div>';
+  });
+  list.innerHTML = html;
+}
+
+async function deletePracticeSession(id) {
+  if (!confirm('Delete this practice session?')) return;
+  var { error } = await _sb.from('practice_sessions').delete().eq('id', id).eq('user_id', currentUser.id);
+  if (error) { alert('Delete failed: ' + error.message); return; }
+  loadPracticeHistory();
+}
+
+// ── Coach viewing student practice sessions ──
+async function loadStudentPracticeSessions() {
+  if (!_currentStudentId) return;
+  var msg = document.getElementById('svPracticePlanMsg');
+  var list = document.getElementById('svPracticePlanList');
+  if (!msg || !list) return;
+  msg.textContent = 'Loading...'; list.innerHTML = '';
+
+  var { data, error } = await _sb.from('practice_sessions').select('*').eq('user_id', _currentStudentId).order('session_date', {ascending: false}).order('created_at', {ascending: false});
+  if (error) { msg.textContent = 'Error: ' + error.message; return; }
+  if (!data || data.length === 0) { msg.textContent = 'No practice sessions found for this student.'; return; }
+  msg.textContent = '';
+
+  var combineIds = data.filter(function(s) { return s.combine_score_id; }).map(function(s) { return s.combine_score_id; });
+  var combinesMap = {};
+  if (combineIds.length > 0) {
+    var { data: combines } = await _sb.from('combine_scores').select('id, combine_type, total_sg, is_combine, grade_100').in('id', combineIds);
+    if (combines) combines.forEach(function(c) { combinesMap[c.id] = c; });
+  }
+
+  var html = '';
+  data.forEach(function(s) {
+    var notes = [];
+    try { notes = JSON.parse(s.notes || '[]'); } catch(e) {}
+    var comb = s.combine_score_id ? combinesMap[s.combine_score_id] : null;
+
+    html += '<div style="background:#1a1a1a;border-radius:12px;padding:14px;margin-bottom:10px;">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">';
+    html += '<div style="font-size:14px;font-weight:800;color:#fff;">' + (s.session_date || '') + '</div>';
+    html += '<div style="font-size:13px;font-weight:700;color:#4CAF50;">' + (s.total_minutes || 0) + ' min</div>';
+    html += '</div>';
+
+    if (comb) {
+      var sg = comb.total_sg != null ? (comb.total_sg >= 0 ? '+' : '') + comb.total_sg.toFixed(1) : '';
+      var grade = comb.grade_100 != null ? Math.round(comb.grade_100) : '';
+      html += '<div style="background:#0d1f4a;border-radius:8px;padding:8px 10px;margin-bottom:8px;font-size:12px;">';
+      html += '<span style="color:#93c5fd;font-weight:700;">' + comb.combine_type + (comb.is_combine ? ' Combine' : ' Practice') + '</span>';
+      if (sg) html += ' <span style="color:' + (comb.total_sg <= 0 ? '#4CAF50' : '#f44') + ';">' + sg + ' SG</span>';
+      if (grade) html += ' <span style="color:#888;">Grade: ' + grade + '</span>';
+      html += '</div>';
+    }
+
+    if (notes.length > 0) {
+      notes.forEach(function(n) {
+        html += '<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;">';
+        html += '<span style="color:#ccc;">' + escHtml(n.text) + '</span>';
+        html += '<span style="color:#4CAF50;font-weight:700;white-space:nowrap;margin-left:8px;">' + n.minutes + ' min</span>';
+        html += '</div>';
+      });
+    }
+
+    html += '</div>';
+  });
+  list.innerHTML = html;
 }
 
 
