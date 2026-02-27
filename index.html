@@ -717,8 +717,8 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
   <div style="font-size:22px;font-weight:800;margin-bottom:6px;">Practice Hub</div>
   <div style="font-size:13px;color:#666;margin-bottom:14px;">Combines, Drills & Practice</div>
 
-  <!-- 3-tab bar -->
-  <div style="display:flex;gap:0;width:100%;max-width:360px;margin-bottom:14px;border-radius:10px;overflow:hidden;">
+  <!-- 3-tab bar (sticky) -->
+  <div style="display:flex;gap:0;width:100%;max-width:360px;margin-bottom:14px;border-radius:10px;overflow:hidden;position:sticky;top:0;z-index:10;">
     <button onclick="setPracticeHubTab('combines')" id="phTabCombines" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#1d4ed8;border:none;color:#fff;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Combines</button>
     <button onclick="setPracticeHubTab('drills')" id="phTabDrills" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#222;border:none;color:#888;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Drills</button>
     <button onclick="setPracticeHubTab('plan')" id="phTabPlan" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#222;border:none;color:#888;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Practice</button>
