@@ -38,6 +38,7 @@ body{background:#181818;color:#fff;font-family:system-ui,sans-serif;}
   overflow-y:auto;
 }
 .page.active{display:flex;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.6;}}
 
 /* START PAGE SCROLLS FROM TOP */
 #roundPage{
@@ -536,14 +537,14 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
       <div><div style="font-size:0.97rem;font-weight:700;line-height:1;">Enter New Round</div><div style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:3px;">Track every shot</div></div>
     </button>
 
-    <button onclick="goToRoundHistory()" style="display:flex;align-items:center;gap:13px;height:auto;padding:13px 15px;font-size:15px;font-weight:700;background:#14532d;border-radius:13px;text-align:left;border:none;">
+    <button onclick="goToRoundHistory()" style="display:flex;align-items:center;gap:13px;height:auto;padding:13px 15px;font-size:15px;font-weight:700;background:#0d3d1e;border-radius:13px;text-align:left;border:none;">
       <span style="font-size:20px;width:28px;text-align:center;flex-shrink:0;">📋</span>
       <div><div style="font-size:0.97rem;font-weight:700;line-height:1;">Round History</div><div style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:3px;">All past rounds</div></div>
     </button>
 
     <div style="height:1px;background:#222;margin:3px 0;"></div>
 
-    <button onclick="goToDashboard()" style="display:flex;align-items:center;gap:13px;height:auto;padding:13px 15px;font-size:15px;font-weight:700;background:#1d4ed8;border-radius:13px;text-align:left;border:none;">
+    <button onclick="goToDashboard()" style="display:flex;align-items:center;gap:13px;height:auto;padding:13px 15px;font-size:15px;font-weight:700;background:#3b82f6;border-radius:13px;text-align:left;border:none;">
       <span style="font-size:20px;width:28px;text-align:center;flex-shrink:0;">📊</span>
       <div><div style="font-size:0.97rem;font-weight:700;line-height:1;">Stats Dashboard</div><div style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:3px;">Analytics &amp; trends</div></div>
     </button>
@@ -569,10 +570,10 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
 
     <div style="height:1px;background:#222;margin:3px 0;"></div>
 
-    <button id="homeStudentsBtn" onclick="goToStudents()" style="display:none;width:100%;align-items:center;gap:13px;height:auto;padding:13px 15px;background:#0f766e;border:none;border-radius:13px;color:#fff;font-size:15px;font-weight:700;text-align:left;">
-      <span style="font-size:20px;width:28px;text-align:center;flex-shrink:0;">👥</span>
-      <div style="flex:1;"><div style="font-size:0.97rem;font-weight:700;line-height:1;">My Students</div><div style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:3px;">Manage your roster</div></div>
-      <span id="studentsNotifDot" style="display:none;background:#ef4444;color:#fff;font-size:10px;font-weight:800;border-radius:10px;padding:2px 7px;flex-shrink:0;white-space:nowrap;">NEW</span>
+    <button onclick="show('myBagPage')" style="display:flex;align-items:center;gap:13px;height:auto;padding:13px 15px;font-size:15px;font-weight:700;background:#1a1a2e;border:1px solid #4a1c6e;border-radius:13px;text-align:left;">
+      <span style="font-size:20px;width:28px;text-align:center;flex-shrink:0;">🎒</span>
+      <div style="flex:1;"><div style="font-size:0.97rem;font-weight:700;line-height:1;">My Bag</div><div style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:3px;">Club distances & yardages</div></div>
+      <span style="background:#ef4444;color:#fff;font-size:10px;font-weight:800;border-radius:10px;padding:2px 7px;flex-shrink:0;white-space:nowrap;animation:pulse 1.5s infinite;">NEW!</span>
     </button>
 
   </div>
@@ -1280,34 +1281,10 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
   <div id="drillDetailContent" style="width:320px;max-width:100%;"></div>
 </div>
 
-<!-- STUDENTS PAGE (Coach) -->
-<div id="studentsPage" class="page" style="justify-content:flex-start;padding-top:15px;overflow-y:auto;padding-bottom:80px;">
-  <button class="back-btn-top" onclick="show('homePage')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
-  <div style="font-size:22px;font-weight:800;margin-bottom:12px;">🎓 My Students</div>
-  
-  <!-- Add student by code -->
-  <div style="width:100%;max-width:320px;background:#1a1a1a;border-radius:10px;padding:12px;margin-bottom:12px;display:flex;flex-direction:column;align-items:center;gap:8px;">
-    <div style="font-size:13px;color:#888;">Add Student by Invite Code</div>
-    <div style="display:flex;gap:6px;width:100%;">
-      <input id="addStudentCode" placeholder="Enter code" style="flex:1;text-transform:uppercase;letter-spacing:2px;font-family:monospace;text-align:center;">
-      <button onclick="addStudentByCode()" style="width:80px;height:44px;font-size:13px;background:#0f766e;border-radius:10px;">ADD</button>
-    </div>
-    <div id="addStudentMsg" style="font-size:12px;min-height:16px;"></div>
-  </div>
-  
-  <!-- Search students -->
-  <div style="width:100%;max-width:320px;margin-bottom:8px;">
-    <input id="studentSearchInput" placeholder="🔍 Search by name..." oninput="filterStudentsList()" style="width:100%;height:40px;font-size:14px;text-align:center;">
-  </div>
-  
-  <!-- Student list -->
-  <div id="studentsListMsg" style="font-size:13px;color:#888;min-height:20px;text-align:center;"></div>
-  <div id="studentsList" style="width:100%;max-width:320px;"></div>
-</div>
 
 <!-- STUDENT VIEWER PAGE (Coach viewing a student) -->
 <div id="studentViewPage" class="page" style="justify-content:flex-start;padding-top:10px;overflow-y:hidden;padding-bottom:0;position:relative;">
-  <button class="back-btn-top" onclick="show('studentsPage')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <button class="back-btn-top" onclick="goToCoaching()"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
   <div id="studentViewHeader" style="text-align:center;margin-bottom:6px;flex-shrink:0;">
     <div style="display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;">
       <div id="studentViewName" style="font-size:20px;font-weight:800;"></div>
@@ -1508,6 +1485,92 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- MY BAG PAGE -->
+<div id="myBagPage" class="page" style="justify-content:flex-start;padding-top:15px;overflow-y:auto;padding-bottom:80px;align-items:center;">
+  <button class="back-btn-top" onclick="show('homePage')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <div style="text-align:center;margin-bottom:16px;">
+    <div style="font-size:22px;font-weight:800;">🎒 My Bag</div>
+    <div style="font-size:12px;color:#666;margin-top:4px;">Enter your clubs and yardages</div>
+  </div>
+
+  <!-- Add Club Section -->
+  <div style="width:100%;max-width:360px;background:#1a1a1a;border-radius:14px;padding:16px;margin-bottom:16px;">
+    <div style="font-size:12px;font-weight:700;color:#a78bfa;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Add Club</div>
+    <select id="bagClubSelect" onchange="onBagClubSelectChange()" style="width:100%;height:40px;background:#222;color:#fff;border:1px solid #444;border-radius:8px;font-size:13px;padding:0 8px;margin-bottom:8px;">
+      <option value="">Pick a club...</option>
+      <optgroup label="Woods">
+        <option value="Dr">Dr (Driver)</option>
+        <option value="3W">3W</option>
+        <option value="5W">5W</option>
+        <option value="7W">7W</option>
+      </optgroup>
+      <optgroup label="Hybrids">
+        <option value="2HY">2HY</option>
+        <option value="3HY">3HY</option>
+        <option value="4HY">4HY</option>
+        <option value="5HY">5HY</option>
+      </optgroup>
+      <optgroup label="Irons">
+        <option value="2I">2I</option>
+        <option value="3I">3I</option>
+        <option value="4I">4I</option>
+        <option value="5I">5I</option>
+        <option value="6I">6I</option>
+        <option value="7I">7I</option>
+        <option value="8I">8I</option>
+        <option value="9I">9I</option>
+      </optgroup>
+      <optgroup label="Wedges">
+        <option value="PW">PW</option>
+        <option value="GW">GW (Gap)</option>
+        <option value="AW">AW (Approach)</option>
+        <option value="46">46°</option>
+        <option value="48">48°</option>
+        <option value="50">50°</option>
+        <option value="52">52°</option>
+        <option value="54">54°</option>
+        <option value="56">56°</option>
+        <option value="58">58°</option>
+        <option value="60">60°</option>
+        <option value="64">64°</option>
+      </optgroup>
+      <optgroup label="Putter">
+        <option value="Putter">Putter</option>
+      </optgroup>
+      <option value="custom">Custom...</option>
+    </select>
+    <div id="bagCustomNameWrap" style="display:none;margin-bottom:8px;">
+      <input id="bagCustomName" placeholder="Club name (e.g. 3HY, 48°)" style="width:100%;height:40px;font-size:13px;text-align:center;box-sizing:border-box;">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+      <div>
+        <div style="font-size:11px;color:#888;margin-bottom:4px;text-align:center;">Avg Carry (yds)</div>
+        <input id="bagCarryInput" type="number" placeholder="e.g. 240" min="0" max="400" style="width:100%;height:40px;font-size:15px;font-weight:700;text-align:center;box-sizing:border-box;">
+      </div>
+      <div>
+        <div style="font-size:11px;color:#888;margin-bottom:4px;text-align:center;">Avg Total (yds)</div>
+        <input id="bagTotalInput" type="number" placeholder="e.g. 260" min="0" max="450" style="width:100%;height:40px;font-size:15px;font-weight:700;text-align:center;box-sizing:border-box;">
+      </div>
+    </div>
+    <button onclick="addBagClub()" style="width:100%;height:42px;background:#7c3aed;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;">+ Add to Bag</button>
+    <div id="bagAddMsg" style="font-size:12px;min-height:16px;text-align:center;margin-top:6px;color:#4ade80;"></div>
+  </div>
+
+  <!-- Club List -->
+  <div style="width:100%;max-width:360px;">
+    <div id="bagEmptyMsg" style="background:#1a1a1a;border-radius:12px;padding:24px;text-align:center;color:#555;font-size:13px;line-height:1.7;">
+      No clubs in your bag yet.<br>Add clubs above to track your distances.
+    </div>
+    <div id="bagClubHeaders" style="display:none;grid-template-columns:1fr 80px 80px 36px;gap:6px;padding:0 6px 6px;font-size:11px;color:#666;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">
+      <div>Club</div>
+      <div style="text-align:center;">Carry</div>
+      <div style="text-align:center;">Total</div>
+      <div></div>
+    </div>
+    <div id="bagClubList" style="display:flex;flex-direction:column;gap:6px;"></div>
   </div>
 </div>
 
@@ -2080,6 +2143,9 @@ function show(id){
   if(id === 'practiceHubPage') {
     setPracticeHubTab(_currentPHTab || 'combines');
   }
+  if(id === 'myBagPage') {
+    renderBagClubs();
+  }
   // Hide score bar on non-scoring pages
   var scoringPages = ['parPage','shotPage','liePage','distancePage','puttPage','penaltyPage','obPenaltyPage','recoveryPage','missedGreenPage'];
   if(scoringPages.indexOf(id) === -1) { var sb=document.getElementById('scoreBar'); if(sb) sb.style.display='none'; }
@@ -2095,9 +2161,9 @@ var _backTargetMap = {
   'coachingCornerPage': 'homePage',
   'drillsPage': 'practiceHubPage',
   'drillDetailPage': 'drillsPage',
-  'studentsPage': 'homePage',
   'helpPage': 'homePage',
-  'studentViewPage': 'studentsPage',
+  'studentViewPage': 'coachingCornerPage',
+  'myBagPage': 'homePage',
   'roundPage': 'homePage',
   'holeByHolePage': 'roundPage',
   'summaryPage': 'homePage',
@@ -7759,18 +7825,12 @@ function setRole(role) {
     cBtn.style.background = '#333'; cBtn.style.color = '#888'; cBtn.style.fontWeight = '600';
     document.getElementById('studentCodeSection').style.display = 'flex';
     document.getElementById('coachInfoSection').style.display = 'none';
-    document.getElementById('homeStudentsBtn').style.display = 'none';
   } else {
     cBtn.style.background = '#0f766e'; cBtn.style.color = '#fff'; cBtn.style.fontWeight = '700';
     sBtn.style.background = '#333'; sBtn.style.color = '#888'; sBtn.style.fontWeight = '600';
     document.getElementById('studentCodeSection').style.display = 'none';
     document.getElementById('coachInfoSection').style.display = 'flex';
-    document.getElementById('homeStudentsBtn').style.display = 'flex';
     checkCoachNotifications();
-  }
-  // Admin always sees the students button regardless of role toggle
-  if (window._isAdmin) {
-    document.getElementById('homeStudentsBtn').style.display = 'flex';
   }
   // Save role to profiles table
   if (currentUser) {
@@ -7832,8 +7892,7 @@ async function goToStudents() {
       await _sb.from('notifications').delete().eq('id', stillUnread[i].id);
     }
   }
-  show('studentsPage');
-  loadStudents();
+  goToCoaching();
 }
 
 async function checkCoachNotifications() {
@@ -7860,6 +7919,7 @@ async function checkCoachNotifications() {
 async function loadStudents() {
   var msg = document.getElementById('studentsListMsg');
   var list = document.getElementById('studentsList');
+  if (!msg || !list) return;
   msg.textContent = 'Loading students...';
   list.innerHTML = '';
   
@@ -7891,7 +7951,7 @@ function filterStudentsList() {
 function renderStudentsList(data) {
   var msg = document.getElementById('studentsListMsg');
   var list = document.getElementById('studentsList');
-  
+  if (!msg || !list) return;
   msg.textContent = data.length + ' student(s)';
   list.innerHTML = '';
   
@@ -13850,6 +13910,108 @@ async function loadStudentPracticeSessions() {
   list.innerHTML = html;
 }
 
+// ─── MY BAG ─────────────────────────────────────────────────────────────────
+var _BAG_KEY = 'myBag_v1';
+var _BAG_ORDER = ['Dr','3W','4W','5W','7W','2HY','3HY','4HY','5HY','2I','3I','4I','5I','6I','7I','8I','9I','PW','GW','AW','46','48','50','52','54','56','58','60','64','Putter'];
+
+function getBagClubs() {
+  try { return JSON.parse(localStorage.getItem(_BAG_KEY)) || []; }
+  catch(e) { return []; }
+}
+
+function saveBagClubs(clubs) {
+  localStorage.setItem(_BAG_KEY, JSON.stringify(clubs));
+}
+
+function sortBagClubs(clubs) {
+  return clubs.sort(function(a, b) {
+    var ai = _BAG_ORDER.indexOf(a.name), bi = _BAG_ORDER.indexOf(b.name);
+    if (ai === -1) ai = 999;
+    if (bi === -1) bi = 999;
+    if (ai !== bi) return ai - bi;
+    return a.name.localeCompare(b.name);
+  });
+}
+
+function onBagClubSelectChange() {
+  var sel = document.getElementById('bagClubSelect');
+  var wrap = document.getElementById('bagCustomNameWrap');
+  if (sel && wrap) wrap.style.display = sel.value === 'custom' ? 'block' : 'none';
+}
+
+function addBagClub() {
+  var sel = document.getElementById('bagClubSelect');
+  var customNameEl = document.getElementById('bagCustomName');
+  var carryEl = document.getElementById('bagCarryInput');
+  var totalEl = document.getElementById('bagTotalInput');
+  var msg = document.getElementById('bagAddMsg');
+
+  var name = sel.value === 'custom' ? (customNameEl ? customNameEl.value.trim() : '') : sel.value;
+  if (!name) {
+    msg.style.color = '#f87171'; msg.textContent = 'Please select or enter a club name.'; return;
+  }
+  var carry = carryEl.value !== '' ? parseInt(carryEl.value) : null;
+  var total = totalEl.value !== '' ? parseInt(totalEl.value) : null;
+  if (carry === null && total === null) {
+    msg.style.color = '#f87171'; msg.textContent = 'Enter at least one distance.'; return;
+  }
+  var clubs = getBagClubs();
+  if (clubs.some(function(c) { return c.name.toLowerCase() === name.toLowerCase(); })) {
+    msg.style.color = '#f87171'; msg.textContent = name + ' is already in your bag.'; return;
+  }
+  clubs.push({ name: name, carry: carry, total: total });
+  saveBagClubs(sortBagClubs(clubs));
+  sel.value = '';
+  if (customNameEl) customNameEl.value = '';
+  carryEl.value = ''; totalEl.value = '';
+  document.getElementById('bagCustomNameWrap').style.display = 'none';
+  msg.style.color = '#4ade80'; msg.textContent = name + ' added!';
+  setTimeout(function() { msg.textContent = ''; }, 2500);
+  renderBagClubs();
+}
+
+function removeBagClub(name) {
+  saveBagClubs(getBagClubs().filter(function(c) { return c.name !== name; }));
+  renderBagClubs();
+}
+
+function updateBagClub(name, field, value) {
+  var clubs = getBagClubs();
+  var club = clubs.find(function(c) { return c.name === name; });
+  if (club) { club[field] = value !== '' ? parseInt(value) : null; saveBagClubs(clubs); }
+}
+
+function renderBagClubs() {
+  var clubs = getBagClubs();
+  var list = document.getElementById('bagClubList');
+  var emptyMsg = document.getElementById('bagEmptyMsg');
+  var headers = document.getElementById('bagClubHeaders');
+  if (!list) return;
+  if (clubs.length === 0) {
+    list.innerHTML = '';
+    if (emptyMsg) emptyMsg.style.display = 'block';
+    if (headers) headers.style.display = 'none';
+    return;
+  }
+  if (emptyMsg) emptyMsg.style.display = 'none';
+  if (headers) headers.style.display = 'grid';
+  list.innerHTML = clubs.map(function(club) {
+    var safe = club.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    var carry = (club.carry !== null && club.carry !== undefined) ? club.carry : '';
+    var total = (club.total !== null && club.total !== undefined) ? club.total : '';
+    return '<div style="display:grid;grid-template-columns:1fr 80px 80px 36px;gap:6px;align-items:center;background:#1a1a1a;border-radius:10px;padding:8px 10px;">' +
+      '<div style="font-size:14px;font-weight:700;color:#e2e8f0;">' + club.name + '</div>' +
+      '<input type="number" value="' + carry + '" placeholder="—" min="0" max="400" ' +
+        'onchange="updateBagClub(\'' + safe + '\',\'carry\',this.value)" ' +
+        'style="height:36px;font-size:14px;font-weight:700;text-align:center;background:#222;border:1px solid #333;border-radius:8px;color:#fff;width:100%;box-sizing:border-box;">' +
+      '<input type="number" value="' + total + '" placeholder="—" min="0" max="450" ' +
+        'onchange="updateBagClub(\'' + safe + '\',\'total\',this.value)" ' +
+        'style="height:36px;font-size:14px;font-weight:700;text-align:center;background:#222;border:1px solid #333;border-radius:8px;color:#fff;width:100%;box-sizing:border-box;">' +
+      '<button onclick="removeBagClub(\'' + safe + '\')" ' +
+        'style="width:32px;height:32px;background:#2a1515;border:1px solid #5a2020;border-radius:8px;color:#f87171;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;">×</button>' +
+      '</div>';
+  }).join('');
+}
 
 </script>
 </body>
