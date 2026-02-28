@@ -768,6 +768,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
             <option value="Chipping (Prox)">Chipping Prox</option>
             <option value="Chip Hole Out">Chip Hole Out</option>
             <option value="Wedge">Wedge</option>
+            <option value="Driver">Driver</option>
           </select>
           <select id="phCombFilterMode" onchange="loadPHCombineHistory()" style="background:#222;color:#fff;border:1px solid #444;border-radius:6px;padding:5px 8px;font-size:12px;">
             <option value="all">Custom &amp; Combine</option>
@@ -1520,6 +1521,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
             <button class="comb-grid-btn comb-green" onclick="combShowModeSelect('putting')" style="min-height:54px;font-size:1rem;border-radius:10px;">Putting</button>
             <button class="comb-grid-btn comb-blue" onclick="combShowShortGameSelect()" style="min-height:54px;font-size:1rem;border-radius:10px;">Short Game</button>
             <button class="comb-grid-btn" style="background:#c2410c;min-height:54px;font-size:1rem;border-radius:10px;" onclick="combShowModeSelect('wedge')">Wedge Distances</button>
+            <button class="comb-grid-btn" style="background:#6d28d9;min-height:54px;font-size:1rem;border-radius:10px;" onclick="combShowModeSelect('driver')">Driver</button>
           </div>
         </div><!-- /comb-practice-sub -->
 
@@ -11441,7 +11443,7 @@ function combShortGameBack() {
 
 function combShowModeSelect(type) {
   _combPendingType = type;
-  var names = {putting:'Putting','chip-prox':'Proximity Based','chip-hole':'Up & Downs',wedge:'Wedge'};
+  var names = {putting:'Putting','chip-prox':'Proximity Based','chip-hole':'Up & Downs',wedge:'Wedge',driver:'Driver'};
   document.getElementById('comb-mode-type-label').textContent = names[type];
   _combFromShortGame = (type === 'chip-prox' || type === 'chip-hole');
   document.getElementById('comb-practice-sub').style.display = 'none';
@@ -11470,12 +11472,14 @@ function combOpen(type, mode) {
   document.getElementById('comb-home-view').style.display='none';
   document.getElementById('comb-tracker-view').style.display='block';
 
-  var isCombine = mode==='combine', isWedge = type==='wedge', isPut = type==='putting';
+  var isCombine = mode==='combine', isWedge = type==='wedge', isPut = type==='putting', isDriver = type==='driver';
 
   // holes selector
   document.getElementById('comb-holes-custom').style.display  = isCombine ? 'none' : '';
   document.getElementById('comb-holes-combine').style.display = isCombine ? '' : 'none';
   document.getElementById('comb-opt-6').style.display = isWedge ? 'none' : '';
+  if(isDriver && isCombine) document.getElementById('comb-holes-combine').value = '6';
+  if(isDriver && !isCombine) document.getElementById('comb-holes-custom').value = 6;
 
   // extra controls
   combVis('comb-wedge-score-grp', isWedge);
@@ -11484,17 +11488,22 @@ function combOpen(type, mode) {
   combVis('comb-wedge-type-grp', isWedge && isCombine);
 
   // title
-  var names={putting:'Putting','chip-prox':'Chipping (Prox)','chip-hole':'Chip Hole Out',wedge:'Wedge'};
+  var names={putting:'Putting','chip-prox':'Chipping (Prox)','chip-hole':'Chip Hole Out',wedge:'Wedge',driver:'Driver'};
   document.getElementById('comb-title').textContent = (isCombine ? '[COMBINE] ' : '') + names[type];
 
   // strokes box
   document.getElementById('comb-strokes-box').style.display = (type==='putting'||type==='chip-hole') ? '' : 'none';
 
-  // HCP dim for wedge pts mode
-  if(isWedge) combSetWedge(combWedgeMode, false);
+  // HCP dim for wedge pts mode; hide HCP + expected for driver
+  if(isDriver){
+    document.getElementById('comb-hcp-group').classList.add('comb-dimmed');
+    document.getElementById('comb-exp-box').style.display='none';
+    document.getElementById('comb-total-label').textContent = 'Total Score';
+  } else if(isWedge) combSetWedge(combWedgeMode, false);
   else {
     document.getElementById('comb-hcp-group').classList.remove('comb-dimmed');
     document.getElementById('comb-exp-box').style.display='';
+    document.getElementById('comb-total-label').textContent = 'Total SG';
   }
 
   // reset save
@@ -11564,6 +11573,7 @@ function combSetup(){
   if(combCurType==='putting')       h+='<th>Dist ft</th><th>Putts</th><th>Exp</th><th>SG</th>';
   else if(combCurType==='wedge')    h+='<th>Target</th><th>Carry</th><th>Prox ft</th><th class="comb-wsg">Exp S</th><th class="comb-wsg">Exp P</th><th class="comb-wsg">Total</th><th id="comb-w-last">SG</th>';
   else if(combCurType==='chip-prox') h+='<th class="comb-col-dist">Dist yd</th><th class="comb-col-lie">Lie</th><th class="comb-col-score">Prox ft</th><th>Exp S</th><th>Exp P</th><th>Total</th><th>SG</th>';
+  else if(combCurType==='driver')   h+='<th>Drive yds</th><th>Offline yds</th><th>Score</th>';
   else h+='<th class="comb-col-dist">Dist yd</th><th class="comb-col-lie">Lie</th><th class="comb-col-score">Score</th><th>Exp</th><th>SG</th>';
   head.innerHTML = h + '<th></th></tr>';
 
@@ -11647,6 +11657,11 @@ function combSetup(){
       r += '<td class="comb-tap comb-col-score"><input type="number" inputmode="decimal" placeholder="–" onchange="combUpd('+i+',\'v\',+this.value)"></td>';
       r += '<td class="comb-ro" id="ce1-'+i+'">–</td><td class="comb-ro" id="ce2-'+i+'">–</td><td class="comb-ro" id="cts-'+i+'">–</td><td class="comb-ro" id="csg-'+i+'">–</td>';
 
+    } else if(combCurType==='driver'){
+      r += '<td class="comb-tap"><input type="number" inputmode="numeric" pattern="[0-9]*" placeholder="–" onchange="combUpd('+i+',\'d\',+this.value)"></td>';
+      r += '<td class="comb-tap"><input type="number" inputmode="numeric" pattern="[0-9]*" placeholder="–" onchange="combUpd('+i+',\'v\',+this.value)"></td>';
+      r += '<td class="comb-ro" id="csg-'+i+'">–</td>';
+
     } else { // chip-hole
       var cd = isCombine ? cS[i-1].d : '', cl = isCombine ? cS[i-1].l : 'Fairway';
       combState[i].d=cd; combState[i].l=cl;
@@ -11722,6 +11737,11 @@ function combCalcRow(i){
     document.getElementById('cts-'+i).textContent = ts.toFixed(2);
     document.getElementById('csg-'+i).innerHTML   = combFmt(r.sg);
 
+  } else if(combCurType==='driver'){
+    r.exp1 = 0;
+    r.sg   = r.d - r.v;
+    document.getElementById('csg-'+i).textContent = r.sg.toFixed(0);
+
   } else { // chip-hole
     r.exp1 = combGetE('chipping',r.d,r.l,h);
     r.sg   = r.exp1 - r.v;
@@ -11746,7 +11766,9 @@ function combUpdateTotals(){
   }
   document.getElementById('comb-total-exp').textContent = e.toFixed(2);
   var totalEl = document.getElementById('comb-total-val');
-  if(combCurType==='wedge' && combWedgeMode==='pts'){
+  if(combCurType==='driver'){
+    totalEl.textContent = c ? sg.toFixed(0) : '0';
+  } else if(combCurType==='wedge' && combWedgeMode==='pts'){
     totalEl.textContent = c ? (sg/c).toFixed(1) : '0.0';
   } else {
     totalEl.innerHTML = combFmt(sg);
@@ -11778,6 +11800,11 @@ function combSetWedge(m, recalc){
 /* ── Grade 0-100 calculation ── */
 function calcCombGrade(type, wedgeMode, totalSg, filled, totalExp) {
   if (!filled || filled === 0) return null;
+  if (type === 'driver') {
+    var avgScore = totalSg / filled;
+    var grade = (avgScore - 100) / 2;
+    return Math.round(Math.max(0, Math.min(100, grade)));
+  }
   if (type === 'wedge' && wedgeMode === 'pts') return Math.round(totalSg / filled);
   // SG-based grading: 50 = benchmark (0 SG), scale by SG per shot
   // +0.1 SG/shot = 60, +0.2 = 70, +0.3 = 80, +0.5 = 100
@@ -11788,6 +11815,11 @@ function calcCombGrade(type, wedgeMode, totalSg, filled, totalExp) {
 }
 
 function getCombGradeFromCard(c) {
+  // For driver combines, grade based on avg score per shot
+  if (c.combine_type === 'Driver' && c.avg_pts !== null && c.avg_pts !== undefined) {
+    var grade = (c.avg_pts - 100) / 2;
+    return Math.round(Math.max(0, Math.min(100, grade)));
+  }
   // For wedge combines with avg_pts, use that as the grade (already 0-100)
   if (c.avg_pts !== null && c.avg_pts !== undefined) return Math.round(c.avg_pts);
   // For all other types, calculate from SG
@@ -11829,7 +11861,7 @@ async function combSave(){
   if(filled===0){ msg.style.color='#f44'; msg.textContent='Enter at least one score first.'; return; }
 
   var isCombine = combCurMode==='combine';
-  var typeNames = {putting:'Putting','chip-prox':'Chipping (Prox)','chip-hole':'Chip Hole Out',wedge:'Wedge'};
+  var typeNames = {putting:'Putting','chip-prox':'Chipping (Prox)','chip-hole':'Chip Hole Out',wedge:'Wedge',driver:'Driver'};
   var combineType = typeNames[combCurType] || combCurType;
   var hcp      = document.getElementById('comb-handicap').value;
   var dateVal  = document.getElementById('comb-date').value || new Date().toISOString().split('T')[0];
@@ -11855,11 +11887,11 @@ async function combSave(){
     holes_count:   holes,
     filled_count:  filled,
     total_sg:      parseFloat(totalSg.toFixed(3)),
-    avg_pts:       (combCurType==='wedge') ? parseFloat((filled?totalPts/filled:0).toFixed(1)) : null,
+    avg_pts:       (combCurType==='wedge') ? parseFloat((filled?totalPts/filled:0).toFixed(1)) : (combCurType==='driver' ? parseFloat((filled?totalSg/filled:0).toFixed(1)) : null),
     total_exp:     parseFloat(totalExp.toFixed(3)),
     total_strokes: (combCurType==='putting'||combCurType==='chip-hole') ? totalStrokes : null,
     handicap:      hcp,
-    score_mode:    combCurType==='wedge' ? combWedgeMode : 'sg',
+    score_mode:    combCurType==='driver' ? 'driver' : (combCurType==='wedge' ? combWedgeMode : 'sg'),
     note:          noteVal,
     row_data:      JSON.stringify(combState),
     grade_100:     calcCombGrade(combCurType, combWedgeMode, totalSg, filled, totalExp)
@@ -12038,7 +12070,10 @@ function renderCombCard(c, canDelete){
   var gradeLine = '';
   var strokesLine = '';
   
-  if(c.total_sg!==null && c.total_sg!==undefined){
+  if(c.combine_type==='Driver' && c.total_sg!==null && c.total_sg!==undefined){
+    sgLine='<span style="color:#bb86fc;font-size:15px;font-weight:700;">'+parseFloat(c.total_sg).toFixed(0)+' yds total</span>';
+    if(c.avg_pts!==null && c.avg_pts!==undefined) sgLine+=' <span style="color:#888;font-size:12px;">('+(+c.avg_pts).toFixed(0)+' avg)</span>';
+  } else if(c.total_sg!==null && c.total_sg!==undefined){
     var s=parseFloat(c.total_sg);
     var col=s>=0?'#69f0ae':'#ff5252';
     sgLine='<span style="color:'+col+';font-size:15px;font-weight:700;">'+(s>=0?'+':'')+s.toFixed(2)+' SG</span>';
@@ -12099,13 +12134,15 @@ function toggleCombDetails(id) {
   var isWedge = combType === 'Wedge';
   var isChipProx = combType === 'Chipping (Prox)';
   var isChipHole = combType === 'Chip Hole Out';
-  
+  var isDriver = combType === 'Driver';
+
   // Build header
   var hdr = '<tr style="font-size:10px;color:#888;text-transform:uppercase;">';
   hdr += '<th style="padding:3px 4px;text-align:center;">#</th>';
   if (isPut) hdr += '<th style="padding:3px 4px;">Dist</th><th style="padding:3px 4px;">Putts</th><th style="padding:3px 4px;">SG</th>';
   else if (isWedge) hdr += '<th style="padding:3px 4px;">Target</th><th style="padding:3px 4px;">Carry</th><th style="padding:3px 4px;">SG</th>';
   else if (isChipProx) hdr += '<th style="padding:3px 4px;">Dist</th><th style="padding:3px 4px;">Lie</th><th style="padding:3px 4px;">Prox</th><th style="padding:3px 4px;">SG</th>';
+  else if (isDriver) hdr += '<th style="padding:3px 4px;">Drive</th><th style="padding:3px 4px;">Offline</th><th style="padding:3px 4px;">Score</th>';
   else hdr += '<th style="padding:3px 4px;">Dist</th><th style="padding:3px 4px;">Lie</th><th style="padding:3px 4px;">Score</th><th style="padding:3px 4px;">SG</th>';
   hdr += '</tr>';
   
@@ -12124,6 +12161,7 @@ function toggleCombDetails(id) {
     if (isPut) row += '<td style="padding:3px 4px;">'+distStr+' ft</td><td style="padding:3px 4px;">'+valStr+'</td><td style="padding:3px 4px;">'+sgStr+'</td>';
     else if (isWedge) row += '<td style="padding:3px 4px;">'+distStr+' yds</td><td style="padding:3px 4px;">'+valStr+'</td><td style="padding:3px 4px;">'+sgStr+'</td>';
     else if (isChipProx) row += '<td style="padding:3px 4px;">'+distStr+' yds</td><td style="padding:3px 4px;font-size:10px;">'+lieStr+'</td><td style="padding:3px 4px;">'+valStr+' ft</td><td style="padding:3px 4px;">'+sgStr+'</td>';
+    else if (isDriver) { var scoreVal = (r.d!==''&&r.v!=='') ? (parseFloat(r.d)-parseFloat(r.v)).toFixed(0) : '–'; row += '<td style="padding:3px 4px;">'+distStr+' yds</td><td style="padding:3px 4px;">'+valStr+' yds</td><td style="padding:3px 4px;font-weight:700;color:#bb86fc;">'+scoreVal+'</td>'; }
     else row += '<td style="padding:3px 4px;">'+distStr+' yds</td><td style="padding:3px 4px;font-size:10px;">'+lieStr+'</td><td style="padding:3px 4px;">'+valStr+'</td><td style="padding:3px 4px;">'+sgStr+'</td>';
     row += '</tr>';
     return row;
