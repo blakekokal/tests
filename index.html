@@ -4220,38 +4220,44 @@ function generateExcelWorkbook(){
   XLSX.utils.book_append_sheet(wb, ws2, 'Off The Tee');
   
   // ============ SHEET 3: APPROACH ============
+  // Get actual proximity: prefer next putt's distanceBefore over approach distanceAfter
+  function getProxXls(shots,idx,s){
+    if(s.lie==='HOLED')return 0;
+    const next=shots[idx+1];
+    if(next&&next.isPutt&&next.distanceBefore>0)return next.distanceBefore;
+    return s.distanceAfter||0;
+  }
   let par3ApproachDist=[],par4ApproachDist=[],par5ApproachDist=[];
   let par3Approaches=[],par4Approaches=[],par5Approaches=[];
-  
+
   allHoles.forEach(h=>{
+    const shots=h.shots||[];
     // For par 4/5, get the 2nd shot distance (approach shot distance)
-    if(h.par === 4 && h.shots.length >= 2){
-      const secondShot = h.shots[1];
+    if(h.par === 4 && shots.length >= 2){
+      const secondShot = shots[1];
       if(secondShot && secondShot.distanceBefore && !secondShot.isPutt){
         par4ApproachDist.push(secondShot.distanceBefore);
-        // If it hit the green, record proximity
-        if(secondShot.lie === 'GREEN' && secondShot.distanceAfter != null){
-          par4Approaches.push(secondShot.distanceAfter);
+        if(secondShot.lie === 'GREEN'){
+          par4Approaches.push(getProxXls(shots,1,secondShot));
         }
       }
-    } else if(h.par === 5 && h.shots.length >= 2){
-      const secondShot = h.shots[1];
+    } else if(h.par === 5 && shots.length >= 2){
+      const secondShot = shots[1];
       if(secondShot && secondShot.distanceBefore && !secondShot.isPutt){
         par5ApproachDist.push(secondShot.distanceBefore);
-        // If it hit the green, record proximity
-        if(secondShot.lie === 'GREEN' && secondShot.distanceAfter != null){
-          par5Approaches.push(secondShot.distanceAfter);
+        if(secondShot.lie === 'GREEN'){
+          par5Approaches.push(getProxXls(shots,1,secondShot));
         }
       }
     }
-    
+
     // For par 3, the tee shot is the approach
-    if(h.par === 3 && h.shots.length >= 1){
-      const teeShot = h.shots[0];
+    if(h.par === 3 && shots.length >= 1){
+      const teeShot = shots[0];
       if(teeShot){
-        par3ApproachDist.push(h.yards); // Use hole yardage for par 3 tee shot
-        if(teeShot.lie === 'GREEN' && teeShot.distanceAfter != null){
-          par3Approaches.push(teeShot.distanceAfter);
+        par3ApproachDist.push(h.yards);
+        if(teeShot.lie === 'GREEN'){
+          par3Approaches.push(getProxXls(shots,0,teeShot));
         }
       }
     }
@@ -4276,7 +4282,8 @@ function generateExcelWorkbook(){
   ];
 
   allHoles.forEach(h=>{
-    h.shots.forEach((s,idx)=>{
+    const shots=h.shots||[];
+    shots.forEach((s,idx)=>{
       const distBefore=s.distanceBefore||0;
       const isPar45Tee=s.shotNum===1&&(h.par===4||h.par===5);
       const isAppAttempt=!s.isPutt&&distBefore>100&&!isPar45Tee&&s.lie!=='PENALTY';
@@ -4284,7 +4291,7 @@ function generateExcelWorkbook(){
         approachRanges.forEach(r=>{
           if(distBefore>=r.min&&distBefore<=r.max){
             r.total++;
-            if(s.lie==='GREEN'||s.lie==='HOLED') r.shots.push(s.distanceAfter||0);
+            if(s.lie==='GREEN'||s.lie==='HOLED') r.shots.push(getProxXls(shots,idx,s));
           }
         });
       }
@@ -4955,36 +4962,44 @@ function generateCSV(){
   csv+=`Right,${missRight},${girOpp?Math.round(missRight/girOpp*100):0}%\n`;
   csv+='\n';
   
+  // Get actual proximity: prefer next putt's distanceBefore over approach distanceAfter
+  function getProxCsv(shots,idx,s){
+    if(s.lie==='HOLED')return 0;
+    const next=shots[idx+1];
+    if(next&&next.isPutt&&next.distanceBefore>0)return next.distanceBefore;
+    return s.distanceAfter||0;
+  }
   let par3ApproachDist=[],par4ApproachDist=[],par5ApproachDist=[];
   let par3Approaches=[],par4Approaches=[],par5Approaches=[];
-  
+
   allHoles.forEach(h=>{
+    const shots=h.shots||[];
     // For par 4/5, get the 2nd shot distance (approach shot distance)
-    if(h.par === 4 && h.shots.length >= 2){
-      const secondShot = h.shots[1];
+    if(h.par === 4 && shots.length >= 2){
+      const secondShot = shots[1];
       if(secondShot && secondShot.distanceBefore && !secondShot.isPutt){
         par4ApproachDist.push(secondShot.distanceBefore);
-        if(secondShot.lie === 'GREEN' && secondShot.distanceAfter != null){
-          par4Approaches.push(secondShot.distanceAfter);
+        if(secondShot.lie === 'GREEN'){
+          par4Approaches.push(getProxCsv(shots,1,secondShot));
         }
       }
-    } else if(h.par === 5 && h.shots.length >= 2){
-      const secondShot = h.shots[1];
+    } else if(h.par === 5 && shots.length >= 2){
+      const secondShot = shots[1];
       if(secondShot && secondShot.distanceBefore && !secondShot.isPutt){
         par5ApproachDist.push(secondShot.distanceBefore);
-        if(secondShot.lie === 'GREEN' && secondShot.distanceAfter != null){
-          par5Approaches.push(secondShot.distanceAfter);
+        if(secondShot.lie === 'GREEN'){
+          par5Approaches.push(getProxCsv(shots,1,secondShot));
         }
       }
     }
-    
+
     // For par 3, the tee shot is the approach
-    if(h.par === 3 && h.shots.length >= 1){
-      const teeShot = h.shots[0];
+    if(h.par === 3 && shots.length >= 1){
+      const teeShot = shots[0];
       if(teeShot){
         par3ApproachDist.push(h.yards);
-        if(teeShot.lie === 'GREEN' && teeShot.distanceAfter != null){
-          par3Approaches.push(teeShot.distanceAfter);
+        if(teeShot.lie === 'GREEN'){
+          par3Approaches.push(getProxCsv(shots,0,teeShot));
         }
       }
     }
@@ -5011,7 +5026,8 @@ function generateCSV(){
   ];
 
   allHoles.forEach(h=>{
-    h.shots.forEach((s,idx)=>{
+    const shots=h.shots||[];
+    shots.forEach((s,idx)=>{
       const distBefore=s.distanceBefore||0;
       const isPar45Tee=s.shotNum===1&&(h.par===4||h.par===5);
       const isAppAttempt=!s.isPutt&&distBefore>100&&!isPar45Tee&&s.lie!=='PENALTY';
@@ -5019,7 +5035,7 @@ function generateCSV(){
         approachRanges.forEach(r=>{
           if(distBefore>=r.min&&distBefore<=r.max){
             r.total++;
-            if(s.lie==='GREEN'||s.lie==='HOLED') r.shots.push(s.distanceAfter||0);
+            if(s.lie==='GREEN'||s.lie==='HOLED') r.shots.push(getProxCsv(shots,idx,s));
           }
         });
       }
@@ -9139,18 +9155,20 @@ function renderDashboard(data, hcp, targetId) {
         }
         if (s.lie==='PENALTY') { var prev5=shots[idx-1]; if(prev5){ if(prev5.shotNum===1){if(h.par===3)A.par3TeePen++;else A.par45TeePen++;}else if(prev5.distanceBefore>30)A.appPen++;else A.sgPen++;} }
         var _db=s.distanceBefore||0;var _isPar45Tee=s.shotNum===1&&(h.par===4||h.par===5);var _isAppAttempt=!s.isPutt&&_db>100&&!_isPar45Tee&&s.lie!=='PENALTY';
-        if(_isAppAttempt){A.appRanges.forEach(function(rr){if(_db>=rr.min&&_db<=rr.max){rr.total++;if(s.lie==='GREEN'||s.lie==='HOLED')rr.s.push(s.distanceAfter||0);}});}
-        if (!s.isPutt&&(s.distanceBefore||0)>0&&(s.distanceBefore||0)<=100&&s.lie==='GREEN') { A.shortRanges.forEach(function(rr){if((s.distanceBefore||0)>=rr.min&&(s.distanceBefore||0)<=rr.max)rr.s.push(s.distanceAfter||0);}); }
-        if (s.lie&&s.lie.includes('BUNKER')&&shots[idx+1]&&shots[idx+1].lie==='GREEN') { A.bunkerProx.push(shots[idx+1].distanceAfter||0); }
+        function _gp(sh,i,st){if(st.lie==='HOLED')return 0;var nx=sh[i+1];if(nx&&nx.isPutt&&nx.distanceBefore>0)return nx.distanceBefore;return st.distanceAfter||0;}
+        if(_isAppAttempt){A.appRanges.forEach(function(rr){if(_db>=rr.min&&_db<=rr.max){rr.total++;if(s.lie==='GREEN'||s.lie==='HOLED')rr.s.push(_gp(shots,idx,s));}});}
+        if (!s.isPutt&&(s.distanceBefore||0)>0&&(s.distanceBefore||0)<=100&&s.lie==='GREEN') { A.shortRanges.forEach(function(rr){if((s.distanceBefore||0)>=rr.min&&(s.distanceBefore||0)<=rr.max)rr.s.push(_gp(shots,idx,s));}); }
+        if (s.lie&&s.lie.includes('BUNKER')&&shots[idx+1]&&shots[idx+1].lie==='GREEN') { A.bunkerProx.push(_gp(shots,idx+1,shots[idx+1])); }
         if (s.isPutt&&(s.distanceBefore||0)>0) { A.allPuttRanges.forEach(function(rr){if((s.distanceBefore||0)>=rr.min&&(s.distanceBefore||0)<=rr.max){rr.t++;if(s.lie==='HOLED'||s.distanceAfter===0)rr.m++;}}); }
         if (!s.isPutt&&s.shotNum>0) { if(s.lie==='MISS SHORT')A.missShort++;if(s.lie==='MISS LONG')A.missLong++;if(s.lie==='MISS LEFT')A.missLeft++;if(s.lie==='MISS RIGHT')A.missRight++; }
       });
       
       rOTT+=hOTT; rAPP+=hAPP; rARG+=hARG; rPutt+=hPutt;
       
-      if (h.par===3&&shots.length>=1) { A.par3AppDist.push(h.yards); if(shots[0].lie==='GREEN'&&shots[0].distanceAfter!=null)A.par3AppProx.push(shots[0].distanceAfter); }
-      if (h.par===4&&shots.length>=2&&!shots[1].isPutt) { A.par4AppDist.push(shots[1].distanceBefore||0); if(shots[1].lie==='GREEN'&&shots[1].distanceAfter!=null)A.par4AppProx.push(shots[1].distanceAfter); }
-      if (h.par===5&&shots.length>=2&&!shots[1].isPutt) { A.par5AppDist.push(shots[1].distanceBefore||0); if(shots[1].lie==='GREEN'&&shots[1].distanceAfter!=null)A.par5AppProx.push(shots[1].distanceAfter); }
+      function _gp2(sh,i,st){if(st.lie==='HOLED')return 0;var nx=sh[i+1];if(nx&&nx.isPutt&&nx.distanceBefore>0)return nx.distanceBefore;return st.distanceAfter||0;}
+      if (h.par===3&&shots.length>=1) { A.par3AppDist.push(h.yards); if(shots[0].lie==='GREEN')A.par3AppProx.push(_gp2(shots,0,shots[0])); }
+      if (h.par===4&&shots.length>=2&&!shots[1].isPutt) { A.par4AppDist.push(shots[1].distanceBefore||0); if(shots[1].lie==='GREEN')A.par4AppProx.push(_gp2(shots,1,shots[1])); }
+      if (h.par===5&&shots.length>=2&&!shots[1].isPutt) { A.par5AppDist.push(shots[1].distanceBefore||0); if(shots[1].lie==='GREEN')A.par5AppProx.push(_gp2(shots,1,shots[1])); }
       
       roundPBP.push(holePBP);
     });
@@ -9897,22 +9915,30 @@ function showFullStats() {
   var puttRangesF=[{min:0,max:3,m:0,t:0,l:'0-3 ft'},{min:4,max:7,m:0,t:0,l:'4-7 ft'},{min:8,max:11,m:0,t:0,l:'8-11 ft'},{min:12,max:15,m:0,t:0,l:'12-15 ft'},{min:16,max:20,m:0,t:0,l:'16-20 ft'},{min:21,max:30,m:0,t:0,l:'21-30 ft'},{min:31,max:40,m:0,t:0,l:'31-40 ft'},{min:41,max:50,m:0,t:0,l:'41-50 ft'},{min:51,max:999,m:0,t:0,l:'50+ ft'}];
   var longestMadeP=0, avgFirstPuttF=0, firstPuttCntF=0;
   
+  // Get actual proximity: prefer next putt's distanceBefore over approach distanceAfter
+  // (approach distanceAfter may be a stale smart default, but the putt distance is user-entered)
+  function getProx(shots,idx,s){
+    if(s.lie==='HOLED')return 0;
+    var next=shots[idx+1];
+    if(next&&next.isPutt&&next.distanceBefore>0)return next.distanceBefore;
+    return s.distanceAfter||0;
+  }
   allHoles.forEach(function(h){
     var shots=h.shots||[];
     shots.forEach(function(s,idx){
       var db=s.distanceBefore||0;
       var isPar45Tee=s.shotNum===1&&(h.par===4||h.par===5);
       var isAppAttempt=!s.isPutt&&db>100&&!isPar45Tee&&s.lie!=='PENALTY';
-      if(isAppAttempt){appRangesF.forEach(function(r){if(db>=r.min&&db<=r.max){r.total++;if(s.lie==='GREEN'||s.lie==='HOLED')r.s.push(s.distanceAfter||0);}});}
-      if(!s.isPutt&&db>0&&db<=100&&s.lie==='GREEN'){shortRangesF.forEach(function(r){if(db>=r.min&&db<=r.max)r.s.push(s.distanceAfter||0);});}
-      if(s.lie&&s.lie.includes('BUNKER')&&shots[idx+1]&&shots[idx+1].lie==='GREEN'){bunkerProxF.push(shots[idx+1].distanceAfter||0);}
+      if(isAppAttempt){appRangesF.forEach(function(r){if(db>=r.min&&db<=r.max){r.total++;if(s.lie==='GREEN'||s.lie==='HOLED')r.s.push(getProx(shots,idx,s));}});}
+      if(!s.isPutt&&db>0&&db<=100&&s.lie==='GREEN'){shortRangesF.forEach(function(r){if(db>=r.min&&db<=r.max)r.s.push(getProx(shots,idx,s));});}
+      if(s.lie&&s.lie.includes('BUNKER')&&shots[idx+1]&&shots[idx+1].lie==='GREEN'){bunkerProxF.push(getProx(shots,idx+1,shots[idx+1]));}
       if(s.isPutt&&db>0){puttRangesF.forEach(function(r){if(db>=r.min&&db<=r.max){r.t++;if(s.lie==='HOLED'||s.distanceAfter===0)r.m++;}});}
     });
     if(h.firstPuttDist>0){avgFirstPuttF+=h.firstPuttDist;firstPuttCntF++;}
     if((h.putts||0)===1&&h.firstPuttDist>0&&h.firstPuttDist>longestMadeP)longestMadeP=h.firstPuttDist;
-    if(h.par===3&&shots.length>=1){par3AppD.push(h.yards);if(shots[0].lie==='GREEN'&&shots[0].distanceAfter!=null)par3AppP.push(shots[0].distanceAfter);}
-    if(h.par===4&&shots.length>=2&&!shots[1].isPutt){par4AppD.push(shots[1].distanceBefore||0);if(shots[1].lie==='GREEN'&&shots[1].distanceAfter!=null)par4AppP.push(shots[1].distanceAfter);}
-    if(h.par===5&&shots.length>=2&&!shots[1].isPutt){par5AppD.push(shots[1].distanceBefore||0);if(shots[1].lie==='GREEN'&&shots[1].distanceAfter!=null)par5AppP.push(shots[1].distanceAfter);}
+    if(h.par===3&&shots.length>=1){par3AppD.push(h.yards);if(shots[0].lie==='GREEN')par3AppP.push(getProx(shots,0,shots[0]));}
+    if(h.par===4&&shots.length>=2&&!shots[1].isPutt){par4AppD.push(shots[1].distanceBefore||0);if(shots[1].lie==='GREEN')par4AppP.push(getProx(shots,1,shots[1]));}
+    if(h.par===5&&shots.length>=2&&!shots[1].isPutt){par5AppD.push(shots[1].distanceBefore||0);if(shots[1].lie==='GREEN')par5AppP.push(getProx(shots,1,shots[1]));}
   });
   avgFirstPuttF=firstPuttCntF>0?Math.round(avgFirstPuttF/firstPuttCntF):0;
   function davg(arr){return arr.length>0?Math.round(arr.reduce(function(a,b){return a+b;},0)/arr.length):0;}
