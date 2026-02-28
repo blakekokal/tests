@@ -4260,7 +4260,8 @@ function generateExcelWorkbook(){
   allHoles.forEach(h=>{
     h.shots.forEach((s,idx)=>{
       const distBefore=s.distanceBefore||0;
-      const isAppAttempt=!s.isPutt&&distBefore>100&&(s.lie==='GREEN'||s.lie==='HOLED'||(s.lie&&s.lie.startsWith('MISS '))||s.lie==='GS BUNKER');
+      const isPar45Tee=s.shotNum===1&&(h.par===4||h.par===5);
+      const isAppAttempt=!s.isPutt&&distBefore>100&&!isPar45Tee&&s.lie!=='PENALTY';
       if(isAppAttempt){
         approachRanges.forEach(r=>{
           if(distBefore>=r.min&&distBefore<=r.max){
@@ -4994,7 +4995,8 @@ function generateCSV(){
   allHoles.forEach(h=>{
     h.shots.forEach((s,idx)=>{
       const distBefore=s.distanceBefore||0;
-      const isAppAttempt=!s.isPutt&&distBefore>100&&(s.lie==='GREEN'||s.lie==='HOLED'||(s.lie&&s.lie.startsWith('MISS '))||s.lie==='GS BUNKER');
+      const isPar45Tee=s.shotNum===1&&(h.par===4||h.par===5);
+      const isAppAttempt=!s.isPutt&&distBefore>100&&!isPar45Tee&&s.lie!=='PENALTY';
       if(isAppAttempt){
         approachRanges.forEach(r=>{
           if(distBefore>=r.min&&distBefore<=r.max){
@@ -9118,7 +9120,7 @@ function renderDashboard(data, hcp, targetId) {
           if (dd>A.longestDrive) A.longestDrive=dd; if (dd<A.shortestDrive) A.shortestDrive=dd;
         }
         if (s.lie==='PENALTY') { var prev5=shots[idx-1]; if(prev5){ if(prev5.shotNum===1){if(h.par===3)A.par3TeePen++;else A.par45TeePen++;}else if(prev5.distanceBefore>30)A.appPen++;else A.sgPen++;} }
-        var _db=s.distanceBefore||0;var _isAppAttempt=!s.isPutt&&_db>100&&(s.lie==='GREEN'||s.lie==='HOLED'||(s.lie&&s.lie.startsWith('MISS '))||s.lie==='GS BUNKER');
+        var _db=s.distanceBefore||0;var _isPar45Tee=s.shotNum===1&&(h.par===4||h.par===5);var _isAppAttempt=!s.isPutt&&_db>100&&!_isPar45Tee&&s.lie!=='PENALTY';
         if(_isAppAttempt){A.appRanges.forEach(function(rr){if(_db>=rr.min&&_db<=rr.max){rr.total++;if(s.lie==='GREEN'||s.lie==='HOLED')rr.s.push(s.distanceAfter||0);}});}
         if (!s.isPutt&&(s.distanceBefore||0)>0&&(s.distanceBefore||0)<=100&&s.lie==='GREEN') { A.shortRanges.forEach(function(rr){if((s.distanceBefore||0)>=rr.min&&(s.distanceBefore||0)<=rr.max)rr.s.push(s.distanceAfter||0);}); }
         if (s.lie&&s.lie.includes('BUNKER')&&shots[idx+1]&&shots[idx+1].lie==='GREEN') { A.bunkerProx.push(shots[idx+1].distanceAfter||0); }
@@ -9881,7 +9883,8 @@ function showFullStats() {
     var shots=h.shots||[];
     shots.forEach(function(s,idx){
       var db=s.distanceBefore||0;
-      var isAppAttempt=!s.isPutt&&db>100&&(s.lie==='GREEN'||s.lie==='HOLED'||(s.lie&&s.lie.startsWith('MISS '))||s.lie==='GS BUNKER');
+      var isPar45Tee=s.shotNum===1&&(h.par===4||h.par===5);
+      var isAppAttempt=!s.isPutt&&db>100&&!isPar45Tee&&s.lie!=='PENALTY';
       if(isAppAttempt){appRangesF.forEach(function(r){if(db>=r.min&&db<=r.max){r.total++;if(s.lie==='GREEN'||s.lie==='HOLED')r.s.push(s.distanceAfter||0);}});}
       if(!s.isPutt&&db>0&&db<=100&&s.lie==='GREEN'){shortRangesF.forEach(function(r){if(db>=r.min&&db<=r.max)r.s.push(s.distanceAfter||0);});}
       if(s.lie&&s.lie.includes('BUNKER')&&shots[idx+1]&&shots[idx+1].lie==='GREEN'){bunkerProxF.push(shots[idx+1].distanceAfter||0);}
