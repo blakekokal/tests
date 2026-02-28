@@ -343,56 +343,6 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
   </div><!-- end profileScrollArea -->
 </div>
 
-<!-- SG CALCULATOR PAGE -->
-<div id="sgCalcPage" class="page" style="justify-content:flex-start;padding-top:8px;overflow-y:auto;padding-bottom:80px;align-items:center;">
-  <button class="back-btn-top" onclick="show('homePage')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
-  <div style="width:340px;max-width:calc(100vw - 32px);">
-
-    <!-- Row 1: HCP + Yardage + Reset (centred) -->
-    <div style="display:flex;gap:6px;align-items:center;justify-content:center;margin-bottom:5px;">
-      <div style="display:flex;align-items:center;gap:4px;">
-        <span style="font-size:10px;color:#888;">HCP</span>
-        <select id="sgCalcHcp" onchange="sgCalcReset()" style="background:#222;color:#fff;border:1px solid #444;border-radius:6px;padding:3px 5px;font-size:12px;height:28px;">
-          <option value="Tour Pro">Pro</option>
-          <option value="Scratch">Scr</option>
-          <option value="5">5</option><option value="10" selected>10</option>
-          <option value="15">15</option><option value="20">20</option>
-          <option value="25">25</option><option value="30">30</option>
-        </select>
-      </div>
-      <div style="display:flex;align-items:center;gap:4px;">
-        <span style="font-size:10px;color:#888;">Yds</span>
-        <input id="sgCalcYardage" type="number" value="400" min="100" max="650" onchange="sgCalcReset()" style="width:52px;height:28px;font-size:12px;text-align:center;background:#222;color:#fff;border:1px solid #444;border-radius:6px;padding:0;">
-      </div>
-      <button onclick="sgCalcReset()" style="height:28px;width:36px;font-size:13px;font-weight:700;background:#333;border:1px solid #444;border-radius:6px;color:#aaa;cursor:pointer;flex-shrink:0;padding:0;">↺</button>
-    </div>
-
-    <!-- Row 2: Par tabs full width -->
-    <div style="display:flex;gap:4px;margin-bottom:5px;background:#1a1a1a;border-radius:8px;padding:2px;">
-      <button id="sgCalcTab3" onclick="sgCalcSetHole(3)" style="flex:1;height:28px;font-size:12px;font-weight:700;background:#1a1a1a;color:#888;border:none;border-radius:6px;cursor:pointer;">Par 3</button>
-      <button id="sgCalcTab4" onclick="sgCalcSetHole(4)" style="flex:1;height:28px;font-size:12px;font-weight:700;background:#333;color:#fff;border:none;border-radius:6px;cursor:pointer;">Par 4</button>
-      <button id="sgCalcTab5" onclick="sgCalcSetHole(5)" style="flex:1;height:28px;font-size:12px;font-weight:700;background:#1a1a1a;color:#888;border:none;border-radius:6px;cursor:pointer;">Par 5</button>
-    </div>
-
-    <!-- Row 3: Stats bar compact -->
-    <div id="sgCalcStatsBar" style="background:#1a1a1a;border-radius:8px;padding:5px 10px;margin-bottom:5px;">
-      <div style="display:flex;justify-content:space-around;align-items:center;">
-        <div style="text-align:center;"><div style="font-size:8px;color:#888;text-transform:uppercase;">Exp</div><div id="sgCalcStatExp" style="font-size:15px;font-weight:800;color:#69f0ae;">–</div></div>
-        <div style="text-align:center;"><div style="font-size:8px;color:#888;text-transform:uppercase;">Rem</div><div id="sgCalcStatRemain" style="font-size:15px;font-weight:800;color:#64b5f6;">–</div></div>
-        <div style="text-align:center;"><div style="font-size:8px;color:#888;text-transform:uppercase;">SG</div><div id="sgCalcStatSg" style="font-size:15px;font-weight:800;color:#555;">–</div></div>
-      </div>
-    </div>
-
-    <!-- Interactive SVG -->
-    <div style="background:transparent;border-radius:14px;overflow:hidden;border:1px solid #333;position:relative;">
-      <svg id="sgCalcSvg" viewBox="0 0 340 400" style="width:100%;height:auto;cursor:crosshair;touch-action:none;display:block;"></svg>
-      <canvas id="sgCalcHoleCanvas" width="340" height="400" style="display:none;"></canvas>
-    </div>
-
-    <!-- Shot results -->
-    <div id="sgCalcResults" style="margin-top:10px;"></div>
-  </div>
-</div>
 
 <!-- HELP / INFO PAGE -->
 <div id="helpPage" class="page" style="justify-content:flex-start;padding-top:20px;overflow-y:auto;padding-bottom:80px;align-items:center;">
@@ -415,9 +365,59 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
       </div>
     </div>
 
-    <!-- Strokes Gained Explained -->
+    <!-- Strokes Gained -->
     <div id="helpContent_sg" style="display:none;">
-      <div id="sgExplainerGraphic" style="background:#1a1a1a;border-radius:14px;overflow:hidden;"></div>
+      <!-- Sub-tab toggle buttons -->
+      <div style="display:flex;gap:4px;margin-bottom:12px;background:#111;border-radius:8px;padding:2px;">
+        <button id="sgSubTab_explained" onclick="showSgSubTab('explained')" style="flex:1;height:32px;font-size:11px;font-weight:700;background:#333;color:#fff;border:none;border-radius:6px;cursor:pointer;max-width:none;">SG Explained</button>
+        <button id="sgSubTab_calc" onclick="showSgSubTab('calc')" style="flex:1;height:32px;font-size:11px;font-weight:700;background:#111;color:#888;border:none;border-radius:6px;cursor:pointer;max-width:none;">SG Calculator</button>
+      </div>
+      <!-- SG Explained content -->
+      <div id="sgSubContent_explained">
+        <div id="sgExplainerGraphic" style="background:#1a1a1a;border-radius:14px;overflow:hidden;"></div>
+      </div>
+      <!-- SG Calculator content (relocated) -->
+      <div id="sgSubContent_calc" style="display:none;">
+        <!-- Row 1: HCP + Yardage + Reset -->
+        <div style="display:flex;gap:6px;align-items:center;justify-content:center;margin-bottom:5px;">
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:10px;color:#888;">HCP</span>
+            <select id="sgCalcHcp" onchange="sgCalcReset()" style="background:#222;color:#fff;border:1px solid #444;border-radius:6px;padding:3px 5px;font-size:12px;height:28px;">
+              <option value="Tour Pro">Pro</option>
+              <option value="Scratch">Scr</option>
+              <option value="5">5</option><option value="10" selected>10</option>
+              <option value="15">15</option><option value="20">20</option>
+              <option value="25">25</option><option value="30">30</option>
+            </select>
+          </div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:10px;color:#888;">Yds</span>
+            <input id="sgCalcYardage" type="number" value="400" min="100" max="650" onchange="sgCalcReset()" style="width:52px;height:28px;font-size:12px;text-align:center;background:#222;color:#fff;border:1px solid #444;border-radius:6px;padding:0;">
+          </div>
+          <button onclick="sgCalcReset()" style="height:28px;width:36px;font-size:13px;font-weight:700;background:#333;border:1px solid #444;border-radius:6px;color:#aaa;cursor:pointer;flex-shrink:0;padding:0;">↺</button>
+        </div>
+        <!-- Row 2: Par tabs -->
+        <div style="display:flex;gap:4px;margin-bottom:5px;background:#1a1a1a;border-radius:8px;padding:2px;">
+          <button id="sgCalcTab3" onclick="sgCalcSetHole(3)" style="flex:1;height:28px;font-size:12px;font-weight:700;background:#1a1a1a;color:#888;border:none;border-radius:6px;cursor:pointer;">Par 3</button>
+          <button id="sgCalcTab4" onclick="sgCalcSetHole(4)" style="flex:1;height:28px;font-size:12px;font-weight:700;background:#333;color:#fff;border:none;border-radius:6px;cursor:pointer;">Par 4</button>
+          <button id="sgCalcTab5" onclick="sgCalcSetHole(5)" style="flex:1;height:28px;font-size:12px;font-weight:700;background:#1a1a1a;color:#888;border:none;border-radius:6px;cursor:pointer;">Par 5</button>
+        </div>
+        <!-- Row 3: Stats bar -->
+        <div id="sgCalcStatsBar" style="background:#1a1a1a;border-radius:8px;padding:5px 10px;margin-bottom:5px;">
+          <div style="display:flex;justify-content:space-around;align-items:center;">
+            <div style="text-align:center;"><div style="font-size:8px;color:#888;text-transform:uppercase;">Exp</div><div id="sgCalcStatExp" style="font-size:15px;font-weight:800;color:#69f0ae;">–</div></div>
+            <div style="text-align:center;"><div style="font-size:8px;color:#888;text-transform:uppercase;">Rem</div><div id="sgCalcStatRemain" style="font-size:15px;font-weight:800;color:#64b5f6;">–</div></div>
+            <div style="text-align:center;"><div style="font-size:8px;color:#888;text-transform:uppercase;">SG</div><div id="sgCalcStatSg" style="font-size:15px;font-weight:800;color:#555;">–</div></div>
+          </div>
+        </div>
+        <!-- Interactive SVG -->
+        <div style="background:transparent;border-radius:14px;overflow:hidden;border:1px solid #333;position:relative;">
+          <svg id="sgCalcSvg" viewBox="0 0 340 400" style="width:100%;height:auto;cursor:crosshair;touch-action:none;display:block;"></svg>
+          <canvas id="sgCalcHoleCanvas" width="340" height="400" style="display:none;"></canvas>
+        </div>
+        <!-- Shot results -->
+        <div id="sgCalcResults" style="margin-top:10px;"></div>
+      </div>
     </div>
 
     <!-- FAQs -->
@@ -553,10 +553,6 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
       <div><div style="font-size:0.97rem;font-weight:700;line-height:1;">Performance Analysis</div><div style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:3px;">Uncover your biggest misses &amp; areas to improve</div></div>
     </button>
 
-    <button onclick="show('sgCalcPage')" style="display:flex;align-items:center;gap:13px;height:auto;padding:13px 15px;font-size:15px;font-weight:700;background:#1e40af;border-radius:13px;text-align:left;border:none;">
-      <span style="font-size:20px;width:28px;text-align:center;flex-shrink:0;">📐</span>
-      <div><div style="font-size:0.97rem;font-weight:700;line-height:1;">Strokes Gained Calculator</div><div style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:3px;">Tap holes to see live SG predictions</div></div>
-    </button>
 
     <div style="height:1px;background:#222;margin:3px 0;"></div>
 
@@ -2100,7 +2096,6 @@ var _backTargetMap = {
   'drillsPage': 'practiceHubPage',
   'drillDetailPage': 'drillsPage',
   'studentsPage': 'homePage',
-  'sgCalcPage': 'homePage',
   'helpPage': 'homePage',
   'studentViewPage': 'studentsPage',
   'roundPage': 'homePage',
@@ -10626,19 +10621,10 @@ function sgCalcRenderResults() {
     + '</div></div>';
 }
 
-// Init on page show
+// Init SG calc when navigating to help page
 var _origShow = show;
 show = function(pageId) {
   _origShow(pageId);
-  if (pageId === 'sgCalcPage' && _sgCalcShots.length === 0) {
-    // Set HCP to user preference
-    var userHcp = (currentUser && currentUser.user_metadata && currentUser.user_metadata.hcp_preference) || '10';
-    var hcpMap = { 'pro': 'Tour Pro', '0': 'Scratch', '5': '5', '10': '10', '15': '15', '20': '20', '25': '25', '30': '30' };
-    var hcpVal = hcpMap[userHcp] || '10';
-    var sel = document.getElementById('sgCalcHcp');
-    if (sel) sel.value = hcpVal;
-    sgCalcReset();
-  }
 };
 
 // ── HELP PAGE ──
@@ -10650,6 +10636,27 @@ function showHelpTab(tab) {
     btn.style.color = t === tab ? '#fff' : '#888';
   });
   if (tab === 'sg') renderSGExplainer();
+}
+
+function showSgSubTab(sub) {
+  ['explained','calc'].forEach(function(t) {
+    var el = document.getElementById('sgSubContent_' + t);
+    if (el) el.style.display = t === sub ? 'block' : 'none';
+    var btn = document.getElementById('sgSubTab_' + t);
+    if (btn) {
+      btn.style.background = t === sub ? '#333' : '#111';
+      btn.style.color = t === sub ? '#fff' : '#888';
+    }
+  });
+  if (sub === 'explained') renderSGExplainer();
+  if (sub === 'calc' && _sgCalcShots.length === 0) {
+    var userHcp = (currentUser && currentUser.user_metadata && currentUser.user_metadata.hcp_preference) || '10';
+    var hcpMap = { 'pro': 'Tour Pro', '0': 'Scratch', '5': '5', '10': '10', '15': '15', '20': '20', '25': '25', '30': '30' };
+    var hcpVal = hcpMap[userHcp] || '10';
+    var sel = document.getElementById('sgCalcHcp');
+    if (sel) sel.value = hcpVal;
+    sgCalcReset();
+  }
 }
 
 function renderSGExplainer() {
