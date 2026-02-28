@@ -4247,29 +4247,31 @@ function generateExcelWorkbook(){
   const avgPar5=par5Approaches.length?Math.round(par5Approaches.reduce((a,b)=>a+b,0)/par5Approaches.length):0;
   
   const approachRanges=[
-    {min:101,max:125,shots:[],label:'101-125 yards'},
-    {min:126,max:150,shots:[],label:'126-150 yards'},
-    {min:151,max:175,shots:[],label:'151-175 yards'},
-    {min:176,max:200,shots:[],label:'176-200 yards'},
-    {min:201,max:225,shots:[],label:'201-225 yards'},
-    {min:226,max:250,shots:[],label:'226-250 yards'},
-    {min:251,max:275,shots:[],label:'251-275 yards'},
-    {min:276,max:999,shots:[],label:'276+ yards'}
+    {min:101,max:125,shots:[],total:0,label:'101-125 yards'},
+    {min:126,max:150,shots:[],total:0,label:'126-150 yards'},
+    {min:151,max:175,shots:[],total:0,label:'151-175 yards'},
+    {min:176,max:200,shots:[],total:0,label:'176-200 yards'},
+    {min:201,max:225,shots:[],total:0,label:'201-225 yards'},
+    {min:226,max:250,shots:[],total:0,label:'226-250 yards'},
+    {min:251,max:275,shots:[],total:0,label:'251-275 yards'},
+    {min:276,max:999,shots:[],total:0,label:'276+ yards'}
   ];
-  
+
   allHoles.forEach(h=>{
     h.shots.forEach((s,idx)=>{
       const distBefore=s.distanceBefore||0;
-      if(!s.isPutt&&distBefore>100&&s.lie==='GREEN'){
+      const isAppAttempt=!s.isPutt&&distBefore>100&&(s.lie==='GREEN'||s.lie==='HOLED'||(s.lie&&s.lie.startsWith('MISS '))||s.lie==='GS BUNKER');
+      if(isAppAttempt){
         approachRanges.forEach(r=>{
           if(distBefore>=r.min&&distBefore<=r.max){
-            r.shots.push(s.distanceAfter||0);
+            r.total++;
+            if(s.lie==='GREEN'||s.lie==='HOLED') r.shots.push(s.distanceAfter||0);
           }
         });
       }
     });
   });
-  
+
   let approachData = [
     ['APPROACH'],
     [],
@@ -4289,7 +4291,7 @@ function generateExcelWorkbook(){
   
   approachRanges.forEach(r=>{
     const avg=r.shots.length?Math.round(r.shots.reduce((a,b)=>a+b,0)/r.shots.length):0;
-    approachData.push([r.label, r.shots.length, avg+' ft']);
+    approachData.push([r.label, r.total, r.shots.length>0?avg+' ft':'–']);
   });
   
   approachData.push([]);
@@ -4977,34 +4979,36 @@ function generateCSV(){
   const avgPar5=par5Approaches.length?Math.round(par5Approaches.reduce((a,b)=>a+b,0)/par5Approaches.length):0;
   
   csv+='Approach by Distance,# of Shots,Avg Proximity\n';
-  
+
   const approachRanges=[
-    {min:101,max:125,shots:[],label:'101-125 yards'},
-    {min:126,max:150,shots:[],label:'126-150 yards'},
-    {min:151,max:175,shots:[],label:'151-175 yards'},
-    {min:176,max:200,shots:[],label:'176-200 yards'},
-    {min:201,max:225,shots:[],label:'201-225 yards'},
-    {min:226,max:250,shots:[],label:'226-250 yards'},
-    {min:251,max:275,shots:[],label:'251-275 yards'},
-    {min:276,max:999,shots:[],label:'276+ yards'}
+    {min:101,max:125,shots:[],total:0,label:'101-125 yards'},
+    {min:126,max:150,shots:[],total:0,label:'126-150 yards'},
+    {min:151,max:175,shots:[],total:0,label:'151-175 yards'},
+    {min:176,max:200,shots:[],total:0,label:'176-200 yards'},
+    {min:201,max:225,shots:[],total:0,label:'201-225 yards'},
+    {min:226,max:250,shots:[],total:0,label:'226-250 yards'},
+    {min:251,max:275,shots:[],total:0,label:'251-275 yards'},
+    {min:276,max:999,shots:[],total:0,label:'276+ yards'}
   ];
-  
+
   allHoles.forEach(h=>{
     h.shots.forEach((s,idx)=>{
       const distBefore=s.distanceBefore||0;
-      if(!s.isPutt&&distBefore>100&&s.lie==='GREEN'){
+      const isAppAttempt=!s.isPutt&&distBefore>100&&(s.lie==='GREEN'||s.lie==='HOLED'||(s.lie&&s.lie.startsWith('MISS '))||s.lie==='GS BUNKER');
+      if(isAppAttempt){
         approachRanges.forEach(r=>{
           if(distBefore>=r.min&&distBefore<=r.max){
-            r.shots.push(s.distanceAfter||0);
+            r.total++;
+            if(s.lie==='GREEN'||s.lie==='HOLED') r.shots.push(s.distanceAfter||0);
           }
         });
       }
     });
   });
-  
+
   approachRanges.forEach(r=>{
     const avg=r.shots.length?Math.round(r.shots.reduce((a,b)=>a+b,0)/r.shots.length):0;
-    csv+=`${r.label},${r.shots.length},${avg} ft\n`;
+    csv+=`${r.label},${r.total},${r.shots.length>0?avg+' ft':'–'}\n`;
   });
   
   csv+='\n';
@@ -5894,7 +5898,20 @@ async function viewSavedRound(roundId) {
     if (rd.stats.onePutts !== undefined) onePuttMade = rd.stats.onePutts;
     if (rd.stats.threePutts !== undefined) threePlusPutts = rd.stats.threePutts;
   }
-  
+
+  // Recalculate missed green directions from shot data
+  allHoles.forEach(h => {
+    (h.shots || []).forEach(s => {
+      if (s.lie && s.lie.startsWith('MISS ')) {
+        girOpp++;
+        if (s.lie === 'MISS LEFT') missLeft++;
+        if (s.lie === 'MISS RIGHT') missRight++;
+        if (s.lie === 'MISS SHORT') missShort++;
+        if (s.lie === 'MISS LONG') missLong++;
+      }
+    });
+  });
+
   currentHole = allHoles.length + 1;
   scoreBar.style.display = 'none';
   
@@ -8947,7 +8964,7 @@ function renderDashboard(data, hcp, targetId) {
     par3TeePen:0, par45TeePen:0, appPen:0, sgPen:0,
     missShort:0, missLong:0, missLeft:0, missRight:0,
     allPuttRanges: [{min:0,max:3,m:0,t:0,l:'0-3 ft'},{min:4,max:7,m:0,t:0,l:'4-7 ft'},{min:8,max:11,m:0,t:0,l:'8-11 ft'},{min:12,max:15,m:0,t:0,l:'12-15 ft'},{min:16,max:20,m:0,t:0,l:'16-20 ft'},{min:21,max:30,m:0,t:0,l:'21-30 ft'},{min:31,max:40,m:0,t:0,l:'31-40 ft'},{min:41,max:50,m:0,t:0,l:'41-50 ft'},{min:51,max:999,m:0,t:0,l:'50+ ft'}],
-    appRanges: [{min:101,max:125,s:[],l:'101-125'},{min:126,max:150,s:[],l:'126-150'},{min:151,max:175,s:[],l:'151-175'},{min:176,max:200,s:[],l:'176-200'},{min:201,max:225,s:[],l:'201-225'},{min:226,max:250,s:[],l:'226-250'},{min:251,max:275,s:[],l:'251-275'},{min:276,max:999,s:[],l:'276+'}],
+    appRanges: [{min:101,max:125,s:[],total:0,l:'101-125'},{min:126,max:150,s:[],total:0,l:'126-150'},{min:151,max:175,s:[],total:0,l:'151-175'},{min:176,max:200,s:[],total:0,l:'176-200'},{min:201,max:225,s:[],total:0,l:'201-225'},{min:226,max:250,s:[],total:0,l:'226-250'},{min:251,max:275,s:[],total:0,l:'251-275'},{min:276,max:999,s:[],total:0,l:'276+'}],
     shortRanges: [{min:0,max:25,s:[],l:'0-25'},{min:26,max:50,s:[],l:'26-50'},{min:51,max:75,s:[],l:'51-75'},{min:76,max:100,s:[],l:'76-100'}],
     par3AppDist:[], par4AppDist:[], par5AppDist:[],
     par3AppProx:[], par4AppProx:[], par5AppProx:[],
@@ -9101,7 +9118,8 @@ function renderDashboard(data, hcp, targetId) {
           if (dd>A.longestDrive) A.longestDrive=dd; if (dd<A.shortestDrive) A.shortestDrive=dd;
         }
         if (s.lie==='PENALTY') { var prev5=shots[idx-1]; if(prev5){ if(prev5.shotNum===1){if(h.par===3)A.par3TeePen++;else A.par45TeePen++;}else if(prev5.distanceBefore>30)A.appPen++;else A.sgPen++;} }
-        if (!s.isPutt&&(s.distanceBefore||0)>100&&s.lie==='GREEN') { A.appRanges.forEach(function(rr){if((s.distanceBefore||0)>=rr.min&&(s.distanceBefore||0)<=rr.max)rr.s.push(s.distanceAfter||0);}); }
+        var _db=s.distanceBefore||0;var _isAppAttempt=!s.isPutt&&_db>100&&(s.lie==='GREEN'||s.lie==='HOLED'||(s.lie&&s.lie.startsWith('MISS '))||s.lie==='GS BUNKER');
+        if(_isAppAttempt){A.appRanges.forEach(function(rr){if(_db>=rr.min&&_db<=rr.max){rr.total++;if(s.lie==='GREEN'||s.lie==='HOLED')rr.s.push(s.distanceAfter||0);}});}
         if (!s.isPutt&&(s.distanceBefore||0)>0&&(s.distanceBefore||0)<=100&&s.lie==='GREEN') { A.shortRanges.forEach(function(rr){if((s.distanceBefore||0)>=rr.min&&(s.distanceBefore||0)<=rr.max)rr.s.push(s.distanceAfter||0);}); }
         if (s.lie&&s.lie.includes('BUNKER')&&shots[idx+1]&&shots[idx+1].lie==='GREEN') { A.bunkerProx.push(shots[idx+1].distanceAfter||0); }
         if (s.isPutt&&(s.distanceBefore||0)>0) { A.allPuttRanges.forEach(function(rr){if((s.distanceBefore||0)>=rr.min&&(s.distanceBefore||0)<=rr.max){rr.t++;if(s.lie==='HOLED'||s.distanceAfter===0)rr.m++;}}); }
@@ -9291,7 +9309,7 @@ function renderDashboard(data, hcp, targetId) {
   html+=row('Left',A.missLeft,totalMiss>0?pct(A.missLeft,totalMiss):'');
   html+=row('Right',A.missRight,totalMiss>0?pct(A.missRight,totalMiss):'');
   html+=hdr('APPROACH BY DISTANCE');
-  var appRows=[];A.appRanges.forEach(function(r){if(r.s.length>0)appRows.push([r.l+' yds',r.s.length+' shots',davg(r.s)+' ft']);});
+  var appRows=[];A.appRanges.forEach(function(r){if(r.total>0)appRows.push([r.l+' yds',r.total+' shots',r.s.length>0?davg(r.s)+' ft':'\u2013']);});
   html+=tbl(['Distance','Shots','Avg Proximity'],appRows);
   html+=hdr('APPROACH BY PAR');
   html+=row('Par 3 Avg Distance',davg(A.par3AppDist)+' yds',A.par3AppDist.length+' holes');
@@ -9852,7 +9870,7 @@ function showFullStats() {
   allHoles.forEach(function(h){ h.shots.forEach(function(s,idx){ if(s.lie==='PENALTY'){ var prev=h.shots[idx-1]; if(prev){ if(prev.shotNum===1){if(h.par===3)par3TeePen++;else par45TeePen++;}else if(prev.distanceBefore>100)appPenF++;else sgPenF++;} } }); });
   
   // Approach ranges
-  var appRangesF=[{min:101,max:125,s:[],l:'101-125'},{min:126,max:150,s:[],l:'126-150'},{min:151,max:175,s:[],l:'151-175'},{min:176,max:200,s:[],l:'176-200'},{min:201,max:225,s:[],l:'201-225'},{min:226,max:250,s:[],l:'226-250'},{min:251,max:275,s:[],l:'251-275'},{min:276,max:999,s:[],l:'276+'}];
+  var appRangesF=[{min:101,max:125,s:[],total:0,l:'101-125'},{min:126,max:150,s:[],total:0,l:'126-150'},{min:151,max:175,s:[],total:0,l:'151-175'},{min:176,max:200,s:[],total:0,l:'176-200'},{min:201,max:225,s:[],total:0,l:'201-225'},{min:226,max:250,s:[],total:0,l:'226-250'},{min:251,max:275,s:[],total:0,l:'251-275'},{min:276,max:999,s:[],total:0,l:'276+'}];
   var shortRangesF=[{min:0,max:25,s:[],l:'0-25'},{min:26,max:50,s:[],l:'26-50'},{min:51,max:75,s:[],l:'51-75'},{min:76,max:100,s:[],l:'76-100'}];
   var bunkerProxF=[];
   var par3AppD=[],par4AppD=[],par5AppD=[],par3AppP=[],par4AppP=[],par5AppP=[];
@@ -9863,7 +9881,8 @@ function showFullStats() {
     var shots=h.shots||[];
     shots.forEach(function(s,idx){
       var db=s.distanceBefore||0;
-      if(!s.isPutt&&db>100&&s.lie==='GREEN'){appRangesF.forEach(function(r){if(db>=r.min&&db<=r.max)r.s.push(s.distanceAfter||0);});}
+      var isAppAttempt=!s.isPutt&&db>100&&(s.lie==='GREEN'||s.lie==='HOLED'||(s.lie&&s.lie.startsWith('MISS '))||s.lie==='GS BUNKER');
+      if(isAppAttempt){appRangesF.forEach(function(r){if(db>=r.min&&db<=r.max){r.total++;if(s.lie==='GREEN'||s.lie==='HOLED')r.s.push(s.distanceAfter||0);}});}
       if(!s.isPutt&&db>0&&db<=100&&s.lie==='GREEN'){shortRangesF.forEach(function(r){if(db>=r.min&&db<=r.max)r.s.push(s.distanceAfter||0);});}
       if(s.lie&&s.lie.includes('BUNKER')&&shots[idx+1]&&shots[idx+1].lie==='GREEN'){bunkerProxF.push(shots[idx+1].distanceAfter||0);}
       if(s.isPutt&&db>0){puttRangesF.forEach(function(r){if(db>=r.min&&db<=r.max){r.t++;if(s.lie==='HOLED'||s.distanceAfter===0)r.m++;}});}
@@ -10036,7 +10055,7 @@ function showFullStats() {
   t3+=hdr('MISSED GREENS');
   t3+=row('Short',''+missShort);t3+=row('Long',''+missLong);t3+=row('Left',''+missLeft);t3+=row('Right',''+missRight);
   t3+=hdr('APPROACH BY DISTANCE');
-  var apR=[];appRangesF.forEach(function(r){if(r.s.length>0)apR.push([r.l+' yds',r.s.length+' shots',davg(r.s)+' ft']);});
+  var apR=[];appRangesF.forEach(function(r){if(r.total>0)apR.push([r.l+' yds',r.total+' shots',r.s.length>0?davg(r.s)+' ft':'\u2013']);});
   t3+=tbl(['Distance','Shots','Avg Prox'],apR);
   t3+=hdr('APPROACH BY PAR');
   t3+=row('Par 3 Avg Distance',davg(par3AppD)+' yds',par3AppD.length+' shots');
