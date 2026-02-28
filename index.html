@@ -1467,8 +1467,9 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
           <input id="svNoteLessonDate" type="date" style="flex:1;height:34px;background:#222;color:#fff;border:1px solid #444;border-radius:8px;font-size:12px;padding:0 8px;">
         </div>
         <textarea id="svNoteText" placeholder="Write feedback..." rows="3" style="width:100%;box-sizing:border-box;background:#222;color:#fff;border:1px solid #444;border-radius:8px;font-size:13px;padding:8px;resize:vertical;margin-bottom:8px;"></textarea>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <button onclick="sendSvNote()" style="flex:1;height:38px;font-size:13px;font-weight:700;background:#7e22ce;border:none;border-radius:8px;color:#fff;max-width:none;cursor:pointer;">Send</button>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button onclick="sendSvNote()" id="svNoteSendBtn" style="flex:1;height:38px;font-size:13px;font-weight:700;background:#7e22ce;border:none;border-radius:8px;color:#fff;max-width:none;cursor:pointer;">Send</button>
+          <button onclick="cancelSvNoteEdit()" id="svNoteCancelBtn" style="display:none;height:38px;font-size:13px;font-weight:700;background:#333;border:none;border-radius:8px;color:#ccc;max-width:none;cursor:pointer;padding:0 14px;">Cancel</button>
           <div id="svNoteMsg" style="font-size:11px;min-height:14px;flex:1;"></div>
         </div>
       </div>
@@ -12082,7 +12083,7 @@ function renderCombCard(c, canDelete){
   var strokesLine = '';
   
   if(c.combine_type==='Driver' && c.avg_pts!==null && c.avg_pts!==undefined){
-    sgLine='<span style="color:#bb86fc;font-size:15px;font-weight:700;">'+(+c.avg_pts).toFixed(0)+' avg yds</span>';
+    sgLine='<span style="color:#bb86fc;font-size:15px;font-weight:700;">'+(+c.avg_pts).toFixed(0)+' avg score</span>';
   } else if(c.total_sg!==null && c.total_sg!==undefined){
     var s=parseFloat(c.total_sg);
     var col=s>=0?'#69f0ae':'#ff5252';
@@ -12109,11 +12110,15 @@ function renderCombCard(c, canDelete){
   var dateStr=c.combine_date?new Date(c.combine_date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'';
   var combBadge = c.is_combine ? '<span style="font-size:10px;background:#1d4ed8;color:#fff;padding:2px 6px;border-radius:4px;margin-left:6px;font-weight:600;">COMBINE</span>' : '';
   var delBtn = canDelete ? '<button class="comb-hist-del" onclick="deleteCombScore(\''+c.id+'\')" title="Delete">🗑 Delete</button>' : '';
-  var metaStr = c.holes_count + '-hole • vs '+c.handicap+strokesLine+(c.note?' • <em style="color:#aaa;">'+escapeHtml(c.note)+'</em>':'');
+  var noteHtml = c.note ? ' • <em style="color:#aaa;">'+escapeHtml(c.note)+'</em>' : '';
+  var metaStr = c.holes_count + '-hole • vs '+c.handicap+strokesLine+noteHtml;
+  var editNoteBtn = canDelete ? '<button onclick="editCombNote(\''+c.id+'\')" style="background:transparent;border:1px solid #333;border-radius:6px;color:#888;font-size:11px;font-weight:600;padding:3px 8px;cursor:pointer;height:auto;width:auto;max-width:none;margin-top:6px;">✏️ Note</button>' : '';
   var detailsBtn = c.row_data ? '<button onclick="toggleCombDetails(\''+c.id+'\')" style="background:transparent;border:1px solid #333;border-radius:6px;color:#888;font-size:11px;font-weight:600;padding:3px 8px;cursor:pointer;height:auto;width:auto;max-width:none;margin-top:6px;">📊 Details</button>' : '';
-  // Store row_data globally for details view
+  // Store data globally for details/edit views
   if (!window._combRowDataMap) window._combRowDataMap = {};
   if (c.row_data) window._combRowDataMap[c.id] = { data: c.row_data, type: c.combine_type };
+  if (!window._combNoteMap) window._combNoteMap = {};
+  window._combNoteMap[c.id] = c.note || '';
   return '<div class="comb-hist-card" id="combcard-'+c.id+'">'
     +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">'
     +'<div><span style="font-weight:700;color:#4caf50;font-size:14px;">'+escapeHtml(c.combine_type||'')+combBadge+'</span></div>'
@@ -12121,7 +12126,8 @@ function renderCombCard(c, canDelete){
     +'</div>'
     +scoreStr
     +'<div style="font-size:11px;color:#666;margin-top:3px;">'+metaStr+'</div>'
-    +detailsBtn
+    +'<div style="display:flex;gap:6px;flex-wrap:wrap;">'+editNoteBtn+detailsBtn+'</div>'
+    +'<div id="combnote-'+c.id+'" style="display:none;margin-top:8px;"></div>'
     +'<div id="combdetail-'+c.id+'" style="display:none;margin-top:8px;"></div>'
     +'</div>';
 }
@@ -12187,6 +12193,43 @@ async function deleteCombScore(id){
   if(error){ alert('Delete failed: '+error.message); return; }
   var card = document.getElementById('combcard-'+id);
   if(card) card.remove();
+}
+
+function editCombNote(id) {
+  var panel = document.getElementById('combnote-' + id);
+  if (!panel) return;
+  if (panel.style.display !== 'none') { panel.style.display = 'none'; return; }
+  var curNote = (window._combNoteMap || {})[id] || '';
+  panel.innerHTML = '<div style="background:#1c1c1c;border:1px solid #444;border-radius:8px;padding:10px;">'
+    + '<input type="text" id="combnote-input-'+id+'" value="'+escapeHtml(curNote)+'" placeholder="Add a note..." style="width:100%;box-sizing:border-box;background:#2a2a2a;color:#e0e0e0;border:1px solid #333;border-radius:6px;padding:7px 10px;font-size:0.9rem;margin-bottom:8px;">'
+    + '<div style="display:flex;gap:6px;">'
+    + '<button onclick="saveCombNote(\''+id+'\')" style="flex:1;height:34px;background:#2E7D32;border:none;border-radius:6px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;max-width:none;">Save</button>'
+    + '<button onclick="document.getElementById(\'combnote-'+id+'\').style.display=\'none\'" style="height:34px;background:#333;border:none;border-radius:6px;color:#ccc;font-size:12px;cursor:pointer;padding:0 14px;max-width:none;">Cancel</button>'
+    + '</div>'
+    + '<div id="combnote-msg-'+id+'" style="font-size:11px;min-height:14px;margin-top:4px;"></div>'
+    + '</div>';
+  panel.style.display = 'block';
+  document.getElementById('combnote-input-' + id).focus();
+}
+
+async function saveCombNote(id) {
+  var input = document.getElementById('combnote-input-' + id);
+  var msgEl = document.getElementById('combnote-msg-' + id);
+  if (!input) return;
+  var newNote = input.value.trim();
+  msgEl.style.color = '#888'; msgEl.textContent = 'Saving...';
+  var { error } = await _sb.from('combine_scores').update({ note: newNote }).eq('id', id).eq('user_id', currentUser.id);
+  if (error) { msgEl.style.color = '#f44'; msgEl.textContent = 'Error: ' + error.message; return; }
+  // Update cached data
+  if (window._combNoteMap) window._combNoteMap[id] = newNote;
+  // Update the note display in the card
+  var card = document.getElementById('combcard-' + id);
+  if (card) {
+    // Reload history to reflect the updated note
+    if (typeof loadPHCombineHistory === 'function') loadPHCombineHistory();
+  }
+  msgEl.style.color = '#4caf50'; msgEl.textContent = '✓ Saved!';
+  setTimeout(function(){ document.getElementById('combnote-' + id).style.display = 'none'; }, 1000);
 }
 
 /* ── Navigation helpers ── */
@@ -13220,10 +13263,16 @@ function renderSvNotes(data) {
     }
 
     var noteText = escapeHtml(n.note_text);
+    // Render bullet points: lines starting with "- " or "• " become styled bullets
+    noteText = noteText.replace(/^[-•]\s+(.*)$/gm, '<div style="display:flex;gap:6px;align-items:flex-start;"><span style="color:#a78bfa;">•</span><span>$1</span></div>');
     if (query.trim()) {
       var re = new RegExp('(' + query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
       noteText = noteText.replace(re, '<mark style="background:#4c1d95;color:#e9d5ff;border-radius:3px;padding:0 2px;">$1</mark>');
     }
+    // Preserve newlines that aren't already bullet divs
+    noteText = noteText.replace(/\n/g, '<br>');
+
+    var editBtn = n.id ? '<button onclick="editSvNote(\'' + n.id + '\')" style="background:transparent;border:none;color:#555;font-size:14px;cursor:pointer;padding:2px 4px;height:auto;width:auto;max-width:none;" title="Edit note">✏️</button>' : '';
 
     return '<div id="svNote_' + (n.id || idx) + '" style="border-bottom:1px solid #222;padding:12px 0;">'
       + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;flex-wrap:wrap;gap:4px;">'
@@ -13232,11 +13281,41 @@ function renderSvNotes(data) {
       + '</div>' + typeBadge + '</div>'
       + '<div style="display:flex;align-items:center;gap:8px;">'
       + '<div style="font-size:10px;color:#555;">' + sentDate + '</div>'
+      + editBtn
       + (n.id ? '<button onclick="deleteSvNote(\'' + n.id + '\')" style="background:transparent;border:none;color:#555;font-size:14px;cursor:pointer;padding:2px 4px;height:auto;width:auto;max-width:none;" title="Delete note">🗑</button>' : '')
       + '</div></div>'
       + lessonLine
       + '<div style="font-size:13px;color:#ddd;line-height:1.6;">' + noteText + '</div></div>';
   }).join('');
+}
+
+var _editingSvNoteId = null;
+
+function editSvNote(noteId) {
+  var note = (window._svAllNotes || []).find(function(n){ return n.id === noteId; });
+  if (!note) return;
+  _editingSvNoteId = noteId;
+  document.getElementById('svNoteText').value = note.note_text || '';
+  document.getElementById('svNoteLessonDate').value = note.lesson_date || '';
+  document.getElementById('svNoteType').value = note.note_type || 'general';
+  var sendBtn = document.getElementById('svNoteSendBtn');
+  if (sendBtn) { sendBtn.textContent = 'Update'; sendBtn.style.background = '#b45309'; }
+  var cancelBtn = document.getElementById('svNoteCancelBtn');
+  if (cancelBtn) cancelBtn.style.display = '';
+  var msg = document.getElementById('svNoteMsg');
+  msg.style.color = '#f59e0b'; msg.textContent = 'Editing note';
+  document.getElementById('svNoteText').focus();
+}
+
+function cancelSvNoteEdit() {
+  _editingSvNoteId = null;
+  document.getElementById('svNoteText').value = '';
+  document.getElementById('svNoteLessonDate').value = '';
+  var sendBtn = document.getElementById('svNoteSendBtn');
+  if (sendBtn) { sendBtn.textContent = 'Send'; sendBtn.style.background = '#7e22ce'; }
+  var cancelBtn = document.getElementById('svNoteCancelBtn');
+  if (cancelBtn) cancelBtn.style.display = 'none';
+  document.getElementById('svNoteMsg').textContent = '';
 }
 
 async function sendSvNote() {
@@ -13246,8 +13325,27 @@ async function sendSvNote() {
   var msg = document.getElementById('svNoteMsg');
   if (!text) { msg.style.color = '#f44'; msg.textContent = 'Write a note first'; return; }
   if (!_currentStudentId) { msg.style.color = '#f44'; msg.textContent = 'No student selected'; return; }
-  msg.style.color = '#888'; msg.textContent = 'Sending...';
+  msg.style.color = '#888'; msg.textContent = _editingSvNoteId ? 'Updating...' : 'Sending...';
 
+  // EDIT existing note
+  if (_editingSvNoteId) {
+    var updateData = { note_text: text, note_type: noteType, lesson_date: lessonDate || null };
+    var { error } = await _sb.from('coach_notes').update(updateData).eq('id', _editingSvNoteId).eq('coach_id', currentUser.id);
+    if (error) { msg.style.color = '#f44'; msg.textContent = 'Error: ' + error.message; return; }
+    msg.style.color = '#4CAF50'; msg.textContent = '✓ Updated!';
+    _editingSvNoteId = null;
+    var sendBtn = document.getElementById('svNoteSendBtn');
+    if (sendBtn) { sendBtn.textContent = 'Send'; sendBtn.style.background = '#7e22ce'; }
+    var cancelBtn = document.getElementById('svNoteCancelBtn');
+    if (cancelBtn) cancelBtn.style.display = 'none';
+    document.getElementById('svNoteText').value = '';
+    document.getElementById('svNoteLessonDate').value = '';
+    loadSvNotes();
+    setTimeout(function(){ msg.textContent = ''; }, 3000);
+    return;
+  }
+
+  // NEW note
   var { data: coachProfile } = await _sb.from('profiles').select('display_name').eq('id', currentUser.id).single();
   var coachName = (coachProfile && coachProfile.display_name) || 'Coach';
 
