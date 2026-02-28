@@ -12074,10 +12074,11 @@ async function loadStudentCombines(){
   if(error){msg.textContent='Error: '+error.message;return;}
   if(!data||data.length===0){msg.textContent='No combine scores found for this student.';return;}
   msg.textContent='';
-  list.innerHTML = data.map(function(c){ return renderCombCard(c, false); }).join('');
+  list.innerHTML = data.map(function(c){ return renderCombCard(c, false, true); }).join('');
 }
 
-function renderCombCard(c, canDelete){
+function renderCombCard(c, canDelete, canEditNote){
+  if (canEditNote === undefined) canEditNote = canDelete;
   var sgLine = '';
   var gradeLine = '';
   var strokesLine = '';
@@ -12112,7 +12113,7 @@ function renderCombCard(c, canDelete){
   var delBtn = canDelete ? '<button class="comb-hist-del" onclick="deleteCombScore(\''+c.id+'\')" title="Delete">🗑 Delete</button>' : '';
   var noteHtml = c.note ? ' • <em style="color:#aaa;">'+escapeHtml(c.note)+'</em>' : '';
   var metaStr = c.holes_count + '-hole • vs '+c.handicap+strokesLine+noteHtml;
-  var editNoteBtn = canDelete ? '<button onclick="editCombNote(\''+c.id+'\')" style="background:transparent;border:1px solid #333;border-radius:6px;color:#888;font-size:11px;font-weight:600;padding:3px 8px;cursor:pointer;height:auto;width:auto;max-width:none;margin-top:6px;">✏️ Note</button>' : '';
+  var editNoteBtn = canEditNote ? '<button onclick="editCombNote(\''+c.id+'\',\''+c.user_id+'\')" style="background:transparent;border:1px solid #333;border-radius:6px;color:#888;font-size:11px;font-weight:600;padding:3px 8px;cursor:pointer;height:auto;width:auto;max-width:none;margin-top:6px;">✏️ Note</button>' : '';
   var detailsBtn = c.row_data ? '<button onclick="toggleCombDetails(\''+c.id+'\')" style="background:transparent;border:1px solid #333;border-radius:6px;color:#888;font-size:11px;font-weight:600;padding:3px 8px;cursor:pointer;height:auto;width:auto;max-width:none;margin-top:6px;">📊 Details</button>' : '';
   // Store data globally for details/edit views
   if (!window._combRowDataMap) window._combRowDataMap = {};
@@ -12195,15 +12196,16 @@ async function deleteCombScore(id){
   if(card) card.remove();
 }
 
-function editCombNote(id) {
+function editCombNote(id, userId) {
   var panel = document.getElementById('combnote-' + id);
   if (!panel) return;
   if (panel.style.display !== 'none') { panel.style.display = 'none'; return; }
   var curNote = (window._combNoteMap || {})[id] || '';
+  var ownerId = userId || currentUser.id;
   panel.innerHTML = '<div style="background:#1c1c1c;border:1px solid #444;border-radius:8px;padding:10px;">'
     + '<input type="text" id="combnote-input-'+id+'" value="'+escapeHtml(curNote)+'" placeholder="Add a note..." style="width:100%;box-sizing:border-box;background:#2a2a2a;color:#e0e0e0;border:1px solid #333;border-radius:6px;padding:7px 10px;font-size:0.9rem;margin-bottom:8px;">'
     + '<div style="display:flex;gap:6px;">'
-    + '<button onclick="saveCombNote(\''+id+'\')" style="flex:1;height:34px;background:#2E7D32;border:none;border-radius:6px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;max-width:none;">Save</button>'
+    + '<button onclick="saveCombNote(\''+id+'\',\''+ownerId+'\')" style="flex:1;height:34px;background:#2E7D32;border:none;border-radius:6px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;max-width:none;">Save</button>'
     + '<button onclick="document.getElementById(\'combnote-'+id+'\').style.display=\'none\'" style="height:34px;background:#333;border:none;border-radius:6px;color:#ccc;font-size:12px;cursor:pointer;padding:0 14px;max-width:none;">Cancel</button>'
     + '</div>'
     + '<div id="combnote-msg-'+id+'" style="font-size:11px;min-height:14px;margin-top:4px;"></div>'
@@ -12212,24 +12214,34 @@ function editCombNote(id) {
   document.getElementById('combnote-input-' + id).focus();
 }
 
-async function saveCombNote(id) {
+async function saveCombNote(id, userId) {
   var input = document.getElementById('combnote-input-' + id);
   var msgEl = document.getElementById('combnote-msg-' + id);
   if (!input) return;
   var newNote = input.value.trim();
+  var ownerId = userId || currentUser.id;
   msgEl.style.color = '#888'; msgEl.textContent = 'Saving...';
-  var { error } = await _sb.from('combine_scores').update({ note: newNote }).eq('id', id).eq('user_id', currentUser.id);
+  var { data: updatedRows, error } = await _sb.from('combine_scores').update({ note: newNote }).eq('id', id).eq('user_id', ownerId).select();
   if (error) { msgEl.style.color = '#f44'; msgEl.textContent = 'Error: ' + error.message; return; }
+  if (!updatedRows || updatedRows.length === 0) { msgEl.style.color = '#f44'; msgEl.textContent = 'Error: Could not update note'; return; }
   // Update cached data
   if (window._combNoteMap) window._combNoteMap[id] = newNote;
-  // Update the note display in the card
+  // Update the note display in the card directly
   var card = document.getElementById('combcard-' + id);
   if (card) {
-    // Reload history to reflect the updated note
-    if (typeof loadPHCombineHistory === 'function') loadPHCombineHistory();
+    var metaDiv = card.querySelector('div[style*="font-size:11px;color:#666"]');
+    if (metaDiv) {
+      var existingNote = metaDiv.querySelector('em');
+      if (existingNote) {
+        if (newNote) { existingNote.textContent = newNote; }
+        else { existingNote.remove(); }
+      } else if (newNote) {
+        metaDiv.innerHTML += ' \u2022 <em style="color:#aaa;">' + escapeHtml(newNote) + '</em>';
+      }
+    }
   }
-  msgEl.style.color = '#4caf50'; msgEl.textContent = '✓ Saved!';
-  setTimeout(function(){ document.getElementById('combnote-' + id).style.display = 'none'; }, 1000);
+  msgEl.style.color = '#4caf50'; msgEl.textContent = '\u2713 Saved!';
+  setTimeout(function(){ var panel = document.getElementById('combnote-' + id); if (panel) panel.style.display = 'none'; }, 1000);
 }
 
 /* ── Navigation helpers ── */
@@ -13330,8 +13342,14 @@ async function sendSvNote() {
   // EDIT existing note
   if (_editingSvNoteId) {
     var updateData = { note_text: text, note_type: noteType, lesson_date: lessonDate || null };
-    var { error } = await _sb.from('coach_notes').update(updateData).eq('id', _editingSvNoteId).eq('coach_id', currentUser.id);
+    var { data: updatedRows, error } = await _sb.from('coach_notes').update(updateData).eq('id', _editingSvNoteId).eq('coach_id', currentUser.id).select();
     if (error) { msg.style.color = '#f44'; msg.textContent = 'Error: ' + error.message; return; }
+    if (!updatedRows || updatedRows.length === 0) { msg.style.color = '#f44'; msg.textContent = 'Error: Could not update note'; return; }
+    // Update local cache immediately so UI reflects changes
+    if (window._svAllNotes) {
+      var cached = window._svAllNotes.find(function(n){ return n.id === _editingSvNoteId; });
+      if (cached) { cached.note_text = text; cached.note_type = noteType; cached.lesson_date = lessonDate || null; }
+    }
     msg.style.color = '#4CAF50'; msg.textContent = '✓ Updated!';
     _editingSvNoteId = null;
     var sendBtn = document.getElementById('svNoteSendBtn');
@@ -13340,7 +13358,8 @@ async function sendSvNote() {
     if (cancelBtn) cancelBtn.style.display = 'none';
     document.getElementById('svNoteText').value = '';
     document.getElementById('svNoteLessonDate').value = '';
-    loadSvNotes();
+    await loadSvNotes();
+    filterSvNotes();
     setTimeout(function(){ msg.textContent = ''; }, 3000);
     return;
   }
