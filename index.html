@@ -738,11 +738,12 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
     <div style="font-size:22px;font-weight:800;margin-bottom:6px;">Practice Hub</div>
     <div style="font-size:13px;color:#666;margin-bottom:14px;">Combines, Drills & Practice</div>
 
-    <!-- 3-tab bar -->
-    <div style="display:flex;gap:0;width:100%;max-width:360px;margin-bottom:0;border-radius:10px;overflow:hidden;">
-      <button onclick="setPracticeHubTab('combines')" id="phTabCombines" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#1d4ed8;border:none;color:#fff;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Combines</button>
-      <button onclick="setPracticeHubTab('drills')" id="phTabDrills" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#222;border:none;color:#888;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Drills</button>
-      <button onclick="setPracticeHubTab('plan')" id="phTabPlan" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#222;border:none;color:#888;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Practice</button>
+    <!-- 4-tab bar -->
+    <div style="display:flex;gap:0;width:100%;max-width:420px;margin-bottom:0;border-radius:10px;overflow:hidden;">
+      <button onclick="setPracticeHubTab('combines')" id="phTabCombines" style="flex:1;height:40px;font-size:12px;font-weight:700;background:#1d4ed8;border:none;color:#fff;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Combines</button>
+      <button onclick="setPracticeHubTab('driver')" id="phTabDriver" style="flex:1;height:40px;font-size:12px;font-weight:700;background:#222;border:none;color:#888;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Driver</button>
+      <button onclick="setPracticeHubTab('drills')" id="phTabDrills" style="flex:1;height:40px;font-size:12px;font-weight:700;background:#222;border:none;color:#888;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Drills</button>
+      <button onclick="setPracticeHubTab('plan')" id="phTabPlan" style="flex:1;height:40px;font-size:12px;font-weight:700;background:#222;border:none;color:#888;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Practice</button>
     </div>
   </div>
 
@@ -778,6 +779,26 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
         </div>
         <div id="phCombineHistoryMsg" style="font-size:13px;color:#888;min-height:20px;text-align:center;margin-bottom:4px;"></div>
         <div id="phCombineHistory" style="width:100%;"></div>
+      </div>
+    </div>
+
+    <!-- DRIVER COMBINE TAB -->
+    <div id="phDriverContent" style="display:none;">
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <button onclick="goToDriverCombine('combine')" style="background:#1a0a3e;border:2px solid #6d28d9;border-radius:12px;padding:16px;text-align:left;color:#fff;cursor:pointer;height:auto;max-width:none;width:100%;display:flex;flex-direction:column;gap:6px;box-sizing:border-box;white-space:normal;word-break:break-word;">
+          <div style="font-size:1rem;font-weight:800;">Combine</div>
+          <div style="font-size:0.82rem;color:#c4b5fd;line-height:1.4;white-space:normal;word-break:break-word;">Fixed 6-shot session. Enter drive distance and offline yards for each shot. Score = Drive − Offline.</div>
+        </button>
+        <button onclick="goToDriverCombine('custom')" style="background:#1a3320;border:2px solid #4caf50;border-radius:12px;padding:16px;text-align:left;color:#fff;cursor:pointer;height:auto;max-width:none;width:100%;display:flex;flex-direction:column;gap:6px;box-sizing:border-box;white-space:normal;word-break:break-word;">
+          <div style="font-size:1rem;font-weight:800;">Custom</div>
+          <div style="font-size:0.82rem;color:#a5d6a7;line-height:1.4;white-space:normal;word-break:break-word;">Choose your own number of shots for targeted driver practice.</div>
+        </button>
+      </div>
+      <!-- Driver History -->
+      <div style="margin-top:16px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:8px;">Driver History</div>
+        <div id="phDriverHistoryMsg" style="font-size:13px;color:#888;min-height:20px;text-align:center;margin-bottom:4px;"></div>
+        <div id="phDriverHistory" style="width:100%;"></div>
       </div>
     </div>
 
@@ -1521,7 +1542,6 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
             <button class="comb-grid-btn comb-green" onclick="combShowModeSelect('putting')" style="min-height:54px;font-size:1rem;border-radius:10px;">Putting</button>
             <button class="comb-grid-btn comb-blue" onclick="combShowShortGameSelect()" style="min-height:54px;font-size:1rem;border-radius:10px;">Short Game</button>
             <button class="comb-grid-btn" style="background:#c2410c;min-height:54px;font-size:1rem;border-radius:10px;" onclick="combShowModeSelect('wedge')">Wedge Distances</button>
-            <button class="comb-grid-btn" style="background:#6d28d9;min-height:54px;font-size:1rem;border-radius:10px;" onclick="combShowModeSelect('driver')">Driver</button>
           </div>
         </div><!-- /comb-practice-sub -->
 
@@ -11408,11 +11428,19 @@ function combGenUnique(n,min,max,gap){
 
 var _combPendingType = null;
 var _combFromShortGame = false;
+var _combFromDriverTab = false;
 
 function combHeaderBack() {
   var trackerVisible = document.getElementById('comb-tracker-view').style.display !== 'none';
   var modeSelectVisible = document.getElementById('comb-mode-select').style.display !== 'none';
   var shortGameVisible = document.getElementById('comb-shortgame-select').style.display !== 'none';
+  if (trackerVisible && _combFromDriverTab) {
+    _combFromDriverTab = false;
+    combGoHome();
+    show('practiceHubPage');
+    setPracticeHubTab('driver');
+    return;
+  }
   if (trackerVisible) {
     combGoHome();
   } else if (modeSelectVisible) {
@@ -11498,7 +11526,7 @@ function combOpen(type, mode) {
   if(isDriver){
     document.getElementById('comb-hcp-group').classList.add('comb-dimmed');
     document.getElementById('comb-exp-box').style.display='none';
-    document.getElementById('comb-total-label').textContent = 'Total Score';
+    document.getElementById('comb-total-label').textContent = 'Avg Score';
   } else if(isWedge) combSetWedge(combWedgeMode, false);
   else {
     document.getElementById('comb-hcp-group').classList.remove('comb-dimmed');
@@ -11767,7 +11795,7 @@ function combUpdateTotals(){
   document.getElementById('comb-total-exp').textContent = e.toFixed(2);
   var totalEl = document.getElementById('comb-total-val');
   if(combCurType==='driver'){
-    totalEl.textContent = c ? sg.toFixed(0) : '0';
+    totalEl.textContent = c ? (sg/c).toFixed(0) : '0';
   } else if(combCurType==='wedge' && combWedgeMode==='pts'){
     totalEl.textContent = c ? (sg/c).toFixed(1) : '0.0';
   } else {
@@ -12070,9 +12098,8 @@ function renderCombCard(c, canDelete){
   var gradeLine = '';
   var strokesLine = '';
   
-  if(c.combine_type==='Driver' && c.total_sg!==null && c.total_sg!==undefined){
-    sgLine='<span style="color:#bb86fc;font-size:15px;font-weight:700;">'+parseFloat(c.total_sg).toFixed(0)+' yds total</span>';
-    if(c.avg_pts!==null && c.avg_pts!==undefined) sgLine+=' <span style="color:#888;font-size:12px;">('+(+c.avg_pts).toFixed(0)+' avg)</span>';
+  if(c.combine_type==='Driver' && c.avg_pts!==null && c.avg_pts!==undefined){
+    sgLine='<span style="color:#bb86fc;font-size:15px;font-weight:700;">'+(+c.avg_pts).toFixed(0)+' avg yds</span>';
   } else if(c.total_sg!==null && c.total_sg!==undefined){
     var s=parseFloat(c.total_sg);
     var col=s>=0?'#69f0ae':'#ff5252';
@@ -12187,6 +12214,28 @@ function goToCombines(){
   if (banner) banner.style.display = 'none';
   show('combinesPage');
   combShowHomeTab('practice');
+}
+
+function goToDriverCombine(mode){
+  _combSaveForStudent = null;
+  _combFromDriverTab = true;
+  var banner = document.getElementById('combStudentBanner');
+  if (banner) banner.style.display = 'none';
+  show('combinesPage');
+  combOpen('driver', mode);
+}
+
+async function loadPHDriverHistory(){
+  var msg  = document.getElementById('phDriverHistoryMsg');
+  var list = document.getElementById('phDriverHistory');
+  if (!msg || !list) return;
+  if (!currentUser) { msg.textContent = 'Log in to see driver history.'; list.innerHTML = ''; return; }
+  msg.textContent = 'Loading...'; list.innerHTML = '';
+  var { data, error } = await _sb.from('combine_scores').select('*').eq('user_id', currentUser.id).eq('combine_type', 'Driver').order('combine_date', {ascending: false}).order('created_at', {ascending: false});
+  if (error) { msg.textContent = 'Error: ' + error.message; return; }
+  if (!data || data.length === 0) { msg.textContent = 'No driver scores yet — complete a session and hit Save!'; return; }
+  msg.textContent = '';
+  list.innerHTML = data.map(function(c) { return renderCombCard(c, true); }).join('');
 }
 
 function combShowHomeTab(tab){
@@ -13282,10 +13331,11 @@ var _currentPHTab = 'combines';
 function setPracticeHubTab(tab) {
   _currentPHTab = tab;
   document.getElementById('phCombinesContent').style.display = tab === 'combines' ? '' : 'none';
+  document.getElementById('phDriverContent').style.display   = tab === 'driver'   ? '' : 'none';
   document.getElementById('phDrillsContent').style.display   = tab === 'drills'   ? '' : 'none';
   document.getElementById('phPlanContent').style.display     = tab === 'plan'     ? '' : 'none';
 
-  var tabs = { combines: 'phTabCombines', drills: 'phTabDrills', plan: 'phTabPlan' };
+  var tabs = { combines: 'phTabCombines', driver: 'phTabDriver', drills: 'phTabDrills', plan: 'phTabPlan' };
   Object.keys(tabs).forEach(function(k) {
     var btn = document.getElementById(tabs[k]);
     if (btn) {
@@ -13295,6 +13345,7 @@ function setPracticeHubTab(tab) {
   });
 
   if (tab === 'combines') loadPHCombineHistory();
+  if (tab === 'driver') loadPHDriverHistory();
   if (tab === 'plan') {
     setPracticePlanSubTab('new');
     initPracticeSessionForm();
