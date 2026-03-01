@@ -1587,6 +1587,12 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
     <div id="bagAddMsg" style="font-size:12px;min-height:16px;text-align:center;margin-top:6px;color:#4ade80;"></div>
   </div>
 
+  <!-- Import CSV -->
+  <div style="width:100%;max-width:360px;margin-bottom:16px;">
+    <button onclick="document.getElementById('bagImportCSV').click()" style="width:100%;height:40px;background:#1a1a1a;border:1px solid #333;border-radius:10px;color:#aaa;font-size:13px;font-weight:600;cursor:pointer;">📤 Import Club Data (.csv)</button>
+    <input type="file" id="bagImportCSV" accept=".csv" style="display:none;" onchange="importBagCSV(this)">
+  </div>
+
   <!-- Club List -->
   <div style="width:100%;max-width:360px;">
     <div id="bagEmptyMsg" style="background:#1a1a1a;border-radius:12px;padding:24px;text-align:center;color:#555;font-size:13px;line-height:1.7;">
@@ -14674,7 +14680,9 @@ function renderBagClubs() {
     var safe = club.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
     var carry = (club.carry !== null && club.carry !== undefined) ? club.carry : '';
     var total = (club.total !== null && club.total !== undefined) ? club.total : '';
-    return '<div style="display:grid;grid-template-columns:1fr 80px 80px 36px;gap:6px;align-items:center;background:#1a1a1a;border-radius:10px;padding:8px 10px;">' +
+    var hasShots = club.shots && club.shots.length > 0;
+    var html = '<div style="background:#1a1a1a;border-radius:10px;padding:8px 10px;">';
+    html += '<div style="display:grid;grid-template-columns:1fr 80px 80px 36px;gap:6px;align-items:center;">' +
       '<div style="font-size:14px;font-weight:700;color:#e2e8f0;">' + club.name + '</div>' +
       '<input type="number" value="' + carry + '" placeholder="—" min="0" max="400" ' +
         'onchange="updateBagClub(\'' + safe + '\',\'carry\',this.value)" ' +
@@ -14685,7 +14693,212 @@ function renderBagClubs() {
       '<button onclick="removeBagClub(\'' + safe + '\')" ' +
         'style="width:32px;height:32px;background:#2a1515;border:1px solid #5a2020;border-radius:8px;color:#f87171;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;">×</button>' +
       '</div>';
+    if (hasShots) {
+      html += '<button onclick="toggleDispersion(\'' + safe + '\')" ' +
+        'style="width:100%;height:28px;margin-top:6px;background:#2d2d2d;border:1px solid #444;border-radius:6px;color:#a78bfa;font-size:11px;font-weight:700;cursor:pointer;">Dispersion (' + club.shots.length + ' shots)</button>' +
+        '<div id="disp_' + club.name + '" style="display:none;margin-top:8px;">' +
+        '<canvas id="dispCanvas_' + club.name + '" width="300" height="300" style="width:100%;border-radius:8px;"></canvas>' +
+        '</div>';
+    }
+    html += '</div>';
+    return html;
   }).join('');
+}
+
+function normalizeBagClubName(name) {
+  var lower = name.toLowerCase().trim();
+  for (var i = 0; i < _BAG_ORDER.length; i++) {
+    if (_BAG_ORDER[i].toLowerCase() === lower) return _BAG_ORDER[i];
+  }
+  return name;
+}
+
+function importBagCSV(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var lines = e.target.result.trim().split('\n');
+    if (lines.length < 2) { alert('CSV is empty.'); return; }
+    var header = lines[0].split(',').map(function(h) { return h.trim().toLowerCase(); });
+    var clubIdx = header.indexOf('club');
+    var totalIdx = header.indexOf('total');
+    var sideIdx = header.indexOf('side');
+    var targetIdx = header.indexOf('target');
+    if (clubIdx === -1 || totalIdx === -1) { alert('CSV must have Club and Total columns.'); return; }
+
+    var clubMap = {};
+    for (var i = 1; i < lines.length; i++) {
+      var cols = lines[i].split(',').map(function(c) { return c.trim(); });
+      if (cols.length <= Math.max(clubIdx, totalIdx)) continue;
+      var cn = cols[clubIdx];
+      var tot = parseFloat(cols[totalIdx]);
+      var side = sideIdx !== -1 ? parseFloat(cols[sideIdx]) : 0;
+      var target = targetIdx !== -1 ? parseFloat(cols[targetIdx]) : 0;
+      if (!cn || isNaN(tot)) continue;
+      var norm = normalizeBagClubName(cn);
+      if (!clubMap[norm]) clubMap[norm] = { totals: [], sides: [], targets: [] };
+      clubMap[norm].totals.push(tot);
+      clubMap[norm].sides.push(isNaN(side) ? 0 : side);
+      if (!isNaN(target)) clubMap[norm].targets.push(target);
+    }
+
+    var clubs = getBagClubs();
+    var count = 0;
+    Object.keys(clubMap).forEach(function(name) {
+      var d = clubMap[name];
+      var avgTotal = Math.round(d.totals.reduce(function(s,v){return s+v;},0) / d.totals.length);
+      var avgTarget = d.targets.length > 0 ? Math.round(d.targets.reduce(function(s,v){return s+v;},0) / d.targets.length) : avgTotal;
+      var shots = d.totals.map(function(t, idx) {
+        return { total: t, side: d.sides[idx] || 0, target: d.targets[idx] || avgTarget };
+      });
+      var existing = clubs.find(function(c) { return c.name === name; });
+      if (existing) {
+        existing.carry = avgTarget;
+        existing.total = avgTotal;
+        existing.shots = shots;
+      } else {
+        clubs.push({ name: name, carry: avgTarget, total: avgTotal, shots: shots });
+      }
+      count++;
+    });
+
+    saveBagClubs(sortBagClubs(clubs));
+    renderBagClubs();
+    var msg = document.getElementById('bagAddMsg');
+    msg.style.color = '#4ade80';
+    msg.textContent = count + ' clubs imported!';
+    setTimeout(function() { msg.textContent = ''; }, 3000);
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+function toggleDispersion(clubName) {
+  var el = document.getElementById('disp_' + clubName);
+  if (!el) return;
+  if (el.style.display === 'none') {
+    el.style.display = 'block';
+    drawDispersion(clubName);
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+function drawDispersion(clubName) {
+  var clubs = getBagClubs();
+  var club = clubs.find(function(c) { return c.name === clubName; });
+  if (!club || !club.shots || club.shots.length === 0) return;
+
+  var canvas = document.getElementById('dispCanvas_' + clubName);
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var W = canvas.width, H = canvas.height;
+  var cx = W / 2, cy = H / 2;
+
+  // Compute shot positions relative to pin (center)
+  var avgTarget = club.carry || club.total;
+  var points = club.shots.map(function(s) {
+    return { x: s.side, y: s.total - (s.target || avgTarget) };
+  });
+
+  // Scale to fit all shots with padding, minimum shows the green
+  var maxAbs = 10;
+  points.forEach(function(p) {
+    if (Math.abs(p.x) > maxAbs) maxAbs = Math.abs(p.x);
+    if (Math.abs(p.y) > maxAbs) maxAbs = Math.abs(p.y);
+  });
+  var viewRadius = maxAbs + 3;
+  var scale = (W / 2 - 10) / viewRadius;
+  var greenR = 10 * scale; // 10 yard radius = 20 yard diameter
+
+  // Background
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#111';
+  ctx.fillRect(0, 0, W, H);
+
+  // Green circle
+  ctx.beginPath();
+  ctx.arc(cx, cy, greenR, 0, Math.PI * 2);
+  ctx.fillStyle = '#1a5e1a';
+  ctx.fill();
+  ctx.strokeStyle = '#2e8e2e';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Fringe ring
+  ctx.beginPath();
+  ctx.arc(cx, cy, greenR + 3 * scale * 0.3, 0, Math.PI * 2);
+  ctx.strokeStyle = '#255e25';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // Crosshairs
+  ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+  ctx.lineWidth = 0.5;
+  ctx.beginPath();
+  ctx.moveTo(cx, 8); ctx.lineTo(cx, H - 8);
+  ctx.moveTo(8, cy); ctx.lineTo(W - 8, cy);
+  ctx.stroke();
+
+  // 5-yard ring markers
+  for (var r = 5; r <= viewRadius; r += 5) {
+    ctx.beginPath();
+    ctx.arc(cx, cy, r * scale, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+  }
+
+  // Pin
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+  ctx.fill();
+  // Flag stick
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(cx, cy); ctx.lineTo(cx, cy - 12);
+  ctx.stroke();
+  ctx.fillStyle = '#e53e3e';
+  ctx.beginPath();
+  ctx.moveTo(cx, cy - 12); ctx.lineTo(cx + 7, cy - 9); ctx.lineTo(cx, cy - 6);
+  ctx.fill();
+
+  // Shot dots
+  var onGreen = 0;
+  points.forEach(function(p) {
+    var px = cx + p.x * scale;
+    var py = cy - p.y * scale;
+    var dist = Math.sqrt(p.x * p.x + p.y * p.y);
+    if (dist <= 10) onGreen++;
+    ctx.fillStyle = dist <= 10 ? 'rgba(74,222,128,0.85)' : 'rgba(248,113,113,0.85)';
+    ctx.beginPath();
+    ctx.arc(px, py, 4.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,0.4)';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+  });
+
+  // Labels
+  ctx.fillStyle = '#555';
+  ctx.font = '10px -apple-system,sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('LONG', cx, 14);
+  ctx.fillText('SHORT', cx, H - 6);
+  ctx.textAlign = 'left';
+  ctx.fillText('L', 6, cy + 4);
+  ctx.textAlign = 'right';
+  ctx.fillText('R', W - 6, cy + 4);
+
+  // Stats bar
+  var pct = Math.round(onGreen / points.length * 100);
+  ctx.fillStyle = '#888';
+  ctx.font = '11px -apple-system,sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(points.length + ' shots · ' + onGreen + ' on green (' + pct + '%) · 20yd green', cx, H - 18);
 }
 
 </script>
