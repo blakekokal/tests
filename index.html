@@ -1467,7 +1467,9 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
         <!-- Add Club Section -->
         <div style="background:#1a1a1a;border-radius:14px;padding:16px;margin-bottom:16px;">
           <div style="font-size:12px;font-weight:700;color:#a78bfa;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Add Club</div>
-          <input id="svBagClubName" placeholder="Club name (e.g. Dr, 7I, 54, PW)" style="width:100%;height:40px;font-size:14px;text-align:center;box-sizing:border-box;margin-bottom:8px;">
+          <select id="svBagClubName" style="width:100%;height:40px;font-size:14px;text-align:center;box-sizing:border-box;margin-bottom:8px;background:#222;color:#fff;border:1px solid #444;border-radius:8px;-webkit-appearance:none;appearance:none;">
+            <option value="" disabled selected>Select a club...</option>
+          </select>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
             <div>
               <div style="font-size:11px;color:#888;margin-bottom:4px;text-align:center;">Avg Carry (yds)</div>
@@ -1557,7 +1559,9 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
   <!-- Add Club Section -->
   <div style="width:100%;max-width:360px;background:#1a1a1a;border-radius:14px;padding:16px;margin-bottom:16px;">
     <div style="font-size:12px;font-weight:700;color:#a78bfa;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Add Club</div>
-    <input id="bagClubName" placeholder="Club name (e.g. Dr, 7I, 54, PW)" style="width:100%;height:40px;font-size:14px;text-align:center;box-sizing:border-box;margin-bottom:8px;">
+    <select id="bagClubName" style="width:100%;height:40px;font-size:14px;text-align:center;box-sizing:border-box;margin-bottom:8px;background:#222;color:#fff;border:1px solid #444;border-radius:8px;-webkit-appearance:none;appearance:none;">
+      <option value="" disabled selected>Select a club...</option>
+    </select>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
       <div>
         <div style="font-size:11px;color:#888;margin-bottom:4px;text-align:center;">Avg Carry (yds)</div>
@@ -14307,12 +14311,27 @@ async function loadStudentBag() {
   renderSvBagClubs();
 }
 
+function populateSvBagDropdown() {
+  var sel = document.getElementById('svBagClubName');
+  if (!sel) return;
+  var inBag = {};
+  _svBagClubs.forEach(function(c) { inBag[c.name.toLowerCase()] = true; });
+  var opts = '<option value="" disabled selected>Select a club...</option>';
+  _BAG_ORDER.forEach(function(name) {
+    if (!inBag[name.toLowerCase()]) {
+      opts += '<option value="' + name + '">' + name + '</option>';
+    }
+  });
+  sel.innerHTML = opts;
+}
+
 function renderSvBagClubs() {
   var clubs = _svBagClubs;
   var list = document.getElementById('svBagClubList');
   var emptyMsg = document.getElementById('svBagEmptyMsg');
   var headers = document.getElementById('svBagClubHeaders');
   if (!list) return;
+  populateSvBagDropdown();
 
   if (clubs.length === 0) {
     list.innerHTML = '';
@@ -14350,8 +14369,8 @@ function addSvBagClub() {
   var carryEl = document.getElementById('svBagCarryInput');
   var totalEl = document.getElementById('svBagTotalInput');
   var msg = document.getElementById('svBagAddMsg');
-  var name = nameEl ? nameEl.value.trim() : '';
-  if (!name) { msg.style.color = '#f87171'; msg.textContent = 'Enter a club name.'; return; }
+  var name = nameEl ? nameEl.value : '';
+  if (!name) { msg.style.color = '#f87171'; msg.textContent = 'Select a club.'; return; }
   var carry = carryEl.value !== '' ? parseInt(carryEl.value) : null;
   var total = totalEl.value !== '' ? parseInt(totalEl.value) : null;
   if (carry === null && total === null) { msg.style.color = '#f87171'; msg.textContent = 'Enter at least one distance.'; return; }
@@ -14361,7 +14380,7 @@ function addSvBagClub() {
   _svBagClubs.push({ name: name, carry: carry, total: total });
   _svBagClubs = sortBagClubs(_svBagClubs);
   saveSvBagClubs();
-  nameEl.value = ''; carryEl.value = ''; totalEl.value = '';
+  carryEl.value = ''; totalEl.value = '';
   msg.style.color = '#4ade80'; msg.textContent = name + ' added!';
   setTimeout(function() { msg.textContent = ''; }, 2500);
   renderSvBagClubs();
@@ -14437,7 +14456,7 @@ async function loadStudentPracticeSessions() {
 
 // ─── MY BAG ─────────────────────────────────────────────────────────────────
 var _BAG_KEY = 'myBag_v1';
-var _BAG_ORDER = ['Dr','3W','4W','5W','7W','2HY','3HY','4HY','5HY','2I','3I','4I','5I','6I','7I','8I','9I','PW','GW','AW','46','48','50','52','54','56','58','60','64','Putter'];
+var _BAG_ORDER = ['Dr','Dr2','2W','3W','4W','5W','6W','7W','2HY','3HY','4HY','5HY','6HY','7HY','2I','3I','4I','5I','6I','7I','8I','9I','PW','GW','AW','SW','50','52','54','58','60','62'];
 
 function getBagClubs() {
   try { return JSON.parse(localStorage.getItem(_BAG_KEY)) || []; }
@@ -14463,15 +14482,30 @@ function sortBagClubs(clubs) {
 }
 
 
+function populateBagDropdown() {
+  var sel = document.getElementById('bagClubName');
+  if (!sel) return;
+  var clubs = getBagClubs();
+  var inBag = {};
+  clubs.forEach(function(c) { inBag[c.name.toLowerCase()] = true; });
+  var opts = '<option value="" disabled selected>Select a club...</option>';
+  _BAG_ORDER.forEach(function(name) {
+    if (!inBag[name.toLowerCase()]) {
+      opts += '<option value="' + name + '">' + name + '</option>';
+    }
+  });
+  sel.innerHTML = opts;
+}
+
 function addBagClub() {
   var nameEl = document.getElementById('bagClubName');
   var carryEl = document.getElementById('bagCarryInput');
   var totalEl = document.getElementById('bagTotalInput');
   var msg = document.getElementById('bagAddMsg');
 
-  var name = nameEl ? nameEl.value.trim() : '';
+  var name = nameEl ? nameEl.value : '';
   if (!name) {
-    msg.style.color = '#f87171'; msg.textContent = 'Enter a club name.'; return;
+    msg.style.color = '#f87171'; msg.textContent = 'Select a club.'; return;
   }
   var carry = carryEl.value !== '' ? parseInt(carryEl.value) : null;
   var total = totalEl.value !== '' ? parseInt(totalEl.value) : null;
@@ -14484,7 +14518,6 @@ function addBagClub() {
   }
   clubs.push({ name: name, carry: carry, total: total });
   saveBagClubs(sortBagClubs(clubs));
-  nameEl.value = '';
   carryEl.value = ''; totalEl.value = '';
   msg.style.color = '#4ade80'; msg.textContent = name + ' added!';
   setTimeout(function() { msg.textContent = ''; }, 2500);
@@ -14508,6 +14541,7 @@ function renderBagClubs() {
   var emptyMsg = document.getElementById('bagEmptyMsg');
   var headers = document.getElementById('bagClubHeaders');
   if (!list) return;
+  populateBagDropdown();
   if (clubs.length === 0) {
     list.innerHTML = '';
     if (emptyMsg) emptyMsg.style.display = 'block';
