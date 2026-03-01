@@ -14903,6 +14903,9 @@ function renderBagClubs() {
 
 function normalizeBagClubName(name) {
   var lower = name.toLowerCase().trim();
+  // Handle common aliases
+  var aliases = { 'driver': 'Dr', 'drive': 'Dr', 'driver2': 'Dr2' };
+  if (aliases[lower]) return aliases[lower];
   for (var i = 0; i < _BAG_ORDER.length; i++) {
     if (_BAG_ORDER[i].toLowerCase() === lower) return _BAG_ORDER[i];
   }
@@ -14951,6 +14954,11 @@ function processBagImportRows(rows) {
   var totalKey = keys.find(function(k) { return k.trim().toLowerCase() === 'total'; });
   var sideKey = keys.find(function(k) { return k.trim().toLowerCase() === 'side'; });
   var targetKey = keys.find(function(k) { return k.trim().toLowerCase() === 'target'; });
+  // New 8-column format columns
+  var targetTotalKey = keys.find(function(k) { return k.trim().toLowerCase() === 'target_total'; });
+  var totalRollKey = keys.find(function(k) { return k.trim().toLowerCase() === 'total_roll'; });
+  var totalSideKey = keys.find(function(k) { return k.trim().toLowerCase() === 'total_side'; });
+  var hasRollData = !!(targetTotalKey && totalRollKey && totalSideKey);
   if (!clubKey || !totalKey) { alert('Data must have Club and Total columns.'); return; }
 
   var clubMap = {};
@@ -14961,29 +14969,56 @@ function processBagImportRows(rows) {
     var target = targetKey ? parseFloat(row[targetKey]) : 0;
     if (!cn || isNaN(tot)) return;
     var norm = normalizeBagClubName(cn);
-    if (!clubMap[norm]) clubMap[norm] = { totals: [], sides: [], targets: [] };
+    if (!clubMap[norm]) clubMap[norm] = { totals: [], sides: [], targets: [], rollTotals: [], rollSides: [], rollTargets: [] };
     clubMap[norm].totals.push(tot);
     clubMap[norm].sides.push(isNaN(side) ? 0 : side);
     clubMap[norm].targets.push(isNaN(target) ? null : target);
+    // Parse total/roll columns if present
+    if (hasRollData) {
+      var rollTot = parseFloat(row[totalRollKey]);
+      var rollSide = parseFloat(row[totalSideKey]);
+      var rollTarget = parseFloat(row[targetTotalKey]);
+      clubMap[norm].rollTotals.push(isNaN(rollTot) ? tot : rollTot);
+      clubMap[norm].rollSides.push(isNaN(rollSide) ? 0 : rollSide);
+      clubMap[norm].rollTargets.push(isNaN(rollTarget) ? null : rollTarget);
+    }
   });
 
   var clubs = getBagClubs();
   var count = 0;
   Object.keys(clubMap).forEach(function(name) {
     var d = clubMap[name];
-    var avgTotal = Math.round(d.totals.reduce(function(s,v){return s+v;},0) / d.totals.length);
+    // Carry averages
+    var avgCarry = Math.round(d.totals.reduce(function(s,v){return s+v;},0) / d.totals.length);
     var validTargets = d.targets.filter(function(t) { return t !== null; });
-    var avgTarget = validTargets.length > 0 ? Math.round(validTargets.reduce(function(s,v){return s+v;},0) / validTargets.length) : avgTotal;
+    var avgCarryTarget = validTargets.length > 0 ? Math.round(validTargets.reduce(function(s,v){return s+v;},0) / validTargets.length) : avgCarry;
+    // Carry shots (total column = carry yardage, side = carry offline, target = carry target)
     var shots = d.totals.map(function(t, idx) {
-      return { total: t, side: d.sides[idx] || 0, target: d.targets[idx] !== null ? d.targets[idx] : avgTarget };
+      return { total: t, side: d.sides[idx] || 0, target: d.targets[idx] !== null ? d.targets[idx] : avgCarryTarget };
     });
+
+    // Total/roll averages and shots
+    var avgTotal = avgCarry;
+    var totalShots = null;
+    if (hasRollData && d.rollTotals.length > 0) {
+      avgTotal = Math.round(d.rollTotals.reduce(function(s,v){return s+v;},0) / d.rollTotals.length);
+      var validRollTargets = d.rollTargets.filter(function(t) { return t !== null; });
+      var avgRollTarget = validRollTargets.length > 0 ? Math.round(validRollTargets.reduce(function(s,v){return s+v;},0) / validRollTargets.length) : avgTotal;
+      totalShots = d.rollTotals.map(function(t, idx) {
+        return { total: t, side: d.rollSides[idx] || 0, target: d.rollTargets[idx] !== null ? d.rollTargets[idx] : avgRollTarget };
+      });
+    }
+
     var existing = clubs.find(function(c) { return c.name === name; });
     if (existing) {
-      existing.carry = avgTarget;
+      existing.carry = avgCarryTarget;
       existing.total = avgTotal;
       existing.shots = shots;
+      if (totalShots) existing.totalShots = totalShots;
     } else {
-      clubs.push({ name: name, carry: avgTarget, total: avgTotal, shots: shots });
+      var clubObj = { name: name, carry: avgCarryTarget, total: avgTotal, shots: shots };
+      if (totalShots) clubObj.totalShots = totalShots;
+      clubs.push(clubObj);
     }
     count++;
   });
@@ -14992,7 +15027,7 @@ function processBagImportRows(rows) {
   renderBagClubs();
   var msg = document.getElementById('bagAddMsg');
   msg.style.color = '#4ade80';
-  msg.textContent = count + ' clubs imported!';
+  msg.textContent = count + ' clubs imported!' + (hasRollData ? ' (carry + total data)' : '');
   setTimeout(function() { msg.textContent = ''; }, 3000);
 }
 
@@ -15009,7 +15044,7 @@ function toggleDispersion(clubName) {
 
 function isFairwayClub(name) {
   var n = name.toLowerCase();
-  return n === 'dr' || n === 'dr2' || /^\d+w$/i.test(n);
+  return n === 'dr' || n === 'dr2' || n === 'driver' || /^\d+w$/i.test(n);
 }
 
 // Preload dispersion background images
@@ -15027,98 +15062,126 @@ function drawDispersion(clubName) {
   if (!canvas) return;
   var isFW = isFairwayClub(clubName);
   var img = isFW ? _dispFairwayImg : _dispGreenImg;
+  var hasTotalShots = club.totalShots && club.totalShots.length > 0;
 
   function render() {
     // --- SCALING CONSTANTS ---
-    // Fairway image: 30 yards = 330px wide, grid lines 110px apart = 10 yards
-    // => 11 px per yard in the fairway image
-    // Green image: 20 yards wide green
-    // We detect the green px/yard from the image: green circle is 20 yards across
-    var fwPxPerYard = 11;  // fairway: 330px / 30 yards
-    var fwHalfWidth = 15;  // 30 yard wide fairway = 15 each side
+    var fwPxPerYard = 11;
+    var fwHalfWidth = 15;
 
-    // Set canvas to match image dimensions
     canvas.width = img.naturalWidth;
     canvas.height = img.naturalHeight;
     var ctx = canvas.getContext('2d');
     var W = canvas.width, H = canvas.height;
-
-    // Draw the background image
     ctx.drawImage(img, 0, 0, W, H);
 
-    // Center of the image is the target/pin center
     var cx = W / 2;
     var cy = H / 2;
 
-    // Compute shot positions relative to target center (flag position)
-    // target = where the player was aiming (flag/center of chart)
-    // total = where the ball actually went
-    // side = lateral deviation in yards (negative = left, positive = right)
-    var avgTarget = club.carry || club.total;
-    var points = club.shots.map(function(s) {
-      var tgt = (s.target != null && s.target > 0) ? s.target : avgTarget;
-      var yDev = s.total - tgt;
-      return { x: s.side, y: yDev };
-    });
-    // Debug: log first few points so we can verify the data
-    console.log('[Dispersion ' + clubName + '] avgTarget=' + avgTarget + ', first 5 shots:', club.shots.slice(0, 5));
-    console.log('[Dispersion ' + clubName + '] first 5 points:', points.slice(0, 5));
-
     var scale;
-    var greenR_yd = 10; // 20 yard diameter = 10 radius
-
+    var greenR_yd = 10;
     if (isFW) {
-      // Fairway: 11 px per yard (330px = 30 yards, grid lines 110px = 10 yards)
       scale = fwPxPerYard;
     } else {
-      // Green: 20 yards wide. The green circle in the image spans 20 yards.
-      // Use same 11 px/yard as fairway for consistency (both images use same scale)
       scale = 11;
     }
 
-    // Shot dots
-    var onTarget = 0;
-    points.forEach(function(p) {
-      // x: positive = right, negative = left
-      // y: positive = long (above target), negative = short (below target)
-      var px = cx + p.x * scale;
-      var py = cy - p.y * scale;
-      var hit;
-      if (isFW) {
-        hit = Math.abs(p.x) <= fwHalfWidth;
-      } else {
-        hit = Math.sqrt(p.x * p.x + p.y * p.y) <= greenR_yd;
-      }
-      if (hit) onTarget++;
-      // Draw dot with black outline
-      ctx.shadowColor = 'rgba(0,0,0,0.6)';
-      ctx.shadowBlur = 4;
-      ctx.fillStyle = hit ? 'rgba(74,222,128,0.9)' : 'rgba(248,113,113,0.9)';
-      ctx.beginPath();
-      ctx.arc(px, py, 9, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.shadowBlur = 0;
-      ctx.strokeStyle = '#000';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-    });
+    // Helper: compute points from shot array (deviation from target center)
+    function computePoints(shotsArr, fallbackTarget) {
+      return shotsArr.map(function(s) {
+        var tgt = (s.target != null && s.target > 0) ? s.target : fallbackTarget;
+        return { x: s.side, y: s.total - tgt };
+      });
+    }
 
-    // Stats bar at bottom
-    var pct = Math.round(onTarget / points.length * 100);
-    // Draw stats background bar
+    // Helper: draw dots and count on-target
+    function drawDots(points, fillHit, fillMiss, dotRadius) {
+      var onTarget = 0;
+      points.forEach(function(p) {
+        var px = cx + p.x * scale;
+        var py = cy - p.y * scale;
+        var hit;
+        if (isFW) {
+          hit = Math.abs(p.x) <= fwHalfWidth;
+        } else {
+          hit = Math.sqrt(p.x * p.x + p.y * p.y) <= greenR_yd;
+        }
+        if (hit) onTarget++;
+        ctx.shadowColor = 'rgba(0,0,0,0.6)';
+        ctx.shadowBlur = 4;
+        ctx.fillStyle = hit ? fillHit : fillMiss;
+        ctx.beginPath();
+        ctx.arc(px, py, dotRadius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      });
+      return onTarget;
+    }
+
+    // --- Draw total shots first (behind carry) if available ---
+    var totalOnTarget = 0, totalPoints = [];
+    if (hasTotalShots) {
+      var avgRollTarget = club.total || club.carry;
+      totalPoints = computePoints(club.totalShots, avgRollTarget);
+      // Total dots: blue tones (hit = dodger blue, miss = orange)
+      totalOnTarget = drawDots(totalPoints, 'rgba(56,189,248,0.85)', 'rgba(251,146,60,0.85)', 7);
+    }
+
+    // --- Draw carry shots on top ---
+    var avgCarryTarget = club.carry || club.total;
+    var carryPoints = computePoints(club.shots, avgCarryTarget);
+    // Carry dots: green/red (original colors)
+    var carryOnTarget = drawDots(carryPoints, 'rgba(74,222,128,0.9)', 'rgba(248,113,113,0.9)', 9);
+
+    // Debug
+    console.log('[Dispersion ' + clubName + '] carry avgTarget=' + avgCarryTarget + ', shots=' + carryPoints.length + (hasTotalShots ? ', total avgTarget=' + (club.total || club.carry) + ', totalShots=' + totalPoints.length : ''));
+
+    // --- Stats bar ---
+    var barH = hasTotalShots ? 64 : 44;
     ctx.fillStyle = 'rgba(0,0,0,0.75)';
-    ctx.fillRect(0, H - 44, W, 44);
+    ctx.fillRect(0, H - barH, W, barH);
     ctx.fillStyle = '#fff';
-    ctx.font = 'bold 20px -apple-system,sans-serif';
+    ctx.font = 'bold 18px -apple-system,sans-serif';
     ctx.textAlign = 'center';
-    if (isFW) {
-      ctx.fillText(points.length + ' shots  ·  ' + onTarget + ' in fairway (' + pct + '%)  ·  30yd wide', cx, H - 15);
+
+    var carryPct = Math.round(carryOnTarget / carryPoints.length * 100);
+    var carryAvg = Math.round(club.shots.reduce(function(s,v){return s+v.total;},0) / club.shots.length);
+    if (hasTotalShots) {
+      var totalPct = Math.round(totalOnTarget / totalPoints.length * 100);
+      var totalAvg = Math.round(club.totalShots.reduce(function(s,v){return s+v.total;},0) / club.totalShots.length);
+      // Carry line (green dot legend)
+      ctx.fillStyle = 'rgba(74,222,128,0.9)';
+      ctx.beginPath(); ctx.arc(20, H - barH + 17, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fff';
+      if (isFW) {
+        ctx.textAlign = 'left';
+        ctx.fillText('Carry: ' + carryPoints.length + ' shots · avg ' + carryAvg + 'y · ' + carryOnTarget + ' in FW (' + carryPct + '%)', 32, H - barH + 22);
+      } else {
+        ctx.textAlign = 'left';
+        ctx.fillText('Carry: ' + carryPoints.length + ' shots · avg ' + carryAvg + 'y · ' + carryOnTarget + ' on green (' + carryPct + '%)', 32, H - barH + 22);
+      }
+      // Total line (blue dot legend)
+      ctx.fillStyle = 'rgba(56,189,248,0.85)';
+      ctx.beginPath(); ctx.arc(20, H - barH + 45, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fff';
+      if (isFW) {
+        ctx.fillText('Total: ' + totalPoints.length + ' shots · avg ' + totalAvg + 'y · ' + totalOnTarget + ' in FW (' + totalPct + '%)', 32, H - barH + 50);
+      } else {
+        ctx.fillText('Total: ' + totalPoints.length + ' shots · avg ' + totalAvg + 'y · ' + totalOnTarget + ' on green (' + totalPct + '%)', 32, H - barH + 50);
+      }
     } else {
-      ctx.fillText(points.length + ' shots  ·  ' + onTarget + ' on green (' + pct + '%)  ·  20yd green', cx, H - 15);
+      // Single data set (carry only) - original style
+      if (isFW) {
+        ctx.fillText(carryPoints.length + ' shots  ·  avg ' + carryAvg + 'y  ·  ' + carryOnTarget + ' in fairway (' + carryPct + '%)  ·  30yd wide', cx, H - 15);
+      } else {
+        ctx.fillText(carryPoints.length + ' shots  ·  avg ' + carryAvg + 'y  ·  ' + carryOnTarget + ' on green (' + carryPct + '%)  ·  20yd green', cx, H - 15);
+      }
     }
   }
 
-  // If image already loaded, render immediately; otherwise wait
   if (img.complete && img.naturalWidth > 0) {
     render();
   } else {
