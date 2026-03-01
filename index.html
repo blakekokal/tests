@@ -4950,6 +4950,114 @@ function exportToExcel(){
   XLSX.writeFile(wb, filename);
 }
 
+async function downloadSavedRound(roundId, btn) {
+  var origText = btn.innerHTML;
+  btn.innerHTML = '⏳';
+  btn.disabled = true;
+  try {
+    var { data, error } = await _sb.from('rounds').select('*').eq('id', roundId).single();
+    if (error || !data || !data.round_data || !data.round_data.allHoles || data.round_data.allHoles.length === 0) {
+      alert('Could not load round data.');
+      return;
+    }
+    var rd = data.round_data;
+
+    // Save current globals
+    var prevAllHoles = allHoles, prevTotalHoles = totalHoles, prevTotalStrokes = totalStrokes, prevTotalPar = totalPar, prevTotalPutts = totalPutts;
+    var prevFwHit = fwHit, prevFwOpp = fwOpp, prevFwLeft = fwLeft, prevFwRight = fwRight;
+    var prevGir = gir, prevGirOpp = girOpp, prevScr = scr, prevScrOpp = scrOpp, prevBun = bun, prevBunOpp = bunOpp;
+    var prevOnePuttMade = onePuttMade, prevOnePuttOpp = onePuttOpp, prevThreePlusPutts = threePlusPutts;
+    var prevP3 = p3, prevC3 = c3, prevP4 = p4, prevC4 = c4, prevP5 = p5, prevC5 = c5;
+    var prevMissLeft = missLeft, prevMissRight = missRight, prevMissShort = missShort, prevMissLong = missLong;
+    var prevGirFirstPuttDist = girFirstPuttDist, prevGirPutts = girPutts;
+    var prevPlayerName = playerName.value, prevCourseName = courseName.value, prevRoundDate = roundDate.value;
+    var prevRoundType = document.getElementById('roundType').value;
+    var prevHandicap = document.getElementById('playerHandicap').value;
+
+    // Restore round data into globals
+    playerName.value = data.player_name;
+    courseName.value = data.course_name;
+    roundDate.value = data.round_date;
+    document.getElementById('roundType').value = data.round_type || 'Casual';
+    document.getElementById('playerHandicap').value = data.handicap || 'pro';
+    allHoles = rd.allHoles;
+    totalHoles = data.holes;
+    totalStrokes = 0; totalPar = 0; totalPutts = 0;
+    fwHit = 0; fwOpp = 0; fwLeft = 0; fwRight = 0;
+    gir = 0; girOpp = 0; girFirstPuttDist = 0; girPutts = 0;
+    scr = 0; scrOpp = 0; bun = 0; bunOpp = 0;
+    onePuttMade = 0; onePuttOpp = 0; threePlusPutts = 0;
+    p3 = 0; c3 = 0; p4 = 0; c4 = 0; p5 = 0; c5 = 0;
+    missLeft = 0; missRight = 0; missShort = 0; missLong = 0;
+
+    allHoles.forEach(function(h) {
+      totalStrokes += h.score;
+      totalPar += h.par;
+      totalPutts += h.putts || 0;
+      onePuttOpp += 1;
+      if (h.par === 3) { c3++; p3 += h.score; }
+      if (h.par === 4) { c4++; p4 += h.score; }
+      if (h.par === 5) { c5++; p5 += h.score; }
+      if ((h.putts || 0) === 1) onePuttMade++;
+      if ((h.putts || 0) >= 3) threePlusPutts++;
+      var shotsToGreen = 0;
+      for (var si = 0; si < (h.shots || []).length; si++) {
+        if (h.shots[si].isPutt) break;
+        shotsToGreen++;
+      }
+      if (shotsToGreen <= (h.par - 2) && h.firstPuttDist > 0) {
+        girFirstPuttDist += h.firstPuttDist;
+        girPutts += h.putts || 0;
+      }
+    });
+    if (rd.stats) {
+      fwHit = rd.stats.fwHit || 0; fwOpp = rd.stats.fwOpp || 0;
+      fwLeft = rd.stats.fwLeft || 0; fwRight = rd.stats.fwRight || 0;
+      gir = rd.stats.girHit || 0; girOpp = rd.stats.girOpp || 0;
+      scr = rd.stats.scrMade || 0; scrOpp = rd.stats.scrOpp || 0;
+      bun = rd.stats.bunMade || 0; bunOpp = rd.stats.bunOpp || 0;
+      if (rd.stats.onePutts !== undefined) onePuttMade = rd.stats.onePutts;
+      if (rd.stats.threePutts !== undefined) threePlusPutts = rd.stats.threePutts;
+    }
+    allHoles.forEach(function(h) {
+      (h.shots || []).forEach(function(s) {
+        if (s.lie && s.lie.startsWith('MISS ')) {
+          girOpp++;
+          if (s.lie === 'MISS LEFT') missLeft++;
+          if (s.lie === 'MISS RIGHT') missRight++;
+          if (s.lie === 'MISS SHORT') missShort++;
+          if (s.lie === 'MISS LONG') missLong++;
+        }
+      });
+    });
+
+    var hcp = document.getElementById('playerHandicap').value || 'pro';
+    recalculateAllSG(hcp);
+
+    // Generate and download
+    var wb = generateExcelWorkbook();
+    var pName = (data.player_name || 'Player').replace(/[^a-zA-Z0-9]/g, '');
+    var cName = (data.course_name || 'Course').replace(/[^a-zA-Z0-9]/g, '');
+    var rDate = formatDateForFilename(data.round_date);
+    XLSX.writeFile(wb, pName + '_' + rDate + '_' + cName + '.xlsx');
+
+    // Restore previous globals
+    allHoles = prevAllHoles; totalHoles = prevTotalHoles; totalStrokes = prevTotalStrokes; totalPar = prevTotalPar; totalPutts = prevTotalPutts;
+    fwHit = prevFwHit; fwOpp = prevFwOpp; fwLeft = prevFwLeft; fwRight = prevFwRight;
+    gir = prevGir; girOpp = prevGirOpp; scr = prevScr; scrOpp = prevScrOpp; bun = prevBun; bunOpp = prevBunOpp;
+    onePuttMade = prevOnePuttMade; onePuttOpp = prevOnePuttOpp; threePlusPutts = prevThreePlusPutts;
+    p3 = prevP3; c3 = prevC3; p4 = prevP4; c4 = prevC4; p5 = prevP5; c5 = prevC5;
+    missLeft = prevMissLeft; missRight = prevMissRight; missShort = prevMissShort; missLong = prevMissLong;
+    girFirstPuttDist = prevGirFirstPuttDist; girPutts = prevGirPutts;
+    playerName.value = prevPlayerName; courseName.value = prevCourseName; roundDate.value = prevRoundDate;
+    document.getElementById('roundType').value = prevRoundType;
+    document.getElementById('playerHandicap').value = prevHandicap;
+  } finally {
+    btn.innerHTML = origText;
+    btn.disabled = false;
+  }
+}
+
 function generateCSV(){
   let csv='';
   
@@ -6318,7 +6426,8 @@ function filterRoundsList() {
           + '<button onclick="event.stopPropagation();deleteSavedRound(\'' + r.id + '\',this)" style="width:60px;height:34px;font-size:12px;background:#c62828;border:none;border-radius:6px;color:#fff;cursor:pointer;">Del</button>'
         : '<button onclick=\"event.stopPropagation();openEditRoundInfo(\'' + r.id + '\', event)\" style=\"flex:1;height:30px;font-size:12px;background:#2e7d32;border-radius:6px;font-weight:700;margin-right:4px;\">Edit</button>'
           + '<button onclick="event.stopPropagation();viewSavedRound(\'' + r.id + '\')" style="flex:1;height:30px;font-size:12px;background:#1d4ed8;border-radius:6px;">Stats</button>'
-          + '<button onclick="event.stopPropagation();deleteSavedRound(\'' + r.id + '\',this)" style="width:60px;height:30px;font-size:12px;background:#c62828;border-radius:6px;">Del</button>'
+          + '<button onclick="event.stopPropagation();downloadSavedRound(\'' + r.id + '\',this)" style="width:50px;height:30px;font-size:12px;background:#1B5E20;border-radius:6px;">📥</button>'
+          + '<button onclick="event.stopPropagation();deleteSavedRound(\'' + r.id + '\',this)" style="width:50px;height:30px;font-size:12px;background:#c62828;border-radius:6px;">Del</button>'
       )
       + '</div>';
     list.appendChild(card);
