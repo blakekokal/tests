@@ -15121,16 +15121,19 @@ function drawDispersion(clubName) {
       return onTarget;
     }
 
+    // Use carry target as the single reference point (the flag/pin).
+    // Carry dots cluster around center; total dots appear past them.
+    var avgCarryTarget = club.carry || club.total;
+
     // --- Draw total shots first (behind carry) if available ---
     var totalOnTarget = 0, totalPoints = [];
     if (hasTotalShots) {
-      var avgRollTarget = club.total || club.carry;
-      totalPoints = computePoints(club.totalShots, avgRollTarget);
+      // Total shots plotted relative to carry target so roll-out is visible
+      totalPoints = computePoints(club.totalShots, avgCarryTarget);
       totalOnTarget = drawDots(totalPoints, 'rgba(248,113,113,0.9)', 7);
     }
 
     // --- Draw carry shots on top ---
-    var avgCarryTarget = club.carry || club.total;
     var carryPoints = computePoints(club.shots, avgCarryTarget);
     var carryOnTarget = drawDots(carryPoints, 'rgba(56,147,248,0.9)', 9);
 
