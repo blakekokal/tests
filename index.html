@@ -14906,7 +14906,7 @@ function processBagImportRows(rows) {
     if (!clubMap[norm]) clubMap[norm] = { totals: [], sides: [], targets: [] };
     clubMap[norm].totals.push(tot);
     clubMap[norm].sides.push(isNaN(side) ? 0 : side);
-    if (!isNaN(target)) clubMap[norm].targets.push(target);
+    clubMap[norm].targets.push(isNaN(target) ? null : target);
   });
 
   var clubs = getBagClubs();
@@ -14914,9 +14914,10 @@ function processBagImportRows(rows) {
   Object.keys(clubMap).forEach(function(name) {
     var d = clubMap[name];
     var avgTotal = Math.round(d.totals.reduce(function(s,v){return s+v;},0) / d.totals.length);
-    var avgTarget = d.targets.length > 0 ? Math.round(d.targets.reduce(function(s,v){return s+v;},0) / d.targets.length) : avgTotal;
+    var validTargets = d.targets.filter(function(t) { return t !== null; });
+    var avgTarget = validTargets.length > 0 ? Math.round(validTargets.reduce(function(s,v){return s+v;},0) / validTargets.length) : avgTotal;
     var shots = d.totals.map(function(t, idx) {
-      return { total: t, side: d.sides[idx] || 0, target: d.targets[idx] || avgTarget };
+      return { total: t, side: d.sides[idx] || 0, target: d.targets[idx] !== null ? d.targets[idx] : avgTarget };
     });
     var existing = clubs.find(function(c) { return c.name === name; });
     if (existing) {
@@ -14991,10 +14992,14 @@ function drawDispersion(clubName) {
     var cx = W / 2;
     var cy = H / 2;
 
-    // Compute shot positions relative to target center
+    // Compute shot positions relative to target center (flag position)
+    // target = where the player was aiming (flag/center of chart)
+    // total = where the ball actually went
+    // side = lateral deviation in yards (negative = left, positive = right)
     var avgTarget = club.carry || club.total;
     var points = club.shots.map(function(s) {
-      return { x: s.side, y: s.total - (s.target || avgTarget) };
+      var tgt = (s.target != null && s.target > 0) ? s.target : avgTarget;
+      return { x: s.side, y: s.total - tgt };
     });
 
     var scale;
@@ -15024,15 +15029,15 @@ function drawDispersion(clubName) {
       }
       if (hit) onTarget++;
       // Draw dot with shadow for visibility on the image
-      ctx.shadowColor = 'rgba(0,0,0,0.5)';
-      ctx.shadowBlur = 3;
+      ctx.shadowColor = 'rgba(0,0,0,0.6)';
+      ctx.shadowBlur = 4;
       ctx.fillStyle = hit ? 'rgba(74,222,128,0.9)' : 'rgba(248,113,113,0.9)';
       ctx.beginPath();
-      ctx.arc(px, py, 5, 0, Math.PI * 2);
+      ctx.arc(px, py, 8, 0, Math.PI * 2);
       ctx.fill();
       ctx.shadowBlur = 0;
-      ctx.strokeStyle = hit ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)';
-      ctx.lineWidth = 1;
+      ctx.strokeStyle = hit ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.5)';
+      ctx.lineWidth = 1.5;
       ctx.stroke();
     });
 
