@@ -1517,6 +1517,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
           <div></div>
         </div>
         <div id="svBagClubList" style="display:flex;flex-direction:column;gap:6px;"></div>
+        <div id="svBagSaveStatus" style="font-size:11px;min-height:14px;text-align:center;margin-top:8px;color:#555;"></div>
       </div>
 
       <!-- Schedule sub-tab -->
@@ -14620,10 +14621,26 @@ function renderSvBagClubs() {
 
 async function saveSvBagClubs() {
   if (!_currentStudentId) return;
-  await _sb.from('profiles').update({ bag_clubs: _svBagClubs }).eq('id', _currentStudentId);
+  var statusEl = document.getElementById('svBagSaveStatus');
+  if (statusEl) { statusEl.style.color = '#888'; statusEl.textContent = 'Saving...'; }
+  try {
+    var { data, error } = await _sb.from('profiles').update({ bag_clubs: _svBagClubs }).eq('id', _currentStudentId).select('bag_clubs');
+    if (error) {
+      if (statusEl) { statusEl.style.color = '#f87171'; statusEl.textContent = 'Save failed: ' + error.message; }
+      return;
+    }
+    // Verify the write actually persisted (RLS can silently block updates)
+    if (!data || data.length === 0) {
+      if (statusEl) { statusEl.style.color = '#f87171'; statusEl.textContent = 'Save failed — unable to update student profile. Check database permissions.'; }
+      return;
+    }
+    if (statusEl) { statusEl.style.color = '#4ade80'; statusEl.textContent = 'Saved'; setTimeout(function() { if (statusEl.textContent === 'Saved') statusEl.textContent = ''; }, 2000); }
+  } catch(e) {
+    if (statusEl) { statusEl.style.color = '#f87171'; statusEl.textContent = 'Save error: ' + e.message; }
+  }
 }
 
-function addSvBagClub() {
+async function addSvBagClub() {
   var nameEl = document.getElementById('svBagClubName');
   var carryEl = document.getElementById('svBagCarryInput');
   var totalEl = document.getElementById('svBagTotalInput');
@@ -14638,23 +14655,23 @@ function addSvBagClub() {
   }
   _svBagClubs.push({ name: name, carry: carry, total: total });
   _svBagClubs = sortBagClubs(_svBagClubs);
-  saveSvBagClubs();
+  await saveSvBagClubs();
   carryEl.value = ''; totalEl.value = '';
   msg.style.color = '#4ade80'; msg.textContent = name + ' added!';
   setTimeout(function() { msg.textContent = ''; }, 2500);
   renderSvBagClubs();
 }
 
-function removeSvBagClub(idx) {
+async function removeSvBagClub(idx) {
   _svBagClubs.splice(idx, 1);
-  saveSvBagClubs();
+  await saveSvBagClubs();
   renderSvBagClubs();
 }
 
-function updateSvBagClub(idx, field, value) {
+async function updateSvBagClub(idx, field, value) {
   if (_svBagClubs[idx]) {
     _svBagClubs[idx][field] = value !== '' ? parseInt(value) : null;
-    saveSvBagClubs();
+    await saveSvBagClubs();
   }
 }
 
@@ -14735,16 +14752,35 @@ async function syncBagFromSupabase() {
   if (!currentUser) return;
   try {
     var { data, error } = await _sb.from('profiles').select('bag_clubs').eq('id', currentUser.id).single();
-    if (error || !data) return;
-    var remote = data.bag_clubs || [];
-    if (remote.length === 0) return;
+    if (error) { console.warn('syncBagFromSupabase: fetch error', error.message); return; }
+    if (!data) return;
+    var remote = data.bag_clubs;
+    if (!Array.isArray(remote)) return;
     var local = getBagClubs();
+    if (remote.length === 0 && local.length === 0) return;
+    if (remote.length === 0) {
+      // Remote is empty but local has data — push local to Supabase
+      _sb.from('profiles').update({ bag_clubs: local }).eq('id', currentUser.id).then(function(){}).catch(function(){});
+      return;
+    }
     if (local.length === 0) {
       // No local data — use remote
       localStorage.setItem(_BAG_KEY, JSON.stringify(remote));
     } else {
-      // Merge: remote wins for existing clubs, keep local-only clubs
-      var merged = remote.slice();
+      // Field-level merge: remote carry/total win, preserve local-only fields (e.g. shots)
+      var localMap = {};
+      local.forEach(function(c) { localMap[c.name] = c; });
+      var merged = remote.map(function(rc) {
+        var lc = localMap[rc.name];
+        if (!lc) return rc; // new club from remote (coach added)
+        // Remote carry/total win; preserve local-only fields like shots
+        var m = {};
+        Object.keys(lc).forEach(function(k) { m[k] = lc[k]; });
+        m.carry = rc.carry;
+        m.total = rc.total;
+        return m;
+      });
+      // Add local-only clubs not in remote
       var remoteNames = {};
       remote.forEach(function(c) { remoteNames[c.name] = true; });
       local.forEach(function(c) {
@@ -14752,7 +14788,7 @@ async function syncBagFromSupabase() {
       });
       localStorage.setItem(_BAG_KEY, JSON.stringify(sortBagClubs(merged)));
     }
-  } catch(e) { /* offline — use local cache */ }
+  } catch(e) { console.warn('syncBagFromSupabase: error', e.message || e); }
 }
 
 function sortBagClubs(clubs) {
