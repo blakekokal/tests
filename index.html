@@ -1450,9 +1450,50 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
 
     <!-- Student Practice Plan Tab -->
     <div id="svPracticePlanTab" style="width:100%;max-width:360px;display:none;">
-      <div style="font-size:16px;font-weight:800;text-align:center;margin-bottom:10px;">Practice Plan</div>
-      <div id="svPracticePlanMsg" style="font-size:13px;color:#888;min-height:20px;text-align:center;"></div>
-      <div id="svPracticePlanList" style="width:100%;"></div>
+      <!-- Toggle: Practice / Bag -->
+      <div style="display:flex;gap:0;margin-bottom:12px;background:#111;border-radius:10px;overflow:hidden;border:1px solid #333;">
+        <button id="svPracticeTogglePractice" onclick="showSvPracticeSubTab('practice')" style="flex:1;height:38px;font-size:13px;font-weight:700;background:#1d4ed8;border:none;color:#fff;cursor:pointer;">Practice</button>
+        <button id="svPracticeToggleBag" onclick="showSvPracticeSubTab('bag')" style="flex:1;height:38px;font-size:13px;font-weight:700;background:#111;border:none;color:#888;cursor:pointer;">Student's Bag</button>
+      </div>
+
+      <!-- Practice sub-tab -->
+      <div id="svPracticeSubContent">
+        <div id="svPracticePlanMsg" style="font-size:13px;color:#888;min-height:20px;text-align:center;"></div>
+        <div id="svPracticePlanList" style="width:100%;"></div>
+      </div>
+
+      <!-- Student Bag sub-tab -->
+      <div id="svBagSubContent" style="display:none;">
+        <!-- Add Club Section -->
+        <div style="background:#1a1a1a;border-radius:14px;padding:16px;margin-bottom:16px;">
+          <div style="font-size:12px;font-weight:700;color:#a78bfa;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Add Club</div>
+          <input id="svBagClubName" placeholder="Club name (e.g. Dr, 7I, 54, PW)" style="width:100%;height:40px;font-size:14px;text-align:center;box-sizing:border-box;margin-bottom:8px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+            <div>
+              <div style="font-size:11px;color:#888;margin-bottom:4px;text-align:center;">Avg Carry (yds)</div>
+              <input id="svBagCarryInput" type="number" placeholder="e.g. 240" min="0" max="400" style="width:100%;height:40px;font-size:15px;font-weight:700;text-align:center;box-sizing:border-box;">
+            </div>
+            <div>
+              <div style="font-size:11px;color:#888;margin-bottom:4px;text-align:center;">Avg Total (yds)</div>
+              <input id="svBagTotalInput" type="number" placeholder="e.g. 260" min="0" max="450" style="width:100%;height:40px;font-size:15px;font-weight:700;text-align:center;box-sizing:border-box;">
+            </div>
+          </div>
+          <button onclick="addSvBagClub()" style="width:100%;height:42px;background:#7c3aed;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;">+ Add to Bag</button>
+          <div id="svBagAddMsg" style="font-size:12px;min-height:16px;text-align:center;margin-top:6px;color:#4ade80;"></div>
+        </div>
+
+        <!-- Club List -->
+        <div id="svBagEmptyMsg" style="background:#1a1a1a;border-radius:12px;padding:24px;text-align:center;color:#555;font-size:13px;line-height:1.7;">
+          No clubs in this student's bag yet.
+        </div>
+        <div id="svBagClubHeaders" style="display:none;grid-template-columns:1fr 80px 80px 36px;gap:6px;padding:0 6px 6px;font-size:11px;color:#666;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">
+          <div>Club</div>
+          <div style="text-align:center;">Carry</div>
+          <div style="text-align:center;">Total</div>
+          <div></div>
+        </div>
+        <div id="svBagClubList" style="display:flex;flex-direction:column;gap:6px;"></div>
+      </div>
     </div>
 
     <!-- Student Notes Tab -->
@@ -2124,6 +2165,13 @@ function show(id){
   }
   if(id === 'myBagPage') {
     renderBagClubs();
+    // Sync local bag to Supabase
+    if (currentUser) {
+      var clubs = getBagClubs();
+      if (clubs.length > 0) {
+        _sb.from('profiles').update({ bag_clubs: clubs }).eq('id', currentUser.id).then(function(){}).catch(function(){});
+      }
+    }
   }
   if(id === 'parPage') {
     updateParPageRoundActions();
@@ -8569,7 +8617,7 @@ function showStudentTab(tab) {
   if (tab === 'performance') loadStudentPerfAnalysis();
   if (tab === 'rounds')      loadStudentRounds();
   if (tab === 'combines')    loadStudentCombines();
-  if (tab === 'practice')    loadStudentPracticeSessions();
+  if (tab === 'practice')    { showSvPracticeSubTab('practice'); loadStudentPracticeSessions(); }
   if (tab === 'notes')       loadSvNotes();
 }
 
@@ -14219,6 +14267,119 @@ async function deletePracticeSession(id) {
 }
 
 // ── Coach viewing student practice sessions ──
+// ─── Student Bag (Coach View) ────────────────────────────────
+var _svBagClubs = [];
+
+function showSvPracticeSubTab(tab) {
+  var practiceEl = document.getElementById('svPracticeSubContent');
+  var bagEl = document.getElementById('svBagSubContent');
+  var btnP = document.getElementById('svPracticeTogglePractice');
+  var btnB = document.getElementById('svPracticeToggleBag');
+  if (tab === 'practice') {
+    if (practiceEl) practiceEl.style.display = 'block';
+    if (bagEl) bagEl.style.display = 'none';
+    if (btnP) { btnP.style.background = '#1d4ed8'; btnP.style.color = '#fff'; }
+    if (btnB) { btnB.style.background = '#111'; btnB.style.color = '#888'; }
+  } else {
+    if (practiceEl) practiceEl.style.display = 'none';
+    if (bagEl) bagEl.style.display = 'block';
+    if (btnP) { btnP.style.background = '#111'; btnP.style.color = '#888'; }
+    if (btnB) { btnB.style.background = '#1d4ed8'; btnB.style.color = '#fff'; }
+    loadStudentBag();
+  }
+}
+
+async function loadStudentBag() {
+  if (!_currentStudentId) return;
+  var emptyMsg = document.getElementById('svBagEmptyMsg');
+  var headers = document.getElementById('svBagClubHeaders');
+  var list = document.getElementById('svBagClubList');
+  if (!list) return;
+  list.innerHTML = '<div style="text-align:center;color:#888;font-size:13px;padding:12px;">Loading...</div>';
+
+  var { data, error } = await _sb.from('profiles').select('bag_clubs').eq('id', _currentStudentId).single();
+  if (error) {
+    list.innerHTML = '<div style="text-align:center;color:#f87171;font-size:13px;padding:12px;">Error loading bag</div>';
+    return;
+  }
+
+  _svBagClubs = (data && data.bag_clubs) ? data.bag_clubs : [];
+  renderSvBagClubs();
+}
+
+function renderSvBagClubs() {
+  var clubs = _svBagClubs;
+  var list = document.getElementById('svBagClubList');
+  var emptyMsg = document.getElementById('svBagEmptyMsg');
+  var headers = document.getElementById('svBagClubHeaders');
+  if (!list) return;
+
+  if (clubs.length === 0) {
+    list.innerHTML = '';
+    if (emptyMsg) emptyMsg.style.display = 'block';
+    if (headers) headers.style.display = 'none';
+    return;
+  }
+  if (emptyMsg) emptyMsg.style.display = 'none';
+  if (headers) headers.style.display = 'grid';
+
+  list.innerHTML = clubs.map(function(club, idx) {
+    var carry = (club.carry !== null && club.carry !== undefined) ? club.carry : '';
+    var total = (club.total !== null && club.total !== undefined) ? club.total : '';
+    return '<div style="display:grid;grid-template-columns:1fr 80px 80px 36px;gap:6px;align-items:center;background:#1a1a1a;border-radius:10px;padding:8px 10px;">' +
+      '<div style="font-size:14px;font-weight:700;color:#e2e8f0;">' + club.name + '</div>' +
+      '<input type="number" value="' + carry + '" placeholder="—" min="0" max="400" ' +
+        'onchange="updateSvBagClub(' + idx + ',\'carry\',this.value)" ' +
+        'style="height:36px;font-size:14px;font-weight:700;text-align:center;background:#222;border:1px solid #333;border-radius:8px;color:#fff;width:100%;box-sizing:border-box;">' +
+      '<input type="number" value="' + total + '" placeholder="—" min="0" max="450" ' +
+        'onchange="updateSvBagClub(' + idx + ',\'total\',this.value)" ' +
+        'style="height:36px;font-size:14px;font-weight:700;text-align:center;background:#222;border:1px solid #333;border-radius:8px;color:#fff;width:100%;box-sizing:border-box;">' +
+      '<button onclick="removeSvBagClub(' + idx + ')" ' +
+        'style="width:32px;height:32px;background:#2a1515;border:1px solid #5a2020;border-radius:8px;color:#f87171;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;">×</button>' +
+      '</div>';
+  }).join('');
+}
+
+async function saveSvBagClubs() {
+  if (!_currentStudentId) return;
+  await _sb.from('profiles').update({ bag_clubs: _svBagClubs }).eq('id', _currentStudentId);
+}
+
+function addSvBagClub() {
+  var nameEl = document.getElementById('svBagClubName');
+  var carryEl = document.getElementById('svBagCarryInput');
+  var totalEl = document.getElementById('svBagTotalInput');
+  var msg = document.getElementById('svBagAddMsg');
+  var name = nameEl ? nameEl.value.trim() : '';
+  if (!name) { msg.style.color = '#f87171'; msg.textContent = 'Enter a club name.'; return; }
+  var carry = carryEl.value !== '' ? parseInt(carryEl.value) : null;
+  var total = totalEl.value !== '' ? parseInt(totalEl.value) : null;
+  if (carry === null && total === null) { msg.style.color = '#f87171'; msg.textContent = 'Enter at least one distance.'; return; }
+  if (_svBagClubs.some(function(c) { return c.name.toLowerCase() === name.toLowerCase(); })) {
+    msg.style.color = '#f87171'; msg.textContent = name + ' is already in the bag.'; return;
+  }
+  _svBagClubs.push({ name: name, carry: carry, total: total });
+  _svBagClubs = sortBagClubs(_svBagClubs);
+  saveSvBagClubs();
+  nameEl.value = ''; carryEl.value = ''; totalEl.value = '';
+  msg.style.color = '#4ade80'; msg.textContent = name + ' added!';
+  setTimeout(function() { msg.textContent = ''; }, 2500);
+  renderSvBagClubs();
+}
+
+function removeSvBagClub(idx) {
+  _svBagClubs.splice(idx, 1);
+  saveSvBagClubs();
+  renderSvBagClubs();
+}
+
+function updateSvBagClub(idx, field, value) {
+  if (_svBagClubs[idx]) {
+    _svBagClubs[idx][field] = value !== '' ? parseInt(value) : null;
+    saveSvBagClubs();
+  }
+}
+
 async function loadStudentPracticeSessions() {
   if (!_currentStudentId) return;
   var msg = document.getElementById('svPracticePlanMsg');
@@ -14285,6 +14446,10 @@ function getBagClubs() {
 
 function saveBagClubs(clubs) {
   localStorage.setItem(_BAG_KEY, JSON.stringify(clubs));
+  // Sync to Supabase so coach can view/edit
+  if (currentUser) {
+    _sb.from('profiles').update({ bag_clubs: clubs }).eq('id', currentUser.id).then(function(){}).catch(function(){});
+  }
 }
 
 function sortBagClubs(clubs) {
