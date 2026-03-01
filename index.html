@@ -2436,6 +2436,11 @@ function highlight(btn){
   btn.classList.add('selected');
 }
 
+// Get today's date in Central Time as YYYY-MM-DD
+function getTodayCentral() {
+  return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
+}
+
 let totalHoles=null,currentHole=1;
 let totalPar=0,totalStrokes=0;
 let par=4,shots=0,putts=0;
@@ -5634,7 +5639,7 @@ async function autoSaveRound() {
 
   const playerName = document.getElementById('playerName').value || 'Player';
   const courseName = document.getElementById('courseName').value || 'Course';
-  const roundDate = document.getElementById('roundDate').value || new Date().toISOString().split('T')[0];
+  const roundDate = document.getElementById('roundDate').value || getTodayCentral();
 
   // Clear incomplete flag from round_data if present
   delete roundBlob.incomplete;
@@ -5781,7 +5786,7 @@ async function saveHoleByHoleForLater() {
 async function saveIncompleteRound(hbhFormData) {
   var playerNameVal = document.getElementById('playerName').value || 'Player';
   var courseNameVal = document.getElementById('courseName').value || 'Course';
-  var roundDateVal = document.getElementById('roundDate').value || new Date().toISOString().split('T')[0];
+  var roundDateVal = document.getElementById('roundDate').value || getTodayCentral();
   var holesCompleted = allHoles.length;
 
   // Build the partial round blob
@@ -5877,7 +5882,7 @@ async function resumeIncompleteRound(roundId) {
   // Restore round metadata
   document.getElementById('playerName').value = data.player_name || '';
   document.getElementById('courseName').value = data.course_name || '';
-  document.getElementById('roundDate').value = data.round_date || new Date().toISOString().split('T')[0];
+  document.getElementById('roundDate').value = data.round_date || getTodayCentral();
   document.getElementById('roundType').value = data.round_type || 'Casual';
   document.getElementById('playerHandicap').value = data.handicap || 'pro';
 
@@ -6073,7 +6078,7 @@ async function saveRoundToAccount() {
   var payload = {
     player_name: document.getElementById('playerName').value || 'Player',
     course_name: document.getElementById('courseName').value || 'Course',
-    round_date: document.getElementById('roundDate').value || new Date().toISOString().split('T')[0],
+    round_date: document.getElementById('roundDate').value || getTodayCentral(),
     round_type: document.getElementById('roundType').value || 'Casual',
     handicap: document.getElementById('playerHandicap').value || 'pro',
     holes: allHoles.length,
@@ -6446,7 +6451,7 @@ function resetRoundState() {
 
   if(document.getElementById('playerName')) document.getElementById('playerName').value = '';
   if(document.getElementById('courseName')) document.getElementById('courseName').value = '';
-  if(document.getElementById('roundDate')) document.getElementById('roundDate').value = new Date().toISOString().split('T')[0];
+  if(document.getElementById('roundDate')) document.getElementById('roundDate').value = getTodayCentral();
   if(document.getElementById('holeHeader')) document.getElementById('holeHeader').innerText = 'Hole 1';
   if(document.getElementById('scoreBarText')) document.getElementById('scoreBarText').innerText = 'E through 0';
   if(document.getElementById('courseLabel')) document.getElementById('courseLabel').innerText = '';
@@ -9193,7 +9198,7 @@ function parseExcelRound(wb) {
     avgDrive: avgDrive
   };
   
-  if (!roundDate) roundDate = new Date().toISOString().split('T')[0];
+  if (!roundDate) roundDate = getTodayCentral();
   if (!playerName) playerName = 'Player';
   if (!courseName) courseName = 'Imported Round';
   
@@ -9225,7 +9230,7 @@ function parseImportDate(val) {
     var yr = parts[2].length === 2 ? '20' + parts[2] : parts[2];
     return yr + '-' + parts[0].padStart(2,'0') + '-' + parts[1].padStart(2,'0');
   }
-  return new Date().toISOString().split('T')[0];
+  return getTodayCentral();
 }
 
 function buildMinimalShots(par, score, putts, yards) {
@@ -12368,7 +12373,7 @@ async function combSave(){
   var typeNames = {putting:'Putting','chip-prox':'Chipping (Prox)','chip-hole':'Chip Hole Out',wedge:'Wedge',driver:'Driver'};
   var combineType = typeNames[combCurType] || combCurType;
   var hcp      = document.getElementById('comb-handicap').value;
-  var dateVal  = document.getElementById('comb-date').value || new Date().toISOString().split('T')[0];
+  var dateVal  = document.getElementById('comb-date').value || getTodayCentral();
   var noteVal  = document.getElementById('comb-note').value || '';
 
   // If coach is running this for a student, tag the note
@@ -13974,7 +13979,7 @@ function initPracticeSessionForm() {
   _editingPracticeSessionId = null;
   var dateInput = document.getElementById('ppSessionDate');
   if (dateInput && !dateInput.value) {
-    dateInput.value = new Date().toISOString().split('T')[0];
+    dateInput.value = getTodayCentral();
   }
   _practiceNotes = [];
   renderPracticeNotes();
