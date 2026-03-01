@@ -15141,11 +15141,11 @@ function drawDispersion(clubName) {
     var carryOnTarget = drawDots(carryPoints, 'rgba(56,147,248,0.9)', 9);
 
     // --- Stats bar ---
-    var barH = hasTotalShots ? 64 : 44;
+    var barH = hasTotalShots ? 100 : 80;
     ctx.fillStyle = 'rgba(0,0,0,0.75)';
     ctx.fillRect(0, H - barH, W, barH);
     ctx.fillStyle = '#fff';
-    ctx.font = 'bold 18px -apple-system,sans-serif';
+    ctx.font = 'bold 28px -apple-system,sans-serif';
     ctx.textAlign = 'center';
 
     var carryPct = Math.round(carryOnTarget / carryPoints.length * 100);
@@ -15156,22 +15156,21 @@ function drawDispersion(clubName) {
       var targetLabel = isFW ? 'in FW' : 'on green';
       // Carry line (blue dot legend)
       ctx.fillStyle = 'rgba(56,147,248,0.9)';
-      ctx.beginPath(); ctx.arc(20, H - barH + 17, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(22, H - barH + 27, 9, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#fff';
       ctx.textAlign = 'left';
-      ctx.fillText('Carry: ' + carryPoints.length + ' shots · avg ' + carryAvg + 'y · ' + carryOnTarget + ' ' + targetLabel + ' (' + carryPct + '%)', 32, H - barH + 22);
+      ctx.fillText('Carry: ' + carryPoints.length + ' shots · avg ' + carryAvg + 'y · ' + carryOnTarget + ' ' + targetLabel + ' (' + carryPct + '%)', 38, H - barH + 34);
       // Total line (red dot legend)
       ctx.fillStyle = 'rgba(248,113,113,0.9)';
-      ctx.beginPath(); ctx.arc(20, H - barH + 45, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(22, H - barH + 67, 9, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#fff';
-      ctx.fillText('Total: ' + totalPoints.length + ' shots · avg ' + totalAvg + 'y · ' + totalOnTarget + ' ' + targetLabel + ' (' + totalPct + '%)', 32, H - barH + 50);
+      ctx.fillText('Total: ' + totalPoints.length + ' shots · avg ' + totalAvg + 'y · ' + totalOnTarget + ' ' + targetLabel + ' (' + totalPct + '%)', 38, H - barH + 74);
     } else {
-      // Single data set (carry only) - original style, blue dots
-      if (isFW) {
-        ctx.fillText(carryPoints.length + ' shots  ·  avg ' + carryAvg + 'y  ·  ' + carryOnTarget + ' in fairway (' + carryPct + '%)  ·  30yd wide', cx, H - 15);
-      } else {
-        ctx.fillText(carryPoints.length + ' shots  ·  avg ' + carryAvg + 'y  ·  ' + carryOnTarget + ' on green (' + carryPct + '%)  ·  20yd green', cx, H - 15);
-      }
+      // Single data set (carry only) - two lines for readability at large size
+      var line1 = carryPoints.length + ' shots · avg ' + carryAvg + 'y · ' + carryPct + '%';
+      var line2 = isFW ? carryOnTarget + ' in fairway · 30yd wide' : carryOnTarget + ' on green · 20yd green';
+      ctx.fillText(line1, cx, H - barH + 34);
+      ctx.fillText(line2, cx, H - barH + 64);
     }
   }
 
