@@ -14835,7 +14835,7 @@ function renderBagClubs() {
       '</div>';
     if (hasShots) {
       html += '<div id="disp_' + club.name + '" style="display:none;margin-top:8px;">' +
-        '<canvas id="dispCanvas_' + club.name + '" width="300" height="300" style="width:100%;border-radius:8px;"></canvas>' +
+        '<canvas id="dispCanvas_' + club.name + '" width="300" height="300" style="width:100%;border-radius:8px;display:block;"></canvas>' +
         '</div>';
     }
     html += '</div>';
@@ -14953,6 +14953,12 @@ function isFairwayClub(name) {
   return n === 'dr' || n === 'dr2' || /^\d+w$/i.test(n);
 }
 
+// Preload dispersion background images
+var _dispFairwayImg = new Image();
+_dispFairwayImg.src = 'fairwaydispersion.jpg';
+var _dispGreenImg = new Image();
+_dispGreenImg.src = 'greendispersion.jpg';
+
 function drawDispersion(clubName) {
   var clubs = getBagClubs();
   var club = clubs.find(function(c) { return c.name === clubName; });
@@ -14960,166 +14966,96 @@ function drawDispersion(clubName) {
 
   var canvas = document.getElementById('dispCanvas_' + clubName);
   if (!canvas) return;
-  var ctx = canvas.getContext('2d');
-  var W = canvas.width, H = canvas.height;
-  var cx = W / 2, cy = H / 2;
   var isFW = isFairwayClub(clubName);
-  var fwHalfWidth = 15; // 30 yard wide fairway = 15 each side
-  var greenR_yd = 10;   // 20 yard diameter green = 10 radius
+  var img = isFW ? _dispFairwayImg : _dispGreenImg;
 
-  // Compute shot positions relative to target center
-  var avgTarget = club.carry || club.total;
-  var points = club.shots.map(function(s) {
-    return { x: s.side, y: s.total - (s.target || avgTarget) };
-  });
+  function render() {
+    // --- SCALING CONSTANTS ---
+    // Fairway image: 30 yards = 330px wide, grid lines 110px apart = 10 yards
+    // => 11 px per yard in the fairway image
+    // Green image: 20 yards wide green
+    // We detect the green px/yard from the image: green circle is 20 yards across
+    var fwPxPerYard = 11;  // fairway: 330px / 30 yards
+    var fwHalfWidth = 15;  // 30 yard wide fairway = 15 each side
 
-  // Scale to fit all shots with padding
-  var maxAbsX = isFW ? fwHalfWidth : greenR_yd;
-  var maxAbsY = isFW ? fwHalfWidth : greenR_yd;
-  points.forEach(function(p) {
-    if (Math.abs(p.x) > maxAbsX) maxAbsX = Math.abs(p.x);
-    if (Math.abs(p.y) > maxAbsY) maxAbsY = Math.abs(p.y);
-  });
-  var viewRadiusX = maxAbsX + 3;
-  var viewRadiusY = maxAbsY + 3;
-  var viewRadius = Math.max(viewRadiusX, viewRadiusY);
-  var scale = (W / 2 - 10) / viewRadius;
+    // Set canvas to match image dimensions
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    var ctx = canvas.getContext('2d');
+    var W = canvas.width, H = canvas.height;
 
-  // Background
-  ctx.clearRect(0, 0, W, H);
-  ctx.fillStyle = '#111';
-  ctx.fillRect(0, 0, W, H);
+    // Draw the background image
+    ctx.drawImage(img, 0, 0, W, H);
 
-  if (isFW) {
-    // Draw fairway rectangle (30 yards wide, full height)
-    var fwPxHalf = fwHalfWidth * scale;
-    // Rough background on sides
-    ctx.fillStyle = '#1a3a1a';
-    ctx.fillRect(0, 0, W, H);
-    // Fairway strip
-    ctx.fillStyle = '#1a5e1a';
-    ctx.fillRect(cx - fwPxHalf, 0, fwPxHalf * 2, H);
-    // Fairway edge lines
-    ctx.strokeStyle = '#2e8e2e';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(cx - fwPxHalf, 0); ctx.lineTo(cx - fwPxHalf, H);
-    ctx.moveTo(cx + fwPxHalf, 0); ctx.lineTo(cx + fwPxHalf, H);
-    ctx.stroke();
-  } else {
-    // Draw green circle
-    var greenR = greenR_yd * scale;
-    ctx.beginPath();
-    ctx.arc(cx, cy, greenR, 0, Math.PI * 2);
-    ctx.fillStyle = '#1a5e1a';
-    ctx.fill();
-    ctx.strokeStyle = '#2e8e2e';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-    // Fringe ring
-    ctx.beginPath();
-    ctx.arc(cx, cy, greenR + 3 * scale * 0.3, 0, Math.PI * 2);
-    ctx.strokeStyle = '#255e25';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-  }
+    // Center of the image is the target/pin center
+    var cx = W / 2;
+    var cy = H / 2;
 
-  // Crosshairs
-  ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-  ctx.lineWidth = 0.5;
-  ctx.beginPath();
-  ctx.moveTo(cx, 8); ctx.lineTo(cx, H - 8);
-  ctx.moveTo(8, cy); ctx.lineTo(W - 8, cy);
-  ctx.stroke();
+    // Compute shot positions relative to target center
+    var avgTarget = club.carry || club.total;
+    var points = club.shots.map(function(s) {
+      return { x: s.side, y: s.total - (s.target || avgTarget) };
+    });
 
-  // 5-yard grid markers
-  for (var r = 5; r <= viewRadius; r += 5) {
+    var scale;
+    var greenR_yd = 10; // 20 yard diameter = 10 radius
+
     if (isFW) {
-      // Horizontal distance lines
-      var yUp = cy - r * scale, yDn = cy + r * scale;
-      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-      ctx.lineWidth = 0.5;
-      if (yUp > 0) { ctx.beginPath(); ctx.moveTo(8, yUp); ctx.lineTo(W - 8, yUp); ctx.stroke(); }
-      if (yDn < H) { ctx.beginPath(); ctx.moveTo(8, yDn); ctx.lineTo(W - 8, yDn); ctx.stroke(); }
+      // Fairway: 11 px per yard (330px = 30 yards, grid lines 110px = 10 yards)
+      scale = fwPxPerYard;
     } else {
+      // Green: 20 yards wide. The green circle in the image spans 20 yards.
+      // Use same 11 px/yard as fairway for consistency (both images use same scale)
+      scale = 11;
+    }
+
+    // Shot dots
+    var onTarget = 0;
+    points.forEach(function(p) {
+      // x: positive = right, negative = left
+      // y: positive = long (above target), negative = short (below target)
+      var px = cx + p.x * scale;
+      var py = cy - p.y * scale;
+      var hit;
+      if (isFW) {
+        hit = Math.abs(p.x) <= fwHalfWidth;
+      } else {
+        hit = Math.sqrt(p.x * p.x + p.y * p.y) <= greenR_yd;
+      }
+      if (hit) onTarget++;
+      // Draw dot with shadow for visibility on the image
+      ctx.shadowColor = 'rgba(0,0,0,0.5)';
+      ctx.shadowBlur = 3;
+      ctx.fillStyle = hit ? 'rgba(74,222,128,0.9)' : 'rgba(248,113,113,0.9)';
       ctx.beginPath();
-      ctx.arc(cx, cy, r * scale, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-      ctx.lineWidth = 0.5;
+      ctx.arc(px, py, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = hit ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)';
+      ctx.lineWidth = 1;
       ctx.stroke();
-    }
-  }
+    });
 
-  // Center marker
-  if (isFW) {
-    // Target landing zone marker
-    ctx.fillStyle = '#fff';
-    ctx.beginPath();
-    ctx.arc(cx, cy, 3, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.arc(cx, cy, 8, 0, Math.PI * 2);
-    ctx.stroke();
-  } else {
-    // Pin flag
-    ctx.fillStyle = '#fff';
-    ctx.beginPath();
-    ctx.arc(cx, cy, 3, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(cx, cy); ctx.lineTo(cx, cy - 12);
-    ctx.stroke();
-    ctx.fillStyle = '#e53e3e';
-    ctx.beginPath();
-    ctx.moveTo(cx, cy - 12); ctx.lineTo(cx + 7, cy - 9); ctx.lineTo(cx, cy - 6);
-    ctx.fill();
-  }
-
-  // Shot dots
-  var onTarget = 0;
-  points.forEach(function(p) {
-    var px = cx + p.x * scale;
-    var py = cy - p.y * scale;
-    var hit;
+    // Stats bar at bottom
+    var pct = Math.round(onTarget / points.length * 100);
+    // Draw stats background bar
+    ctx.fillStyle = 'rgba(0,0,0,0.65)';
+    ctx.fillRect(0, H - 28, W, 28);
+    ctx.fillStyle = '#ddd';
+    ctx.font = 'bold 12px -apple-system,sans-serif';
+    ctx.textAlign = 'center';
     if (isFW) {
-      hit = Math.abs(p.x) <= fwHalfWidth;
+      ctx.fillText(points.length + ' shots  ·  ' + onTarget + ' in fairway (' + pct + '%)  ·  30yd wide', cx, H - 9);
     } else {
-      hit = Math.sqrt(p.x * p.x + p.y * p.y) <= greenR_yd;
+      ctx.fillText(points.length + ' shots  ·  ' + onTarget + ' on green (' + pct + '%)  ·  20yd green', cx, H - 9);
     }
-    if (hit) onTarget++;
-    ctx.fillStyle = hit ? 'rgba(74,222,128,0.85)' : 'rgba(248,113,113,0.85)';
-    ctx.beginPath();
-    ctx.arc(px, py, 4.5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(0,0,0,0.4)';
-    ctx.lineWidth = 0.5;
-    ctx.stroke();
-  });
+  }
 
-  // Labels
-  ctx.fillStyle = '#555';
-  ctx.font = '10px -apple-system,sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('LONG', cx, 14);
-  ctx.fillText('SHORT', cx, H - 6);
-  ctx.textAlign = 'left';
-  ctx.fillText('L', 6, cy + 4);
-  ctx.textAlign = 'right';
-  ctx.fillText('R', W - 6, cy + 4);
-
-  // Stats bar
-  var pct = Math.round(onTarget / points.length * 100);
-  ctx.fillStyle = '#888';
-  ctx.font = '11px -apple-system,sans-serif';
-  ctx.textAlign = 'center';
-  if (isFW) {
-    ctx.fillText(points.length + ' shots · ' + onTarget + ' in fairway (' + pct + '%) · 30yd wide', cx, H - 18);
+  // If image already loaded, render immediately; otherwise wait
+  if (img.complete && img.naturalWidth > 0) {
+    render();
   } else {
-    ctx.fillText(points.length + ' shots · ' + onTarget + ' on green (' + pct + '%) · 20yd green', cx, H - 18);
+    img.onload = render;
   }
 }
 
