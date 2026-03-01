@@ -14732,7 +14732,7 @@ async function loadStudentPracticeSessions() {
 
 // ─── MY BAG ─────────────────────────────────────────────────────────────────
 var _BAG_KEY = 'myBag_v1';
-var _BAG_ORDER = ['Dr','Dr2','2W','3W','4W','5W','6W','7W','2HY','3HY','4HY','5HY','6HY','7HY','2I','3I','4I','5I','6I','7I','8I','9I','PW','GW','AW','SW','50','52','54','58','60','62'];
+var _BAG_ORDER = ['Dr','Dr2','2W','3W','4W','5W','6W','7W','2HY','3HY','4HY','5HY','6HY','7HY','2I','3I','4I','5I','6I','7I','8I','9I','PW','GW','AW','SW','50','52','54','56','58','60','62'];
 
 function getBagClubs() {
   try { return JSON.parse(localStorage.getItem(_BAG_KEY)) || []; }
@@ -14793,6 +14793,9 @@ async function syncBagFromSupabase() {
 
 function sortBagClubs(clubs) {
   return clubs.sort(function(a, b) {
+    var ac = (a.carry !== null && a.carry !== undefined) ? a.carry : -1;
+    var bc = (b.carry !== null && b.carry !== undefined) ? b.carry : -1;
+    if (ac !== bc) return bc - ac;
     var ai = _BAG_ORDER.indexOf(a.name), bi = _BAG_ORDER.indexOf(b.name);
     if (ai === -1) ai = 999;
     if (bi === -1) bi = 999;
