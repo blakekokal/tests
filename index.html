@@ -307,6 +307,11 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
         <option value="3">Last 3 Months</option>
         <option value="6">Last 6 Months</option>
       </select>
+      <select id="roundFilterStatus" onchange="filterRoundsList()" style="background:#222;color:#fff;border:1px solid #444;border-radius:6px;padding:4px 6px;font-size:11px;">
+        <option value="all">All Status</option>
+        <option value="complete">Completed</option>
+        <option value="incomplete">In Progress</option>
+      </select>
       <select id="roundSortBy" onchange="filterRoundsList()" style="background:#222;color:#fff;border:1px solid #444;border-radius:6px;padding:4px 6px;font-size:11px;">
         <option value="date-desc">Date: Newest</option>
         <option value="date-asc">Date: Oldest</option>
@@ -1842,8 +1847,9 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
   <div id="hbhCourseName" style="font-size:13px;color:#888;margin-bottom:2px;display:none;"></div>
   <div style="font-size:12px;color:#666;margin-bottom:16px;">Enter each hole then submit</div>
   <div id="hbhHolesList" style="width:100%;max-width:360px;display:flex;flex-direction:column;gap:14px;"></div>
-  <div style="width:100%;max-width:360px;margin-top:16px;">
+  <div style="width:100%;max-width:360px;margin-top:16px;display:flex;flex-direction:column;gap:8px;">
     <button onclick="submitHoleByHole()" style="width:100%;height:52px;background:#2E7D32;border:none;border-radius:12px;color:#fff;font-size:16px;font-weight:800;cursor:pointer;">✅ Submit Round</button>
+    <button onclick="saveHoleByHoleForLater()" style="width:100%;height:44px;background:#e65100;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;">💾 Save & Finish Later</button>
   </div>
 </div>
 
@@ -1855,6 +1861,12 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
   <div class="input-wrap"><input id="holeYards" type="number" inputmode="numeric" onfocus="this.select()"><span>yards</span></div>
   <button class="holes9" onclick="startHole()">CONFIRM</button>
   <div class="back-wrap"><button class="back" onclick="goBack()">BACK</button></div>
+  <div id="parPageRoundActions" style="display:none;width:100%;max-width:320px;margin-top:12px;">
+    <div style="display:flex;gap:8px;">
+      <button onclick="endRoundEarly()" style="flex:1;height:44px;font-size:13px;font-weight:700;background:#c62828;border:none;border-radius:10px;color:#fff;cursor:pointer;">End Round Early</button>
+      <button onclick="saveRoundForLater()" style="flex:1;height:44px;font-size:13px;font-weight:700;background:#e65100;border:none;border-radius:10px;color:#fff;cursor:pointer;">Save & Finish Later</button>
+    </div>
+  </div>
 </div>
 
 <div id="shotPage" class="page">
@@ -2112,6 +2124,9 @@ function show(id){
   }
   if(id === 'myBagPage') {
     renderBagClubs();
+  }
+  if(id === 'parPage') {
+    updateParPageRoundActions();
   }
   // Hide score bar on non-scoring pages
   var scoringPages = ['parPage','shotPage','liePage','distancePage','puttPage','penaltyPage','obPenaltyPage','recoveryPage','missedGreenPage'];
@@ -3782,6 +3797,7 @@ function finishHole(){
       else if (hd.par === 5 && parBtns[2]) parBtns[2].classList.add('selected');
     }
     show('parPage');
+    updateParPageRoundActions();
   }else{
     scoreBar.style.display='none';
     renderSummary();
@@ -3791,7 +3807,7 @@ function finishHole(){
     var saveBtn = document.getElementById('saveToAccountBtn');
     if(saveBtn) saveBtn.style.display = currentUser ? '' : 'none';
     show('summaryPage');
-    
+
     // Auto-save round if logged in
     if (currentUser && allHoles.length > 0) {
       autoSaveRound();
@@ -5620,8 +5636,11 @@ async function autoSaveRound() {
   const courseName = document.getElementById('courseName').value || 'Course';
   const roundDate = document.getElementById('roundDate').value || new Date().toISOString().split('T')[0];
 
-  const { data, error } = await _sb.from('rounds').insert({
-    user_id: currentUser.id,
+  // Clear incomplete flag from round_data if present
+  delete roundBlob.incomplete;
+  delete roundBlob._flagIncomplete;
+
+  var payload = {
     player_name: playerName,
     course_name: courseName,
     round_date: roundDate,
@@ -5631,14 +5650,39 @@ async function autoSaveRound() {
     score: totalStrokes,
     par: totalPar,
     to_par: totalStrokes - totalPar,
-    round_data: roundBlob
-  }).select();
-  
+    round_data: roundBlob,
+    is_incomplete: false
+  };
+
+  var resp;
+  if (_currentRoundId) {
+    // Completing a previously incomplete round — update it
+    resp = await _sb.from('rounds').update(payload).eq('id', _currentRoundId).select();
+  } else {
+    payload.user_id = currentUser.id;
+    resp = await _sb.from('rounds').insert(payload).select();
+  }
+
+  // If is_incomplete column doesn't exist, retry without it
+  if (resp.error && resp.error.message && resp.error.message.indexOf('is_incomplete') !== -1) {
+    delete payload.is_incomplete;
+    if (_currentRoundId) {
+      resp = await _sb.from('rounds').update(payload).eq('id', _currentRoundId).select();
+    } else {
+      payload.user_id = currentUser.id;
+      resp = await _sb.from('rounds').insert(payload).select();
+    }
+  }
+
+  var data = resp.data;
+  var error = resp.error;
+
   if (error) {
     status.style.color = '#f44';
     status.textContent = 'Auto-save failed';
     console.error('Auto-save error:', error);
   } else {
+    if (data && data[0]) _currentRoundId = data[0].id;
     status.style.color = '#4CAF50';
     status.textContent = '✓ Round auto-saved!';
     // Hide save button since already saved
@@ -5647,6 +5691,311 @@ async function autoSaveRound() {
     // Notify coach if student
     notifyCoachOfNewRound(playerName, courseName, roundDate, totalStrokes, totalPar);
   }
+}
+
+// ─── SAVE & FINISH LATER / END ROUND EARLY ────────────────
+// Show/hide the End Round / Save & Finish Later buttons on parPage
+function updateParPageRoundActions() {
+  var el = document.getElementById('parPageRoundActions');
+  if (el) el.style.display = (allHoles.length > 0 && currentUser) ? 'block' : 'none';
+}
+
+// End Round Early (shot-by-shot mode) — submits only the holes completed so far
+function endRoundEarly() {
+  if (allHoles.length === 0) { alert('Complete at least one hole before ending the round.'); return; }
+  if (!confirm('End round after ' + allHoles.length + ' hole' + (allHoles.length > 1 ? 's' : '') + '? This will save your round as a completed ' + allHoles.length + '-hole round.')) return;
+
+  // Adjust totalHoles to match what was actually played
+  totalHoles = allHoles.length;
+
+  scoreBar.style.display = 'none';
+  renderSummary();
+  document.getElementById('backToRoundsBtn').style.display = 'none';
+  document.getElementById('saveStatus').textContent = '';
+  _viewingStudentRound = false;
+  var saveBtn = document.getElementById('saveToAccountBtn');
+  if (saveBtn) saveBtn.style.display = currentUser ? '' : 'none';
+  show('summaryPage');
+
+  if (currentUser && allHoles.length > 0) {
+    autoSaveRound();
+  }
+}
+
+// Save & Finish Later (shot-by-shot mode) — saves incomplete round to DB
+async function saveRoundForLater() {
+  if (!currentUser) { alert('Please log in to save rounds.'); showAuthPage(); return; }
+  if (allHoles.length === 0) { alert('Complete at least one hole before saving.'); return; }
+  if (!confirm('Save your progress (' + allHoles.length + ' of ' + totalHoles + ' holes) and finish later?')) return;
+
+  await saveIncompleteRound();
+}
+
+// Save & Finish Later (hole-by-hole mode) — saves partial hole-by-hole entry
+async function saveHoleByHoleForLater() {
+  if (!currentUser) { alert('Please log in to save rounds.'); showAuthPage(); return; }
+
+  // Gather whatever holes have data entered
+  var partialHoles = [];
+  for (var h = 1; h <= totalHoles; h++) {
+    var shotsContainer = document.getElementById('hbh_shots_' + h);
+    if (!shotsContainer) continue;
+    var shotEls = shotsContainer.querySelectorAll('[id^="hbh_shot_' + h + '_"]');
+    var hasShot = false;
+    for (var s = 0; s < shotEls.length; s++) {
+      var lieEl = document.getElementById('hbh_lie_' + h + '_' + (s + 1));
+      if (lieEl && lieEl.value) { hasShot = true; break; }
+    }
+    if (hasShot) partialHoles.push(h);
+  }
+  if (partialHoles.length === 0) { alert('Enter at least one hole before saving.'); return; }
+  if (!confirm('Save your progress (' + partialHoles.length + ' of ' + totalHoles + ' holes entered) and finish later?')) return;
+
+  // Build partial blob from HBH form
+  var hbhFormData = [];
+  for (var h = 1; h <= totalHoles; h++) {
+    var card = document.getElementById('hbh_hole_' + h);
+    if (!card) continue;
+    var parVal = parseInt(card.dataset.par) || 4;
+    var yardsEl = document.getElementById('hbh_yards_' + h);
+    var yardsVal = yardsEl ? parseInt(yardsEl.value) || 0 : 0;
+    var shotsContainer = document.getElementById('hbh_shots_' + h);
+    var shotEls = shotsContainer ? shotsContainer.querySelectorAll('[id^="hbh_shot_' + h + '_"]') : [];
+    var shotsArr = [];
+    for (var s = 0; s < shotEls.length; s++) {
+      var sNum = s + 1;
+      var lieEl = document.getElementById('hbh_lie_' + h + '_' + sNum);
+      var distEl = document.getElementById('hbh_dist_' + h + '_' + sNum);
+      shotsArr.push({
+        lie: lieEl ? lieEl.value : '',
+        dist: distEl ? distEl.value : ''
+      });
+    }
+    hbhFormData.push({ hole: h, par: parVal, yards: yardsVal, shots: shotsArr });
+  }
+
+  await saveIncompleteRound(hbhFormData);
+}
+
+// Core function to save an incomplete round to Supabase
+async function saveIncompleteRound(hbhFormData) {
+  var playerNameVal = document.getElementById('playerName').value || 'Player';
+  var courseNameVal = document.getElementById('courseName').value || 'Course';
+  var roundDateVal = document.getElementById('roundDate').value || new Date().toISOString().split('T')[0];
+  var holesCompleted = allHoles.length;
+
+  // Build the partial round blob
+  var roundBlob;
+  if (hbhFormData) {
+    // Hole-by-hole mode — store form state for resuming
+    roundBlob = {
+      allHoles: [],
+      stats: {},
+      incomplete: true,
+      entryMode: 'hole',
+      totalHoles: totalHoles,
+      holesCompleted: 0,
+      hbhFormData: hbhFormData
+    };
+    holesCompleted = 0; // no fully-processed holes yet in HBH save-for-later
+    // Count how many holes have at least one shot entered
+    var enteredCount = hbhFormData.filter(function(h) { return h.shots.some(function(s) { return s.lie; }); }).length;
+    roundBlob.holesCompleted = enteredCount;
+    holesCompleted = enteredCount;
+  } else {
+    // Shot-by-shot mode — save processed holes
+    roundBlob = buildRoundBlob();
+    roundBlob.incomplete = true;
+    roundBlob.entryMode = 'shot';
+    roundBlob.totalHoles = totalHoles;
+    roundBlob.holesCompleted = allHoles.length;
+    // Save course data for resuming
+    if (_selectedCourse) roundBlob._selectedCourse = _selectedCourse;
+    if (_selectedTee) roundBlob._selectedTee = _selectedTee;
+    if (_courseHoleData) roundBlob._courseHoleData = _courseHoleData;
+  }
+
+  var payload = {
+    user_id: currentUser.id,
+    player_name: playerNameVal,
+    course_name: courseNameVal,
+    round_date: roundDateVal,
+    round_type: document.getElementById('roundType').value || 'Casual',
+    handicap: document.getElementById('playerHandicap').value || 'pro',
+    holes: totalHoles,
+    score: totalStrokes || 0,
+    par: totalPar || 0,
+    to_par: (totalStrokes || 0) - (totalPar || 0),
+    round_data: roundBlob,
+    is_incomplete: true
+  };
+
+  var resp;
+  if (_currentRoundId) {
+    resp = await _sb.from('rounds').update(payload).eq('id', _currentRoundId);
+  } else {
+    resp = await _sb.from('rounds').insert(payload).select();
+  }
+
+  if (resp.error) {
+    // If is_incomplete column doesn't exist, save without it
+    delete payload.is_incomplete;
+    roundBlob._flagIncomplete = true;
+    payload.round_data = roundBlob;
+    if (_currentRoundId) {
+      resp = await _sb.from('rounds').update(payload).eq('id', _currentRoundId);
+    } else {
+      resp = await _sb.from('rounds').insert(payload).select();
+    }
+  }
+
+  if (resp.error) {
+    alert('Error saving: ' + resp.error.message);
+  } else {
+    if (resp.data && resp.data[0]) _currentRoundId = resp.data[0].id;
+    alert('Round saved! You can resume it from Round History.');
+    scoreBar.style.display = 'none';
+    show('homePage');
+  }
+}
+
+// Resume an incomplete round from round history
+async function resumeIncompleteRound(roundId) {
+  var msg = document.getElementById('roundsListMsg');
+  if (msg) msg.textContent = 'Loading round...';
+
+  var { data, error } = await _sb.from('rounds').select('*').eq('id', roundId).single();
+  if (error || !data) { if (msg) msg.textContent = 'Error loading round'; return; }
+
+  var rd = data.round_data;
+  if (!rd) { if (msg) msg.textContent = 'Round data is empty'; return; }
+
+  // Reset state
+  resetRoundState();
+  _currentRoundId = data.id;
+
+  // Restore round metadata
+  document.getElementById('playerName').value = data.player_name || '';
+  document.getElementById('courseName').value = data.course_name || '';
+  document.getElementById('roundDate').value = data.round_date || new Date().toISOString().split('T')[0];
+  document.getElementById('roundType').value = data.round_type || 'Casual';
+  document.getElementById('playerHandicap').value = data.handicap || 'pro';
+
+  totalHoles = rd.totalHoles || data.holes || 9;
+
+  var cLabel = document.getElementById('courseLabel');
+  if (cLabel) cLabel.innerText = data.course_name || '';
+
+  if (rd.entryMode === 'hole' && rd.hbhFormData) {
+    // Resume hole-by-hole mode
+    _entryMode = 'hole';
+    setEntryMode('hole');
+    var customHolesEl = document.getElementById('customHoles');
+    if (customHolesEl) customHolesEl.value = totalHoles;
+
+    // Build the form then populate it
+    buildHoleByHoleForm();
+
+    var hbhCN = document.getElementById('hbhCourseName');
+    if (hbhCN) { hbhCN.innerText = data.course_name || ''; hbhCN.style.display = data.course_name ? 'block' : 'none'; }
+
+    // Restore form data
+    rd.hbhFormData.forEach(function(hd) {
+      var h = hd.hole;
+      // Set par by clicking the appropriate par button
+      var card = document.getElementById('hbh_hole_' + h);
+      if (card) {
+        card.dataset.par = hd.par;
+        // Find the par buttons (3 buttons in the par selector div)
+        var parBtns = card.querySelectorAll('button[onclick^="hbhSetPar"]');
+        parBtns.forEach(function(b) {
+          var onclickStr = b.getAttribute('onclick') || '';
+          var match = onclickStr.match(/hbhSetPar\(\d+,(\d+)/);
+          if (match && parseInt(match[1]) === hd.par) {
+            hbhSetPar(h, hd.par, b);
+          }
+        });
+      }
+      // Set yards
+      var yardsEl = document.getElementById('hbh_yards_' + h);
+      if (yardsEl && hd.yards) yardsEl.value = hd.yards;
+      // Set shots
+      if (hd.shots && hd.shots.length > 0) {
+        // Ensure enough shot rows exist
+        var shotsContainer = document.getElementById('hbh_shots_' + h);
+        if (shotsContainer) {
+          var existing = shotsContainer.querySelectorAll('[id^="hbh_shot_' + h + '_"]');
+          for (var s = existing.length; s < hd.shots.length; s++) {
+            hbhAddShot(h);
+          }
+        }
+        hd.shots.forEach(function(shotData, idx) {
+          var sNum = idx + 1;
+          var lieEl = document.getElementById('hbh_lie_' + h + '_' + sNum);
+          var distEl = document.getElementById('hbh_dist_' + h + '_' + sNum);
+          if (lieEl && shotData.lie) { lieEl.value = shotData.lie; hbhLieChanged(h, sNum, lieEl); }
+          if (distEl && shotData.dist) distEl.value = shotData.dist;
+        });
+      }
+    });
+
+    show('holeByHolePage');
+  } else {
+    // Resume shot-by-shot mode
+    _entryMode = 'shot';
+    setEntryMode('shot');
+
+    // Restore course data if available
+    if (rd._selectedCourse) _selectedCourse = rd._selectedCourse;
+    if (rd._selectedTee) _selectedTee = rd._selectedTee;
+    if (rd._courseHoleData) _courseHoleData = rd._courseHoleData;
+
+    // Restore completed holes
+    if (rd.allHoles && rd.allHoles.length > 0) {
+      allHoles = rd.allHoles;
+      // Recalculate aggregates from restored holes
+      allHoles.forEach(function(h) {
+        totalStrokes += h.score;
+        totalPar += h.par;
+        totalPutts += h.putts || 0;
+        if (h.par === 3) { c3++; p3 += h.score; }
+        if (h.par === 4) { c4++; p4 += h.score; }
+        if (h.par === 5) { c5++; p5 += h.score; }
+      });
+    }
+
+    currentHole = allHoles.length + 1;
+    document.getElementById('holeHeader').innerText = 'Hole ' + currentHole;
+
+    // Auto-populate par/yardage for next hole if course data available
+    if (_courseHoleData && _courseHoleData[currentHole - 1]) {
+      var hd = _courseHoleData[currentHole - 1];
+      par = hd.par;
+      document.getElementById('holeYards').value = hd.yards;
+      var parBtns = document.querySelectorAll('#parPage .par3, #parPage .par4, #parPage .par5');
+      parBtns.forEach(function(b) { b.classList.remove('selected'); });
+      if (hd.par === 3 && parBtns[0]) parBtns[0].classList.add('selected');
+      else if (hd.par === 4 && parBtns[1]) parBtns[1].classList.add('selected');
+      else if (hd.par === 5 && parBtns[2]) parBtns[2].classList.add('selected');
+    }
+
+    // Update score bar
+    if (totalStrokes > 0 || totalPar > 0) {
+      var d = totalStrokes - totalPar;
+      document.getElementById('scoreBarText').innerText = d === 0 ? 'E through ' + (currentHole - 1) : (d > 0 ? '+' : '') + d + ' through ' + (currentHole - 1);
+    }
+
+    scoreBar.style.display = 'flex';
+    show('parPage');
+    updateParPageRoundActions();
+  }
+}
+
+// Check if a round is incomplete (works with or without is_incomplete column)
+function isRoundIncomplete(round) {
+  if (round.is_incomplete) return true;
+  if (round.round_data && (round.round_data.incomplete || round.round_data._flagIncomplete)) return true;
+  return false;
 }
 
 // Notify coach when student uploads a round
@@ -5717,6 +6066,9 @@ async function saveRoundToAccount() {
   status.style.color = '#888';
   
   const roundBlob = buildRoundBlob();
+  // Clear incomplete flags
+  delete roundBlob.incomplete;
+  delete roundBlob._flagIncomplete;
 
   var payload = {
     player_name: document.getElementById('playerName').value || 'Player',
@@ -5728,7 +6080,8 @@ async function saveRoundToAccount() {
     score: totalStrokes,
     par: totalPar,
     to_par: totalStrokes - totalPar,
-    round_data: roundBlob
+    round_data: roundBlob,
+    is_incomplete: false
   };
 
   var resp;
@@ -5740,7 +6093,17 @@ async function saveRoundToAccount() {
     payload.user_id = currentUser.id;
     resp = await _sb.from('rounds').insert(payload);
   }
-  
+
+  // If is_incomplete column doesn't exist, retry without it
+  if (resp.error && resp.error.message && resp.error.message.indexOf('is_incomplete') !== -1) {
+    delete payload.is_incomplete;
+    if (_currentRoundId) {
+      resp = await _sb.from('rounds').update(payload).eq('id', _currentRoundId);
+    } else {
+      resp = await _sb.from('rounds').insert(payload);
+    }
+  }
+
   if (resp.error) {
     status.style.color = '#f44';
     status.textContent = 'Error: ' + resp.error.message;
@@ -5761,17 +6124,27 @@ async function loadMyRounds() {
   msg.textContent = 'Loading...';
   list.innerHTML = '';
   
-  const { data, error } = await _sb
+  var { data, error } = await _sb
     .from('rounds')
-    .select('id, player_name, course_name, round_date, round_type, holes, score, par, to_par, created_at')
+    .select('id, player_name, course_name, round_date, round_type, holes, score, par, to_par, created_at, is_incomplete, round_data')
     .eq('user_id', currentUser.id)
     .order('round_date', { ascending: false });
-  
+
+  // Fallback if is_incomplete column doesn't exist
+  if (error && error.message && error.message.indexOf('is_incomplete') !== -1) {
+    var resp2 = await _sb.from('rounds')
+      .select('id, player_name, course_name, round_date, round_type, holes, score, par, to_par, created_at, round_data')
+      .eq('user_id', currentUser.id)
+      .order('round_date', { ascending: false });
+    data = resp2.data;
+    error = resp2.error;
+  }
+
   if (error) {
     msg.textContent = 'Error: ' + error.message;
     return;
   }
-  
+
   _allRoundsData = data || [];
   
   if (_allRoundsData.length === 0) {
@@ -5785,7 +6158,8 @@ async function loadMyRounds() {
   document.getElementById('roundFilterHoles').value = 'all';
   document.getElementById('roundFilterTime').value = 'all';
   document.getElementById('roundSortBy').value = 'date-desc';
-  
+  if (document.getElementById('roundFilterStatus')) document.getElementById('roundFilterStatus').value = 'all';
+
   filterRoundsList();
 }
 
@@ -5796,6 +6170,7 @@ function filterRoundsList() {
   var typeFilter = document.getElementById('roundFilterType').value;
   var holesFilter = document.getElementById('roundFilterHoles').value;
   var timeFilter = document.getElementById('roundFilterTime').value;
+  var statusFilter = document.getElementById('roundFilterStatus') ? document.getElementById('roundFilterStatus').value : 'all';
   var sortBy = document.getElementById('roundSortBy').value;
   
   var cutoff = null;
@@ -5815,6 +6190,9 @@ function filterRoundsList() {
     if (typeFilter !== 'all' && r.round_type !== typeFilter) return false;
     // Holes filter
     if (holesFilter !== 'all' && r.holes !== parseInt(holesFilter)) return false;
+    // Status filter
+    if (statusFilter === 'complete' && isRoundIncomplete(r)) return false;
+    if (statusFilter === 'incomplete' && !isRoundIncomplete(r)) return false;
     // Time filter
     if (cutoff) {
       var rd = new Date(r.round_date + 'T12:00:00');
@@ -5851,26 +6229,39 @@ function filterRoundsList() {
   }
   
   filtered.forEach(function(r) {
+    var incomplete = isRoundIncomplete(r);
     var tp = r.to_par > 0 ? '+' + r.to_par : r.to_par === 0 ? 'E' : r.to_par;
     var d = new Date(r.round_date + 'T12:00:00');
     var dateStr = (d.getMonth()+1) + '/' + d.getDate() + '/' + d.getFullYear();
     var typeTag = r.round_type === 'Tournament' ? '<span style="color:#FF9800;font-size:10px;"> ★ Tournament</span>' : '';
-    
+    var incompleteTag = incomplete ? '<span style="color:#e65100;font-size:10px;font-weight:700;"> ⏸ In Progress</span>' : '';
+
+    // For incomplete rounds, show holes completed info
+    var holesCompleted = 0;
+    if (incomplete && r.round_data) {
+      holesCompleted = r.round_data.holesCompleted || (r.round_data.allHoles ? r.round_data.allHoles.length : 0);
+    }
+    var holesInfo = incomplete ? holesCompleted + '/' + r.holes + ' holes' : r.holes + ' holes';
+
     var card = document.createElement('div');
-    card.style.cssText = 'background:#222;border-radius:10px;padding:12px;margin:6px 0;cursor:pointer;';
+    card.style.cssText = 'background:#222;border-radius:10px;padding:12px;margin:6px 0;cursor:pointer;' + (incomplete ? 'border-left:3px solid #e65100;' : '');
     card.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;">'
       + '<div style="text-align:left;">'
-      + '<div style="font-weight:700;font-size:15px;">' + r.course_name + typeTag + '</div>'
-      + '<div style="font-size:12px;color:#aaa;">' + dateStr + ' · ' + r.holes + ' holes · ' + r.player_name + '</div>'
+      + '<div style="font-weight:700;font-size:15px;">' + r.course_name + typeTag + incompleteTag + '</div>'
+      + '<div style="font-size:12px;color:#aaa;">' + dateStr + ' · ' + holesInfo + ' · ' + r.player_name + '</div>'
       + '</div>'
       + '<div style="text-align:right;">'
-      + '<div style="font-size:20px;font-weight:800;">' + r.score + '</div>'
-      + '<div style="font-size:13px;color:' + (r.to_par>0?'#ef5350':r.to_par<0?'#66bb6a':'#aaa') + '">' + tp + '</div>'
+      + (incomplete ? '<div style="font-size:14px;font-weight:700;color:#e65100;">In Progress</div>' : '<div style="font-size:20px;font-weight:800;">' + r.score + '</div>')
+      + (incomplete ? '' : '<div style="font-size:13px;color:' + (r.to_par>0?'#ef5350':r.to_par<0?'#66bb6a':'#aaa') + '">' + tp + '</div>')
       + '</div></div>'
       + '<div style="display:flex;gap:6px;margin-top:8px;">'
-            + '<button onclick=\"event.stopPropagation();openEditRoundInfo(\'' + r.id + '\', event)\" style=\"flex:1;height:30px;font-size:12px;background:#2e7d32;border-radius:6px;font-weight:700;margin-right:4px;\">Edit</button>'
-+ '<button onclick="event.stopPropagation();viewSavedRound(\'' + r.id + '\')" style="flex:1;height:30px;font-size:12px;background:#1d4ed8;border-radius:6px;">Stats</button>'
-      + '<button onclick="event.stopPropagation();deleteSavedRound(\'' + r.id + '\',this)" style="width:60px;height:30px;font-size:12px;background:#c62828;border-radius:6px;">Del</button>'
+      + (incomplete
+        ? '<button onclick="event.stopPropagation();resumeIncompleteRound(\'' + r.id + '\')" style="flex:2;height:34px;font-size:13px;font-weight:700;background:#e65100;border:none;border-radius:6px;color:#fff;cursor:pointer;">▶ Resume Round</button>'
+          + '<button onclick="event.stopPropagation();deleteSavedRound(\'' + r.id + '\',this)" style="width:60px;height:34px;font-size:12px;background:#c62828;border:none;border-radius:6px;color:#fff;cursor:pointer;">Del</button>'
+        : '<button onclick=\"event.stopPropagation();openEditRoundInfo(\'' + r.id + '\', event)\" style=\"flex:1;height:30px;font-size:12px;background:#2e7d32;border-radius:6px;font-weight:700;margin-right:4px;\">Edit</button>'
+          + '<button onclick="event.stopPropagation();viewSavedRound(\'' + r.id + '\')" style="flex:1;height:30px;font-size:12px;background:#1d4ed8;border-radius:6px;">Stats</button>'
+          + '<button onclick="event.stopPropagation();deleteSavedRound(\'' + r.id + '\',this)" style="width:60px;height:30px;font-size:12px;background:#c62828;border-radius:6px;">Del</button>'
+      )
       + '</div>';
     list.appendChild(card);
   });
@@ -6153,6 +6544,7 @@ function enterScoring() {
     }
     scoreBar.style.display = 'flex';
     show('parPage');
+    updateParPageRoundActions();
   }
 }
 
