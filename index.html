@@ -15087,9 +15087,12 @@ function drawDispersion(clubName) {
     }
 
     // Helper: compute points from shot array (deviation from target center)
-    function computePoints(shotsArr, fallbackTarget) {
+    // forceTarget overrides per-shot targets when provided
+    function computePoints(shotsArr, fallbackTarget, forceTarget) {
       return shotsArr.map(function(s) {
-        var tgt = (s.target != null && s.target > 0) ? s.target : fallbackTarget;
+        var tgt = forceTarget != null ? forceTarget
+                : (s.target != null && s.target > 0) ? s.target
+                : fallbackTarget;
         return { x: s.side, y: s.total - tgt };
       });
     }
@@ -15128,8 +15131,8 @@ function drawDispersion(clubName) {
     // --- Draw total shots first (behind carry) if available ---
     var totalOnTarget = 0, totalPoints = [];
     if (hasTotalShots) {
-      // Total shots plotted relative to carry target so roll-out is visible
-      totalPoints = computePoints(club.totalShots, avgCarryTarget);
+      // Force carry target so total dots appear past carry dots by roll amount
+      totalPoints = computePoints(club.totalShots, avgCarryTarget, avgCarryTarget);
       totalOnTarget = drawDots(totalPoints, 'rgba(248,113,113,0.9)', 7);
     }
 
