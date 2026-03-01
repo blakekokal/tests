@@ -14999,8 +14999,12 @@ function drawDispersion(clubName) {
     var avgTarget = club.carry || club.total;
     var points = club.shots.map(function(s) {
       var tgt = (s.target != null && s.target > 0) ? s.target : avgTarget;
-      return { x: s.side, y: s.total - tgt };
+      var yDev = s.total - tgt;
+      return { x: s.side, y: yDev };
     });
+    // Debug: log first few points so we can verify the data
+    console.log('[Dispersion ' + clubName + '] avgTarget=' + avgTarget + ', first 5 shots:', club.shots.slice(0, 5));
+    console.log('[Dispersion ' + clubName + '] first 5 points:', points.slice(0, 5));
 
     var scale;
     var greenR_yd = 10; // 20 yard diameter = 10 radius
@@ -15028,31 +15032,31 @@ function drawDispersion(clubName) {
         hit = Math.sqrt(p.x * p.x + p.y * p.y) <= greenR_yd;
       }
       if (hit) onTarget++;
-      // Draw dot with shadow for visibility on the image
+      // Draw dot with black outline
       ctx.shadowColor = 'rgba(0,0,0,0.6)';
       ctx.shadowBlur = 4;
       ctx.fillStyle = hit ? 'rgba(74,222,128,0.9)' : 'rgba(248,113,113,0.9)';
       ctx.beginPath();
-      ctx.arc(px, py, 8, 0, Math.PI * 2);
+      ctx.arc(px, py, 9, 0, Math.PI * 2);
       ctx.fill();
       ctx.shadowBlur = 0;
-      ctx.strokeStyle = hit ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.5)';
-      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 2;
       ctx.stroke();
     });
 
     // Stats bar at bottom
     var pct = Math.round(onTarget / points.length * 100);
     // Draw stats background bar
-    ctx.fillStyle = 'rgba(0,0,0,0.65)';
-    ctx.fillRect(0, H - 28, W, 28);
-    ctx.fillStyle = '#ddd';
-    ctx.font = 'bold 12px -apple-system,sans-serif';
+    ctx.fillStyle = 'rgba(0,0,0,0.75)';
+    ctx.fillRect(0, H - 44, W, 44);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 20px -apple-system,sans-serif';
     ctx.textAlign = 'center';
     if (isFW) {
-      ctx.fillText(points.length + ' shots  ·  ' + onTarget + ' in fairway (' + pct + '%)  ·  30yd wide', cx, H - 9);
+      ctx.fillText(points.length + ' shots  ·  ' + onTarget + ' in fairway (' + pct + '%)  ·  30yd wide', cx, H - 15);
     } else {
-      ctx.fillText(points.length + ' shots  ·  ' + onTarget + ' on green (' + pct + '%)  ·  20yd green', cx, H - 9);
+      ctx.fillText(points.length + ' shots  ·  ' + onTarget + ' on green (' + pct + '%)  ·  20yd green', cx, H - 15);
     }
   }
 
