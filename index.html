@@ -2213,14 +2213,11 @@ function show(id){
     setPracticeHubTab(_currentPHTab || 'combines');
   }
   if(id === 'myBagPage') {
-    renderBagClubs();
-    // Sync local bag to Supabase
-    if (currentUser) {
-      var clubs = getBagClubs();
-      if (clubs.length > 0) {
-        _sb.from('profiles').update({ bag_clubs: clubs }).eq('id', currentUser.id).then(function(){}).catch(function(){});
-      }
-    }
+    renderBagClubs(); // show local cache immediately
+    // Pull latest from Supabase, then re-render
+    syncBagFromSupabase().then(function() {
+      renderBagClubs();
+    });
   }
   if(id === 'parPage') {
     updateParPageRoundActions();
@@ -14731,6 +14728,31 @@ function saveBagClubs(clubs) {
   if (currentUser) {
     _sb.from('profiles').update({ bag_clubs: clubs }).eq('id', currentUser.id).then(function(){}).catch(function(){});
   }
+}
+
+// Pull bag data from Supabase and merge into localStorage
+async function syncBagFromSupabase() {
+  if (!currentUser) return;
+  try {
+    var { data, error } = await _sb.from('profiles').select('bag_clubs').eq('id', currentUser.id).single();
+    if (error || !data) return;
+    var remote = data.bag_clubs || [];
+    if (remote.length === 0) return;
+    var local = getBagClubs();
+    if (local.length === 0) {
+      // No local data — use remote
+      localStorage.setItem(_BAG_KEY, JSON.stringify(remote));
+    } else {
+      // Merge: remote wins for existing clubs, keep local-only clubs
+      var merged = remote.slice();
+      var remoteNames = {};
+      remote.forEach(function(c) { remoteNames[c.name] = true; });
+      local.forEach(function(c) {
+        if (!remoteNames[c.name]) merged.push(c);
+      });
+      localStorage.setItem(_BAG_KEY, JSON.stringify(sortBagClubs(merged)));
+    }
+  } catch(e) { /* offline — use local cache */ }
 }
 
 function sortBagClubs(clubs) {
