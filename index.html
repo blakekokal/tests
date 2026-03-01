@@ -15094,8 +15094,8 @@ function drawDispersion(clubName) {
       });
     }
 
-    // Helper: draw dots and count on-target
-    function drawDots(points, fillHit, fillMiss, dotRadius) {
+    // Helper: draw dots in a single color and count on-target
+    function drawDots(points, color, dotRadius) {
       var onTarget = 0;
       points.forEach(function(p) {
         var px = cx + p.x * scale;
@@ -15109,7 +15109,7 @@ function drawDispersion(clubName) {
         if (hit) onTarget++;
         ctx.shadowColor = 'rgba(0,0,0,0.6)';
         ctx.shadowBlur = 4;
-        ctx.fillStyle = hit ? fillHit : fillMiss;
+        ctx.fillStyle = color;
         ctx.beginPath();
         ctx.arc(px, py, dotRadius, 0, Math.PI * 2);
         ctx.fill();
@@ -15126,18 +15126,13 @@ function drawDispersion(clubName) {
     if (hasTotalShots) {
       var avgRollTarget = club.total || club.carry;
       totalPoints = computePoints(club.totalShots, avgRollTarget);
-      // Total dots: blue tones (hit = dodger blue, miss = orange)
-      totalOnTarget = drawDots(totalPoints, 'rgba(56,189,248,0.85)', 'rgba(251,146,60,0.85)', 7);
+      totalOnTarget = drawDots(totalPoints, 'rgba(248,113,113,0.9)', 7);
     }
 
     // --- Draw carry shots on top ---
     var avgCarryTarget = club.carry || club.total;
     var carryPoints = computePoints(club.shots, avgCarryTarget);
-    // Carry dots: green/red (original colors)
-    var carryOnTarget = drawDots(carryPoints, 'rgba(74,222,128,0.9)', 'rgba(248,113,113,0.9)', 9);
-
-    // Debug
-    console.log('[Dispersion ' + clubName + '] carry avgTarget=' + avgCarryTarget + ', shots=' + carryPoints.length + (hasTotalShots ? ', total avgTarget=' + (club.total || club.carry) + ', totalShots=' + totalPoints.length : ''));
+    var carryOnTarget = drawDots(carryPoints, 'rgba(56,147,248,0.9)', 9);
 
     // --- Stats bar ---
     var barH = hasTotalShots ? 64 : 44;
@@ -15152,28 +15147,20 @@ function drawDispersion(clubName) {
     if (hasTotalShots) {
       var totalPct = Math.round(totalOnTarget / totalPoints.length * 100);
       var totalAvg = Math.round(club.totalShots.reduce(function(s,v){return s+v.total;},0) / club.totalShots.length);
-      // Carry line (green dot legend)
-      ctx.fillStyle = 'rgba(74,222,128,0.9)';
+      var targetLabel = isFW ? 'in FW' : 'on green';
+      // Carry line (blue dot legend)
+      ctx.fillStyle = 'rgba(56,147,248,0.9)';
       ctx.beginPath(); ctx.arc(20, H - barH + 17, 6, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#fff';
-      if (isFW) {
-        ctx.textAlign = 'left';
-        ctx.fillText('Carry: ' + carryPoints.length + ' shots · avg ' + carryAvg + 'y · ' + carryOnTarget + ' in FW (' + carryPct + '%)', 32, H - barH + 22);
-      } else {
-        ctx.textAlign = 'left';
-        ctx.fillText('Carry: ' + carryPoints.length + ' shots · avg ' + carryAvg + 'y · ' + carryOnTarget + ' on green (' + carryPct + '%)', 32, H - barH + 22);
-      }
-      // Total line (blue dot legend)
-      ctx.fillStyle = 'rgba(56,189,248,0.85)';
+      ctx.textAlign = 'left';
+      ctx.fillText('Carry: ' + carryPoints.length + ' shots · avg ' + carryAvg + 'y · ' + carryOnTarget + ' ' + targetLabel + ' (' + carryPct + '%)', 32, H - barH + 22);
+      // Total line (red dot legend)
+      ctx.fillStyle = 'rgba(248,113,113,0.9)';
       ctx.beginPath(); ctx.arc(20, H - barH + 45, 6, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#fff';
-      if (isFW) {
-        ctx.fillText('Total: ' + totalPoints.length + ' shots · avg ' + totalAvg + 'y · ' + totalOnTarget + ' in FW (' + totalPct + '%)', 32, H - barH + 50);
-      } else {
-        ctx.fillText('Total: ' + totalPoints.length + ' shots · avg ' + totalAvg + 'y · ' + totalOnTarget + ' on green (' + totalPct + '%)', 32, H - barH + 50);
-      }
+      ctx.fillText('Total: ' + totalPoints.length + ' shots · avg ' + totalAvg + 'y · ' + totalOnTarget + ' ' + targetLabel + ' (' + totalPct + '%)', 32, H - barH + 50);
     } else {
-      // Single data set (carry only) - original style
+      // Single data set (carry only) - original style, blue dots
       if (isFW) {
         ctx.fillText(carryPoints.length + ' shots  ·  avg ' + carryAvg + 'y  ·  ' + carryOnTarget + ' in fairway (' + carryPct + '%)  ·  30yd wide', cx, H - 15);
       } else {
