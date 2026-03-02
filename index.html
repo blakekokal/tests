@@ -9226,6 +9226,7 @@ function parseExcelRound(wb) {
     if (!r || r.length === 0) continue;
     var first = String(r[0] || '').trim().toLowerCase();
     
+    if (first === 'name:' || first === 'name') playerName = String(r[1] || '').trim();
     if (first.indexOf('player') === 0) playerName = String(r[1] || '').trim();
     if (first.indexOf('course') === 0) courseName = String(r[1] || '').trim();
     if (first.indexOf('handicap') === 0) handicap = String(r[1] || 'pro').trim();
@@ -9236,7 +9237,7 @@ function parseExcelRound(wb) {
       var sec = { holeRow: i, yardRow: null, parRow: null, scoreRow: null, puttRow: null };
       for (var k = i + 1; k < Math.min(i + 6, rows.length); k++) {
         var label = String((rows[k] || [])[0] || '').trim().toLowerCase();
-        if (label === 'yards' || label === 'yds') sec.yardRow = k;
+        if (label === 'yards' || label === 'yds' || label === 'yardage') sec.yardRow = k;
         if (label === 'par') sec.parRow = k;
         if (label === 'score') sec.scoreRow = k;
         if (label === 'putts') sec.puttRow = k;
@@ -9309,9 +9310,16 @@ function parseExcelRound(wb) {
     }
   }
   
+  // Parse shot data from scorecard-style template (multi-hole columns)
+  parseScorecardShotData(rows, allHoles);
+
   // Fill in minimal shots for holes without shot data
   allHoles.forEach(function(h) {
     if (h.shots.length === 0) h.shots = buildMinimalShots(h.par, h.score, h.putts, h.yards);
+    // Sync putts count from parsed shots if shots were filled in
+    if (h.shots.length > 0 && h.putts === 0) {
+      h.putts = h.shots.filter(function(s){ return s.isPutt; }).length;
+    }
   });
   
   // ===== PARSE PUTTING SHEET (firstPuttDist, expectedPutts per hole) =====
@@ -9416,6 +9424,98 @@ function parseExcelRound(wb) {
   };
 }
 
+// ── Scorecard-format shot parser ──────────────────────────────────────────────
+// Detects multi-hole-column layout (Hole|1||Hole|2||...) and rebuilds shots.
+function parseScorecardShotData(rows, allHoles) {
+  for (var i = 0; i < rows.length; i++) {
+    var r0 = String(rows[i][0] || '').trim().toLowerCase();
+    var r3 = String(rows[i][3] || '').trim().toLowerCase();
+    if (r0 !== 'hole' || r3 !== 'hole') continue;
+
+    // Find first "Shot 1" row in this section
+    var shotStart = -1;
+    for (var k = i + 1; k < Math.min(i + 8, rows.length); k++) {
+      if (String(rows[k][0] || '').trim().toLowerCase() === 'shot 1') { shotStart = k; break; }
+    }
+    if (shotStart < 0) continue;
+
+    // Collect contiguous shot rows ("Shot 1" … "Shot N")
+    var shotRows = [];
+    for (var k = shotStart; k < rows.length; k++) {
+      if (String(rows[k][0] || '').trim().toLowerCase().indexOf('shot') === 0) {
+        shotRows.push(rows[k]);
+      } else { break; }
+    }
+
+    // Process each of the 9 holes in this section (base col = hi*3)
+    var holeHeaderRow = rows[i];
+    for (var hi = 0; hi < 9; hi++) {
+      var b = hi * 3;
+      var holeNum = parseInt(holeHeaderRow[b + 1]);
+      if (isNaN(holeNum)) continue;
+      var hole = allHoles.find(function(h){ return h.hole === holeNum; });
+      if (!hole) continue;
+      var built = rebuildScorecardShots(hole.yards, shotRows, b);
+      if (built.length > 0) hole.shots = built;
+    }
+  }
+}
+
+function rebuildScorecardShots(yards, shotRows, baseCol) {
+  var shots = [], shotNum = 1, distBefore = yards || 200, prevLie = '';
+  for (var si = 0; si < shotRows.length; si++) {
+    var endLieRaw = String(shotRows[si][baseCol + 1] || '').trim();
+    var distRaw   = String(shotRows[si][baseCol + 2] || '').trim();
+    if (!endLieRaw) break;
+    var ell = endLieRaw.toLowerCase();
+
+    // "2 putts" / "3 putts" — expand into N putts finishing holed
+    var mp = ell.match(/^(\d+)\s*putts?$/);
+    if (mp) {
+      var n = parseInt(mp[1]), d = distBefore;
+      for (var p = 0; p < n; p++) {
+        var last = (p === n - 1);
+        shots.push({ shotNum: shotNum++, lie: last ? 'HOLED' : 'GREEN',
+          distanceBefore: d, distanceAfter: last ? 0 : 3, isPutt: true });
+        d = 3;
+      }
+      break;
+    }
+
+    var isPutt = (prevLie === 'GREEN' || ell.indexOf('putt') !== -1);
+    var mappedLie = mapScorecardLie(ell);
+    var distAfter = (mappedLie === 'HOLED') ? 0 : parseScorecardDist(distRaw);
+
+    shots.push({ shotNum: shotNum++, lie: mappedLie,
+      distanceBefore: distBefore, distanceAfter: distAfter, isPutt: isPutt });
+
+    if (mappedLie === 'HOLED') break;
+    distBefore = distAfter;
+    prevLie = mappedLie;
+  }
+  return shots;
+}
+
+function mapScorecardLie(ell) {
+  if (ell === 'hole' || ell === 'holed' || ell === 'in' || ell === 'made') return 'HOLED';
+  if (ell.indexOf('putt') !== -1) return 'GREEN';
+  if (ell.indexOf('green') !== -1) return 'GREEN';
+  if (ell.indexOf('fairway') !== -1 || ell === 'fw') return 'FAIRWAY';
+  if (ell.indexOf('rough') !== -1) return 'ROUGH';
+  if (ell.indexOf('bunker') !== -1 || ell.indexOf('sand') !== -1) return 'BUNKER';
+  if (ell.indexOf('water') !== -1 || ell === 'ob' || ell === 'oob' ||
+      ell.indexOf('penalty') !== -1 || ell.indexOf('hazard') !== -1) return 'PENALTY';
+  if (ell.indexOf('tree') !== -1) return 'ROUGH';
+  return 'FAIRWAY';
+}
+
+function parseScorecardDist(s) {
+  s = String(s).trim().toLowerCase();
+  if (!s || s === 'hole' || s === 'holed') return 0;
+  return parseInt(s) || 0;
+}
+// ──────────────────────────────────────────────────────────────────────────────
+
 function parseImportDate(val) {
   // Handle Excel date serial number
   if (typeof val === 'number') {
@@ -9496,21 +9596,19 @@ function downloadRoundTemplate() {
   var wb = XLSX.utils.book_new();
 
   // ---- style shortcuts ----
-  var GRN  = {fgColor:{rgb:'1A6B3C'}};
-  var LGRN = {fgColor:{rgb:'D8F0E4'}};
-  var YEL  = {fgColor:{rgb:'FFFDE7'}};
-  var THIN = {top:{style:'thin',color:{rgb:'AAAAAA'}},bottom:{style:'thin',color:{rgb:'AAAAAA'}},left:{style:'thin',color:{rgb:'AAAAAA'}},right:{style:'thin',color:{rgb:'AAAAAA'}}};
-  var BOLD = {top:{style:'thin',color:{rgb:'444444'}},bottom:{style:'thin',color:{rgb:'444444'}},left:{style:'thin',color:{rgb:'444444'}},right:{style:'thin',color:{rgb:'444444'}}};
-  var thS  = {fill:GRN,  font:{bold:true,color:{rgb:'FFFFFF'}}, border:BOLD, alignment:{horizontal:'center'}};
-  var tdS  = {fill:YEL,  border:THIN, alignment:{horizontal:'center'}};
-  var totS = {fill:LGRN, font:{bold:true}, border:BOLD, alignment:{horizontal:'center'}};
-  var lblS = {font:{bold:true}, alignment:{horizontal:'right'}};
-  var inpS = {fill:YEL,  border:THIN, alignment:{horizontal:'left'}};
-  var ttlS = {font:{bold:true,sz:14,color:{rgb:'1A6B3C'}}, fill:LGRN};
-  var notS = {font:{italic:true,sz:10,color:{rgb:'555555'}}};
-  var secS = {font:{bold:true,sz:13,color:{rgb:'1A6B3C'}}, fill:LGRN};
-  var rowS = {font:{bold:true}, border:BOLD, alignment:{horizontal:'left'}};
-  var valS = {fill:YEL, border:THIN, alignment:{horizontal:'center'}};
+  var TN  = {top:{style:'thin',color:{rgb:'BBBBBB'}},bottom:{style:'thin',color:{rgb:'BBBBBB'}},left:{style:'thin',color:{rgb:'BBBBBB'}},right:{style:'thin',color:{rgb:'BBBBBB'}}};
+  var TN2 = {top:{style:'thin',color:{rgb:'444444'}},bottom:{style:'thin',color:{rgb:'444444'}},left:{style:'thin',color:{rgb:'444444'}},right:{style:'thin',color:{rgb:'444444'}}};
+  var HDR  = {fill:{fgColor:{rgb:'1A5C32'}}, font:{bold:true,color:{rgb:'FFFFFF'}}, border:TN2, alignment:{horizontal:'center',vertical:'center'}};
+  var HDR2 = {fill:{fgColor:{rgb:'2E7D32'}}, font:{bold:true,color:{rgb:'FFFFFF'}}, border:TN2, alignment:{horizontal:'center',vertical:'center'}};
+  var INP  = {fill:{fgColor:{rgb:'FFFDE7'}}, border:TN, alignment:{horizontal:'center',vertical:'center'}};
+  var SINP = {fill:{fgColor:{rgb:'FFF8E1'}}, border:TN, alignment:{horizontal:'center',vertical:'center'}};
+  var TTL  = {fill:{fgColor:{rgb:'E8F5E9'}}, font:{bold:true}, border:TN2, alignment:{horizontal:'center',vertical:'center'}};
+  var LBL  = {font:{bold:true}, alignment:{horizontal:'right',vertical:'center'}};
+  var INFL = {fill:{fgColor:{rgb:'FFFDE7'}}, border:TN, alignment:{horizontal:'left',vertical:'center'}};
+  var SHT  = {fill:{fgColor:{rgb:'EEEEEE'}}, font:{bold:true,color:{rgb:'444444'}}, border:TN, alignment:{horizontal:'center',vertical:'center'}};
+  var BRD  = {border:TN};
+  var NOTS = {font:{italic:true,sz:10,color:{rgb:'555555'}}};
+  var REFL = {fill:{fgColor:{rgb:'F1F8E9'}}, font:{bold:true,sz:11,color:{rgb:'1A5C32'}}};
 
   function sc(ws, r, c, style) {
     var addr = XLSX.utils.encode_cell({r:r, c:c});
@@ -9518,164 +9616,132 @@ function downloadRoundTemplate() {
     ws[addr].s = style;
   }
 
-  // ============ SHEET 1: SCORING ============
-  var sd = [
-    ['GOLF ROUND SCORECARD TEMPLATE'],
-    ['Fill in the YELLOW cells. Save as .xlsx then upload to your profile.'],
-    ['Handicap: pro  0  5  10  15  20  25  30    |    Round Type: Casual  or  Tournament'],
-    [],
-    ['Player:',    ''],
-    ['Handicap:',  'pro'],
-    ['Course:',    ''],
-    ['Date:',      ''],
-    ['Round Type:','Casual'],
-    [],
-    ['Hole',  1,  2,  3,  4,  5,  6,  7,  8,  9, 'OUT'],
-    ['Yards', '', '', '', '', '', '', '', '', '', ''],
-    ['Par',   '', '', '', '', '', '', '', '', '', ''],
-    ['Score', '', '', '', '', '', '', '', '', '', ''],
-    ['Putts', '', '', '', '', '', '', '', '', '', ''],
-    [],
-    ['Hole',  10, 11, 12, 13, 14, 15, 16, 17, 18, 'IN', 'TOTAL'],
-    ['Yards', '',  '',  '',  '',  '',  '',  '',  '',  '', '',  ''],
-    ['Par',   '',  '',  '',  '',  '',  '',  '',  '',  '', '',  ''],
-    ['Score', '',  '',  '',  '',  '',  '',  '',  '',  '', '',  ''],
-    ['Putts', '',  '',  '',  '',  '',  '',  '',  '',  '', '',  ''],
-    [],
-    ['9-hole rounds: fill Front 9 only. Leave the Back 9 section blank.'],
-    ['Date format: MM/DD/YYYY  (e.g. 03/15/2026)']
-  ];
-
-  var ws1 = XLSX.utils.aoa_to_sheet(sd);
-  ws1['!cols'] = [{wch:14},{wch:7},{wch:7},{wch:7},{wch:7},{wch:7},{wch:7},{wch:7},{wch:7},{wch:7},{wch:7},{wch:7}];
-
-  sc(ws1, 0, 0, ttlS);
-  sc(ws1, 1, 0, notS);
-  sc(ws1, 2, 0, notS);
-  for (var ri = 4; ri <= 8; ri++) { sc(ws1, ri, 0, lblS); sc(ws1, ri, 1, inpS); }
-  for (var ri = 10; ri <= 14; ri++) {
-    sc(ws1, ri, 0, thS);
-    for (var ci = 1; ci <= 9; ci++) sc(ws1, ri, ci, ri === 10 ? thS : tdS);
-    sc(ws1, ri, 10, ri === 10 ? thS : totS);
+  // 9 holes x 3 cols each + 3 Total cols = 30 cols total
+  function makeHoleRow(holeNums) {
+    var row = [];
+    for (var i = 0; i < holeNums.length; i++) { row.push('Hole'); row.push(holeNums[i]); row.push(''); }
+    row.push('Total'); row.push(''); row.push('');
+    return row;
   }
-  for (var ri = 16; ri <= 20; ri++) {
-    sc(ws1, ri, 0, thS);
-    for (var ci = 1; ci <= 9; ci++) sc(ws1, ri, ci, ri === 16 ? thS : tdS);
-    sc(ws1, ri, 10, ri === 16 ? thS : totS);
-    sc(ws1, ri, 11, ri === 16 ? thS : totS);
+  function makeLabelRow(label, totalLabel) {
+    var row = [];
+    for (var i = 0; i < 9; i++) { row.push(label); row.push(''); row.push(''); }
+    row.push(totalLabel || ''); row.push(''); row.push('');
+    return row;
   }
-  sc(ws1, 22, 0, notS);
-  sc(ws1, 23, 0, notS);
-  XLSX.utils.book_append_sheet(wb, ws1, 'Scoring');
-
-  // ============ SHEET 2: OFF THE TEE ============
-  var ottd = [
-    ['OFF THE TEE'],
-    ['Fairways Hit: enter as  hits/opportunities  e.g.  7/14'],
-    ['Average: average drive distance in yards, whole number  e.g.  265'],
-    [],
-    ['Fairways Hit',  ''],
-    ['Missed Left',   ''],
-    ['Missed Right',  ''],
-    ['Average',       '']
-  ];
-  var ws2 = XLSX.utils.aoa_to_sheet(ottd);
-  ws2['!cols'] = [{wch:22},{wch:18}];
-  sc(ws2, 0, 0, secS);
-  sc(ws2, 1, 0, notS); sc(ws2, 2, 0, notS);
-  for (var ri = 4; ri <= 7; ri++) { sc(ws2, ri, 0, rowS); sc(ws2, ri, 1, valS); }
-  XLSX.utils.book_append_sheet(wb, ws2, 'Off The Tee');
-
-  // ============ SHEET 3: APPROACH ============
-  var appd = [
-    ['APPROACH'],
-    ['GIR: enter as  greens hit/opportunities  e.g.  10/18'],
-    ['Proximity When GIR: average feet from the pin when hitting the green'],
-    ['Miss direction: number of times you missed each direction'],
-    [],
-    ['GIR',                  ''],
-    ['Proximity When GIR',   ''],
-    ['Short',                ''],
-    ['Long',                 ''],
-    ['Left',                 ''],
-    ['Right',                '']
-  ];
-  var ws3 = XLSX.utils.aoa_to_sheet(appd);
-  ws3['!cols'] = [{wch:22},{wch:18}];
-  sc(ws3, 0, 0, secS);
-  for (var ri = 1; ri <= 3; ri++) sc(ws3, ri, 0, notS);
-  for (var ri = 5; ri <= 10; ri++) { sc(ws3, ri, 0, rowS); sc(ws3, ri, 1, valS); }
-  XLSX.utils.book_append_sheet(wb, ws3, 'Approach');
-
-  // ============ SHEET 4: AROUND THE GREEN ============
-  var argd = [
-    ['AROUND THE GREEN'],
-    ['Scrambling: times you saved par or better after missing the green'],
-    ['Sand saves: times you got up-and-down from a bunker'],
-    ['Format: saves/opportunities  e.g.  3/5'],
-    [],
-    ['Scrambling',       ''],
-    ['Sand Up (Bunker)', '']
-  ];
-  var ws4 = XLSX.utils.aoa_to_sheet(argd);
-  ws4['!cols'] = [{wch:22},{wch:18}];
-  sc(ws4, 0, 0, secS);
-  for (var ri = 1; ri <= 3; ri++) sc(ws4, ri, 0, notS);
-  for (var ri = 5; ri <= 6; ri++) { sc(ws4, ri, 0, rowS); sc(ws4, ri, 1, valS); }
-  XLSX.utils.book_append_sheet(wb, ws4, 'Around The Green');
-
-  // ============ SHEET 5: PUTTING ============
-  var puttd = [
-    ['PUTTING'],
-    ['Total Putts: total number of putts for the round'],
-    ['One-Putts / Three-Putts: count for the entire round'],
-    ['Putts Per GIR: decimal average  e.g.  1.85'],
-    [],
-    ['Total Putts',   ''],
-    ['One-Putts',     ''],
-    ['Three-Putts',   ''],
-    ['Putts Per GIR', ''],
-    [],
-    ['HOLE-BY-HOLE FIRST PUTT DISTANCE  (optional)'],
-    ['Enter the distance of your first putt.  IMPORTANT: include ft  e.g.  20ft  or  8ft'],
-    ['Hole', 'First Putt', '', 'Expected Putts', 'SG Putting']
-  ];
-  for (var h = 1; h <= 18; h++) puttd.push([h, '', '', '', '']);
-
-  var ws5 = XLSX.utils.aoa_to_sheet(puttd);
-  ws5['!cols'] = [{wch:12},{wch:18},{wch:4},{wch:16},{wch:14}];
-  sc(ws5, 0, 0, secS);
-  for (var ri = 1; ri <= 3; ri++) sc(ws5, ri, 0, notS);
-  for (var ri = 5; ri <= 8; ri++) { sc(ws5, ri, 0, rowS); sc(ws5, ri, 1, valS); }
-  sc(ws5, 10, 0, {font:{bold:true,color:{rgb:'1A6B3C'}}});
-  sc(ws5, 11, 0, notS);
-  for (var ci = 0; ci < 5; ci++) sc(ws5, 12, ci, thS);
-  for (var ri = 13; ri <= 30; ri++) {
-    sc(ws5, ri, 0, {font:{bold:true}, border:THIN, alignment:{horizontal:'center'}});
-    sc(ws5, ri, 1, valS);
+  function makeShotHdrRow() {
+    var row = [];
+    for (var i = 0; i < 9; i++) { row.push('Shot #'); row.push('End Lie/Putts'); row.push('Distance left'); }
+    row.push(''); row.push(''); row.push('');
+    return row;
   }
-  XLSX.utils.book_append_sheet(wb, ws5, 'Putting');
+  function makeShotRow(n) {
+    var row = [];
+    for (var i = 0; i < 9; i++) { row.push('Shot ' + n); row.push(''); row.push(''); }
+    row.push(''); row.push(''); row.push('');
+    return row;
+  }
 
-  // ============ SHEET 6: STROKES GAINED - SHOT BY SHOT (Advanced / Optional) ============
-  var sgd = [
-    ['STROKES GAINED - SHOT BY SHOT  (ADVANCED / OPTIONAL)'],
-    ['Fill this in for full Strokes Gained analysis. Leave blank to use estimated values.'],
-    ['Start/End Lie: TEE  FAIRWAY  ROUGH  BUNKER  GREEN  PENALTY  HOLED'],
-    ['Distances: yards for non-putts, feet for putts on the green (just enter the number)'],
-    ['For putts: Start Lie = GREEN. Last shot of hole: End Lie = HOLED, End Distance = 0'],
+  // Build all rows
+  var allRows = [
+    // Rows 0-5: info
+    ['name:',       ''],
+    ['date',        ''],
+    ['course name', ''],
+    ['round type',  'Casual'],
+    ['# of holes',  18],
+    ['handicap',    'pro'],
+    // Row 6: blank
     [],
-    ['Hole', 'Par', 'Shot #', 'Start Distance', 'Start Lie', 'End Lie', 'End Distance', 'Notes']
+    // Row 7: front 9 hole header
+    makeHoleRow([1,2,3,4,5,6,7,8,9]),
+    makeLabelRow('Par',     'Par'),
+    makeLabelRow('Score',   'Score'),
+    makeLabelRow('Yardage', ''),
+    makeShotHdrRow()
   ];
-  // 60 blank data rows
-  for (var si = 0; si < 60; si++) sgd.push(['', '', '', '', '', '', '', '']);
+  for (var s = 1; s <= 9; s++) allRows.push(makeShotRow(s));
+  // Rows 21-22: blank
+  allRows.push([]); allRows.push([]);
+  // Row 23: back 9 hole header
+  allRows.push(makeHoleRow([10,11,12,13,14,15,16,17,18]));
+  allRows.push(makeLabelRow('Par',     'Par'));
+  allRows.push(makeLabelRow('Score',   'Score'));
+  allRows.push(makeLabelRow('Yardage', ''));
+  allRows.push(makeShotHdrRow());
+  for (var s = 1; s <= 9; s++) allRows.push(makeShotRow(s));
+  // Row 37: blank
+  allRows.push([]);
+  // Rows 38+: lie reference guide
+  allRows.push(['LIE / END POSITION REFERENCE', '', '', 'Write exactly what you see — not case-sensitive']);
+  allRows.push(['What happened', '', '', 'What to write in End Lie/Putts', '', 'What to write in Distance left']);
+  allRows.push(['Ball in fairway', '', '', 'fairway  or  fw', '', 'Yards remaining, e.g.  140']);
+  allRows.push(['Ball in rough (left/right)', '', '', 'rough  or  l rough  or  r rough', '', 'Yards remaining, e.g.  95']);
+  allRows.push(['Ball in bunker / sand', '', '', 'bunker  or  sand  or  gs bunker', '', 'Yards remaining, e.g.  30']);
+  allRows.push(['Ball on the green', '', '', 'green', '', 'Feet from hole, e.g.  22 ft']);
+  allRows.push(['Penalty (water / OB etc.)', '', '', 'water  or  penalty  or  OB', '', 'Yards after drop, e.g.  180']);
+  allRows.push(['One putt (with distance left)', '', '', 'putt', '', 'Feet remaining, e.g.  4ft']);
+  allRows.push(['Made the putt / last shot', '', '', 'hole  or  holed', '', '(leave blank)']);
+  allRows.push(['Two putts total', '', '', '2 putts', '', '(leave blank)']);
+  allRows.push(['Three putts total', '', '', '3 putts', '', '(leave blank)']);
+  allRows.push([]);
+  allRows.push(['9-hole rounds: fill Front 9 only. Leave Back 9 blank.']);
+  allRows.push(['Date format: MM/DD/YYYY  e.g.  03/15/2026']);
+  allRows.push(['Handicap options: pro  0  5  10  15  20  25  30']);
 
-  var ws6 = XLSX.utils.aoa_to_sheet(sgd);
-  ws6['!cols'] = [{wch:8},{wch:6},{wch:8},{wch:16},{wch:12},{wch:12},{wch:16},{wch:20}];
-  sc(ws6, 0, 0, secS);
-  for (var ri = 1; ri <= 4; ri++) sc(ws6, ri, 0, notS);
-  for (var ci = 0; ci < 8; ci++) sc(ws6, 6, ci, thS);
-  XLSX.utils.book_append_sheet(wb, ws6, 'Strokes Gained');
+  var ws = XLSX.utils.aoa_to_sheet(allRows);
 
+  // Column widths: 9 holes × 3 cols + 3 Total = 30 cols
+  var cols = [];
+  for (var hi = 0; hi < 9; hi++) { cols.push({wch:9}); cols.push({wch:16}); cols.push({wch:14}); }
+  cols.push({wch:8}); cols.push({wch:10}); cols.push({wch:8});
+  ws['!cols'] = cols;
+
+  // ---- Apply styles ----
+
+  // Info rows 0-5
+  for (var r = 0; r < 6; r++) { sc(ws, r, 0, LBL); sc(ws, r, 1, INFL); }
+
+  // Front 9 (F9_START=7) and Back 9 (B9_START=23)
+  var F9 = 7, B9 = 23;
+  [F9, B9].forEach(function(secStart) {
+    var hRow  = secStart,     pRow  = secStart + 1,
+        sRow  = secStart + 2, yRow  = secStart + 3,
+        shRow = secStart + 4;
+
+    for (var hi = 0; hi < 9; hi++) {
+      var b = hi * 3;
+      // Hole header
+      sc(ws, hRow, b, HDR); sc(ws, hRow, b+1, HDR); sc(ws, hRow, b+2, HDR);
+      // Par
+      sc(ws, pRow, b, HDR2); sc(ws, pRow, b+1, INP); sc(ws, pRow, b+2, BRD);
+      // Score
+      sc(ws, sRow, b, HDR2); sc(ws, sRow, b+1, INP); sc(ws, sRow, b+2, BRD);
+      // Yardage
+      sc(ws, yRow, b, HDR2); sc(ws, yRow, b+1, INP); sc(ws, yRow, b+2, BRD);
+      // Shot column headers
+      sc(ws, shRow, b, HDR2); sc(ws, shRow, b+1, HDR2); sc(ws, shRow, b+2, HDR2);
+      // Shot data rows
+      for (var sr = 0; sr < 9; sr++) {
+        sc(ws, secStart+5+sr, b,   SHT);
+        sc(ws, secStart+5+sr, b+1, SINP);
+        sc(ws, secStart+5+sr, b+2, SINP);
+      }
+    }
+    // Total col (27)
+    sc(ws, hRow, 27, HDR);
+    sc(ws, pRow, 27, HDR2); sc(ws, pRow, 28, TTL);
+    sc(ws, sRow, 27, HDR2); sc(ws, sRow, 28, TTL);
+    sc(ws, yRow, 27, BRD);
+    sc(ws, shRow, 27, BRD);
+  });
+
+  // Reference guide header (row 38)
+  sc(ws, 38, 0, REFL); sc(ws, 38, 3, NOTS);
+  sc(ws, 39, 0, {font:{bold:true,color:{rgb:'1A5C32'}}}); sc(ws, 39, 3, {font:{bold:true,color:{rgb:'1A5C32'}}}); sc(ws, 39, 5, {font:{bold:true,color:{rgb:'1A5C32'}}});
+  for (var r = 40; r <= 50; r++) sc(ws, r, 0, NOTS);
+
+  XLSX.utils.book_append_sheet(wb, ws, 'Scorecard');
   XLSX.writeFile(wb, 'Round_Template.xlsx');
 }
 
