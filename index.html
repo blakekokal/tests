@@ -13223,8 +13223,9 @@ function renderFeedbackNotes(data) {
       var assignBadgeLabel = n._kind === 'drill' ? 'Drill' : 'Combine';
       var assignBadge = '<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px;background:#3b1a6e;color:#c4b5fd;">' + assignBadgeLabel + '</span>';
       var doneStyle = n.completed ? 'opacity:0.55;' : '';
+      var noun = n._kind === 'combine' ? escapeHtml(n.note_text || '') + ' combine' : escapeHtml(n.note_text || '');
       var article = n._kind === 'drill' ? 'the' : 'a';
-      var assignText = 'Your coach assigned you ' + article + ' ' + escapeHtml(n.note_text || '');
+      var assignText = 'Your coach assigned you ' + article + ' ' + noun;
       var dueLine = '';
       if (n.due_date) {
         var dd = new Date(n.due_date + 'T12:00:00');
