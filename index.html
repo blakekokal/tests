@@ -13637,10 +13637,10 @@ function populateCoachDrillList() {
   var sel = document.getElementById('coachDrillSelect');
   if (!sel) return;
   sel.innerHTML = '<option value="">Select drill...</option>';
-  if (!cat || !window._allDrills) return;
-  window._allDrills.filter(function(d){ return d.category === cat; }).forEach(function(d) {
+  if (!cat || !drillsData || !drillsData[cat]) return;
+  drillsData[cat].forEach(function(d) {
     var opt = document.createElement('option');
-    opt.value = d.name; opt.textContent = d.name;
+    opt.value = d.title; opt.textContent = d.title;
     sel.appendChild(opt);
   });
 }
