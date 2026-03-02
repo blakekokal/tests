@@ -776,11 +776,12 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
     <div style="font-size:22px;font-weight:800;margin-bottom:6px;">Practice Hub</div>
     <div style="font-size:13px;color:#666;margin-bottom:14px;">Combines, Drills & Practice</div>
 
-    <!-- 3-tab bar -->
+    <!-- 4-tab bar -->
     <div style="display:flex;gap:0;width:100%;max-width:360px;margin-bottom:0;border-radius:10px;overflow:hidden;">
       <button onclick="setPracticeHubTab('combines')" id="phTabCombines" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#1d4ed8;border:none;color:#fff;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Combines</button>
       <button onclick="setPracticeHubTab('drills')" id="phTabDrills" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#222;border:none;color:#888;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Drills</button>
       <button onclick="setPracticeHubTab('plan')" id="phTabPlan" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#222;border:none;color:#888;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Practice</button>
+      <button onclick="setPracticeHubTab('learn')" id="phTabLearn" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#222;border:none;color:#888;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Learn</button>
     </div>
   </div>
 
@@ -892,6 +893,13 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
       <div id="ppHistory" style="display:none;">
         <div id="ppHistoryList" style="font-size:13px;color:#555;text-align:center;padding:12px 0;">Loading...</div>
       </div>
+    </div>
+
+    <!-- LEARN TAB -->
+    <div id="phLearnContent" style="display:none;text-align:center;padding:40px 0;">
+      <div style="font-size:32px;margin-bottom:12px;">📚</div>
+      <div style="font-size:18px;font-weight:700;margin-bottom:8px;">Coming Soon</div>
+      <div style="font-size:13px;color:#666;">Learning content is on its way.</div>
     </div>
 
   </div>
@@ -14515,8 +14523,9 @@ function setPracticeHubTab(tab) {
   document.getElementById('phCombinesContent').style.display = tab === 'combines' ? '' : 'none';
   document.getElementById('phDrillsContent').style.display   = tab === 'drills'   ? '' : 'none';
   document.getElementById('phPlanContent').style.display     = tab === 'plan'     ? '' : 'none';
+  document.getElementById('phLearnContent').style.display    = tab === 'learn'    ? '' : 'none';
 
-  var tabs = { combines: 'phTabCombines', drills: 'phTabDrills', plan: 'phTabPlan' };
+  var tabs = { combines: 'phTabCombines', drills: 'phTabDrills', plan: 'phTabPlan', learn: 'phTabLearn' };
   Object.keys(tabs).forEach(function(k) {
     var btn = document.getElementById(tabs[k]);
     if (btn) {
