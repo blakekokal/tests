@@ -1305,7 +1305,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
 
 <!-- DRILL DETAIL PAGE -->
 <div id="drillDetailPage" class="page" style="justify-content:flex-start;padding-top:20px;overflow-y:auto;padding-bottom:80px;">
-  <button class="back-btn-top" onclick="show('drillsPage')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <button class="back-btn-top" onclick="drillDetailBack()"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
   <div id="drillDetailContent" style="width:320px;max-width:100%;"></div>
 </div>
 
@@ -13222,7 +13222,7 @@ function renderFeedbackNotes(data) {
 async function loadStudentAssignedDrills() {
   var list = document.getElementById('coachingAssignedDrillsList');
   var { data, error } = await _sb.from('coach_drill_assignments')
-    .select('drill_name, drill_category, note, created_at, completed, coach_name, coach_id')
+    .select('drill_name, drill_category, note, created_at, completed, coach_name, coach_id, completion_note')
     .eq('student_id', currentUser.id)
     .order('created_at', { ascending: false })
     .limit(20);
@@ -13238,15 +13238,17 @@ async function loadStudentAssignedDrills() {
     var catColor = d.drill_category === 'putting' ? '#3b82f6' : d.drill_category === 'shortgame' ? '#10b981' : '#f59e0b';
     return '<div style="background:#1e1e1e;border-radius:10px;padding:12px;margin-bottom:8px;">'
       + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">'
-      + '<div style="font-weight:700;font-size:14px;">' + escapeHtml(d.drill_name) + '</div>'
+      + '<div onclick="openAssignedDrillDetail(' + idx + ')" style="font-weight:700;font-size:14px;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;">' + escapeHtml(d.drill_name) + '</div>'
       + '<div style="font-size:10px;color:' + catColor + ';font-weight:700;text-transform:uppercase;">' + escapeHtml(d.drill_category || '') + '</div></div>'
       + (d.note ? '<div style="font-size:12px;color:#aaa;font-style:italic;margin-bottom:6px;">"' + escapeHtml(d.note) + '"</div>' : '')
       + '<div style="display:flex;align-items:center;justify-content:space-between;">'
       + '<div style="font-size:10px;color:#555;">From ' + escapeHtml(d.coach_name || 'Coach') + ' · ' + dateStr + '</div>'
-      + '<button data-idx="' + idx + '" data-completed="' + (d.completed ? '1' : '0') + '" onclick="toggleDrillComplete(this,' + idx + ')" '
+      + '<button data-idx="' + idx + '" onclick="toggleDrillComplete(this,' + idx + ')" '
       + 'style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;background:' + (d.completed ? '#166534' : '#333') + ';'
       + 'color:' + (d.completed ? '#4ade80' : '#888') + ';border:none;cursor:pointer;height:auto;max-width:none;width:auto;">'
-      + (d.completed ? '✓ Done' : 'Mark Done') + '</button></div></div>';
+      + (d.completed ? '✓ Done' : 'Mark Done') + '</button></div>'
+      + (d.completion_note ? '<div style="font-size:11px;color:#666;margin-top:6px;padding-top:6px;border-top:1px solid #2a2a2a;">📝 ' + escapeHtml(d.completion_note) + '</div>' : '')
+      + '</div>';
   }).join('');
 }
 
@@ -13292,29 +13294,101 @@ async function loadStudentAssignedCombines() {
   }).join('');
 }
 
-async function toggleDrillComplete(btn, idx) {
+var _drillDetailBackTarget = 'drillsPage';
+function drillDetailBack() { show(_drillDetailBackTarget); _drillDetailBackTarget = 'drillsPage'; }
+
+function openAssignedDrillDetail(idx) {
+  var drill = window._assignedDrillsData && window._assignedDrillsData[idx];
+  if (!drill) return;
+  var drills = drillsData[drill.drill_category] || [];
+  var drillObj = drills.find(function(d) { return d.title === drill.drill_name; });
+  if (!drillObj) return;
+  _drillDetailBackTarget = 'coachingCornerPage';
+  showDrillDetail(drillObj.id, drill.drill_category);
+}
+
+var _pendingDrillCompleteIdx = null;
+var _pendingDrillCompleteBtn = null;
+
+function toggleDrillComplete(btn, idx) {
   if (!window._assignedDrillsData || !window._assignedDrillsData[idx]) return;
   var drill = window._assignedDrillsData[idx];
-  var newVal = !drill.completed;
+  if (!drill.completed) {
+    // Show note modal before marking done
+    _pendingDrillCompleteIdx = idx;
+    _pendingDrillCompleteBtn = btn;
+    document.getElementById('drillCompleteNoteInput').value = '';
+    document.getElementById('drillCompleteModal').style.display = 'flex';
+    return;
+  }
+  // Marking as undone — no note needed
+  _finalizeDrillToggle(btn, idx, false, null);
+}
+
+async function _finalizeDrillToggle(btn, idx, newVal, completionNote) {
+  var drill = window._assignedDrillsData[idx];
   drill.completed = newVal;
+  if (!newVal) drill.completion_note = null;
   btn.style.background = newVal ? '#166534' : '#333';
   btn.style.color = newVal ? '#4ade80' : '#888';
   btn.textContent = newVal ? '✓ Done' : 'Mark Done';
-  await _sb.from('coach_drill_assignments')
-    .update({ completed: newVal })
+
+  // Show/hide completion note in the card
+  var card = btn.closest ? btn.closest('div[style*="background:#1e1e1e"]') : null;
+  if (card) {
+    var noteEl = card.querySelector('.completion-note-row');
+    if (newVal && completionNote) {
+      if (!noteEl) {
+        noteEl = document.createElement('div');
+        noteEl.className = 'completion-note-row';
+        noteEl.style.cssText = 'font-size:11px;color:#666;margin-top:6px;padding-top:6px;border-top:1px solid #2a2a2a;';
+        card.appendChild(noteEl);
+      }
+      noteEl.textContent = '\uD83D\uDCDD ' + completionNote;
+    } else if (noteEl) {
+      noteEl.remove();
+    }
+  }
+
+  var updateObj = { completed: newVal, completion_note: newVal ? (completionNote || null) : null };
+  var { error } = await _sb.from('coach_drill_assignments')
+    .update(updateObj)
     .eq('student_id', currentUser.id)
     .eq('drill_name', drill.drill_name)
     .eq('created_at', drill.created_at);
-  // Notify coach when student completes a drill
+  // If completion_note column doesn't exist yet, retry without it
+  if (error) {
+    await _sb.from('coach_drill_assignments')
+      .update({ completed: newVal })
+      .eq('student_id', currentUser.id)
+      .eq('drill_name', drill.drill_name)
+      .eq('created_at', drill.created_at);
+  }
+
   if (newVal && drill.coach_id) {
     var { data: prof } = await _sb.from('profiles').select('display_name').eq('id', currentUser.id).single();
     var studentName = (prof && prof.display_name) || 'Student';
     await _sb.from('notifications').insert({
       user_id: drill.coach_id, type: 'drill_completed', title: studentName + ' completed a drill',
-      message: studentName + ' completed: ' + drill.drill_name, student_id: currentUser.id, student_name: studentName,
+      message: studentName + ' completed: ' + drill.drill_name + (completionNote ? ' \u2014 ' + completionNote : ''),
+      student_id: currentUser.id, student_name: studentName,
       read: false, created_at: new Date().toISOString()
     });
   }
+}
+
+function closeDrillCompleteModal() {
+  document.getElementById('drillCompleteModal').style.display = 'none';
+  _pendingDrillCompleteIdx = null;
+  _pendingDrillCompleteBtn = null;
+}
+
+async function confirmDrillComplete() {
+  var note = document.getElementById('drillCompleteNoteInput').value.trim();
+  var idx = _pendingDrillCompleteIdx;
+  var btn = _pendingDrillCompleteBtn;
+  closeDrillCompleteModal();
+  await _finalizeDrillToggle(btn, idx, true, note || null);
 }
 
 function startCoachCombine(idx) {
@@ -15176,5 +15250,18 @@ function drawDispersion(clubName) {
 }
 
 </script>
+
+<!-- Drill Completion Note Modal -->
+<div id="drillCompleteModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;align-items:center;justify-content:center;">
+  <div style="background:#1a1a1a;border-radius:16px;padding:20px;width:300px;max-width:90vw;box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+    <div style="font-size:15px;font-weight:700;margin-bottom:4px;">Session Note</div>
+    <div style="font-size:12px;color:#777;margin-bottom:12px;">How did it go? (optional)</div>
+    <textarea id="drillCompleteNoteInput" placeholder="e.g. Did 3–8 ft gates for 10 mins, holed 7/10..." style="width:100%;background:#222;border:1px solid #333;border-radius:8px;color:#fff;font-size:13px;padding:10px;resize:vertical;min-height:80px;box-sizing:border-box;font-family:inherit;"></textarea>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button onclick="confirmDrillComplete()" style="flex:1;background:#166534;color:#4ade80;font-weight:700;border:none;border-radius:8px;padding:10px;cursor:pointer;font-size:13px;height:auto;max-width:none;width:auto;">✓ Mark Done</button>
+      <button onclick="closeDrillCompleteModal()" style="flex:1;background:#2a2a2a;color:#888;font-weight:700;border:none;border-radius:8px;padding:10px;cursor:pointer;font-size:13px;height:auto;max-width:none;width:auto;">Cancel</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
