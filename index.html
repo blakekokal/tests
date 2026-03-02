@@ -896,10 +896,20 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
     </div>
 
     <!-- LEARN TAB -->
-    <div id="phLearnContent" style="display:none;text-align:center;padding:40px 0;">
-      <div style="font-size:32px;margin-bottom:12px;">📚</div>
-      <div style="font-size:18px;font-weight:700;margin-bottom:8px;">Coming Soon</div>
-      <div style="font-size:13px;color:#666;">Learning content is on its way.</div>
+    <div id="phLearnContent" style="display:none;">
+      <div style="display:flex;flex-direction:column;gap:10px;align-items:center;">
+        <button onclick="toggleLearnSGCalc()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#0d1f4a;border-radius:12px;text-align:left;">
+          <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">📊</span>
+          <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Strokes Gained Calculator</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Calculate SG for any shot</div></div>
+        </button>
+        <!-- Container where SG Calculator gets moved into -->
+        <div id="learnSGCalcContainer" style="display:none;width:100%;"></div>
+
+        <button style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#0d1f4a;border-radius:12px;text-align:left;opacity:0.5;cursor:default;" disabled>
+          <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🟢</span>
+          <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Putting Break Calculator</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Coming Soon</div></div>
+        </button>
+      </div>
     </div>
 
   </div>
@@ -14540,6 +14550,44 @@ function setPracticeHubTab(tab) {
     initPracticeSessionForm();
     loadPracticePlanCombineOptions();
   }
+  // When leaving Learn tab, return SG calc to its original home
+  if (tab !== 'learn') returnSGCalcToHelp();
+}
+
+function toggleLearnSGCalc() {
+  var container = document.getElementById('learnSGCalcContainer');
+  if (!container) return;
+  if (container.style.display !== 'none') {
+    // Hide and return calc to help page
+    container.style.display = 'none';
+    returnSGCalcToHelp();
+    return;
+  }
+  // Move the existing SG calc into the Learn tab container
+  var calc = document.getElementById('sgSubContent_calc');
+  if (calc) {
+    container.appendChild(calc);
+    calc.style.display = 'block';
+    container.style.display = '';
+    // Initialize the calculator
+    var userHcp = (currentUser && currentUser.user_metadata && currentUser.user_metadata.hcp_preference) || '10';
+    var hcpMap = { 'pro': 'Tour Pro', '0': 'Scratch', '5': '5', '10': '10', '15': '15', '20': '20', '25': '25', '30': '30' };
+    var hcpVal = hcpMap[userHcp] || '10';
+    var sel = document.getElementById('sgCalcHcp');
+    if (sel) sel.value = hcpVal;
+    sgCalcReset();
+  }
+}
+
+function returnSGCalcToHelp() {
+  var calc = document.getElementById('sgSubContent_calc');
+  var helpParent = document.getElementById('helpContent_sg');
+  if (calc && helpParent && calc.parentNode !== helpParent) {
+    calc.style.display = 'none';
+    helpParent.appendChild(calc);
+  }
+  var container = document.getElementById('learnSGCalcContainer');
+  if (container) container.style.display = 'none';
 }
 
 async function loadPHCombineHistory() {
