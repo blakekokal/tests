@@ -1030,8 +1030,6 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
           <div id="feedbackFilterCount" style="font-size:11px;color:#555;text-align:right;min-height:14px;margin-top:4px;"></div>
         </div>
 
-        <!-- Assignment notices -->
-        <div id="coachingAssignmentNotices"></div>
         <!-- Scrollable notes only -->
         <div id="coachingNotesList" style="flex:1;overflow-y:auto;padding:0 16px 80px;">
           <div style="text-align:center;color:#555;font-size:13px;padding:20px 0;">No feedback from your coach yet.</div>
@@ -13123,75 +13121,33 @@ async function loadCoachingPageStudentView() {
   loadStudentCoachNotes();
   loadStudentAssignedDrills();
   loadStudentAssignedCombines();
-  loadAssignmentNotices();
-}
-
-async function loadAssignmentNotices() {
-  var el = document.getElementById('coachingAssignmentNotices');
-  if (!el) return;
-
-  var [drillRes, combRes] = await Promise.all([
-    _sb.from('coach_drill_assignments')
-      .select('drill_name, drill_category, coach_name, created_at, completed')
-      .eq('student_id', currentUser.id)
-      .order('created_at', { ascending: false })
-      .limit(5),
-    _sb.from('coach_combine_assignments')
-      .select('combine_type, coach_name, created_at, completed')
-      .eq('student_id', currentUser.id)
-      .order('created_at', { ascending: false })
-      .limit(5)
-  ]);
-
-  var notices = [];
-  (drillRes.data || []).forEach(function(d) {
-    notices.push({ type: 'drill', name: d.drill_name, coach: d.coach_name, date: d.created_at, completed: d.completed });
-  });
-  (combRes.data || []).forEach(function(c) {
-    notices.push({ type: 'combine', name: c.combine_type, coach: c.coach_name, date: c.created_at, completed: c.completed });
-  });
-  notices.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
-  notices = notices.slice(0, 5);
-
-  if (notices.length === 0) { el.innerHTML = ''; return; }
-
-  el.innerHTML = '<div style="padding:10px 16px 2px;">'
-    + notices.map(function(n) {
-        var icon = n.type === 'drill' ? '\uD83C\uDFAF' : '\uD83C\uDFCC\uFE0F';
-        var label = n.type === 'drill' ? 'Drill assigned' : 'Combine assigned';
-        var dateStr = new Date(n.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        var dim = n.completed ? 'opacity:0.5;' : '';
-        return '<div onclick="showStudentCoachingTab(1)" style="' + dim + 'background:#0a1f1f;border:1px solid #0f766e;border-radius:10px;padding:10px 12px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">'
-          + '<div style="display:flex;align-items:center;gap:10px;">'
-          + '<div style="font-size:20px;line-height:1;">' + icon + '</div>'
-          + '<div><div style="font-size:11px;font-weight:700;color:#2dd4bf;margin-bottom:1px;">' + label + (n.completed ? ' · Done ✓' : '') + '</div>'
-          + '<div style="font-size:13px;color:#eee;font-weight:600;">' + escapeHtml(n.name) + '</div>'
-          + '<div style="font-size:10px;color:#555;margin-top:1px;">From ' + escapeHtml(n.coach || 'Coach') + ' · ' + dateStr + '</div></div>'
-          + '</div>'
-          + '<div style="font-size:20px;color:#0f766e;font-weight:300;">›</div>'
-          + '</div>';
-      }).join('')
-    + '</div>';
 }
 
 async function loadStudentCoachNotes() {
   var list = document.getElementById('coachingNotesList');
   list.innerHTML = '<div style="text-align:center;color:#555;font-size:13px;padding:20px 0;">Loading...</div>';
 
-  var { data, error } = await _sb.from('coach_notes')
-    .select('note_text, created_at, coach_name, lesson_date, note_type')
-    .eq('student_id', currentUser.id)
-    .order('created_at', { ascending: false })
-    .limit(100);
+  var [notesRes, drillsRes, combinesRes] = await Promise.all([
+    _sb.from('coach_notes').select('note_text, created_at, coach_name, lesson_date, note_type').eq('student_id', currentUser.id).order('created_at', { ascending: false }).limit(100),
+    _sb.from('coach_drill_assignments').select('drill_name, coach_name, created_at, completed').eq('student_id', currentUser.id).order('created_at', { ascending: false }).limit(20),
+    _sb.from('coach_combine_assignments').select('combine_type, coach_name, created_at, completed').eq('student_id', currentUser.id).order('created_at', { ascending: false }).limit(20)
+  ]);
 
-  if (error || !data || data.length === 0) {
+  var notes = (notesRes.data || []).map(function(n) { return Object.assign({ _kind: 'note' }, n); });
+  var drills = (drillsRes.data || []).map(function(d) { return { _kind: 'drill', note_text: d.drill_name, coach_name: d.coach_name, created_at: d.created_at, completed: d.completed }; });
+  var combines = (combinesRes.data || []).map(function(c) { return { _kind: 'combine', note_text: c.combine_type, coach_name: c.coach_name, created_at: c.created_at, completed: c.completed }; });
+
+  var all = notes.concat(drills, combines);
+  all.sort(function(a, b) { return new Date(b.created_at) - new Date(a.created_at); });
+
+  if (all.length === 0) {
     list.innerHTML = '<div style="text-align:center;color:#555;font-size:13px;padding:20px 0;">No feedback from your coach yet.</div>';
     window._allCoachNotes = [];
     return;
   }
 
-  window._allCoachNotes = data;
-  renderFeedbackNotes(data);
+  window._allCoachNotes = all;
+  renderFeedbackNotes(all);
 }
 
 function filterStudentFeedback() {
@@ -13212,9 +13168,11 @@ function filterStudentFeedback() {
                && (n.coach_name || '').toLowerCase().indexOf(query) === -1) return false;
     // type filter
     if (type !== 'all') {
-      var isLesson = !!n.lesson_date || n.note_type === 'lesson';
+      var kind = n._kind || 'note';
+      var isLesson = kind === 'note' && (!!n.lesson_date || n.note_type === 'lesson');
+      var isAssignment = kind === 'drill' || kind === 'combine';
       if (type === 'lesson'  && !isLesson) return false;
-      if (type === 'general' &&  isLesson) return false;
+      if (type === 'general' && (isLesson || isAssignment)) return false;
     }
     // date filter
     if (cutoff && new Date(n.created_at) < cutoff) return false;
@@ -13259,6 +13217,17 @@ function renderFeedbackNotes(data) {
     if (query.trim()) {
       var re = new RegExp('(' + query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
       noteText = noteText.replace(re, '<mark style="background:#4c1d95;color:#e9d5ff;border-radius:3px;padding:0 2px;">$1</mark>');
+    }
+
+    if (n._kind === 'drill' || n._kind === 'combine') {
+      var assignBadgeLabel = n._kind === 'drill' ? 'Drill' : 'Combine';
+      var assignBadge = '<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px;background:#3b1a6e;color:#c4b5fd;">' + assignBadgeLabel + '</span>';
+      var doneStyle = n.completed ? 'opacity:0.55;' : '';
+      return '<div onclick="showStudentCoachingTab(1)" style="' + doneStyle + 'border-bottom:1px solid #222;padding:12px 0;cursor:pointer;">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;flex-wrap:wrap;gap:4px;">'
+        + '<div style="display:flex;align-items:center;"><div style="font-size:11px;font-weight:700;color:#a78bfa;">' + escapeHtml(n.coach_name || 'Coach') + '</div>' + assignBadge + '</div>'
+        + '<div style="font-size:10px;color:#555;">' + sentDate + '</div></div>'
+        + '<div style="font-size:13px;color:#c4b5fd;line-height:1.6;">' + escapeHtml(n.note_text || '') + (n.completed ? ' <span style=\'font-size:11px;color:#4ade80;\'>\u2713</span>' : '') + '</div></div>';
     }
 
     return '<div style="border-bottom:1px solid #222;padding:12px 0;">'
