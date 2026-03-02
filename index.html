@@ -13130,12 +13130,12 @@ async function loadStudentCoachNotes() {
   var [notesRes, drillsRes, combinesRes] = await Promise.all([
     _sb.from('coach_notes').select('note_text, created_at, coach_name, lesson_date, note_type').eq('student_id', currentUser.id).order('created_at', { ascending: false }).limit(100),
     _sb.from('coach_drill_assignments').select('drill_name, coach_name, created_at, completed').eq('student_id', currentUser.id).order('created_at', { ascending: false }).limit(20),
-    _sb.from('coach_combine_assignments').select('combine_type, coach_name, created_at, completed').eq('student_id', currentUser.id).order('created_at', { ascending: false }).limit(20)
+    _sb.from('coach_combine_assignments').select('combine_type, coach_name, created_at, completed, due_date').eq('student_id', currentUser.id).order('created_at', { ascending: false }).limit(20)
   ]);
 
   var notes = (notesRes.data || []).map(function(n) { return Object.assign({ _kind: 'note' }, n); });
   var drills = (drillsRes.data || []).map(function(d) { return { _kind: 'drill', note_text: d.drill_name, coach_name: d.coach_name, created_at: d.created_at, completed: d.completed }; });
-  var combines = (combinesRes.data || []).map(function(c) { return { _kind: 'combine', note_text: c.combine_type, coach_name: c.coach_name, created_at: c.created_at, completed: c.completed }; });
+  var combines = (combinesRes.data || []).map(function(c) { return { _kind: 'combine', note_text: c.combine_type, coach_name: c.coach_name, created_at: c.created_at, completed: c.completed, due_date: c.due_date || null }; });
 
   var all = notes.concat(drills, combines);
   all.sort(function(a, b) { return new Date(b.created_at) - new Date(a.created_at); });
@@ -13223,11 +13223,18 @@ function renderFeedbackNotes(data) {
       var assignBadgeLabel = n._kind === 'drill' ? 'Drill' : 'Combine';
       var assignBadge = '<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px;background:#3b1a6e;color:#c4b5fd;">' + assignBadgeLabel + '</span>';
       var doneStyle = n.completed ? 'opacity:0.55;' : '';
+      var article = n._kind === 'drill' ? 'the' : 'a';
+      var assignText = 'Your coach assigned you ' + article + ' ' + escapeHtml(n.note_text || '');
+      var dueLine = '';
+      if (n.due_date) {
+        var dd = new Date(n.due_date + 'T12:00:00');
+        dueLine = ' <span style="font-size:11px;color:#888;">· due ' + dd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + '</span>';
+      }
       return '<div onclick="showStudentCoachingTab(1)" style="' + doneStyle + 'border-bottom:1px solid #222;padding:12px 0;cursor:pointer;">'
         + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;flex-wrap:wrap;gap:4px;">'
         + '<div style="display:flex;align-items:center;"><div style="font-size:11px;font-weight:700;color:#a78bfa;">' + escapeHtml(n.coach_name || 'Coach') + '</div>' + assignBadge + '</div>'
         + '<div style="font-size:10px;color:#555;">' + sentDate + '</div></div>'
-        + '<div style="font-size:13px;color:#c4b5fd;line-height:1.6;">' + escapeHtml(n.note_text || '') + (n.completed ? ' <span style=\'font-size:11px;color:#4ade80;\'>\u2713</span>' : '') + '</div></div>';
+        + '<div style="font-size:13px;color:#c4b5fd;line-height:1.6;">' + assignText + dueLine + (n.completed ? ' <span style="font-size:11px;color:#4ade80;">\u2713</span>' : '') + '</div></div>';
     }
 
     return '<div style="border-bottom:1px solid #222;padding:12px 0;">'
