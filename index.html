@@ -9672,18 +9672,18 @@ function downloadRoundTemplate() {
   for (var s = 1; s <= 9; s++) allRows.push(makeShotRow(s));
   // Row 37: blank
   allRows.push([]);
-  // Rows 38+: lie reference guide
-  allRows.push(['LIE / END POSITION REFERENCE', '', '', 'Write exactly what you see — not case-sensitive']);
-  allRows.push(['What happened', '', '', 'What to write in End Lie/Putts', '', 'What to write in Distance left']);
-  allRows.push(['Ball in fairway', '', '', 'fairway  or  fw', '', 'Yards remaining, e.g.  140']);
-  allRows.push(['Ball in rough (left/right)', '', '', 'rough  or  l rough  or  r rough', '', 'Yards remaining, e.g.  95']);
-  allRows.push(['Ball in bunker / sand', '', '', 'bunker  or  sand  or  gs bunker', '', 'Yards remaining, e.g.  30']);
-  allRows.push(['Ball on the green', '', '', 'green', '', 'Feet from hole, e.g.  22 ft']);
-  allRows.push(['Penalty (water / OB etc.)', '', '', 'water  or  penalty  or  OB', '', 'Yards after drop, e.g.  180']);
-  allRows.push(['One putt (with distance left)', '', '', 'putt', '', 'Feet remaining, e.g.  4ft']);
-  allRows.push(['Made the putt / last shot', '', '', 'hole  or  holed', '', '(leave blank)']);
-  allRows.push(['Two putts total', '', '', '2 putts', '', '(leave blank)']);
-  allRows.push(['Three putts total', '', '', '3 putts', '', '(leave blank)']);
+  // Rows 38+: lie reference guide (3 columns, merged groups of 3 cols each)
+  allRows.push(['LIE / END POSITION REFERENCE']);
+  allRows.push(['What happened', '', '', 'What to write in  End Lie/Putts', '', '', 'What to write in  Distance left']);
+  allRows.push(['Ball in fairway',               '', '', 'fairway  /  fw',                '', '', 'yards remaining  e.g.  140']);
+  allRows.push(['Ball in rough (left / right)',  '', '', 'rough  /  l rough  /  r rough', '', '', 'yards remaining  e.g.  95']);
+  allRows.push(['Ball in bunker / sand',         '', '', 'bunker  /  sand  /  gs bunker', '', '', 'yards remaining  e.g.  30']);
+  allRows.push(['Ball on the green',             '', '', 'green',                         '', '', 'feet from hole  e.g.  22 ft']);
+  allRows.push(['Penalty — water / OB',          '', '', 'water  /  penalty  /  OB',      '', '', 'yards after drop  e.g.  180']);
+  allRows.push(['Last shot — made the putt',     '', '', 'hole  /  holed',                '', '', '(leave blank)']);
+  allRows.push(['One putt, feet still left',     '', '', 'putt',                          '', '', 'feet remaining  e.g.  4ft']);
+  allRows.push(['Two putts remaining',           '', '', '2 putts',                       '', '', '(leave blank)']);
+  allRows.push(['Three putts remaining',         '', '', '3 putts',                       '', '', '(leave blank)']);
   allRows.push([]);
   allRows.push(['9-hole rounds: fill Front 9 only. Leave Back 9 blank.']);
   allRows.push(['Date format: MM/DD/YYYY  e.g.  03/15/2026']);
@@ -9736,10 +9736,48 @@ function downloadRoundTemplate() {
     sc(ws, shRow, 27, BRD);
   });
 
-  // Reference guide header (row 38)
-  sc(ws, 38, 0, REFL); sc(ws, 38, 3, NOTS);
-  sc(ws, 39, 0, {font:{bold:true,color:{rgb:'1A5C32'}}}); sc(ws, 39, 3, {font:{bold:true,color:{rgb:'1A5C32'}}}); sc(ws, 39, 5, {font:{bold:true,color:{rgb:'1A5C32'}}});
-  for (var r = 40; r <= 50; r++) sc(ws, r, 0, NOTS);
+  // ---- Reference guide: merge cols 0-2, 3-5, 6-8 per row ----
+  ws['!merges'] = [];
+  ws['!merges'].push({s:{r:38,c:0}, e:{r:38,c:29}}); // title spans full width
+  for (var refRow = 39; refRow <= 48; refRow++) {
+    ws['!merges'].push({s:{r:refRow,c:0}, e:{r:refRow,c:2}});  // "What happened"
+    ws['!merges'].push({s:{r:refRow,c:3}, e:{r:refRow,c:5}});  // "End Lie" value
+    ws['!merges'].push({s:{r:refRow,c:6}, e:{r:refRow,c:8}});  // "Distance" value
+  }
+
+  var REFT = {fill:{fgColor:{rgb:'F1F8E9'}}, font:{bold:true,sz:12,color:{rgb:'1A5C32'}}, alignment:{horizontal:'left',vertical:'center'}};
+  var REFH = {fill:{fgColor:{rgb:'E8F5E9'}}, font:{bold:true,color:{rgb:'1A5C32'}}, border:TN2, alignment:{horizontal:'center',vertical:'center',wrapText:true}};
+  var REFD = {border:TN, alignment:{horizontal:'left',vertical:'center',wrapText:true}};
+  var REFV = {fill:{fgColor:{rgb:'F0FFF0'}}, font:{bold:true,color:{rgb:'1A5C32'}}, border:TN, alignment:{horizontal:'left',vertical:'center',wrapText:true}};
+  sc(ws, 38, 0, REFT);
+  sc(ws, 39, 0, REFH); sc(ws, 39, 3, REFH); sc(ws, 39, 6, REFH);
+  for (var r = 40; r <= 48; r++) {
+    sc(ws, r, 0, REFD);   // "What happened" — plain
+    sc(ws, r, 3, REFV);   // "End Lie value" — green bold
+    sc(ws, r, 6, REFD);   // "Distance" — plain
+  }
+
+  // Row heights for reference section
+  ws['!rows'] = [];
+  ws['!rows'][38] = {hpt:22}; ws['!rows'][39] = {hpt:28};
+  for (var r = 40; r <= 48; r++) ws['!rows'][r] = {hpt:22};
+
+  // ---- Dropdowns for End Lie/Putts cells ----
+  // Lie column for hole hi is at col hi*3+1
+  // Front 9 shot rows: 12-20 (0-indexed) = Excel rows 13-21
+  // Back 9 shot rows:  28-36 (0-indexed) = Excel rows 29-37
+  var lieList = '"fairway,fw,l rough,r rough,rough,bunker,sand,gs bunker,green,water,penalty,OB,putt,2 putts,3 putts,hole,holed"';
+  var lieLetters = ['B','E','H','K','N','Q','T','W','Z'];
+  var sqrefParts = [];
+  for (var hi = 0; hi < 9; hi++) sqrefParts.push(lieLetters[hi] + '13:' + lieLetters[hi] + '21');
+  for (var hi = 0; hi < 9; hi++) sqrefParts.push(lieLetters[hi] + '29:' + lieLetters[hi] + '37');
+  ws['!dataValidation'] = [{
+    type: 'list',
+    sqref: sqrefParts.join(' '),
+    formula1: lieList,
+    showDropDown: false,
+    showErrorMessage: false
+  }];
 
   XLSX.utils.book_append_sheet(wb, ws, 'Scorecard');
   XLSX.writeFile(wb, 'Round_Template.xlsx');
