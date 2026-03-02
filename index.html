@@ -1030,6 +1030,8 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
           <div id="feedbackFilterCount" style="font-size:11px;color:#555;text-align:right;min-height:14px;margin-top:4px;"></div>
         </div>
 
+        <!-- Assignment notices -->
+        <div id="coachingAssignmentNotices"></div>
         <!-- Scrollable notes only -->
         <div id="coachingNotesList" style="flex:1;overflow-y:auto;padding:0 16px 80px;">
           <div style="text-align:center;color:#555;font-size:13px;padding:20px 0;">No feedback from your coach yet.</div>
@@ -13121,6 +13123,55 @@ async function loadCoachingPageStudentView() {
   loadStudentCoachNotes();
   loadStudentAssignedDrills();
   loadStudentAssignedCombines();
+  loadAssignmentNotices();
+}
+
+async function loadAssignmentNotices() {
+  var el = document.getElementById('coachingAssignmentNotices');
+  if (!el) return;
+
+  var [drillRes, combRes] = await Promise.all([
+    _sb.from('coach_drill_assignments')
+      .select('drill_name, drill_category, coach_name, created_at, completed')
+      .eq('student_id', currentUser.id)
+      .order('created_at', { ascending: false })
+      .limit(5),
+    _sb.from('coach_combine_assignments')
+      .select('combine_type, coach_name, created_at, completed')
+      .eq('student_id', currentUser.id)
+      .order('created_at', { ascending: false })
+      .limit(5)
+  ]);
+
+  var notices = [];
+  (drillRes.data || []).forEach(function(d) {
+    notices.push({ type: 'drill', name: d.drill_name, coach: d.coach_name, date: d.created_at, completed: d.completed });
+  });
+  (combRes.data || []).forEach(function(c) {
+    notices.push({ type: 'combine', name: c.combine_type, coach: c.coach_name, date: c.created_at, completed: c.completed });
+  });
+  notices.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+  notices = notices.slice(0, 5);
+
+  if (notices.length === 0) { el.innerHTML = ''; return; }
+
+  el.innerHTML = '<div style="padding:10px 16px 2px;">'
+    + notices.map(function(n) {
+        var icon = n.type === 'drill' ? '\uD83C\uDFAF' : '\uD83C\uDFCC\uFE0F';
+        var label = n.type === 'drill' ? 'Drill assigned' : 'Combine assigned';
+        var dateStr = new Date(n.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        var dim = n.completed ? 'opacity:0.5;' : '';
+        return '<div onclick="showStudentCoachingTab(1)" style="' + dim + 'background:#0a1f1f;border:1px solid #0f766e;border-radius:10px;padding:10px 12px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">'
+          + '<div style="display:flex;align-items:center;gap:10px;">'
+          + '<div style="font-size:20px;line-height:1;">' + icon + '</div>'
+          + '<div><div style="font-size:11px;font-weight:700;color:#2dd4bf;margin-bottom:1px;">' + label + (n.completed ? ' · Done ✓' : '') + '</div>'
+          + '<div style="font-size:13px;color:#eee;font-weight:600;">' + escapeHtml(n.name) + '</div>'
+          + '<div style="font-size:10px;color:#555;margin-top:1px;">From ' + escapeHtml(n.coach || 'Coach') + ' · ' + dateStr + '</div></div>'
+          + '</div>'
+          + '<div style="font-size:20px;color:#0f766e;font-weight:300;">›</div>'
+          + '</div>';
+      }).join('')
+    + '</div>';
 }
 
 async function loadStudentCoachNotes() {
@@ -13244,8 +13295,8 @@ async function loadStudentAssignedDrills() {
       + '<div style="display:flex;align-items:center;justify-content:space-between;">'
       + '<div style="font-size:10px;color:#555;">From ' + escapeHtml(d.coach_name || 'Coach') + ' · ' + dateStr + '</div>'
       + '<button data-idx="' + idx + '" onclick="toggleDrillComplete(this,' + idx + ')" '
-      + 'style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;background:' + (d.completed ? '#166534' : '#333') + ';'
-      + 'color:' + (d.completed ? '#4ade80' : '#888') + ';border:none;cursor:pointer;height:auto;max-width:none;width:auto;">'
+      + 'style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;background:' + (d.completed ? '#166534' : '#0f766e') + ';'
+      + 'color:' + (d.completed ? '#4ade80' : '#fff') + ';border:none;cursor:pointer;height:auto;max-width:none;width:auto;">'
       + (d.completed ? '✓ Done' : 'Mark Done') + '</button></div>'
       + (d.completion_note ? '<div style="font-size:11px;color:#666;margin-top:6px;padding-top:6px;border-top:1px solid #2a2a2a;">📝 ' + escapeHtml(d.completion_note) + '</div>' : '')
       + '</div>';
@@ -13329,8 +13380,8 @@ async function _finalizeDrillToggle(btn, idx, newVal, completionNote) {
   var drill = window._assignedDrillsData[idx];
   drill.completed = newVal;
   if (!newVal) drill.completion_note = null;
-  btn.style.background = newVal ? '#166534' : '#333';
-  btn.style.color = newVal ? '#4ade80' : '#888';
+  btn.style.background = newVal ? '#166534' : '#0f766e';
+  btn.style.color = newVal ? '#4ade80' : '#fff';
   btn.textContent = newVal ? '✓ Done' : 'Mark Done';
 
   // Show/hide completion note in the card
