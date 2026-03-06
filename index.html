@@ -1611,49 +1611,110 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
 <!-- MY BAG PAGE -->
 <div id="myBagPage" class="page" style="justify-content:flex-start;padding-top:15px;overflow-y:auto;padding-bottom:80px;align-items:center;">
   <button class="back-btn-top" onclick="show('homePage')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
-  <div style="text-align:center;margin-bottom:16px;">
-    <div style="font-size:22px;font-weight:800;">🎒 My Bag</div>
-    <div style="font-size:12px;color:#666;margin-top:4px;">Enter your clubs and yardages</div>
+  <div style="text-align:center;margin-bottom:12px;">
+    <div style="font-size:22px;font-weight:800;">🎒 My Clubs</div>
   </div>
 
-  <!-- Add Club Section -->
-  <div style="width:100%;max-width:360px;background:#1a1a1a;border-radius:14px;padding:16px;margin-bottom:16px;">
-    <div style="font-size:12px;font-weight:700;color:#a78bfa;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Add Club</div>
-    <select id="bagClubName" style="width:100%;height:40px;font-size:14px;text-align:center;box-sizing:border-box;margin-bottom:8px;background:#222;color:#fff;border:1px solid #444;border-radius:8px;-webkit-appearance:none;appearance:none;">
-      <option value="" disabled selected>Select a club...</option>
-    </select>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
-      <div>
-        <div style="font-size:11px;color:#888;margin-bottom:4px;text-align:center;">Avg Carry (yds)</div>
-        <input id="bagCarryInput" type="number" placeholder="e.g. 240" min="0" max="400" style="width:100%;height:40px;font-size:15px;font-weight:700;text-align:center;box-sizing:border-box;">
+  <!-- Tabs -->
+  <div style="display:flex;gap:0;width:100%;max-width:360px;margin-bottom:16px;background:#1a1a1a;border-radius:12px;overflow:hidden;border:1px solid #333;">
+    <button id="bagTabMyBag" onclick="setBagTab('myBag')" style="flex:1;height:40px;font-size:13px;font-weight:700;border:none;cursor:pointer;transition:all 0.2s;background:#7c3aed;color:#fff;">My Bag</button>
+    <button id="bagTabFindYardages" onclick="setBagTab('findYardages')" style="flex:1;height:40px;font-size:13px;font-weight:700;border:none;cursor:pointer;transition:all 0.2s;background:transparent;color:#888;">Find Yardages</button>
+  </div>
+
+  <!-- TAB 1: MY BAG -->
+  <div id="bagTabContentMyBag" style="width:100%;display:flex;flex-direction:column;align-items:center;">
+    <!-- Add Club Section -->
+    <div style="width:100%;max-width:360px;background:#1a1a1a;border-radius:14px;padding:16px;margin-bottom:16px;">
+      <div style="font-size:12px;font-weight:700;color:#a78bfa;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Add Club</div>
+      <select id="bagClubName" style="width:100%;height:40px;font-size:14px;text-align:center;box-sizing:border-box;margin-bottom:10px;background:#222;color:#fff;border:1px solid #444;border-radius:8px;-webkit-appearance:none;appearance:none;">
+        <option value="" disabled selected>Select a club...</option>
+      </select>
+      <button onclick="addBagClub()" style="width:100%;height:42px;background:#7c3aed;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;">+ Add to Bag</button>
+      <div id="bagAddMsg" style="font-size:12px;min-height:16px;text-align:center;margin-top:6px;color:#4ade80;"></div>
+    </div>
+
+    <!-- Import CSV -->
+    <div style="width:100%;max-width:360px;margin-bottom:16px;">
+      <button onclick="document.getElementById('bagImportCSV').click()" style="width:100%;height:40px;background:#1a1a1a;border:1px solid #333;border-radius:10px;color:#aaa;font-size:13px;font-weight:600;cursor:pointer;">📤 Import Club Data (.csv / .xlsx)</button>
+      <input type="file" id="bagImportCSV" accept=".csv,.xlsx,.xls" style="display:none;" onchange="importBagFile(this)">
+    </div>
+
+    <!-- Club List -->
+    <div style="width:100%;max-width:360px;">
+      <div id="bagEmptyMsg" style="background:#1a1a1a;border-radius:12px;padding:24px;text-align:center;color:#555;font-size:13px;line-height:1.7;">
+        No clubs in your bag yet.<br>Add clubs above to track your distances.
       </div>
-      <div>
-        <div style="font-size:11px;color:#888;margin-bottom:4px;text-align:center;">Avg Total (yds)</div>
-        <input id="bagTotalInput" type="number" placeholder="e.g. 260" min="0" max="450" style="width:100%;height:40px;font-size:15px;font-weight:700;text-align:center;box-sizing:border-box;">
+      <div id="bagClubHeaders" style="display:none;grid-template-columns:1fr 50px 70px 70px 36px;gap:6px;padding:0 6px 6px;font-size:11px;color:#666;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">
+        <div>Club</div>
+        <div style="text-align:center;">Shots</div>
+        <div style="text-align:center;">Carry</div>
+        <div style="text-align:center;">Total</div>
+        <div></div>
+      </div>
+      <div id="bagClubList" style="display:flex;flex-direction:column;gap:6px;"></div>
+    </div>
+  </div>
+
+  <!-- TAB 2: FIND YARDAGES -->
+  <div id="bagTabContentFindYardages" style="width:100%;display:none;flex-direction:column;align-items:center;">
+    <!-- Step 1: Select Club -->
+    <div id="fyStep1" style="width:100%;max-width:360px;">
+      <div style="background:#1a1a1a;border-radius:14px;padding:16px;margin-bottom:12px;">
+        <div style="font-size:12px;font-weight:700;color:#a78bfa;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Select a Club</div>
+        <div id="fyClubGrid" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"></div>
+        <div style="font-size:11px;color:#555;margin-bottom:8px;text-align:center;">— or add a new club —</div>
+        <select id="fyNewClubSelect" style="width:100%;height:40px;font-size:14px;text-align:center;box-sizing:border-box;background:#222;color:#fff;border:1px solid #444;border-radius:8px;-webkit-appearance:none;appearance:none;">
+          <option value="" disabled selected>Select a club...</option>
+        </select>
+        <button onclick="fyPickNewClub()" style="width:100%;height:38px;background:#7c3aed;border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;margin-top:8px;">+ Add & Select</button>
       </div>
     </div>
-    <button onclick="addBagClub()" style="width:100%;height:42px;background:#7c3aed;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;">+ Add to Bag</button>
-    <div id="bagAddMsg" style="font-size:12px;min-height:16px;text-align:center;margin-top:6px;color:#4ade80;"></div>
+
+    <!-- Step 2: Choose # of shots -->
+    <div id="fyStep2" style="width:100%;max-width:360px;display:none;">
+      <div style="background:#1a1a1a;border-radius:14px;padding:16px;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <button onclick="fyBackToStep1()" style="background:#333;border:none;color:#fff;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;">←</button>
+          <div style="font-size:16px;font-weight:800;color:#e2e8f0;" id="fySelectedClubName"></div>
+          <div style="width:32px;"></div>
+        </div>
+        <div style="font-size:12px;font-weight:700;color:#a78bfa;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">How many shots?</div>
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;" id="fyShotCountBtns"></div>
+      </div>
+    </div>
+
+    <!-- Step 3: Enter shots -->
+    <div id="fyStep3" style="width:100%;max-width:360px;display:none;">
+      <div style="background:#1a1a1a;border-radius:14px;padding:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <button onclick="fyBackToStep2()" style="background:#333;border:none;color:#fff;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;">←</button>
+          <div style="font-size:16px;font-weight:800;color:#e2e8f0;" id="fyStep3ClubName"></div>
+          <div style="width:32px;"></div>
+        </div>
+        <div style="font-size:12px;font-weight:700;color:#a78bfa;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Enter Carry & Total for each shot</div>
+        <div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:6px;align-items:center;margin-bottom:4px;">
+          <div style="font-size:10px;color:#666;font-weight:600;">#</div>
+          <div style="font-size:10px;color:#666;font-weight:600;text-align:center;">CARRY</div>
+          <div style="font-size:10px;color:#666;font-weight:600;text-align:center;">TOTAL</div>
+        </div>
+        <div id="fyShotInputs" style="display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto;margin-bottom:12px;"></div>
+        <button onclick="fySaveShots()" style="width:100%;height:42px;background:#166534;border:none;border-radius:10px;color:#4ade80;font-size:14px;font-weight:700;cursor:pointer;">Save Yardages</button>
+        <div id="fyMsg" style="font-size:12px;min-height:16px;text-align:center;margin-top:6px;color:#4ade80;"></div>
+      </div>
+    </div>
   </div>
 
-  <!-- Import CSV -->
-  <div style="width:100%;max-width:360px;margin-bottom:16px;">
-    <button onclick="document.getElementById('bagImportCSV').click()" style="width:100%;height:40px;background:#1a1a1a;border:1px solid #333;border-radius:10px;color:#aaa;font-size:13px;font-weight:600;cursor:pointer;">📤 Import Club Data (.csv / .xlsx)</button>
-    <input type="file" id="bagImportCSV" accept=".csv,.xlsx,.xls" style="display:none;" onchange="importBagFile(this)">
-  </div>
-
-  <!-- Club List -->
-  <div style="width:100%;max-width:360px;">
-    <div id="bagEmptyMsg" style="background:#1a1a1a;border-radius:12px;padding:24px;text-align:center;color:#555;font-size:13px;line-height:1.7;">
-      No clubs in your bag yet.<br>Add clubs above to track your distances.
+  <!-- Existing data conflict modal -->
+  <div id="fyConflictModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;align-items:center;justify-content:center;">
+    <div style="background:#1a1a1a;border-radius:16px;padding:20px;width:300px;max-width:90vw;box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+      <div style="font-size:15px;font-weight:700;margin-bottom:4px;">Existing Shot Data</div>
+      <div id="fyConflictMsg" style="font-size:13px;color:#aaa;margin-bottom:16px;line-height:1.5;"></div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <button onclick="fyResolveConflict('add')" style="width:100%;height:42px;background:#1d4ed8;border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">Add to Existing Shots</button>
+        <button onclick="fyResolveConflict('replace')" style="width:100%;height:42px;background:#b91c1c;border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">Replace with New Data Only</button>
+        <button onclick="fyResolveConflict('cancel')" style="width:100%;height:42px;background:#333;border:none;border-radius:10px;color:#aaa;font-size:13px;font-weight:700;cursor:pointer;">Cancel</button>
+      </div>
     </div>
-    <div id="bagClubHeaders" style="display:none;grid-template-columns:1fr 80px 80px 36px;gap:6px;padding:0 6px 6px;font-size:11px;color:#666;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">
-      <div>Club</div>
-      <div style="text-align:center;">Carry</div>
-      <div style="text-align:center;">Total</div>
-      <div></div>
-    </div>
-    <div id="bagClubList" style="display:flex;flex-direction:column;gap:6px;"></div>
   </div>
 </div>
 
@@ -2235,6 +2296,7 @@ function show(id){
   }
   if(id === 'myBagPage') {
     renderBagClubs(); // show local cache immediately
+    setBagTab(_currentBagTab || 'myBag');
     // Pull latest from Supabase, then re-render
     syncBagFromSupabase().then(function() {
       renderBagClubs();
@@ -15287,26 +15349,18 @@ function populateBagDropdown() {
 
 function addBagClub() {
   var nameEl = document.getElementById('bagClubName');
-  var carryEl = document.getElementById('bagCarryInput');
-  var totalEl = document.getElementById('bagTotalInput');
   var msg = document.getElementById('bagAddMsg');
 
   var name = nameEl ? nameEl.value : '';
   if (!name) {
     msg.style.color = '#f87171'; msg.textContent = 'Select a club.'; return;
   }
-  var carry = carryEl.value !== '' ? parseInt(carryEl.value) : null;
-  var total = totalEl.value !== '' ? parseInt(totalEl.value) : null;
-  if (carry === null && total === null) {
-    msg.style.color = '#f87171'; msg.textContent = 'Enter at least one distance.'; return;
-  }
   var clubs = getBagClubs();
   if (clubs.some(function(c) { return c.name.toLowerCase() === name.toLowerCase(); })) {
     msg.style.color = '#f87171'; msg.textContent = name + ' is already in your bag.'; return;
   }
-  clubs.push({ name: name, carry: carry, total: total });
+  clubs.push({ name: name, carry: null, total: null });
   saveBagClubs(sortBagClubs(clubs));
-  carryEl.value = ''; totalEl.value = '';
   msg.style.color = '#4ade80'; msg.textContent = name + ' added!';
   setTimeout(function() { msg.textContent = ''; }, 2500);
   renderBagClubs();
@@ -15350,23 +15404,19 @@ function renderBagClubs() {
     var carry = (club.carry !== null && club.carry !== undefined) ? club.carry : '';
     var total = (club.total !== null && club.total !== undefined) ? club.total : '';
     var hasShots = club.shots && club.shots.length > 0;
+    var shotCount = hasShots ? club.shots.length : 0;
     var html = '<div style="background:#1a1a1a;border-radius:10px;padding:8px 10px;">';
-    html += '<div style="display:grid;grid-template-columns:1fr 80px 80px ' + (hasShots ? '36px ' : '') + '36px;gap:6px;align-items:center;">' +
+    html += '<div style="display:grid;grid-template-columns:1fr 50px 70px 70px 36px;gap:6px;align-items:center;">' +
       '<div style="font-size:14px;font-weight:700;color:#e2e8f0;">' + club.name + '</div>' +
-      '<input type="number" value="' + carry + '" placeholder="—" min="0" max="400" ' +
-        'onchange="updateBagClub(\'' + safe + '\',\'carry\',this.value)" ' +
-        'style="height:36px;font-size:14px;font-weight:700;text-align:center;background:#222;border:1px solid #333;border-radius:8px;color:#fff;width:100%;box-sizing:border-box;">' +
-      '<input type="number" value="' + total + '" placeholder="—" min="0" max="450" ' +
-        'onchange="updateBagClub(\'' + safe + '\',\'total\',this.value)" ' +
-        'style="height:36px;font-size:14px;font-weight:700;text-align:center;background:#222;border:1px solid #333;border-radius:8px;color:#fff;width:100%;box-sizing:border-box;">';
-    if (hasShots) {
-      html += '<button onclick="toggleDispersion(\'' + safe + '\')" ' +
-        'style="width:32px;height:32px;background:#2d2d2d;border:1px solid #444;border-radius:8px;color:#a78bfa;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;" title="Dispersion (' + club.shots.length + ' shots)">⊕</button>';
-    }
-    html += '<button onclick="removeBagClub(\'' + safe + '\')" ' +
+      '<div style="font-size:13px;font-weight:600;text-align:center;color:' + (shotCount > 0 ? '#a78bfa' : '#444') + ';">' + (shotCount > 0 ? shotCount : '—') + '</div>' +
+      '<div style="font-size:14px;font-weight:700;text-align:center;color:' + (carry !== '' ? '#fff' : '#444') + ';">' + (carry !== '' ? carry : '—') + '</div>' +
+      '<div style="font-size:14px;font-weight:700;text-align:center;color:' + (total !== '' ? '#fff' : '#444') + ';">' + (total !== '' ? total : '—') + '</div>' +
+      '<button onclick="removeBagClub(\'' + safe + '\')" ' +
         'style="width:32px;height:32px;background:#2a1515;border:1px solid #5a2020;border-radius:8px;color:#f87171;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;">×</button>' +
       '</div>';
     if (hasShots) {
+      html += '<div style="padding:4px 0 0;"><button onclick="toggleDispersion(\'' + safe + '\')" ' +
+        'style="width:100%;height:28px;background:#2d2d2d;border:1px solid #444;border-radius:8px;color:#a78bfa;font-size:11px;font-weight:600;cursor:pointer;">⊕ Dispersion (' + club.shots.length + ' shots)</button></div>';
       html += '<div id="disp_' + club.name + '" style="display:none;margin-top:8px;">' +
         '<canvas id="dispCanvas_' + club.name + '" width="300" height="300" style="width:100%;border-radius:8px;display:block;"></canvas>' +
         '</div>';
@@ -15504,6 +15554,251 @@ function processBagImportRows(rows) {
   msg.style.color = '#4ade80';
   msg.textContent = count + ' clubs imported!' + (hasRollData ? ' (carry + total data)' : '');
   setTimeout(function() { msg.textContent = ''; }, 3000);
+}
+
+// ─── BAG TABS ──────────────────────────────────────────────────────────────
+var _currentBagTab = 'myBag';
+function setBagTab(tab) {
+  _currentBagTab = tab;
+  var tabMyBag = document.getElementById('bagTabMyBag');
+  var tabFY = document.getElementById('bagTabFindYardages');
+  var contentMyBag = document.getElementById('bagTabContentMyBag');
+  var contentFY = document.getElementById('bagTabContentFindYardages');
+  if (tab === 'myBag') {
+    tabMyBag.style.background = '#7c3aed'; tabMyBag.style.color = '#fff';
+    tabFY.style.background = 'transparent'; tabFY.style.color = '#888';
+    contentMyBag.style.display = 'flex'; contentFY.style.display = 'none';
+    renderBagClubs();
+  } else {
+    tabMyBag.style.background = 'transparent'; tabMyBag.style.color = '#888';
+    tabFY.style.background = '#7c3aed'; tabFY.style.color = '#fff';
+    contentMyBag.style.display = 'none'; contentFY.style.display = 'flex';
+    fyShowStep1();
+  }
+}
+
+// ─── FIND YARDAGES ─────────────────────────────────────────────────────────
+var _fySelectedClub = null;
+var _fyShotCount = 5;
+var _fyPendingShots = null; // stored temporarily for conflict resolution
+
+function fyShowStep1() {
+  document.getElementById('fyStep1').style.display = '';
+  document.getElementById('fyStep2').style.display = 'none';
+  document.getElementById('fyStep3').style.display = 'none';
+  fyRenderClubGrid();
+  fyPopulateNewClubDropdown();
+}
+
+function fyBackToStep1() {
+  _fySelectedClub = null;
+  fyShowStep1();
+}
+
+function fyBackToStep2() {
+  document.getElementById('fyStep2').style.display = '';
+  document.getElementById('fyStep3').style.display = 'none';
+  fyRenderShotCountBtns();
+}
+
+function fyRenderClubGrid() {
+  var clubs = getBagClubs();
+  var grid = document.getElementById('fyClubGrid');
+  if (!grid) return;
+  if (clubs.length === 0) {
+    grid.innerHTML = '<div style="color:#555;font-size:13px;width:100%;text-align:center;padding:8px 0;">No clubs in bag yet. Add one below.</div>';
+    return;
+  }
+  grid.innerHTML = clubs.map(function(c) {
+    var safe = c.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return '<button onclick="fySelectClub(\'' + safe + '\')" style="padding:8px 14px;background:#222;border:1px solid #444;border-radius:10px;color:#e2e8f0;font-size:13px;font-weight:700;cursor:pointer;">' + c.name + '</button>';
+  }).join('');
+}
+
+function fyPopulateNewClubDropdown() {
+  var sel = document.getElementById('fyNewClubSelect');
+  if (!sel) return;
+  var clubs = getBagClubs();
+  var inBag = {};
+  clubs.forEach(function(c) { inBag[c.name.toLowerCase()] = true; });
+  var opts = '<option value="" disabled selected>Select a club...</option>';
+  _BAG_ORDER.forEach(function(name) {
+    if (!inBag[name.toLowerCase()]) {
+      opts += '<option value="' + name + '">' + name + '</option>';
+    }
+  });
+  sel.innerHTML = opts;
+}
+
+function fyPickNewClub() {
+  var sel = document.getElementById('fyNewClubSelect');
+  var name = sel ? sel.value : '';
+  if (!name) return;
+  // Add to bag first
+  var clubs = getBagClubs();
+  if (!clubs.some(function(c) { return c.name.toLowerCase() === name.toLowerCase(); })) {
+    clubs.push({ name: name, carry: null, total: null });
+    saveBagClubs(sortBagClubs(clubs));
+  }
+  fySelectClub(name);
+}
+
+function fySelectClub(name) {
+  _fySelectedClub = name;
+  document.getElementById('fySelectedClubName').textContent = name;
+  document.getElementById('fyStep1').style.display = 'none';
+  document.getElementById('fyStep2').style.display = '';
+  document.getElementById('fyStep3').style.display = 'none';
+  fyRenderShotCountBtns();
+}
+
+function fyRenderShotCountBtns() {
+  var container = document.getElementById('fyShotCountBtns');
+  if (!container) return;
+  var counts = [3, 5, 10, 15, 20];
+  container.innerHTML = counts.map(function(n) {
+    var active = n === _fyShotCount;
+    return '<button onclick="fyPickShotCount(' + n + ')" style="width:52px;height:44px;font-size:16px;font-weight:800;border-radius:10px;border:2px solid ' +
+      (active ? '#7c3aed' : '#444') + ';background:' + (active ? '#7c3aed' : '#222') + ';color:' +
+      (active ? '#fff' : '#aaa') + ';cursor:pointer;">' + n + '</button>';
+  }).join('');
+  container.innerHTML += '<button onclick="fyGoToStep3()" style="width:100%;height:42px;margin-top:8px;background:#166534;border:none;border-radius:10px;color:#4ade80;font-size:14px;font-weight:700;cursor:pointer;">Enter Shots →</button>';
+}
+
+function fyPickShotCount(n) {
+  _fyShotCount = n;
+  fyRenderShotCountBtns();
+}
+
+function fyGoToStep3() {
+  document.getElementById('fyStep2').style.display = 'none';
+  document.getElementById('fyStep3').style.display = '';
+  document.getElementById('fyStep3ClubName').textContent = _fySelectedClub;
+  fyRenderShotInputs();
+}
+
+function fyRenderShotInputs() {
+  var container = document.getElementById('fyShotInputs');
+  if (!container) return;
+  var html = '';
+  for (var i = 0; i < _fyShotCount; i++) {
+    html += '<div style="display:grid;grid-template-columns:28px 1fr 1fr;gap:6px;align-items:center;">' +
+      '<div style="font-size:12px;color:#666;font-weight:700;text-align:center;">' + (i + 1) + '</div>' +
+      '<input type="number" id="fyCarry_' + i + '" placeholder="Carry" min="0" max="400" style="height:38px;font-size:14px;font-weight:700;text-align:center;background:#222;border:1px solid #333;border-radius:8px;color:#fff;width:100%;box-sizing:border-box;">' +
+      '<input type="number" id="fyTotal_' + i + '" placeholder="Total" min="0" max="450" style="height:38px;font-size:14px;font-weight:700;text-align:center;background:#222;border:1px solid #333;border-radius:8px;color:#fff;width:100%;box-sizing:border-box;">' +
+      '</div>';
+  }
+  container.innerHTML = html;
+  document.getElementById('fyMsg').textContent = '';
+}
+
+function fySaveShots() {
+  var msg = document.getElementById('fyMsg');
+  // Gather shot data
+  var newShots = [];
+  for (var i = 0; i < _fyShotCount; i++) {
+    var cEl = document.getElementById('fyCarry_' + i);
+    var tEl = document.getElementById('fyTotal_' + i);
+    var c = cEl && cEl.value !== '' ? parseInt(cEl.value) : null;
+    var t = tEl && tEl.value !== '' ? parseInt(tEl.value) : null;
+    if (c !== null || t !== null) {
+      newShots.push({ total: c || t, side: 0, target: c || t });
+      // If total is provided and different from carry, track total shots too
+    }
+  }
+  if (newShots.length === 0) {
+    msg.style.color = '#f87171'; msg.textContent = 'Enter at least one shot.';
+    return;
+  }
+
+  // Build carry and total arrays from inputs
+  var newCarryShots = [];
+  var newTotalShots = [];
+  for (var j = 0; j < _fyShotCount; j++) {
+    var cEl2 = document.getElementById('fyCarry_' + j);
+    var tEl2 = document.getElementById('fyTotal_' + j);
+    var cv = cEl2 && cEl2.value !== '' ? parseInt(cEl2.value) : null;
+    var tv = tEl2 && tEl2.value !== '' ? parseInt(tEl2.value) : null;
+    if (cv !== null) {
+      newCarryShots.push({ total: cv, side: 0, target: cv });
+    }
+    if (tv !== null) {
+      newTotalShots.push({ total: tv, side: 0, target: tv });
+    }
+  }
+
+  if (newCarryShots.length === 0 && newTotalShots.length === 0) {
+    msg.style.color = '#f87171'; msg.textContent = 'Enter at least one shot.';
+    return;
+  }
+
+  // Check if club already has shot data
+  var clubs = getBagClubs();
+  var club = clubs.find(function(c) { return c.name === _fySelectedClub; });
+  if (club && club.shots && club.shots.length > 0) {
+    // Store pending data and show conflict modal
+    _fyPendingShots = { carry: newCarryShots, total: newTotalShots };
+    var modal = document.getElementById('fyConflictModal');
+    document.getElementById('fyConflictMsg').textContent =
+      _fySelectedClub + ' already has ' + club.shots.length + ' shot(s). Do you want to add your ' +
+      newCarryShots.length + ' new shot(s) to the existing data, or replace it entirely?';
+    modal.style.display = 'flex';
+    return;
+  }
+
+  // No existing data — just save
+  fyApplyShots(newCarryShots, newTotalShots, 'replace');
+}
+
+function fyResolveConflict(action) {
+  document.getElementById('fyConflictModal').style.display = 'none';
+  if (action === 'cancel') { _fyPendingShots = null; return; }
+  if (_fyPendingShots) {
+    fyApplyShots(_fyPendingShots.carry, _fyPendingShots.total, action);
+    _fyPendingShots = null;
+  }
+}
+
+function fyApplyShots(newCarryShots, newTotalShots, mode) {
+  var clubs = getBagClubs();
+  var club = clubs.find(function(c) { return c.name === _fySelectedClub; });
+  if (!club) {
+    club = { name: _fySelectedClub, carry: null, total: null };
+    clubs.push(club);
+  }
+
+  if (mode === 'add') {
+    club.shots = (club.shots || []).concat(newCarryShots);
+    if (newTotalShots.length > 0) {
+      club.totalShots = (club.totalShots || []).concat(newTotalShots);
+    }
+  } else {
+    club.shots = newCarryShots;
+    club.totalShots = newTotalShots.length > 0 ? newTotalShots : null;
+  }
+
+  // Compute averages from all shots
+  var allCarry = club.shots || [];
+  var allTotal = club.totalShots || [];
+  if (allCarry.length > 0) {
+    club.carry = Math.round(allCarry.reduce(function(s, v) { return s + v.total; }, 0) / allCarry.length);
+  }
+  if (allTotal.length > 0) {
+    club.total = Math.round(allTotal.reduce(function(s, v) { return s + v.total; }, 0) / allTotal.length);
+  } else if (allCarry.length > 0) {
+    club.total = club.carry;
+  }
+
+  saveBagClubs(sortBagClubs(clubs));
+
+  var msg = document.getElementById('fyMsg');
+  msg.style.color = '#4ade80';
+  msg.textContent = 'Saved! ' + _fySelectedClub + ': ' + (club.carry || '—') + ' carry / ' + (club.total || '—') + ' total';
+
+  // Go back to step 1 after a short delay
+  setTimeout(function() {
+    fyShowStep1();
+  }, 1800);
 }
 
 function toggleDispersion(clubName) {
