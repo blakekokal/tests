@@ -1616,10 +1616,11 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
   </div>
 
   <!-- Tabs -->
-  <div style="display:flex;gap:0;width:100%;max-width:360px;margin-bottom:16px;background:#1a1a1a;border-radius:12px;overflow:hidden;border:1px solid #333;">
-    <button id="bagTabMyBag" onclick="setBagTab('myBag')" style="flex:1;height:40px;font-size:12px;font-weight:700;border:none;cursor:pointer;transition:all 0.2s;background:#7c3aed;color:#fff;">My Bag</button>
-    <button id="bagTabFindYardages" onclick="setBagTab('findYardages')" style="flex:1;height:40px;font-size:12px;font-weight:700;border:none;cursor:pointer;transition:all 0.2s;background:transparent;color:#888;">Find Yardages</button>
-    <button id="bagTabWedgeGap" onclick="setBagTab('wedgeGap')" style="flex:1;height:40px;font-size:12px;font-weight:700;border:none;cursor:pointer;transition:all 0.2s;background:transparent;color:#888;">Wedge Gapping</button>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);width:100%;max-width:360px;margin-bottom:16px;background:#1a1a1a;border-radius:12px;overflow:hidden;border:1px solid #333;">
+    <button id="bagTabMyBag" onclick="setBagTab('myBag')" style="height:40px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:#7c3aed;color:#fff;padding:0 2px;">My Bag</button>
+    <button id="bagTabFindYardages" onclick="setBagTab('findYardages')" style="height:40px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:transparent;color:#888;padding:0 2px;">Find Yardages</button>
+    <button id="bagTabWedgeGap" onclick="setBagTab('wedgeGap')" style="height:40px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:transparent;color:#888;padding:0 2px;">Wedge Gapping</button>
+    <button id="bagTabSpeed" onclick="setBagTab('speed')" style="height:40px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:transparent;color:#888;padding:0 2px;">Speed</button>
   </div>
 
   <!-- TAB 1: MY BAG -->
@@ -1693,12 +1694,11 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
           <div style="width:32px;"></div>
         </div>
         <div style="font-size:12px;font-weight:700;color:#a78bfa;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Enter Carry & Total for each shot</div>
-        <div style="display:grid;grid-template-columns:22px 1fr 60px 1fr 60px;gap:4px;align-items:center;margin-bottom:4px;">
+        <div style="display:grid;grid-template-columns:22px 1fr 1fr 70px;gap:4px;align-items:center;margin-bottom:4px;">
           <div></div>
           <div style="font-size:10px;color:#666;font-weight:600;text-align:center;">CARRY</div>
-          <div style="font-size:10px;color:#4ade80;font-weight:600;text-align:center;">L/R</div>
           <div style="font-size:10px;color:#666;font-weight:600;text-align:center;">TOTAL</div>
-          <div style="font-size:10px;color:#4ade80;font-weight:600;text-align:center;">L/R</div>
+          <div style="font-size:10px;color:#4ade80;font-weight:600;text-align:center;">OFFLINE</div>
         </div>
         <div id="fyShotInputs" style="display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto;margin-bottom:12px;"></div>
         <button onclick="fySaveShots()" style="width:100%;height:42px;background:#166534;border:none;border-radius:10px;color:#4ade80;font-size:14px;font-weight:700;cursor:pointer;">Save Yardages</button>
@@ -1713,6 +1713,86 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
       <div style="font-size:36px;margin-bottom:12px;">⛳</div>
       <div style="font-size:18px;font-weight:800;color:#e2e8f0;margin-bottom:8px;">Wedge Gapping</div>
       <div style="font-size:13px;color:#555;font-weight:600;letter-spacing:1px;text-transform:uppercase;">Coming Soon</div>
+    </div>
+  </div>
+
+  <!-- TAB 4: SPEED -->
+  <div id="bagTabContentSpeed" style="width:100%;display:none;flex-direction:column;align-items:center;">
+
+    <!-- History view (default) -->
+    <div id="spHistoryView" style="width:100%;max-width:360px;">
+      <button onclick="spStartNewSession()" style="width:100%;height:44px;background:#7c3aed;border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:14px;">+ New Speed Session</button>
+
+      <!-- Filters -->
+      <div style="background:#1a1a1a;border-radius:12px;padding:12px;margin-bottom:12px;">
+        <div style="font-size:11px;color:#666;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Filter</div>
+        <div style="font-size:11px;color:#888;margin-bottom:4px;">Club</div>
+        <div id="spClubFilterBtns" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;"></div>
+        <div style="font-size:11px;color:#888;margin-bottom:4px;">Date Range</div>
+        <div id="spDateFilterBtns" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+      </div>
+
+      <!-- Summary averages -->
+      <div id="spSummaryCard" style="background:#1a1a1a;border-radius:12px;padding:12px;margin-bottom:12px;display:none;">
+        <div style="font-size:11px;color:#a78bfa;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Filtered Averages</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;" id="spSummaryGrid"></div>
+      </div>
+
+      <!-- Session list -->
+      <div id="spSessionList" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+
+    <!-- Entry flow -->
+    <div id="spEntryView" style="width:100%;max-width:360px;display:none;">
+      <!-- Step 1: Select club -->
+      <div id="spStep1">
+        <div style="background:#1a1a1a;border-radius:14px;padding:16px;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <button onclick="spCancelEntry()" style="background:#333;border:none;color:#fff;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;flex-shrink:0;">←</button>
+            <div style="font-size:15px;font-weight:800;color:#e2e8f0;">Select a Club</div>
+          </div>
+          <div id="spClubGrid" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"></div>
+          <div style="font-size:11px;color:#555;margin-bottom:8px;text-align:center;">— or add a new club —</div>
+          <select id="spNewClubSelect" style="width:100%;height:40px;font-size:14px;text-align:center;box-sizing:border-box;background:#222;color:#fff;border:1px solid #444;border-radius:8px;-webkit-appearance:none;appearance:none;">
+            <option value="" disabled selected>Select a club...</option>
+          </select>
+          <button onclick="spPickNewClub()" style="width:100%;height:38px;background:#7c3aed;border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;margin-top:8px;">+ Add & Select</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Shot count -->
+      <div id="spStep2" style="display:none;">
+        <div style="background:#1a1a1a;border-radius:14px;padding:16px;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <button onclick="spBackToStep1()" style="background:#333;border:none;color:#fff;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;">←</button>
+            <div style="font-size:16px;font-weight:800;color:#e2e8f0;" id="spSelectedClubLabel"></div>
+            <div style="width:32px;"></div>
+          </div>
+          <div style="font-size:12px;font-weight:700;color:#a78bfa;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">How many swings?</div>
+          <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;" id="spShotCountBtns"></div>
+        </div>
+      </div>
+
+      <!-- Step 3: Enter shots -->
+      <div id="spStep3" style="display:none;">
+        <div style="background:#1a1a1a;border-radius:14px;padding:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <button onclick="spBackToStep2()" style="background:#333;border:none;color:#fff;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;">←</button>
+            <div style="font-size:15px;font-weight:800;color:#e2e8f0;" id="spStep3ClubLabel"></div>
+            <div style="width:32px;"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:20px 1fr 1fr 1fr 1fr;gap:4px;align-items:center;margin-bottom:6px;">
+            <div></div>
+            <div style="font-size:9px;color:#f59e0b;font-weight:700;text-align:center;">CLB SPD</div>
+            <div style="font-size:9px;color:#60a5fa;font-weight:700;text-align:center;">BALL SPD</div>
+            <div style="font-size:9px;color:#666;font-weight:700;text-align:center;">CARRY</div>
+            <div style="font-size:9px;color:#666;font-weight:700;text-align:center;">TOTAL</div>
+          </div>
+          <div id="spShotInputs" style="display:flex;flex-direction:column;gap:5px;max-height:320px;overflow-y:auto;margin-bottom:12px;"></div>
+          <button onclick="spSaveSession()" style="width:100%;height:42px;background:#166534;border:none;border-radius:10px;color:#4ade80;font-size:14px;font-weight:700;cursor:pointer;">Save Session</button>
+          <div id="spMsg" style="font-size:12px;min-height:16px;text-align:center;margin-top:6px;color:#4ade80;"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -15572,8 +15652,8 @@ function processBagImportRows(rows) {
 var _currentBagTab = 'myBag';
 function setBagTab(tab) {
   _currentBagTab = tab;
-  var tabs = { myBag: 'bagTabMyBag', findYardages: 'bagTabFindYardages', wedgeGap: 'bagTabWedgeGap' };
-  var contents = { myBag: 'bagTabContentMyBag', findYardages: 'bagTabContentFindYardages', wedgeGap: 'bagTabContentWedgeGap' };
+  var tabs = { myBag: 'bagTabMyBag', findYardages: 'bagTabFindYardages', wedgeGap: 'bagTabWedgeGap', speed: 'bagTabSpeed' };
+  var contents = { myBag: 'bagTabContentMyBag', findYardages: 'bagTabContentFindYardages', wedgeGap: 'bagTabContentWedgeGap', speed: 'bagTabContentSpeed' };
   Object.keys(tabs).forEach(function(key) {
     var btn = document.getElementById(tabs[key]);
     var cont = document.getElementById(contents[key]);
@@ -15582,6 +15662,11 @@ function setBagTab(tab) {
   });
   if (tab === 'myBag') renderBagClubs();
   if (tab === 'findYardages') fyShowStep1();
+  if (tab === 'speed') {
+    document.getElementById('spHistoryView').style.display = '';
+    document.getElementById('spEntryView').style.display = 'none';
+    renderSpeedTab();
+  }
 }
 
 // ─── FIND YARDAGES ─────────────────────────────────────────────────────────
@@ -15691,12 +15776,11 @@ function fyRenderShotInputs() {
   var offStyle = 'height:36px;font-size:12px;font-weight:700;text-align:center;background:#181f18;border:1px solid #2a3a2a;border-radius:8px;color:#4ade80;width:100%;box-sizing:border-box;';
   var html = '';
   for (var i = 0; i < _fyShotCount; i++) {
-    html += '<div style="display:grid;grid-template-columns:22px 1fr 60px 1fr 60px;gap:4px;align-items:center;">' +
+    html += '<div style="display:grid;grid-template-columns:22px 1fr 1fr 70px;gap:4px;align-items:center;">' +
       '<div style="font-size:11px;color:#555;font-weight:700;text-align:center;">' + (i + 1) + '</div>' +
       '<input type="number" id="fyCarry_' + i + '" placeholder="—" min="0" max="400" style="' + distStyle + '">' +
-      '<input type="number" id="fyCarryOff_' + i + '" placeholder="0" min="-99" max="99" style="' + offStyle + '">' +
       '<input type="number" id="fyTotal_' + i + '" placeholder="—" min="0" max="450" style="' + distStyle + '">' +
-      '<input type="number" id="fyTotalOff_' + i + '" placeholder="auto" min="-99" max="99" style="' + offStyle + '">' +
+      '<input type="number" id="fyTotalOff_' + i + '" placeholder="0" min="-99" max="99" style="' + offStyle + '">' +
       '</div>';
   }
   container.innerHTML = html;
@@ -15709,26 +15793,21 @@ function fySaveShots() {
   var newTotalShots = [];
 
   for (var i = 0; i < _fyShotCount; i++) {
-    var cv = document.getElementById('fyCarry_' + i);
-    var tv = document.getElementById('fyTotal_' + i);
-    var coEl = document.getElementById('fyCarryOff_' + i);
-    var toEl = document.getElementById('fyTotalOff_' + i);
+    var carry = (function(el){ return el && el.value !== '' ? parseInt(el.value) : null; })(document.getElementById('fyCarry_' + i));
+    var total = (function(el){ return el && el.value !== '' ? parseInt(el.value) : null; })(document.getElementById('fyTotal_' + i));
+    var totalOff = (function(el){ return el && el.value !== '' ? parseFloat(el.value) : null; })(document.getElementById('fyTotalOff_' + i));
 
-    var carry = cv && cv.value !== '' ? parseInt(cv.value) : null;
-    var total = tv && tv.value !== '' ? parseInt(tv.value) : null;
-    var carryOff = coEl && coEl.value !== '' ? parseFloat(coEl.value) : null;
-    var totalOff = toEl && toEl.value !== '' ? parseFloat(toEl.value) : null;
-
-    // Interpolate total offline from carry offline angle if total offline is blank
-    if (carry !== null && total !== null && carryOff !== null && totalOff === null) {
-      totalOff = Math.round(carryOff * (total / carry) * 10) / 10;
+    // User enters total offline; interpolate carry offline from same angle
+    var carryOff = null;
+    if (totalOff !== null && total !== null && total > 0 && carry !== null) {
+      carryOff = Math.round(totalOff * (carry / total) * 10) / 10;
     }
 
     if (carry !== null) {
-      newCarryShots.push({ total: carry, side: carryOff || 0, target: carry });
+      newCarryShots.push({ total: carry, side: carryOff !== null ? carryOff : 0, target: carry });
     }
     if (total !== null) {
-      newTotalShots.push({ total: total, side: totalOff || 0, target: total });
+      newTotalShots.push({ total: total, side: totalOff !== null ? totalOff : 0, target: total });
     }
   }
 
@@ -15804,6 +15883,320 @@ function fyApplyShots(newCarryShots, newTotalShots, mode) {
   setTimeout(function() {
     fyShowStep1();
   }, 1800);
+}
+
+// ─── SPEED TAB ──────────────────────────────────────────────────────────────
+var _SPEED_KEY = 'speedSessions_v1';
+var _spSelectedClub = null;
+var _spShotCount = 5;
+var _spClubFilter = 'all';
+var _spDateFilter = 'all';
+
+function getSpeedSessions() {
+  try { return JSON.parse(localStorage.getItem(_SPEED_KEY)) || []; } catch(e) { return []; }
+}
+function saveSpeedSessions(s) { localStorage.setItem(_SPEED_KEY, JSON.stringify(s)); }
+
+function spClubGroup(name) {
+  var n = (name || '').toLowerCase();
+  if (n === 'dr' || n === 'dr2') return 'driver';
+  if (/^\d+w$/.test(n)) return 'woods';
+  if (/hy$/.test(n)) return 'hybrids';
+  if (/^\d+i$/.test(n)) return 'irons';
+  return 'wedges';
+}
+
+function spFilteredSessions() {
+  var sessions = getSpeedSessions();
+  var now = new Date();
+  return sessions.filter(function(s) {
+    // Club filter
+    if (_spClubFilter !== 'all') {
+      if (_spClubFilter === 'driver' && spClubGroup(s.club) !== 'driver') return false;
+      if (_spClubFilter === 'woods'  && spClubGroup(s.club) !== 'woods')  return false;
+      if (_spClubFilter === 'hybrids'&& spClubGroup(s.club) !== 'hybrids')return false;
+      if (_spClubFilter === 'irons'  && spClubGroup(s.club) !== 'irons')  return false;
+      if (_spClubFilter === 'wedges' && spClubGroup(s.club) !== 'wedges') return false;
+    }
+    // Date filter
+    if (_spDateFilter !== 'all') {
+      var days = { '30d': 30, '3mo': 90, '6mo': 180, '1yr': 365 }[_spDateFilter];
+      var cutoff = new Date(now); cutoff.setDate(cutoff.getDate() - days);
+      if (new Date(s.date) < cutoff) return false;
+    }
+    return true;
+  }).sort(function(a,b){ return new Date(b.date) - new Date(a.date); });
+}
+
+function spAvg(arr, key) {
+  var vals = arr.filter(function(v){ return v[key] != null; });
+  if (!vals.length) return null;
+  return Math.round(vals.reduce(function(s,v){ return s + v[key]; }, 0) / vals.length * 10) / 10;
+}
+
+function spTrend(sessions, key) {
+  if (sessions.length < 2) return '';
+  var half = Math.ceil(sessions.length / 2);
+  var recent = sessions.slice(0, half);
+  var older  = sessions.slice(half);
+  var r = spAvg(recent, key), o = spAvg(older, key);
+  if (r == null || o == null) return '';
+  var diff = Math.round((r - o) * 10) / 10;
+  if (Math.abs(diff) < 0.5) return '<span style="color:#888;font-size:10px;"> →</span>';
+  return diff > 0
+    ? '<span style="color:#4ade80;font-size:10px;"> ▲' + diff + '</span>'
+    : '<span style="color:#f87171;font-size:10px;"> ▼' + Math.abs(diff) + '</span>';
+}
+
+function renderSpeedTab() {
+  // Render filter buttons
+  var clubFilters = [
+    { key: 'all', label: 'All' },
+    { key: 'driver',  label: 'Driver' },
+    { key: 'woods',   label: 'Woods' },
+    { key: 'hybrids', label: 'Hybrids' },
+    { key: 'irons',   label: 'Irons' },
+    { key: 'wedges',  label: 'Wedges' }
+  ];
+  var dateFilters = [
+    { key: '30d',  label: '30 Days' },
+    { key: '3mo',  label: '3 Months' },
+    { key: '6mo',  label: '6 Months' },
+    { key: '1yr',  label: '1 Year' },
+    { key: 'all',  label: 'All Time' }
+  ];
+  function filterBtn(arr, current, onclick) {
+    return arr.map(function(f) {
+      var active = f.key === current;
+      return '<button onclick="' + onclick + '(\'' + f.key + '\')" style="padding:5px 10px;font-size:11px;font-weight:700;border-radius:8px;border:1px solid ' +
+        (active ? '#7c3aed' : '#333') + ';background:' + (active ? '#7c3aed' : '#1a1a1a') + ';color:' +
+        (active ? '#fff' : '#888') + ';cursor:pointer;">' + f.label + '</button>';
+    }).join('');
+  }
+  var cb = document.getElementById('spClubFilterBtns');
+  var db = document.getElementById('spDateFilterBtns');
+  if (cb) cb.innerHTML = filterBtn(clubFilters, _spClubFilter, 'spSetClubFilter');
+  if (db) db.innerHTML = filterBtn(dateFilters, _spDateFilter, 'spSetDateFilter');
+
+  var filtered = spFilteredSessions();
+
+  // Summary card
+  var summary = document.getElementById('spSummaryCard');
+  var grid = document.getElementById('spSummaryGrid');
+  if (filtered.length === 0) {
+    if (summary) summary.style.display = 'none';
+  } else {
+    if (summary) summary.style.display = 'block';
+    var metrics = [
+      { key: 'avgClubSpeed', label: 'Club Spd', color: '#f59e0b' },
+      { key: 'avgBallSpeed', label: 'Ball Spd', color: '#60a5fa' },
+      { key: 'avgCarry',     label: 'Carry',    color: '#e2e8f0' },
+      { key: 'avgTotal',     label: 'Total',    color: '#e2e8f0' }
+    ];
+    if (grid) grid.innerHTML = metrics.map(function(m) {
+      var val = spAvg(filtered, m.key);
+      return '<div style="text-align:center;background:#222;border-radius:8px;padding:8px 4px;">' +
+        '<div style="font-size:9px;color:#666;font-weight:600;margin-bottom:3px;">' + m.label + '</div>' +
+        '<div style="font-size:16px;font-weight:800;color:' + m.color + ';">' + (val !== null ? val : '—') + '</div>' +
+        spTrend(filtered, m.key) +
+        '</div>';
+    }).join('');
+  }
+
+  // Session list
+  var list = document.getElementById('spSessionList');
+  if (!list) return;
+  if (filtered.length === 0) {
+    list.innerHTML = '<div style="background:#1a1a1a;border-radius:12px;padding:24px;text-align:center;color:#555;font-size:13px;">' +
+      (getSpeedSessions().length === 0 ? 'No sessions yet. Tap + New Speed Session to start.' : 'No sessions match your filters.') + '</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(function(s) {
+    var d = new Date(s.date + 'T12:00:00');
+    var dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    return '<div style="background:#1a1a1a;border-radius:12px;padding:12px;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
+        '<div style="font-size:14px;font-weight:800;color:#e2e8f0;">' + s.club + '</div>' +
+        '<div style="display:flex;align-items:center;gap:8px;">' +
+          '<div style="font-size:11px;color:#555;">' + dateStr + ' · ' + s.shots.length + ' swings</div>' +
+          '<button onclick="spDeleteSession(\'' + s.id + '\')" style="background:#2a1515;border:1px solid #5a2020;border-radius:6px;color:#f87171;font-size:13px;cursor:pointer;width:26px;height:26px;padding:0;display:flex;align-items:center;justify-content:center;">×</button>' +
+        '</div>' +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;">' +
+        spStatCell('Club Spd', s.avgClubSpeed, '#f59e0b') +
+        spStatCell('Ball Spd', s.avgBallSpeed, '#60a5fa') +
+        spStatCell('Carry',    s.avgCarry,     '#e2e8f0') +
+        spStatCell('Total',    s.avgTotal,     '#e2e8f0') +
+      '</div></div>';
+  }).join('');
+}
+
+function spStatCell(label, val, color) {
+  return '<div style="text-align:center;background:#222;border-radius:8px;padding:6px 4px;">' +
+    '<div style="font-size:9px;color:#555;font-weight:600;margin-bottom:2px;">' + label + '</div>' +
+    '<div style="font-size:15px;font-weight:800;color:' + color + ';">' + (val != null ? val : '—') + '</div>' +
+    '</div>';
+}
+
+function spSetClubFilter(key) { _spClubFilter = key; renderSpeedTab(); }
+function spSetDateFilter(key) { _spDateFilter = key; renderSpeedTab(); }
+
+function spDeleteSession(id) {
+  if (!confirm('Delete this speed session?')) return;
+  saveSpeedSessions(getSpeedSessions().filter(function(s){ return s.id !== id; }));
+  renderSpeedTab();
+}
+
+function spStartNewSession() {
+  document.getElementById('spHistoryView').style.display = 'none';
+  document.getElementById('spEntryView').style.display = '';
+  spPopulateClubGrid();
+  spPopulateNewClubDropdown();
+  document.getElementById('spStep1').style.display = '';
+  document.getElementById('spStep2').style.display = 'none';
+  document.getElementById('spStep3').style.display = 'none';
+  _spSelectedClub = null;
+}
+
+function spCancelEntry() {
+  document.getElementById('spEntryView').style.display = 'none';
+  document.getElementById('spHistoryView').style.display = '';
+  renderSpeedTab();
+}
+
+function spPopulateClubGrid() {
+  var clubs = getBagClubs();
+  var grid = document.getElementById('spClubGrid');
+  if (!grid) return;
+  if (clubs.length === 0) {
+    grid.innerHTML = '<div style="color:#555;font-size:13px;width:100%;text-align:center;padding:8px 0;">No clubs in bag yet.</div>';
+    return;
+  }
+  grid.innerHTML = clubs.map(function(c) {
+    var safe = c.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return '<button onclick="spSelectClub(\'' + safe + '\')" style="padding:8px 14px;background:#222;border:1px solid #444;border-radius:10px;color:#e2e8f0;font-size:13px;font-weight:700;cursor:pointer;">' + c.name + '</button>';
+  }).join('');
+}
+
+function spPopulateNewClubDropdown() {
+  var sel = document.getElementById('spNewClubSelect');
+  if (!sel) return;
+  var opts = '<option value="" disabled selected>Select a club...</option>';
+  _BAG_ORDER.forEach(function(name) { opts += '<option value="' + name + '">' + name + '</option>'; });
+  sel.innerHTML = opts;
+}
+
+function spPickNewClub() {
+  var sel = document.getElementById('spNewClubSelect');
+  var name = sel ? sel.value : '';
+  if (!name) return;
+  // Add to bag if not already there
+  var clubs = getBagClubs();
+  if (!clubs.some(function(c){ return c.name.toLowerCase() === name.toLowerCase(); })) {
+    clubs.push({ name: name, carry: null, total: null });
+    saveBagClubs(sortBagClubs(clubs));
+  }
+  spSelectClub(name);
+}
+
+function spSelectClub(name) {
+  _spSelectedClub = name;
+  document.getElementById('spSelectedClubLabel').textContent = name;
+  document.getElementById('spStep3ClubLabel').textContent = name;
+  document.getElementById('spStep1').style.display = 'none';
+  document.getElementById('spStep2').style.display = '';
+  spRenderShotCountBtns();
+}
+
+function spBackToStep1() {
+  _spSelectedClub = null;
+  document.getElementById('spStep2').style.display = 'none';
+  document.getElementById('spStep1').style.display = '';
+}
+
+function spRenderShotCountBtns() {
+  var container = document.getElementById('spShotCountBtns');
+  if (!container) return;
+  var counts = [3, 5, 10, 15, 20];
+  container.innerHTML = counts.map(function(n) {
+    var active = n === _spShotCount;
+    return '<button onclick="spPickShotCount(' + n + ')" style="width:52px;height:44px;font-size:16px;font-weight:800;border-radius:10px;border:2px solid ' +
+      (active ? '#7c3aed' : '#444') + ';background:' + (active ? '#7c3aed' : '#222') + ';color:' +
+      (active ? '#fff' : '#aaa') + ';cursor:pointer;">' + n + '</button>';
+  }).join('') +
+  '<button onclick="spGoToStep3()" style="width:100%;height:42px;margin-top:8px;background:#166534;border:none;border-radius:10px;color:#4ade80;font-size:14px;font-weight:700;cursor:pointer;">Enter Swings →</button>';
+}
+
+function spPickShotCount(n) { _spShotCount = n; spRenderShotCountBtns(); }
+
+function spGoToStep3() {
+  document.getElementById('spStep2').style.display = 'none';
+  document.getElementById('spStep3').style.display = '';
+  spRenderShotInputs();
+}
+
+function spBackToStep2() {
+  document.getElementById('spStep3').style.display = 'none';
+  document.getElementById('spStep2').style.display = '';
+  spRenderShotCountBtns();
+}
+
+function spRenderShotInputs() {
+  var container = document.getElementById('spShotInputs');
+  if (!container) return;
+  var s1 = 'height:34px;font-size:12px;font-weight:700;text-align:center;background:#222;border:1px solid #333;border-radius:8px;color:#fff;width:100%;box-sizing:border-box;';
+  var s2 = s1.replace('#222','#1a1a0a').replace('#333','#444400');
+  var html = '';
+  for (var i = 0; i < _spShotCount; i++) {
+    html += '<div style="display:grid;grid-template-columns:20px 1fr 1fr 1fr 1fr;gap:4px;align-items:center;">' +
+      '<div style="font-size:10px;color:#555;font-weight:700;text-align:center;">' + (i + 1) + '</div>' +
+      '<input type="number" id="spClubSpd_' + i + '" placeholder="—" min="0" max="200" style="' + s2 + 'color:#f59e0b;">' +
+      '<input type="number" id="spBallSpd_' + i + '" placeholder="—" min="0" max="250" style="' + s2 + 'color:#60a5fa;">' +
+      '<input type="number" id="spCarry_'   + i + '" placeholder="—" min="0" max="400" style="' + s1 + '">' +
+      '<input type="number" id="spTotal_'   + i + '" placeholder="—" min="0" max="450" style="' + s1 + '">' +
+      '</div>';
+  }
+  container.innerHTML = html;
+  document.getElementById('spMsg').textContent = '';
+}
+
+function spSaveSession() {
+  var msg = document.getElementById('spMsg');
+  var shots = [];
+  for (var i = 0; i < _spShotCount; i++) {
+    var cs = (function(el){ return el && el.value !== '' ? parseFloat(el.value) : null; })(document.getElementById('spClubSpd_' + i));
+    var bs = (function(el){ return el && el.value !== '' ? parseFloat(el.value) : null; })(document.getElementById('spBallSpd_' + i));
+    var ca = (function(el){ return el && el.value !== '' ? parseInt(el.value) : null; })(document.getElementById('spCarry_' + i));
+    var to = (function(el){ return el && el.value !== '' ? parseInt(el.value) : null; })(document.getElementById('spTotal_' + i));
+    if (cs !== null || bs !== null || ca !== null || to !== null) {
+      shots.push({ clubSpeed: cs, ballSpeed: bs, carry: ca, total: to });
+    }
+  }
+  if (shots.length === 0) {
+    msg.style.color = '#f87171'; msg.textContent = 'Enter at least one swing.'; return;
+  }
+  function avg(key) {
+    var vals = shots.filter(function(s){ return s[key] != null; });
+    return vals.length ? Math.round(vals.reduce(function(a,s){ return a + s[key]; }, 0) / vals.length * 10) / 10 : null;
+  }
+  var today = new Date();
+  var dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+  var session = {
+    id: Date.now().toString(),
+    date: dateStr,
+    club: _spSelectedClub,
+    shots: shots,
+    avgClubSpeed: avg('clubSpeed'),
+    avgBallSpeed: avg('ballSpeed'),
+    avgCarry:     avg('carry'),
+    avgTotal:     avg('total')
+  };
+  var sessions = getSpeedSessions();
+  sessions.push(session);
+  saveSpeedSessions(sessions);
+  msg.style.color = '#4ade80';
+  msg.textContent = 'Session saved!';
+  setTimeout(function() { spCancelEntry(); }, 1200);
 }
 
 function toggleDispersion(clubName) {
