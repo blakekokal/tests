@@ -5801,7 +5801,9 @@ async function doResetPassword() {
   msg.textContent = 'Sending reset link...';
   msg.style.color = '#888';
   
-  const { error } = await _sb.auth.resetPasswordForEmail(email);
+  const { error } = await _sb.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + window.location.pathname,
+  });
   
   if (error) {
     msg.style.color = '#f44';
