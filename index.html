@@ -1709,10 +1709,71 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
 
   <!-- TAB 3: WEDGE GAPPING -->
   <div id="bagTabContentWedgeGap" style="width:100%;display:none;flex-direction:column;align-items:center;">
-    <div style="width:100%;max-width:360px;background:#1a1a1a;border-radius:14px;padding:40px 20px;text-align:center;">
-      <div style="font-size:36px;margin-bottom:12px;">⛳</div>
-      <div style="font-size:18px;font-weight:800;color:#e2e8f0;margin-bottom:8px;">Wedge Gapping</div>
-      <div style="font-size:13px;color:#555;font-weight:600;letter-spacing:1px;text-transform:uppercase;">Coming Soon</div>
+
+    <!-- History View -->
+    <div id="wgHistoryView" style="width:100%;max-width:400px;padding:0 10px 80px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0 10px;">
+        <div style="font-size:16px;font-weight:800;color:#e2e8f0;">Wedge Gapping</div>
+        <button onclick="wgStartNew()" style="background:#7c3aed;border:none;border-radius:10px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;padding:8px 14px;">+ New Session</button>
+      </div>
+      <div id="wgSessionList"></div>
+    </div>
+
+    <!-- Entry View -->
+    <div id="wgEntryView" style="display:none;width:100%;max-width:400px;padding:0 10px 80px;">
+
+      <!-- Step 1: Club Selection -->
+      <div id="wgStep1">
+        <div style="display:flex;align-items:center;gap:8px;padding:12px 0 10px;">
+          <button onclick="wgCancelEntry()" style="background:#333;border:none;color:#fff;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;">←</button>
+          <div style="font-size:15px;font-weight:800;color:#e2e8f0;">Select Wedges</div>
+        </div>
+        <div style="font-size:11px;color:#666;margin-bottom:12px;">Pick 1–4 wedges. Brighter = in your bag.</div>
+        <div id="wgClubGrid" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;"></div>
+        <div id="wgStep1Msg" style="font-size:12px;color:#f87171;min-height:16px;margin-bottom:8px;"></div>
+        <button onclick="wgNextStep1()" style="width:100%;height:42px;background:#7c3aed;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;">Next →</button>
+      </div>
+
+      <!-- Step 2: Setup -->
+      <div id="wgStep2" style="display:none;">
+        <div style="display:flex;align-items:center;gap:8px;padding:12px 0 10px;">
+          <button onclick="wgBackToStep1()" style="background:#333;border:none;color:#fff;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;">←</button>
+          <div style="font-size:15px;font-weight:800;color:#e2e8f0;">Session Setup</div>
+        </div>
+        <div style="background:#1a1a1a;border-radius:12px;padding:14px;margin-bottom:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:8px;">Shots per swing type</div>
+          <select id="wgShotCount" style="width:100%;height:38px;background:#222;color:#fff;border:1px solid #444;border-radius:8px;font-size:14px;font-weight:700;padding:0 10px;">
+            <option value="1">1 shot</option>
+            <option value="2">2 shots</option>
+            <option value="3" selected>3 shots</option>
+            <option value="4">4 shots</option>
+            <option value="5">5 shots</option>
+          </select>
+        </div>
+        <div style="background:#1a1a1a;border-radius:12px;padding:14px;margin-bottom:14px;">
+          <div style="font-size:11px;color:#888;margin-bottom:10px;">Swing type</div>
+          <div style="display:flex;gap:8px;">
+            <button id="wgTypeBtnPercent"  onclick="wgSelectType('percent')"  style="flex:1;height:40px;background:#222;border:1px solid #444;border-radius:10px;color:#888;font-size:13px;font-weight:700;cursor:pointer;">Percent</button>
+            <button id="wgTypeBtnFraction" onclick="wgSelectType('fraction')" style="flex:1;height:40px;background:#222;border:1px solid #444;border-radius:10px;color:#888;font-size:13px;font-weight:700;cursor:pointer;">Fraction</button>
+            <button id="wgTypeBtnBody"     onclick="wgSelectType('body')"     style="flex:1;height:40px;background:#222;border:1px solid #444;border-radius:10px;color:#888;font-size:13px;font-weight:700;cursor:pointer;">Body</button>
+          </div>
+          <div id="wgSwingPreview" style="font-size:11px;color:#666;margin-top:8px;text-align:center;min-height:14px;"></div>
+        </div>
+        <div id="wgStep2Msg" style="font-size:12px;color:#f87171;min-height:16px;margin-bottom:8px;"></div>
+        <button onclick="wgNextStep2()" style="width:100%;height:42px;background:#7c3aed;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;">Next →</button>
+      </div>
+
+      <!-- Step 3: Data Entry -->
+      <div id="wgStep3" style="display:none;">
+        <div style="display:flex;align-items:center;gap:8px;padding:12px 0 10px;">
+          <button onclick="wgBackToStep2()" style="background:#333;border:none;color:#fff;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;">←</button>
+          <div style="font-size:15px;font-weight:800;color:#e2e8f0;">Enter Carry (yds)</div>
+        </div>
+        <div id="wgInputArea" style="display:flex;flex-direction:column;gap:12px;margin-bottom:14px;"></div>
+        <div id="wgStep3Msg" style="font-size:12px;min-height:16px;margin-bottom:8px;color:#f87171;"></div>
+        <button onclick="wgSaveSession()" style="width:100%;height:42px;background:#166534;border:none;border-radius:10px;color:#4ade80;font-size:14px;font-weight:700;cursor:pointer;">Save Session</button>
+      </div>
+
     </div>
   </div>
 
@@ -15362,7 +15423,7 @@ async function loadStudentPracticeSessions() {
 
 // ─── MY BAG ─────────────────────────────────────────────────────────────────
 var _BAG_KEY = 'myBag_v1';
-var _BAG_ORDER = ['Dr','Dr2','2W','3W','4W','5W','6W','7W','2HY','3HY','4HY','5HY','6HY','7HY','2I','3I','4I','5I','6I','7I','8I','9I','PW','GW','AW','SW','50','52','54','56','58','60','62'];
+var _BAG_ORDER = ['Dr','Dr2','2W','3W','4W','5W','6W','7W','2HY','3HY','4HY','5HY','6HY','7HY','2I','3I','4I','5I','6I','7I','8I','9I','48','PW','GW','AW','SW','50','52','54','56','58','60','62','LW'];
 
 function getBagClubs() {
   try { return JSON.parse(localStorage.getItem(_BAG_KEY)) || []; }
@@ -15677,6 +15738,11 @@ function setBagTab(tab) {
   });
   if (tab === 'myBag') renderBagClubs();
   if (tab === 'findYardages') fyShowStep1();
+  if (tab === 'wedgeGap') {
+    document.getElementById('wgHistoryView').style.display = '';
+    document.getElementById('wgEntryView').style.display = 'none';
+    renderWgTab();
+  }
   if (tab === 'speed') {
     document.getElementById('spHistoryView').style.display = '';
     document.getElementById('spEntryView').style.display = 'none';
@@ -16195,6 +16261,234 @@ function spSaveSession() {
   msg.style.color = '#4ade80';
   msg.textContent = 'Session saved!';
   setTimeout(function() { spCancelEntry(); }, 1200);
+}
+
+// ─── WEDGE GAPPING ──────────────────────────────────────────────────────────
+var _WG_KEY = 'wedgeGap_v1';
+var WG_SWINGS = {
+  percent:  ['Full', '75%', '50%'],
+  fraction: ['Full', '3/4', '1/2'],
+  body:     ['Full', 'Ears', 'Shoulders', 'Ribs', 'Hips']
+};
+// All valid wedge clubs in loft order
+var WG_WEDGE_LIST = ['48','PW','GW','AW','SW','50','52','54','56','58','60','62','LW'];
+var _wgSelectedClubs = [];
+var _wgSwingType = null;
+
+function getWgSessions() { try { return JSON.parse(localStorage.getItem(_WG_KEY)) || []; } catch(e) { return []; } }
+function saveWgSessions(s) { localStorage.setItem(_WG_KEY, JSON.stringify(s)); }
+
+function renderWgTab() {
+  var list = document.getElementById('wgSessionList');
+  if (!list) return;
+  var sessions = getWgSessions();
+  if (sessions.length === 0) {
+    list.innerHTML = '<div style="background:#1a1a1a;border-radius:12px;padding:24px;text-align:center;color:#555;font-size:13px;">No sessions yet. Tap + New Session to start.</div>';
+    return;
+  }
+  list.innerHTML = sessions.slice().reverse().map(function(s) {
+    var swingLabels = WG_SWINGS[s.swingType] || [];
+    var gridCols = '52px ' + swingLabels.map(function(){ return '1fr'; }).join(' ');
+    var d = new Date(s.date + 'T12:00:00');
+    var dateStr = d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+    var typeLabel = s.swingType === 'percent' ? 'Percent' : s.swingType === 'fraction' ? 'Fraction' : 'Body';
+    var cells = '';
+    // Header
+    cells += '<div style="font-size:9px;font-weight:700;color:#555;padding:3px 2px;">Club</div>';
+    swingLabels.forEach(function(l) {
+      cells += '<div style="font-size:9px;font-weight:700;color:#555;text-align:center;padding:3px 2px;">' + l + '</div>';
+    });
+    // Rows
+    s.clubs.forEach(function(club) {
+      var clubData = s.results[club] || {};
+      cells += '<div style="font-size:13px;font-weight:800;color:#a78bfa;padding:4px 3px;">' + club + '</div>';
+      swingLabels.forEach(function(l, i) {
+        var entry = clubData['sw' + i];
+        var avg = entry && entry.avg != null ? entry.avg : '—';
+        cells += '<div style="font-size:13px;font-weight:700;color:#e2e8f0;text-align:center;padding:4px 3px;">' + avg + '</div>';
+      });
+    });
+    return '<div style="background:#1a1a1a;border-radius:12px;padding:12px;margin-bottom:8px;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
+        '<div style="font-size:11px;color:#555;">' + dateStr + ' · ' + s.clubs.join(', ') + ' · ' + typeLabel + '</div>' +
+        '<button onclick="wgDeleteSession(\'' + s.id + '\')" style="background:#2a1515;border:1px solid #5a2020;border-radius:6px;color:#f87171;font-size:13px;cursor:pointer;width:26px;height:26px;padding:0;display:flex;align-items:center;justify-content:center;">×</button>' +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:' + gridCols + ';gap:3px 6px;">' + cells + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function wgDeleteSession(id) {
+  if (!confirm('Delete this wedge gapping session?')) return;
+  saveWgSessions(getWgSessions().filter(function(s){ return s.id !== id; }));
+  renderWgTab();
+}
+
+function wgStartNew() {
+  _wgSelectedClubs = [];
+  _wgSwingType = null;
+  document.getElementById('wgHistoryView').style.display = 'none';
+  document.getElementById('wgEntryView').style.display = '';
+  document.getElementById('wgStep1').style.display = '';
+  document.getElementById('wgStep2').style.display = 'none';
+  document.getElementById('wgStep3').style.display = 'none';
+  document.getElementById('wgStep1Msg').textContent = '';
+  wgRenderClubGrid();
+}
+
+function wgCancelEntry() {
+  document.getElementById('wgEntryView').style.display = 'none';
+  document.getElementById('wgHistoryView').style.display = '';
+  renderWgTab();
+}
+
+function wgRenderClubGrid() {
+  var grid = document.getElementById('wgClubGrid');
+  if (!grid) return;
+  var bagNames = getBagClubs().map(function(c){ return c.name; });
+  grid.innerHTML = WG_WEDGE_LIST.map(function(w) {
+    var inBag = bagNames.indexOf(w) >= 0;
+    var selected = _wgSelectedClubs.indexOf(w) >= 0;
+    return '<button onclick="wgToggleClub(\'' + w + '\')" style="' +
+      'padding:8px 14px;font-size:13px;font-weight:700;border-radius:10px;cursor:pointer;' +
+      'background:' + (selected ? '#7c3aed' : '#222') + ';' +
+      'border:1px solid ' + (selected ? '#7c3aed' : inBag ? '#555' : '#2a2a2a') + ';' +
+      'color:' + (selected ? '#fff' : inBag ? '#e2e8f0' : '#444') + ';">' + w + '</button>';
+  }).join('');
+}
+
+function wgToggleClub(name) {
+  var idx = _wgSelectedClubs.indexOf(name);
+  if (idx >= 0) {
+    _wgSelectedClubs.splice(idx, 1);
+  } else {
+    if (_wgSelectedClubs.length >= 4) {
+      document.getElementById('wgStep1Msg').textContent = 'Max 4 wedges.';
+      return;
+    }
+    _wgSelectedClubs.push(name);
+  }
+  document.getElementById('wgStep1Msg').textContent = '';
+  wgRenderClubGrid();
+}
+
+function wgNextStep1() {
+  if (_wgSelectedClubs.length === 0) {
+    document.getElementById('wgStep1Msg').textContent = 'Select at least 1 wedge.';
+    return;
+  }
+  document.getElementById('wgStep1').style.display = 'none';
+  document.getElementById('wgStep2').style.display = '';
+  document.getElementById('wgStep2Msg').textContent = '';
+  wgUpdateTypeButtons();
+}
+
+function wgBackToStep1() {
+  document.getElementById('wgStep2').style.display = 'none';
+  document.getElementById('wgStep1').style.display = '';
+}
+
+function wgSelectType(type) {
+  _wgSwingType = type;
+  wgUpdateTypeButtons();
+}
+
+function wgUpdateTypeButtons() {
+  ['percent','fraction','body'].forEach(function(t) {
+    var btn = document.getElementById('wgTypeBtn' + t.charAt(0).toUpperCase() + t.slice(1));
+    if (!btn) return;
+    btn.style.background   = _wgSwingType === t ? '#7c3aed' : '#222';
+    btn.style.borderColor  = _wgSwingType === t ? '#7c3aed' : '#444';
+    btn.style.color        = _wgSwingType === t ? '#fff'    : '#888';
+  });
+  var preview = document.getElementById('wgSwingPreview');
+  if (preview) preview.textContent = _wgSwingType ? WG_SWINGS[_wgSwingType].join(' · ') : '';
+}
+
+function wgNextStep2() {
+  if (!_wgSwingType) {
+    document.getElementById('wgStep2Msg').textContent = 'Select a swing type.';
+    return;
+  }
+  document.getElementById('wgStep2Msg').textContent = '';
+  document.getElementById('wgStep2').style.display = 'none';
+  document.getElementById('wgStep3').style.display = '';
+  document.getElementById('wgStep3Msg').textContent = '';
+  wgRenderInputs();
+}
+
+function wgBackToStep2() {
+  document.getElementById('wgStep3').style.display = 'none';
+  document.getElementById('wgStep2').style.display = '';
+}
+
+function wgRenderInputs() {
+  var shotCount = parseInt(document.getElementById('wgShotCount').value) || 3;
+  var swings = WG_SWINGS[_wgSwingType];
+  var area = document.getElementById('wgInputArea');
+  if (!area) return;
+  area.innerHTML = _wgSelectedClubs.map(function(club) {
+    var safeClub = club.replace(/[^a-zA-Z0-9]/g, '_');
+    var blocks = swings.map(function(label, si) {
+      var inputs = '';
+      for (var i = 0; i < shotCount; i++) {
+        inputs += '<input type="number" id="wg_' + safeClub + '_' + si + '_' + i +
+          '" inputmode="decimal" placeholder="—" style="width:50px;height:34px;background:#111;border:1px solid #333;border-radius:6px;color:#e2e8f0;font-size:13px;font-weight:700;text-align:center;padding:0;">';
+      }
+      return '<div style="background:#1e1e1e;border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
+        '<div style="font-size:11px;color:#888;font-weight:700;min-width:64px;">' + label + '</div>' +
+        '<div style="display:flex;gap:5px;flex-wrap:wrap;">' + inputs + '</div>' +
+      '</div>';
+    }).join('');
+    return '<div style="background:#1a1a1a;border-radius:12px;padding:12px;">' +
+      '<div style="font-size:14px;font-weight:800;color:#a78bfa;margin-bottom:8px;">' + club + '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:6px;">' + blocks + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function wgSaveSession() {
+  var shotCount = parseInt(document.getElementById('wgShotCount').value) || 3;
+  var swings = WG_SWINGS[_wgSwingType];
+  var results = {};
+  var hasAny = false;
+  _wgSelectedClubs.forEach(function(club) {
+    var safeClub = club.replace(/[^a-zA-Z0-9]/g, '_');
+    results[club] = {};
+    swings.forEach(function(label, si) {
+      var shots = [];
+      for (var i = 0; i < shotCount; i++) {
+        var el = document.getElementById('wg_' + safeClub + '_' + si + '_' + i);
+        var val = el && el.value !== '' ? parseInt(el.value) : null;
+        if (val !== null && !isNaN(val)) { shots.push(val); hasAny = true; }
+      }
+      var avg = shots.length ? Math.round(shots.reduce(function(a,v){ return a+v; },0) / shots.length) : null;
+      results[club]['sw' + si] = { shots: shots, avg: avg };
+    });
+  });
+  if (!hasAny) {
+    var msg = document.getElementById('wgStep3Msg');
+    msg.style.color = '#f87171';
+    msg.textContent = 'Enter at least one carry distance.';
+    return;
+  }
+  var today = new Date();
+  var dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+  var session = {
+    id: Date.now().toString(),
+    date: dateStr,
+    clubs: _wgSelectedClubs.slice(),
+    swingType: _wgSwingType,
+    shotsPerSwing: shotCount,
+    results: results
+  };
+  var sessions = getWgSessions();
+  sessions.push(session);
+  saveWgSessions(sessions);
+  var msg = document.getElementById('wgStep3Msg');
+  msg.style.color = '#4ade80';
+  msg.textContent = 'Session saved!';
+  setTimeout(function() { wgCancelEntry(); }, 1200);
 }
 
 function toggleDispersion(clubName) {
