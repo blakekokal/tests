@@ -1729,7 +1729,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
           <div style="font-size:15px;font-weight:800;color:#e2e8f0;">Select Wedges</div>
         </div>
         <div style="font-size:11px;color:#666;margin-bottom:12px;">Pick 1–4 wedges. Brighter = in your bag.</div>
-        <div id="wgClubGrid" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;"></div>
+        <div id="wgClubGrid" style="width:100%;margin-bottom:14px;"></div>
         <div id="wgStep1Msg" style="font-size:12px;color:#f87171;min-height:16px;margin-bottom:8px;"></div>
         <button onclick="wgNextStep1()" style="width:100%;height:42px;background:#7c3aed;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;">Next →</button>
       </div>
@@ -16271,7 +16271,9 @@ var WG_SWINGS = {
   body:     ['Full', 'Ears', 'Shoulders', 'Ribs', 'Hips']
 };
 // All valid wedge clubs in loft order
-var WG_WEDGE_LIST = ['48','PW','GW','AW','SW','50','52','54','56','58','60','62','LW'];
+var WG_WEDGE_NAMED  = ['PW','GW','AW','SW','LW'];
+var WG_WEDGE_DEGREE = ['48','50','52','54','56','58','60','62'];
+var WG_WEDGE_LIST   = WG_WEDGE_NAMED.concat(WG_WEDGE_DEGREE);
 var _wgSelectedClubs = [];
 var _wgSwingType = null;
 
@@ -16346,15 +16348,22 @@ function wgRenderClubGrid() {
   var grid = document.getElementById('wgClubGrid');
   if (!grid) return;
   var bagNames = getBagClubs().map(function(c){ return c.name; });
-  grid.innerHTML = WG_WEDGE_LIST.map(function(w) {
+  function btn(w) {
     var inBag = bagNames.indexOf(w) >= 0;
-    var selected = _wgSelectedClubs.indexOf(w) >= 0;
+    var sel   = _wgSelectedClubs.indexOf(w) >= 0;
     return '<button onclick="wgToggleClub(\'' + w + '\')" style="' +
-      'padding:8px 14px;font-size:13px;font-weight:700;border-radius:10px;cursor:pointer;' +
-      'background:' + (selected ? '#7c3aed' : '#222') + ';' +
-      'border:1px solid ' + (selected ? '#7c3aed' : inBag ? '#555' : '#2a2a2a') + ';' +
-      'color:' + (selected ? '#fff' : inBag ? '#e2e8f0' : '#444') + ';">' + w + '</button>';
-  }).join('');
+      'flex:1;min-width:0;height:36px;font-size:12px;font-weight:700;border-radius:8px;cursor:pointer;' +
+      'background:' + (sel ? '#7c3aed' : '#222') + ';' +
+      'border:1px solid ' + (sel ? '#7c3aed' : inBag ? '#555' : '#2a2a2a') + ';' +
+      'color:' + (sel ? '#fff' : inBag ? '#e2e8f0' : '#444') + ';">' + w + '</button>';
+  }
+  grid.innerHTML =
+    '<div style="width:100%;">' +
+      '<div style="font-size:9px;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Named</div>' +
+      '<div style="display:flex;gap:6px;margin-bottom:10px;">' + WG_WEDGE_NAMED.map(btn).join('') + '</div>' +
+      '<div style="font-size:9px;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Degree</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">' + WG_WEDGE_DEGREE.map(btn).join('') + '</div>' +
+    '</div>';
 }
 
 function wgToggleClub(name) {
