@@ -5816,6 +5816,18 @@ async function doResetPassword() {
 
 // Listen for auth changes
 _sb.auth.onAuthStateChange((event, session) => {
+  if (event === 'PASSWORD_RECOVERY') {
+    currentUser = session.user;
+    updateAuthUI(true);
+    show('profilePage');
+    showProfileTab('account');
+    const pwMsg = document.getElementById('pwMsg');
+    if (pwMsg) {
+      pwMsg.style.color = '#64B5F6';
+      pwMsg.textContent = 'Enter and confirm your new password below.';
+    }
+    return;
+  }
   if (session) {
     currentUser = session.user;
     updateAuthUI(true);
