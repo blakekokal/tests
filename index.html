@@ -1724,7 +1724,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
       <button onclick="spStartNewSession()" style="width:100%;height:44px;background:#7c3aed;border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:14px;">+ New Speed Session</button>
 
       <!-- Filters -->
-      <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px;">
+      <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px;justify-content:center;">
         <select id="spClubFilterSel" onchange="spSetClubFilter(this.value)" style="background:#222;color:#fff;border:1px solid #444;border-radius:6px;padding:4px 6px;font-size:11px;">
           <option value="all">All Clubs</option>
           <option value="driver">Driver</option>
@@ -1799,6 +1799,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
             <div style="font-size:9px;color:#666;font-weight:700;text-align:center;">TOTAL</div>
           </div>
           <div id="spShotInputs" style="display:flex;flex-direction:column;gap:5px;max-height:320px;overflow-y:auto;margin-bottom:12px;"></div>
+          <textarea id="spSessionNote" placeholder="Notes (e.g. max effort, course swings, wind...)" style="width:100%;box-sizing:border-box;background:#1a1a1a;border:1px solid #333;border-radius:10px;color:#e2e8f0;font-size:12px;padding:8px 10px;resize:none;height:56px;margin-bottom:8px;font-family:inherit;"></textarea>
           <button onclick="spSaveSession()" style="width:100%;height:42px;background:#166534;border:none;border-radius:10px;color:#4ade80;font-size:14px;font-weight:700;cursor:pointer;">Save Session</button>
           <div id="spMsg" style="font-size:12px;min-height:16px;text-align:center;margin-top:6px;color:#4ade80;"></div>
         </div>
@@ -16018,7 +16019,9 @@ function renderSpeedTab() {
         spStatCell('Ball Spd', s.avgBallSpeed, '#60a5fa') +
         spStatCell('Carry',    s.avgCarry,     '#e2e8f0') +
         spStatCell('Total',    s.avgTotal,     '#e2e8f0') +
-      '</div></div>';
+      '</div>' +
+      (s.note ? '<div style="font-size:11px;color:#777;margin-top:8px;font-style:italic;">' + s.note.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>' : '') +
+      '</div>';
   }).join('');
 }
 
@@ -16050,6 +16053,8 @@ function spStartNewSession() {
 }
 
 function spCancelEntry() {
+  var noteEl = document.getElementById('spSessionNote');
+  if (noteEl) noteEl.value = '';
   document.getElementById('spEntryView').style.display = 'none';
   document.getElementById('spHistoryView').style.display = '';
   renderSpeedTab();
@@ -16172,10 +16177,12 @@ function spSaveSession() {
   }
   var today = new Date();
   var dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+  var noteEl = document.getElementById('spSessionNote');
   var session = {
     id: Date.now().toString(),
     date: dateStr,
     club: _spSelectedClub,
+    note: noteEl ? noteEl.value.trim() : '',
     shots: shots,
     avgClubSpeed: avg('clubSpeed'),
     avgBallSpeed: avg('ballSpeed'),
