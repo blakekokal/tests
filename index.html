@@ -1724,12 +1724,22 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
       <button onclick="spStartNewSession()" style="width:100%;height:44px;background:#7c3aed;border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:14px;">+ New Speed Session</button>
 
       <!-- Filters -->
-      <div style="background:#1a1a1a;border-radius:12px;padding:12px;margin-bottom:12px;">
-        <div style="font-size:11px;color:#666;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Filter</div>
-        <div style="font-size:11px;color:#888;margin-bottom:4px;">Club</div>
-        <div id="spClubFilterBtns" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;"></div>
-        <div style="font-size:11px;color:#888;margin-bottom:4px;">Date Range</div>
-        <div id="spDateFilterBtns" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px;">
+        <select id="spClubFilterSel" onchange="spSetClubFilter(this.value)" style="background:#222;color:#fff;border:1px solid #444;border-radius:6px;padding:4px 6px;font-size:11px;">
+          <option value="all">All Clubs</option>
+          <option value="driver">Driver</option>
+          <option value="woods">Woods</option>
+          <option value="hybrids">Hybrids</option>
+          <option value="irons">Irons</option>
+          <option value="wedges">Wedges</option>
+        </select>
+        <select id="spDateFilterSel" onchange="spSetDateFilter(this.value)" style="background:#222;color:#fff;border:1px solid #444;border-radius:6px;padding:4px 6px;font-size:11px;">
+          <option value="all">All Time</option>
+          <option value="1mo">Last Month</option>
+          <option value="3mo">Last 3 Months</option>
+          <option value="6mo">Last 6 Months</option>
+          <option value="1yr">Last 12 Months</option>
+        </select>
       </div>
 
       <!-- Summary averages -->
@@ -15924,7 +15934,7 @@ function spFilteredSessions() {
     }
     // Date filter
     if (_spDateFilter !== 'all') {
-      var days = { '30d': 30, '3mo': 90, '6mo': 180, '1yr': 365 }[_spDateFilter];
+      var days = { '1mo': 30, '3mo': 90, '6mo': 180, '1yr': 365 }[_spDateFilter];
       var cutoff = new Date(now); cutoff.setDate(cutoff.getDate() - days);
       if (new Date(s.date) < cutoff) return false;
     }
@@ -15953,34 +15963,11 @@ function spTrend(sessions, key) {
 }
 
 function renderSpeedTab() {
-  // Render filter buttons
-  var clubFilters = [
-    { key: 'all', label: 'All' },
-    { key: 'driver',  label: 'Driver' },
-    { key: 'woods',   label: 'Woods' },
-    { key: 'hybrids', label: 'Hybrids' },
-    { key: 'irons',   label: 'Irons' },
-    { key: 'wedges',  label: 'Wedges' }
-  ];
-  var dateFilters = [
-    { key: '30d',  label: '30 Days' },
-    { key: '3mo',  label: '3 Months' },
-    { key: '6mo',  label: '6 Months' },
-    { key: '1yr',  label: '1 Year' },
-    { key: 'all',  label: 'All Time' }
-  ];
-  function filterBtn(arr, current, onclick) {
-    return arr.map(function(f) {
-      var active = f.key === current;
-      return '<button onclick="' + onclick + '(\'' + f.key + '\')" style="padding:5px 10px;font-size:11px;font-weight:700;border-radius:8px;border:1px solid ' +
-        (active ? '#7c3aed' : '#333') + ';background:' + (active ? '#7c3aed' : '#1a1a1a') + ';color:' +
-        (active ? '#fff' : '#888') + ';cursor:pointer;">' + f.label + '</button>';
-    }).join('');
-  }
-  var cb = document.getElementById('spClubFilterBtns');
-  var db = document.getElementById('spDateFilterBtns');
-  if (cb) cb.innerHTML = filterBtn(clubFilters, _spClubFilter, 'spSetClubFilter');
-  if (db) db.innerHTML = filterBtn(dateFilters, _spDateFilter, 'spSetDateFilter');
+  // Sync select values to current filter state
+  var cs = document.getElementById('spClubFilterSel');
+  var ds = document.getElementById('spDateFilterSel');
+  if (cs) cs.value = _spClubFilter;
+  if (ds) ds.value = _spDateFilter;
 
   var filtered = spFilteredSessions();
 
