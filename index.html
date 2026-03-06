@@ -15313,7 +15313,14 @@ function addBagClub() {
 }
 
 function removeBagClub(name) {
-  saveBagClubs(getBagClubs().filter(function(c) { return c.name !== name; }));
+  var clubs = getBagClubs();
+  var club = clubs.find(function(c) { return c.name === name; });
+  var hasShots = club && ((club.shots && club.shots.length > 0) || (club.totalShots && club.totalShots.length > 0));
+  var msg = hasShots
+    ? 'Remove ' + name + ' and its ' + ((club.shots && club.shots.length) || 0) + ' shot(s) from your bag?'
+    : 'Remove ' + name + ' from your bag?';
+  if (!confirm(msg)) return;
+  saveBagClubs(clubs.filter(function(c) { return c.name !== name; }));
   renderBagClubs();
 }
 
