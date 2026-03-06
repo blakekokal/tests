@@ -1617,8 +1617,9 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
 
   <!-- Tabs -->
   <div style="display:flex;gap:0;width:100%;max-width:360px;margin-bottom:16px;background:#1a1a1a;border-radius:12px;overflow:hidden;border:1px solid #333;">
-    <button id="bagTabMyBag" onclick="setBagTab('myBag')" style="flex:1;height:40px;font-size:13px;font-weight:700;border:none;cursor:pointer;transition:all 0.2s;background:#7c3aed;color:#fff;">My Bag</button>
-    <button id="bagTabFindYardages" onclick="setBagTab('findYardages')" style="flex:1;height:40px;font-size:13px;font-weight:700;border:none;cursor:pointer;transition:all 0.2s;background:transparent;color:#888;">Find Yardages</button>
+    <button id="bagTabMyBag" onclick="setBagTab('myBag')" style="flex:1;height:40px;font-size:12px;font-weight:700;border:none;cursor:pointer;transition:all 0.2s;background:#7c3aed;color:#fff;">My Bag</button>
+    <button id="bagTabFindYardages" onclick="setBagTab('findYardages')" style="flex:1;height:40px;font-size:12px;font-weight:700;border:none;cursor:pointer;transition:all 0.2s;background:transparent;color:#888;">Find Yardages</button>
+    <button id="bagTabWedgeGap" onclick="setBagTab('wedgeGap')" style="flex:1;height:40px;font-size:12px;font-weight:700;border:none;cursor:pointer;transition:all 0.2s;background:transparent;color:#888;">Wedge Gapping</button>
   </div>
 
   <!-- TAB 1: MY BAG -->
@@ -1692,15 +1693,26 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
           <div style="width:32px;"></div>
         </div>
         <div style="font-size:12px;font-weight:700;color:#a78bfa;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Enter Carry & Total for each shot</div>
-        <div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:6px;align-items:center;margin-bottom:4px;">
-          <div style="font-size:10px;color:#666;font-weight:600;">#</div>
+        <div style="display:grid;grid-template-columns:22px 1fr 60px 1fr 60px;gap:4px;align-items:center;margin-bottom:4px;">
+          <div></div>
           <div style="font-size:10px;color:#666;font-weight:600;text-align:center;">CARRY</div>
+          <div style="font-size:10px;color:#4ade80;font-weight:600;text-align:center;">L/R</div>
           <div style="font-size:10px;color:#666;font-weight:600;text-align:center;">TOTAL</div>
+          <div style="font-size:10px;color:#4ade80;font-weight:600;text-align:center;">L/R</div>
         </div>
         <div id="fyShotInputs" style="display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto;margin-bottom:12px;"></div>
         <button onclick="fySaveShots()" style="width:100%;height:42px;background:#166534;border:none;border-radius:10px;color:#4ade80;font-size:14px;font-weight:700;cursor:pointer;">Save Yardages</button>
         <div id="fyMsg" style="font-size:12px;min-height:16px;text-align:center;margin-top:6px;color:#4ade80;"></div>
       </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: WEDGE GAPPING -->
+  <div id="bagTabContentWedgeGap" style="width:100%;display:none;flex-direction:column;align-items:center;">
+    <div style="width:100%;max-width:360px;background:#1a1a1a;border-radius:14px;padding:40px 20px;text-align:center;">
+      <div style="font-size:36px;margin-bottom:12px;">⛳</div>
+      <div style="font-size:18px;font-weight:800;color:#e2e8f0;margin-bottom:8px;">Wedge Gapping</div>
+      <div style="font-size:13px;color:#555;font-weight:600;letter-spacing:1px;text-transform:uppercase;">Coming Soon</div>
     </div>
   </div>
 
@@ -15560,21 +15572,16 @@ function processBagImportRows(rows) {
 var _currentBagTab = 'myBag';
 function setBagTab(tab) {
   _currentBagTab = tab;
-  var tabMyBag = document.getElementById('bagTabMyBag');
-  var tabFY = document.getElementById('bagTabFindYardages');
-  var contentMyBag = document.getElementById('bagTabContentMyBag');
-  var contentFY = document.getElementById('bagTabContentFindYardages');
-  if (tab === 'myBag') {
-    tabMyBag.style.background = '#7c3aed'; tabMyBag.style.color = '#fff';
-    tabFY.style.background = 'transparent'; tabFY.style.color = '#888';
-    contentMyBag.style.display = 'flex'; contentFY.style.display = 'none';
-    renderBagClubs();
-  } else {
-    tabMyBag.style.background = 'transparent'; tabMyBag.style.color = '#888';
-    tabFY.style.background = '#7c3aed'; tabFY.style.color = '#fff';
-    contentMyBag.style.display = 'none'; contentFY.style.display = 'flex';
-    fyShowStep1();
-  }
+  var tabs = { myBag: 'bagTabMyBag', findYardages: 'bagTabFindYardages', wedgeGap: 'bagTabWedgeGap' };
+  var contents = { myBag: 'bagTabContentMyBag', findYardages: 'bagTabContentFindYardages', wedgeGap: 'bagTabContentWedgeGap' };
+  Object.keys(tabs).forEach(function(key) {
+    var btn = document.getElementById(tabs[key]);
+    var cont = document.getElementById(contents[key]);
+    if (btn) { btn.style.background = key === tab ? '#7c3aed' : 'transparent'; btn.style.color = key === tab ? '#fff' : '#888'; }
+    if (cont) { cont.style.display = key === tab ? 'flex' : 'none'; }
+  });
+  if (tab === 'myBag') renderBagClubs();
+  if (tab === 'findYardages') fyShowStep1();
 }
 
 // ─── FIND YARDAGES ─────────────────────────────────────────────────────────
@@ -15680,12 +15687,16 @@ function fyGoToStep3() {
 function fyRenderShotInputs() {
   var container = document.getElementById('fyShotInputs');
   if (!container) return;
+  var distStyle = 'height:36px;font-size:13px;font-weight:700;text-align:center;background:#222;border:1px solid #333;border-radius:8px;color:#fff;width:100%;box-sizing:border-box;';
+  var offStyle = 'height:36px;font-size:12px;font-weight:700;text-align:center;background:#181f18;border:1px solid #2a3a2a;border-radius:8px;color:#4ade80;width:100%;box-sizing:border-box;';
   var html = '';
   for (var i = 0; i < _fyShotCount; i++) {
-    html += '<div style="display:grid;grid-template-columns:28px 1fr 1fr;gap:6px;align-items:center;">' +
-      '<div style="font-size:12px;color:#666;font-weight:700;text-align:center;">' + (i + 1) + '</div>' +
-      '<input type="number" id="fyCarry_' + i + '" placeholder="Carry" min="0" max="400" style="height:38px;font-size:14px;font-weight:700;text-align:center;background:#222;border:1px solid #333;border-radius:8px;color:#fff;width:100%;box-sizing:border-box;">' +
-      '<input type="number" id="fyTotal_' + i + '" placeholder="Total" min="0" max="450" style="height:38px;font-size:14px;font-weight:700;text-align:center;background:#222;border:1px solid #333;border-radius:8px;color:#fff;width:100%;box-sizing:border-box;">' +
+    html += '<div style="display:grid;grid-template-columns:22px 1fr 60px 1fr 60px;gap:4px;align-items:center;">' +
+      '<div style="font-size:11px;color:#555;font-weight:700;text-align:center;">' + (i + 1) + '</div>' +
+      '<input type="number" id="fyCarry_' + i + '" placeholder="—" min="0" max="400" style="' + distStyle + '">' +
+      '<input type="number" id="fyCarryOff_' + i + '" placeholder="0" min="-99" max="99" style="' + offStyle + '">' +
+      '<input type="number" id="fyTotal_' + i + '" placeholder="—" min="0" max="450" style="' + distStyle + '">' +
+      '<input type="number" id="fyTotalOff_' + i + '" placeholder="auto" min="-99" max="99" style="' + offStyle + '">' +
       '</div>';
   }
   container.innerHTML = html;
@@ -15694,36 +15705,30 @@ function fyRenderShotInputs() {
 
 function fySaveShots() {
   var msg = document.getElementById('fyMsg');
-  // Gather shot data
-  var newShots = [];
-  for (var i = 0; i < _fyShotCount; i++) {
-    var cEl = document.getElementById('fyCarry_' + i);
-    var tEl = document.getElementById('fyTotal_' + i);
-    var c = cEl && cEl.value !== '' ? parseInt(cEl.value) : null;
-    var t = tEl && tEl.value !== '' ? parseInt(tEl.value) : null;
-    if (c !== null || t !== null) {
-      newShots.push({ total: c || t, side: 0, target: c || t });
-      // If total is provided and different from carry, track total shots too
-    }
-  }
-  if (newShots.length === 0) {
-    msg.style.color = '#f87171'; msg.textContent = 'Enter at least one shot.';
-    return;
-  }
-
-  // Build carry and total arrays from inputs
   var newCarryShots = [];
   var newTotalShots = [];
-  for (var j = 0; j < _fyShotCount; j++) {
-    var cEl2 = document.getElementById('fyCarry_' + j);
-    var tEl2 = document.getElementById('fyTotal_' + j);
-    var cv = cEl2 && cEl2.value !== '' ? parseInt(cEl2.value) : null;
-    var tv = tEl2 && tEl2.value !== '' ? parseInt(tEl2.value) : null;
-    if (cv !== null) {
-      newCarryShots.push({ total: cv, side: 0, target: cv });
+
+  for (var i = 0; i < _fyShotCount; i++) {
+    var cv = document.getElementById('fyCarry_' + i);
+    var tv = document.getElementById('fyTotal_' + i);
+    var coEl = document.getElementById('fyCarryOff_' + i);
+    var toEl = document.getElementById('fyTotalOff_' + i);
+
+    var carry = cv && cv.value !== '' ? parseInt(cv.value) : null;
+    var total = tv && tv.value !== '' ? parseInt(tv.value) : null;
+    var carryOff = coEl && coEl.value !== '' ? parseFloat(coEl.value) : null;
+    var totalOff = toEl && toEl.value !== '' ? parseFloat(toEl.value) : null;
+
+    // Interpolate total offline from carry offline angle if total offline is blank
+    if (carry !== null && total !== null && carryOff !== null && totalOff === null) {
+      totalOff = Math.round(carryOff * (total / carry) * 10) / 10;
     }
-    if (tv !== null) {
-      newTotalShots.push({ total: tv, side: 0, target: tv });
+
+    if (carry !== null) {
+      newCarryShots.push({ total: carry, side: carryOff || 0, target: carry });
+    }
+    if (total !== null) {
+      newTotalShots.push({ total: total, side: totalOff || 0, target: total });
     }
   }
 
