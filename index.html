@@ -1643,20 +1643,19 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
       <input type="file" id="bagImportCSV" accept=".csv,.xlsx,.xls" style="display:none;" onchange="importBagFile(this)">
     </div>
 
-    <!-- Club List -->
+    <!-- Club Tile Grid -->
     <div style="width:100%;max-width:360px;">
       <div id="bagEmptyMsg" style="background:#1a1a1a;border-radius:12px;padding:24px;text-align:center;color:#555;font-size:13px;line-height:1.7;">
         No clubs in your bag yet.<br>Add clubs above to track your distances.
       </div>
-      <div id="bagClubHeaders" style="display:none;grid-template-columns:1fr 50px 70px 70px 36px;gap:6px;padding:0 6px 6px;font-size:11px;color:#666;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">
-        <div>Club</div>
-        <div style="text-align:center;">Shots</div>
-        <div style="text-align:center;">Carry</div>
-        <div style="text-align:center;">Total</div>
-        <div></div>
-      </div>
-      <div id="bagClubList" style="display:flex;flex-direction:column;gap:6px;"></div>
+      <div id="bagClubHeaders" style="display:none;"></div>
+      <div id="bagClubList" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;"></div>
     </div>
+  </div>
+
+  <!-- Club Detail Modal -->
+  <div id="clubDetailModal" onclick="if(event.target===this)closeClubDetail()" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:1000;justify-content:center;align-items:center;">
+    <div id="clubDetailContent" style="background:#1a1a1a;border-radius:16px;padding:20px;width:90%;max-width:340px;max-height:80vh;overflow-y:auto;position:relative;border:1px solid #333;"></div>
   </div>
 
   <!-- TAB 2: FIND YARDAGES -->
@@ -15597,66 +15596,168 @@ function renderBagClubs() {
     return;
   }
   if (emptyMsg) emptyMsg.style.display = 'none';
-  if (headers) headers.style.display = 'grid';
+  if (headers) headers.style.display = 'none';
   list.innerHTML = clubs.map(function(club) {
     var safe = club.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
     var carry = (club.carry !== null && club.carry !== undefined) ? club.carry : '';
     var total = (club.total !== null && club.total !== undefined) ? club.total : '';
-    var hasShots = club.shots && club.shots.length > 0;
-    var shotCount = hasShots ? club.shots.length : 0;
-    var inStyle = 'height:34px;font-size:13px;font-weight:700;text-align:center;background:#222;border:1px solid #444;border-radius:8px;color:#fff;width:100%;box-sizing:border-box;';
-    var html = '<div style="background:#1a1a1a;border-radius:10px;padding:8px 10px;">';
-    var isWedge   = (typeof WG_WEDGE_LIST !== 'undefined') && WG_WEDGE_LIST.indexOf(club.name) >= 0;
-    var wgSess    = isWedge && (typeof wgGetLatestForClub === 'function') ? wgGetLatestForClub(club.name) : null;
+    var isWedge = (typeof WG_WEDGE_LIST !== 'undefined') && WG_WEDGE_LIST.indexOf(club.name) >= 0;
+    var wgSess = isWedge && (typeof wgGetLatestForClub === 'function') ? wgGetLatestForClub(club.name) : null;
     var wgFullAvg = null;
     if (wgSess) {
       var _wgFE = (wgSess.results[club.name] || {})['sw0'];
       wgFullAvg = _wgFE && _wgFE.avg != null ? _wgFE.avg : null;
     }
     var displayCarry = (wgFullAvg !== null) ? wgFullAvg : carry;
-    html += '<div style="display:grid;grid-template-columns:1fr 40px 1fr 1fr 34px;gap:5px;align-items:center;">';
-    html += '<div style="font-size:14px;font-weight:700;color:#e2e8f0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + club.name + '</div>';
-    html += '<div style="font-size:12px;font-weight:600;text-align:center;color:' + (shotCount > 0 ? '#a78bfa' : '#444') + ';">' + (shotCount > 0 ? shotCount : '—') + '</div>';
-    if (hasShots) {
-      html += '<div style="font-size:13px;font-weight:700;text-align:center;color:#fff;background:#222;border:1px solid #333;border-radius:8px;height:34px;display:flex;align-items:center;justify-content:center;">' + (displayCarry !== '' ? displayCarry : '—') + '</div>';
-      html += '<div style="font-size:13px;font-weight:700;text-align:center;color:#fff;background:#222;border:1px solid #333;border-radius:8px;height:34px;display:flex;align-items:center;justify-content:center;">' + (total !== '' ? total : '—') + '</div>';
-    } else {
-      html += '<input type="number" value="' + displayCarry + '" placeholder="Carry" min="0" max="400" onchange="updateBagClub(\'' + safe + '\',\'carry\',this.value)" style="' + inStyle + '">';
-      html += '<input type="number" value="' + total + '" placeholder="Total" min="0" max="450" onchange="updateBagClub(\'' + safe + '\',\'total\',this.value)" style="' + inStyle + '">';
+
+    // Wedge tiles span full width and show partial shots
+    if (isWedge && wgSess) {
+      var wgSwings = WG_SWINGS[wgSess.swingType] || [];
+      var wgClubData = wgSess.results[club.name] || {};
+      var partialsHtml = wgSwings.map(function(label, si) {
+        var entry = wgClubData['sw' + si];
+        var avg = entry && entry.avg != null ? entry.avg : '—';
+        return '<div style="display:flex;flex-direction:column;align-items:center;">' +
+          '<span style="font-size:8px;color:#666;font-weight:700;line-height:1;">' + label + '</span>' +
+          '<span style="font-size:12px;color:#a78bfa;font-weight:800;line-height:1.3;">' + avg + '</span>' +
+        '</div>';
+      }).join('');
+      return '<div onclick="openClubDetail(\'' + safe + '\')" style="grid-column:span 3;background:#1a1a1a;border-radius:10px;padding:8px 10px;cursor:pointer;border:1px solid #2a2a2a;display:flex;align-items:center;gap:10px;">' +
+        '<div style="min-width:36px;text-align:center;">' +
+          '<div style="font-size:14px;font-weight:800;color:#e2e8f0;line-height:1.2;">' + club.name + '</div>' +
+          '<div style="font-size:9px;color:#555;margin-top:2px;">C:' + (displayCarry !== '' ? displayCarry : '—') + ' T:' + (total !== '' ? total : '—') + '</div>' +
+        '</div>' +
+        '<div style="flex:1;display:grid;grid-template-columns:repeat(' + wgSwings.length + ',1fr);gap:4px;">' + partialsHtml + '</div>' +
+      '</div>';
     }
-    html += '<button onclick="removeBagClub(\'' + safe + '\')" style="width:32px;height:32px;background:#2a1515;border:1px solid #5a2020;border-radius:8px;color:#f87171;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;">×</button>';
-    html += '</div>'; // close main grid
-    // Sub-row: wedge gapping data OR manual ¾ carry
-    if (isWedge) {
-      if (wgSess) {
-        var wgSwings   = WG_SWINGS[wgSess.swingType] || [];
-        var wgClubData = wgSess.results[club.name] || {};
-        var wgParts = wgSwings.map(function(label, si) {
-          var entry = wgClubData['sw' + si];
-          var avg   = entry && entry.avg != null ? entry.avg : '—';
-          return '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;background:#222;border-radius:6px;padding:4px 2px;">' +
-            '<span style="font-size:9px;color:#666;font-weight:700;">' + label + '</span>' +
-            '<span style="font-size:13px;color:#a78bfa;font-weight:800;">' + avg + '</span>' +
-          '</div>';
-        }).join('');
-        html += '<div style="display:grid;grid-template-columns:repeat(' + wgSwings.length + ',1fr);gap:5px;margin-top:6px;padding-top:6px;border-top:1px solid #1f1f1f;">' + wgParts + '</div>';
-      }
-    } else {
-      var carry34 = (club.carry34 !== null && club.carry34 !== undefined) ? club.carry34 : '';
-      html += '<div style="display:flex;align-items:center;gap:8px;margin-top:6px;padding-top:6px;border-top:1px solid #1f1f1f;">';
-      html += '<div style="font-size:10px;color:#555;font-weight:700;min-width:52px;">¾ Carry</div>';
-      html += '<input type="number" value="' + carry34 + '" placeholder="—" min="0" max="400" ' +
-        'onchange="updateBagClub(\'' + safe + '\',\'carry34\',this.value)" ' +
-        'style="width:58px;height:28px;font-size:12px;font-weight:700;text-align:center;background:#222;border:1px solid #333;border-radius:6px;color:#fff;">';
-      html += '</div>';
-    }
-    if (hasShots) {
-      html += '<div style="padding:4px 0 0;"><button onclick="toggleDispersion(\'' + safe + '\')" style="width:100%;height:28px;background:#2d2d2d;border:1px solid #444;border-radius:8px;color:#a78bfa;font-size:11px;font-weight:600;cursor:pointer;">⊕ Dispersion (' + club.shots.length + ' shots)</button></div>';
-      html += '<div id="disp_' + club.name + '" style="display:none;margin-top:8px;"><canvas id="dispCanvas_' + club.name + '" width="300" height="300" style="width:100%;border-radius:8px;display:block;"></canvas></div>';
-    }
-    html += '</div>';
-    return html;
+
+    // Standard club tile (1 column)
+    return '<div onclick="openClubDetail(\'' + safe + '\')" style="background:#1a1a1a;border-radius:10px;padding:10px 6px;cursor:pointer;border:1px solid #2a2a2a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:68px;">' +
+      '<div style="font-size:14px;font-weight:800;color:#e2e8f0;line-height:1.2;">' + club.name + '</div>' +
+      '<div style="display:flex;gap:6px;margin-top:6px;align-items:baseline;">' +
+        '<div style="text-align:center;"><div style="font-size:8px;color:#666;font-weight:600;line-height:1;">CARRY</div><div style="font-size:13px;font-weight:700;color:#fff;line-height:1.3;">' + (displayCarry !== '' ? displayCarry : '—') + '</div></div>' +
+        '<div style="color:#333;font-size:10px;">|</div>' +
+        '<div style="text-align:center;"><div style="font-size:8px;color:#666;font-weight:600;line-height:1;">TOTAL</div><div style="font-size:13px;font-weight:700;color:#fff;line-height:1.3;">' + (total !== '' ? total : '—') + '</div></div>' +
+      '</div>' +
+    '</div>';
   }).join('');
+}
+
+function openClubDetail(name) {
+  var clubs = getBagClubs();
+  var club = clubs.find(function(c) { return c.name === name; });
+  if (!club) return;
+  var safe = name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+  var carry = (club.carry !== null && club.carry !== undefined) ? club.carry : '';
+  var total = (club.total !== null && club.total !== undefined) ? club.total : '';
+  var hasShots = club.shots && club.shots.length > 0;
+  var isWedge = (typeof WG_WEDGE_LIST !== 'undefined') && WG_WEDGE_LIST.indexOf(club.name) >= 0;
+  var wgSess = isWedge && (typeof wgGetLatestForClub === 'function') ? wgGetLatestForClub(club.name) : null;
+  var wgFullAvg = null;
+  if (wgSess) {
+    var _wgFE = (wgSess.results[club.name] || {})['sw0'];
+    wgFullAvg = _wgFE && _wgFE.avg != null ? _wgFE.avg : null;
+  }
+  var displayCarry = (wgFullAvg !== null) ? wgFullAvg : carry;
+  var inStyle = 'height:36px;font-size:14px;font-weight:700;text-align:center;background:#222;border:1px solid #444;border-radius:8px;color:#fff;width:100%;box-sizing:border-box;';
+
+  var html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">';
+  html += '<div style="font-size:20px;font-weight:800;color:#e2e8f0;">' + club.name + '</div>';
+  html += '<button onclick="closeClubDetail()" style="width:32px;height:32px;background:transparent;border:1px solid #444;border-radius:8px;color:#aaa;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">×</button>';
+  html += '</div>';
+
+  // Carry / Total
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">';
+  if (hasShots) {
+    html += '<div style="text-align:center;background:#222;border-radius:8px;padding:10px;"><div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;">CARRY</div><div style="font-size:18px;font-weight:700;color:#fff;">' + (displayCarry !== '' ? displayCarry : '—') + '</div></div>';
+    html += '<div style="text-align:center;background:#222;border-radius:8px;padding:10px;"><div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;">TOTAL</div><div style="font-size:18px;font-weight:700;color:#fff;">' + (total !== '' ? total : '—') + '</div></div>';
+  } else {
+    html += '<div style="text-align:center;"><div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;">CARRY</div><input type="number" value="' + displayCarry + '" placeholder="—" min="0" max="400" onchange="updateBagClub(\'' + safe + '\',\'carry\',this.value);openClubDetail(\'' + safe + '\')" style="' + inStyle + '"></div>';
+    html += '<div style="text-align:center;"><div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;">TOTAL</div><input type="number" value="' + total + '" placeholder="—" min="0" max="450" onchange="updateBagClub(\'' + safe + '\',\'total\',this.value);openClubDetail(\'' + safe + '\')" style="' + inStyle + '"></div>';
+  }
+  html += '</div>';
+
+  // 3/4 carry for non-wedges
+  if (!isWedge) {
+    var carry34 = (club.carry34 !== null && club.carry34 !== undefined) ? club.carry34 : '';
+    html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">';
+    html += '<div style="font-size:11px;color:#666;font-weight:700;">¾ CARRY</div>';
+    html += '<input type="number" value="' + carry34 + '" placeholder="—" min="0" max="400" onchange="updateBagClub(\'' + safe + '\',\'carry34\',this.value)" style="width:80px;height:32px;font-size:13px;font-weight:700;text-align:center;background:#222;border:1px solid #444;border-radius:8px;color:#fff;">';
+    html += '</div>';
+  }
+
+  // Wedge gapping partials
+  if (isWedge && wgSess) {
+    var wgSwings = WG_SWINGS[wgSess.swingType] || [];
+    var wgClubData = wgSess.results[club.name] || {};
+    html += '<div style="margin-bottom:12px;"><div style="font-size:10px;color:#666;font-weight:600;margin-bottom:6px;">PARTIAL SHOTS</div>';
+    html += '<div style="display:grid;grid-template-columns:repeat(' + wgSwings.length + ',1fr);gap:6px;">';
+    wgSwings.forEach(function(label, si) {
+      var entry = wgClubData['sw' + si];
+      var avg = entry && entry.avg != null ? entry.avg : '—';
+      html += '<div style="text-align:center;background:#222;border-radius:8px;padding:8px 4px;"><div style="font-size:9px;color:#666;font-weight:700;">' + label + '</div><div style="font-size:16px;color:#a78bfa;font-weight:800;">' + avg + '</div></div>';
+    });
+    html += '</div></div>';
+  }
+
+  // Dispersion
+  if (hasShots) {
+    html += '<div style="margin-bottom:12px;"><div style="font-size:10px;color:#666;font-weight:600;margin-bottom:6px;">DISPERSION (' + club.shots.length + ' shots)</div>';
+    html += '<canvas id="dispCanvas_modal_' + club.name + '" width="300" height="300" style="width:100%;border-radius:8px;display:block;"></canvas></div>';
+  }
+
+  // Remove button
+  html += '<button onclick="closeClubDetail();removeBagClub(\'' + safe + '\')" style="width:100%;height:38px;background:#2a1515;border:1px solid #5a2020;border-radius:10px;color:#f87171;font-size:13px;font-weight:700;cursor:pointer;">Remove from Bag</button>';
+
+  var modal = document.getElementById('clubDetailModal');
+  document.getElementById('clubDetailContent').innerHTML = html;
+  modal.style.display = 'flex';
+
+  // Draw dispersion after modal is visible
+  if (hasShots) {
+    setTimeout(function() {
+      var canvas = document.getElementById('dispCanvas_modal_' + club.name);
+      if (canvas && club.shots) {
+        var isFW = isFairwayClub(club.name);
+        var img = isFW ? _dispFairwayImg : _dispGreenImg;
+        var hasTotalShots = club.totalShots && club.totalShots.length > 0;
+        var ctx = canvas.getContext('2d');
+        canvas.width = 300; canvas.height = 300;
+        var drawOnCanvas = function() {
+          ctx.drawImage(img, 0, 0, 300, 300);
+          var allX = club.shots.map(function(s){return s.offline;});
+          var allY = club.shots.map(function(s){return s.carry;});
+          if (hasTotalShots) { allY = allY.concat(club.totalShots.map(function(s){return s.total;})); }
+          var cx = 150, cy = 150, pad = 30;
+          var maxOff = Math.max.apply(null, allX.map(Math.abs).concat([1]));
+          var minY = Math.min.apply(null, allY), maxY = Math.max.apply(null, allY);
+          var rangeY = Math.max(maxY - minY, 1);
+          club.shots.forEach(function(s) {
+            var px = cx + (s.offline / maxOff) * (150 - pad);
+            var py = (300 - pad) - ((s.carry - minY) / rangeY) * (300 - 2 * pad);
+            ctx.beginPath(); ctx.arc(px, py, 5, 0, 2 * Math.PI);
+            ctx.fillStyle = 'rgba(124,58,237,0.7)'; ctx.fill();
+            ctx.strokeStyle = '#a78bfa'; ctx.lineWidth = 1; ctx.stroke();
+          });
+          if (hasTotalShots) {
+            club.totalShots.forEach(function(s) {
+              var px = cx + (s.offline / maxOff) * (150 - pad);
+              var py = (300 - pad) - ((s.total - minY) / rangeY) * (300 - 2 * pad);
+              ctx.beginPath(); ctx.arc(px, py, 4, 0, 2 * Math.PI);
+              ctx.fillStyle = 'rgba(74,222,128,0.6)'; ctx.fill();
+              ctx.strokeStyle = '#4ade80'; ctx.lineWidth = 1; ctx.stroke();
+            });
+          }
+        };
+        if (img.complete) drawOnCanvas(); else img.onload = drawOnCanvas;
+      }
+    }, 50);
+  }
+}
+
+function closeClubDetail() {
+  document.getElementById('clubDetailModal').style.display = 'none';
+  renderBagClubs();
 }
 
 function normalizeBagClubName(name) {
