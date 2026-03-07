@@ -16560,8 +16560,18 @@ var WG_WEDGE_LIST   = WG_WEDGE_NAMED.concat(WG_WEDGE_DEGREE);
 var _wgSelectedClubs = [];
 var _wgSwingType = null;
 
-function getWgSessions() { try { return JSON.parse(localStorage.getItem(_WG_KEY)) || []; } catch(e) { return []; } }
+function getWgSessions() {
+  if (_bagViewingStudentId && _bagStudentWgSessions !== null) return _bagStudentWgSessions;
+  try { return JSON.parse(localStorage.getItem(_WG_KEY)) || []; } catch(e) { return []; }
+}
 function saveWgSessions(s) {
+  if (_bagViewingStudentId) {
+    // Save to student's profile, also update local cache
+    _bagStudentWgSessions = s;
+    _sb.from('profiles').update({ wedge_gapping: s }).eq('id', _bagViewingStudentId)
+      .then(function(){}).catch(function(e){ console.warn('Save student WG error:', e); });
+    return;
+  }
   localStorage.setItem(_WG_KEY, JSON.stringify(s));
   if (currentUser) {
     _sb.from('profiles').update({ wedge_gapping: s }).eq('id', currentUser.id).then(function(){}).catch(function(){});
