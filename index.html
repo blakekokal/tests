@@ -1538,6 +1538,16 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
         </div>
         <div id="svBagClubList" style="display:flex;flex-direction:column;gap:6px;"></div>
         <div id="svBagSaveStatus" style="font-size:11px;min-height:14px;text-align:center;margin-top:8px;color:#555;"></div>
+
+        <!-- Record session data for this student -->
+        <div style="background:#1a0d2e;border-radius:12px;padding:14px;margin-top:14px;border:1px solid #3b1a6e;">
+          <div style="font-size:11px;color:#a78bfa;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Record Session Data</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <button onclick="svOpenForStudent('findYardages')" style="width:100%;height:40px;background:#1d4ed8;border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">Find Yardages →</button>
+            <button onclick="svOpenForStudent('wedgeGap')" style="width:100%;height:40px;background:#166534;border:none;border-radius:10px;color:#4ade80;font-size:13px;font-weight:700;cursor:pointer;">Wedge Gapping →</button>
+            <button onclick="svOpenForStudent('speed')" style="width:100%;height:40px;background:#4c1d95;border:none;border-radius:10px;color:#a78bfa;font-size:13px;font-weight:700;cursor:pointer;">Speed Session →</button>
+          </div>
+        </div>
       </div>
 
       <!-- Schedule sub-tab -->
@@ -1614,6 +1624,8 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
   <div style="text-align:center;margin-bottom:12px;">
     <div style="font-size:22px;font-weight:800;">🎒 My Clubs</div>
   </div>
+  <!-- Coach student-context banner -->
+  <div id="coachStudentBanner" style="display:none;background:#1a0d2e;border:1px solid #7c3aed;border-radius:10px;padding:8px 14px;margin-bottom:10px;width:100%;max-width:400px;box-sizing:border-box;flex-shrink:0;align-items:center;justify-content:space-between;"></div>
 
   <!-- Tabs -->
   <div style="display:grid;grid-template-columns:repeat(4,1fr);width:100%;max-width:360px;margin-bottom:16px;background:#1a1a1a;border-radius:12px;overflow:hidden;border:1px solid #333;">
@@ -15157,6 +15169,32 @@ function showSvMiscSubTab(tab) {
   }
 }
 
+/* ── Open bag page in student context ──────────────────────────── */
+async function svOpenForStudent(tool) {
+  var name = (document.getElementById('studentViewName') || {}).textContent || 'Student';
+  _coachStudentContext = { id: _currentStudentId, name: name };
+  // Always load fresh student bag before entering any tool
+  await loadStudentBag();
+  // Show banner
+  var banner = document.getElementById('coachStudentBanner');
+  if (banner) {
+    banner.style.display = 'flex';
+    banner.innerHTML =
+      '<div style="font-size:12px;color:#a78bfa;font-weight:700;">📋 Recording for: ' + name + '</div>' +
+      '<button onclick="clearStudentContext()" style="background:#333;border:none;border-radius:8px;color:#fff;font-size:11px;font-weight:700;cursor:pointer;padding:5px 12px;">← Back to Profile</button>';
+  }
+  show('myBagPage');
+  setBagTab(tool);
+}
+
+function clearStudentContext() {
+  _coachStudentContext = null;
+  var banner = document.getElementById('coachStudentBanner');
+  if (banner) banner.style.display = 'none';
+  renderSvBagClubs(); // refresh student bag display with any saved changes
+  show('studentViewPage');
+}
+
 /* ── Student Schedule (under Misc tab) ─────────────────────────── */
 async function loadStudentSchedule() {
   if (!_currentStudentId) return;
@@ -15425,12 +15463,20 @@ async function loadStudentPracticeSessions() {
 var _BAG_KEY = 'myBag_v1';
 var _BAG_ORDER = ['Dr','Dr2','2W','3W','4W','5W','6W','7W','2HY','3HY','4HY','5HY','6HY','7HY','2I','3I','4I','5I','6I','7I','8I','9I','48','PW','GW','AW','SW','50','52','54','56','58','60','62','LW'];
 
+var _coachStudentContext = null; // { id, name } when recording data for a student
+
 function getBagClubs() {
+  if (_coachStudentContext) return (_svBagClubs || []).slice();
   try { return JSON.parse(localStorage.getItem(_BAG_KEY)) || []; }
   catch(e) { return []; }
 }
 
 function saveBagClubs(clubs) {
+  if (_coachStudentContext) {
+    _svBagClubs = clubs;
+    saveSvBagClubs();
+    return;
+  }
   localStorage.setItem(_BAG_KEY, JSON.stringify(clubs));
   // Sync to Supabase so coach can view/edit
   if (currentUser) {
@@ -16004,9 +16050,13 @@ var _spClubFilter = 'all';
 var _spDateFilter = 'all';
 
 function getSpeedSessions() {
-  try { return JSON.parse(localStorage.getItem(_SPEED_KEY)) || []; } catch(e) { return []; }
+  var key = _coachStudentContext ? (_SPEED_KEY + '_' + _coachStudentContext.id) : _SPEED_KEY;
+  try { return JSON.parse(localStorage.getItem(key)) || []; } catch(e) { return []; }
 }
-function saveSpeedSessions(s) { localStorage.setItem(_SPEED_KEY, JSON.stringify(s)); }
+function saveSpeedSessions(s) {
+  var key = _coachStudentContext ? (_SPEED_KEY + '_' + _coachStudentContext.id) : _SPEED_KEY;
+  localStorage.setItem(key, JSON.stringify(s));
+}
 
 function spClubGroup(name) {
   var n = (name || '').toLowerCase();
@@ -16307,8 +16357,14 @@ var WG_WEDGE_LIST   = WG_WEDGE_NAMED.concat(WG_WEDGE_DEGREE);
 var _wgSelectedClubs = [];
 var _wgSwingType = null;
 
-function getWgSessions() { try { return JSON.parse(localStorage.getItem(_WG_KEY)) || []; } catch(e) { return []; } }
-function saveWgSessions(s) { localStorage.setItem(_WG_KEY, JSON.stringify(s)); }
+function getWgSessions() {
+  var key = _coachStudentContext ? (_WG_KEY + '_' + _coachStudentContext.id) : _WG_KEY;
+  try { return JSON.parse(localStorage.getItem(key)) || []; } catch(e) { return []; }
+}
+function saveWgSessions(s) {
+  var key = _coachStudentContext ? (_WG_KEY + '_' + _coachStudentContext.id) : _WG_KEY;
+  localStorage.setItem(key, JSON.stringify(s));
+}
 
 function renderWgTab() {
   var list = document.getElementById('wgSessionList');
