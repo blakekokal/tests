@@ -16828,6 +16828,22 @@ function wgSaveSession() {
   var sessions = getWgSessions();
   sessions.push(session);
   saveWgSessions(sessions);
+
+  // Update bag clubs carry with full-swing averages from this session
+  var clubs = getBagClubs();
+  var changed = false;
+  _wgSelectedClubs.forEach(function(club) {
+    var fullEntry = results[club] && results[club]['sw0'];
+    if (fullEntry && fullEntry.avg != null) {
+      var bagClub = clubs.find(function(c) { return c.name === club; });
+      if (bagClub) {
+        bagClub.carry = fullEntry.avg;
+        changed = true;
+      }
+    }
+  });
+  if (changed) saveBagClubs(sortBagClubs(clubs));
+
   var msg = document.getElementById('wgStep3Msg');
   msg.style.color = '#4ade80';
   msg.textContent = 'Session saved!';
