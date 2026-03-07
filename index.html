@@ -1615,6 +1615,13 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
     <div style="font-size:22px;font-weight:800;">🎒 My Clubs</div>
   </div>
 
+  <!-- Coach Student Selector -->
+  <div id="bagCoachStudentBar" style="display:none;width:100%;max-width:360px;margin:0 auto 10px;">
+    <select id="bagStudentSelect" onchange="onBagStudentChange(this.value)" style="width:100%;height:38px;font-size:13px;font-weight:600;text-align:center;background:#1a1a1a;color:#fff;border:1px solid #0f766e;border-radius:10px;-webkit-appearance:none;appearance:none;padding:0 10px;box-sizing:border-box;">
+      <option value="">My Bag</option>
+    </select>
+  </div>
+
   <!-- Tabs -->
   <div style="position:sticky;top:0;z-index:10;width:100%;display:flex;justify-content:center;background:#181818;padding:0 0 16px;">
     <div style="display:grid;grid-template-columns:repeat(4,1fr);width:100%;max-width:360px;background:#1a1a1a;border-radius:12px;overflow:hidden;border:1px solid #333;">
@@ -2465,6 +2472,14 @@ function show(id){
       showAuthPage();
       return;
     }
+    // Reset student view when entering bag page
+    _bagViewingStudentId = null;
+    _bagViewingStudentName = null;
+    _bagStudentClubs = null;
+    _bagStudentWgSessions = null;
+    var bss = document.getElementById('bagStudentSelect');
+    if (bss) bss.value = '';
+    populateBagStudentSelect();
     renderBagClubs(); // show local cache immediately
     setBagTab(_currentBagTab || 'myBag');
     // Pull latest from Supabase, then re-render
@@ -15441,17 +15456,101 @@ async function loadStudentPracticeSessions() {
 var _BAG_KEY = 'myBag_v1';
 var _BAG_ORDER = ['Dr','Dr2','2W','3W','4W','5W','6W','7W','2HY','3HY','4HY','5HY','6HY','7HY','2I','3I','4I','5I','6I','7I','8I','9I','48','PW','GW','AW','SW','50','52','54','56','58','60','62','LW'];
 
+// Coach viewing a student's bag
+var _bagViewingStudentId = null;
+var _bagViewingStudentName = null;
+var _bagStudentClubs = null; // cached clubs array when viewing student
+var _bagStudentWgSessions = null; // cached wedge gapping for student
+
 function getBagClubs() {
+  if (_bagViewingStudentId && _bagStudentClubs !== null) return _bagStudentClubs;
   try { return JSON.parse(localStorage.getItem(_BAG_KEY)) || []; }
   catch(e) { return []; }
 }
 
 function saveBagClubs(clubs) {
+  if (_bagViewingStudentId) {
+    // Save to student's profile in Supabase
+    _bagStudentClubs = clubs;
+    _sb.from('profiles').update({ bag_clubs: clubs }).eq('id', _bagViewingStudentId)
+      .select('bag_clubs').then(function(res) {
+        if (res.error) console.warn('Save student bag error:', res.error.message);
+      }).catch(function(e) { console.warn('Save student bag error:', e); });
+    return;
+  }
   localStorage.setItem(_BAG_KEY, JSON.stringify(clubs));
   // Sync to Supabase so coach can view/edit
   if (currentUser) {
     _sb.from('profiles').update({ bag_clubs: clubs }).eq('id', currentUser.id).then(function(){}).catch(function(){});
   }
+}
+
+function getWgSessionsForBag() {
+  if (_bagViewingStudentId && _bagStudentWgSessions !== null) return _bagStudentWgSessions;
+  return getWgSessions();
+}
+
+function bagWgGetLatestForClub(clubName) {
+  var sessions = getWgSessionsForBag();
+  for (var i = sessions.length - 1; i >= 0; i--) {
+    if (sessions[i].clubs && sessions[i].clubs.indexOf(clubName) >= 0) return sessions[i];
+  }
+  return null;
+}
+
+async function onBagStudentChange(val) {
+  if (!val) {
+    // Switch back to coach's own bag
+    _bagViewingStudentId = null;
+    _bagViewingStudentName = null;
+    _bagStudentClubs = null;
+    _bagStudentWgSessions = null;
+    renderBagClubs();
+    return;
+  }
+  var parts = val.split('|');
+  _bagViewingStudentId = parts[0];
+  _bagViewingStudentName = parts[1] || 'Student';
+  // Fetch student's bag and wedge gapping from Supabase
+  try {
+    var { data, error } = await _sb.from('profiles')
+      .select('bag_clubs, wedge_gapping')
+      .eq('id', _bagViewingStudentId).single();
+    if (error) { console.warn('Fetch student bag error:', error.message); }
+    _bagStudentClubs = (data && Array.isArray(data.bag_clubs)) ? data.bag_clubs : [];
+    _bagStudentWgSessions = (data && Array.isArray(data.wedge_gapping)) ? data.wedge_gapping : [];
+  } catch(e) {
+    _bagStudentClubs = [];
+    _bagStudentWgSessions = [];
+  }
+  renderBagClubs();
+}
+
+async function populateBagStudentSelect() {
+  var bar = document.getElementById('bagCoachStudentBar');
+  if (!bar) return;
+  if (_userRole !== 'coach') { bar.style.display = 'none'; return; }
+  bar.style.display = 'block';
+  var sel = document.getElementById('bagStudentSelect');
+  // Keep current selection
+  var curVal = sel.value;
+  sel.innerHTML = '<option value="">My Bag</option>';
+  try {
+    var { data } = await _sb.from('coach_students')
+      .select('student_id, student_name')
+      .eq('coach_id', currentUser.id)
+      .order('student_name', { ascending: true });
+    if (data) {
+      data.forEach(function(s) {
+        var opt = document.createElement('option');
+        opt.value = s.student_id + '|' + (s.student_name || 'Student');
+        opt.textContent = s.student_name || 'Student';
+        sel.appendChild(opt);
+      });
+    }
+  } catch(e) {}
+  // Restore selection if still valid
+  if (curVal) sel.value = curVal;
 }
 
 // Pull bag, wedge gapping, and speed data from Supabase and merge into localStorage
@@ -15592,6 +15691,9 @@ function renderBagClubs() {
   var emptyMsg = document.getElementById('bagEmptyMsg');
   var headers = document.getElementById('bagClubHeaders');
   if (!list) return;
+  // Update My Bag tab label
+  var tabBtn = document.getElementById('bagTabMyBag');
+  if (tabBtn) tabBtn.textContent = _bagViewingStudentId ? (_bagViewingStudentName + "'s Bag") : 'My Bag';
   populateBagDropdown();
   if (clubs.length === 0) {
     list.innerHTML = '';
@@ -15607,7 +15709,7 @@ function renderBagClubs() {
     var carry = (club.carry !== null && club.carry !== undefined) ? club.carry : '';
     var total = (club.total !== null && club.total !== undefined) ? club.total : '';
     var isWedge = (typeof WG_WEDGE_LIST !== 'undefined') && WG_WEDGE_LIST.indexOf(club.name) >= 0;
-    var wgSess = isWedge && (typeof wgGetLatestForClub === 'function') ? wgGetLatestForClub(club.name) : null;
+    var wgSess = isWedge ? bagWgGetLatestForClub(club.name) : null;
     var wgFullAvg = null;
     if (wgSess) {
       var _wgFE = (wgSess.results[club.name] || {})['sw0'];
@@ -15659,7 +15761,7 @@ function openClubDetail(name) {
   var total = (club.total !== null && club.total !== undefined) ? club.total : '';
   var hasShots = club.shots && club.shots.length > 0;
   var isWedge = (typeof WG_WEDGE_LIST !== 'undefined') && WG_WEDGE_LIST.indexOf(club.name) >= 0;
-  var wgSess = isWedge && (typeof wgGetLatestForClub === 'function') ? wgGetLatestForClub(club.name) : null;
+  var wgSess = isWedge ? bagWgGetLatestForClub(club.name) : null;
   var wgFullAvg = null;
   if (wgSess) {
     var _wgFE = (wgSess.results[club.name] || {})['sw0'];
