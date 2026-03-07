@@ -1655,6 +1655,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
       <select id="bagClubName" style="width:100%;height:40px;font-size:14px;text-align:center;box-sizing:border-box;margin-bottom:10px;background:#222;color:#fff;border:1px solid #444;border-radius:8px;-webkit-appearance:none;appearance:none;">
         <option value="" disabled selected>Select a club...</option>
       </select>
+      <input id="bagClubLabel" type="text" placeholder="Custom label (e.g. 48°, Titleist)" maxlength="20" style="width:100%;height:36px;font-size:13px;text-align:center;box-sizing:border-box;margin-bottom:10px;background:#222;color:#fff;border:1px solid #444;border-radius:8px;padding:0 10px;">
       <button onclick="addBagClub()" style="width:100%;height:42px;background:#7c3aed;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;">+ Add to Bag</button>
       <div id="bagAddMsg" style="font-size:12px;min-height:16px;text-align:center;margin-top:6px;color:#4ade80;"></div>
     </div>
@@ -15665,6 +15666,7 @@ function populateBagDropdown() {
 
 function addBagClub() {
   var nameEl = document.getElementById('bagClubName');
+  var labelEl = document.getElementById('bagClubLabel');
   var msg = document.getElementById('bagAddMsg');
 
   var name = nameEl ? nameEl.value : '';
@@ -15675,9 +15677,13 @@ function addBagClub() {
   if (clubs.some(function(c) { return c.name.toLowerCase() === name.toLowerCase(); })) {
     msg.style.color = '#f87171'; msg.textContent = name + ' is already in your bag.'; return;
   }
-  clubs.push({ name: name, carry: null, total: null });
+  var label = labelEl ? labelEl.value.trim() : '';
+  var clubObj = { name: name, carry: null, total: null };
+  if (label) clubObj.label = label;
+  clubs.push(clubObj);
   saveBagClubs(sortBagClubs(clubs));
-  msg.style.color = '#4ade80'; msg.textContent = name + ' added!';
+  if (labelEl) labelEl.value = '';
+  msg.style.color = '#4ade80'; msg.textContent = name + (label ? ' (' + label + ')' : '') + ' added!';
   setTimeout(function() { msg.textContent = ''; }, 2500);
   renderBagClubs();
 }
@@ -15697,7 +15703,15 @@ function removeBagClub(name) {
 function updateBagClub(name, field, value) {
   var clubs = getBagClubs();
   var club = clubs.find(function(c) { return c.name === name; });
-  if (club) { club[field] = value !== '' ? parseInt(value) : null; saveBagClubs(clubs); }
+  if (!club) return;
+  if (field === 'label') {
+    club.label = value || '';
+    if (!club.label) delete club.label;
+  } else {
+    club[field] = value !== '' ? parseInt(value) : null;
+  }
+  saveBagClubs(clubs);
+  renderBagClubs();
 }
 
 function bagDisplayName(name) {
@@ -15725,6 +15739,7 @@ function renderBagClubs() {
   list.innerHTML = clubs.map(function(club) {
     var safe = club.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
     var dName = bagDisplayName(club.name);
+    var labelHtml = club.label ? '<div style="font-size:9px;color:#888;font-weight:600;line-height:1;margin-top:1px;">(' + club.label.replace(/</g,'&lt;') + ')</div>' : '';
     var carry = (club.carry !== null && club.carry !== undefined) ? club.carry : '';
     var total = (club.total !== null && club.total !== undefined) ? club.total : '';
     var isWedge = (typeof WG_WEDGE_LIST !== 'undefined') && WG_WEDGE_LIST.indexOf(club.name) >= 0;
@@ -15750,7 +15765,7 @@ function renderBagClubs() {
       }).join('');
       return '<div onclick="openClubDetail(\'' + safe + '\')" style="grid-column:span 3;background:#1a1a1a;border-radius:10px;padding:8px 10px;cursor:pointer;border:1px solid #2a2a2a;display:flex;align-items:center;gap:10px;">' +
         '<div style="min-width:36px;text-align:center;">' +
-          '<div style="font-size:14px;font-weight:800;color:#e2e8f0;line-height:1.2;">' + dName + '</div>' +
+          '<div style="font-size:14px;font-weight:800;color:#e2e8f0;line-height:1.2;">' + dName + '</div>' + labelHtml +
         '</div>' +
         '<div style="flex:1;display:grid;grid-template-columns:repeat(' + wgSwings.length + ',1fr);gap:4px;">' + partialsHtml + '</div>' +
       '</div>';
@@ -15759,7 +15774,7 @@ function renderBagClubs() {
     // Standard club tile (1 column)
     var carry34 = (club.carry34 !== null && club.carry34 !== undefined) ? club.carry34 : '';
     return '<div onclick="openClubDetail(\'' + safe + '\')" style="background:#1a1a1a;border-radius:10px;padding:10px 6px;cursor:pointer;border:1px solid #2a2a2a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:68px;">' +
-      '<div style="font-size:14px;font-weight:800;color:#e2e8f0;line-height:1.2;">' + dName + '</div>' +
+      '<div style="font-size:14px;font-weight:800;color:#e2e8f0;line-height:1.2;">' + dName + '</div>' + labelHtml +
       '<div style="display:flex;gap:4px;margin-top:6px;align-items:baseline;">' +
         '<div style="text-align:center;"><div style="font-size:8px;color:#666;font-weight:600;line-height:1;">CARRY</div><div style="font-size:13px;font-weight:700;color:#fff;line-height:1.3;">' + (displayCarry !== '' ? displayCarry : '—') + '</div></div>' +
         '<div style="color:#333;font-size:10px;">|</div>' +
@@ -15790,10 +15805,13 @@ function openClubDetail(name) {
   var inStyle = 'height:36px;font-size:14px;font-weight:700;text-align:center;background:#222;border:1px solid #444;border-radius:8px;color:#fff;width:100%;box-sizing:border-box;';
 
   var dName = bagDisplayName(club.name);
-  var html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">';
-  html += '<div style="font-size:20px;font-weight:800;color:#e2e8f0;">' + dName + '</div>';
+  var clubLabel = club.label || '';
+  var escapedLabel = clubLabel.replace(/"/g,'&quot;').replace(/</g,'&lt;');
+  var html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">';
+  html += '<div style="font-size:20px;font-weight:800;color:#e2e8f0;">' + dName + (clubLabel ? ' <span style="font-size:14px;color:#888;font-weight:600;">(' + clubLabel.replace(/</g,'&lt;') + ')</span>' : '') + '</div>';
   html += '<button onclick="closeClubDetail()" style="width:32px;height:32px;background:transparent;border:1px solid #444;border-radius:8px;color:#aaa;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">×</button>';
   html += '</div>';
+  html += '<div style="margin-bottom:12px;"><input type="text" value="' + escapedLabel + '" placeholder="Add label (e.g. 48°, Titleist)" maxlength="20" onchange="updateBagClub(\'' + safe + '\',\'label\',this.value.trim());openClubDetail(\'' + safe + '\')" style="width:100%;height:32px;font-size:12px;text-align:center;background:#222;border:1px solid #444;border-radius:8px;color:#fff;box-sizing:border-box;padding:0 10px;"></div>';
 
   // Carry / Total — skip for wedges with gapping data (partials shown instead)
   if (!(isWedge && wgSess)) {
