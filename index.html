@@ -15582,6 +15582,10 @@ function updateBagClub(name, field, value) {
   if (club) { club[field] = value !== '' ? parseInt(value) : null; saveBagClubs(clubs); }
 }
 
+function bagDisplayName(name) {
+  return name.replace(/I$/, 'i').replace(/I(\d)/, 'i$1').replace(/^(\d+)I$/, '$1i');
+}
+
 function renderBagClubs() {
   var clubs = getBagClubs();
   var list = document.getElementById('bagClubList');
@@ -15599,6 +15603,7 @@ function renderBagClubs() {
   if (headers) headers.style.display = 'none';
   list.innerHTML = clubs.map(function(club) {
     var safe = club.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    var dName = bagDisplayName(club.name);
     var carry = (club.carry !== null && club.carry !== undefined) ? club.carry : '';
     var total = (club.total !== null && club.total !== undefined) ? club.total : '';
     var isWedge = (typeof WG_WEDGE_LIST !== 'undefined') && WG_WEDGE_LIST.indexOf(club.name) >= 0;
@@ -15610,7 +15615,7 @@ function renderBagClubs() {
     }
     var displayCarry = (wgFullAvg !== null) ? wgFullAvg : carry;
 
-    // Wedge tiles span full width and show partial shots
+    // Wedge tiles with gapping: span full width, show only partial carries
     if (isWedge && wgSess) {
       var wgSwings = WG_SWINGS[wgSess.swingType] || [];
       var wgClubData = wgSess.results[club.name] || {};
@@ -15618,14 +15623,13 @@ function renderBagClubs() {
         var entry = wgClubData['sw' + si];
         var avg = entry && entry.avg != null ? entry.avg : '—';
         return '<div style="display:flex;flex-direction:column;align-items:center;">' +
-          '<span style="font-size:8px;color:#666;font-weight:700;line-height:1;">' + label + '</span>' +
+          '<span style="font-size:10px;color:#ccc;font-weight:700;line-height:1;">' + label + '</span>' +
           '<span style="font-size:12px;color:#a78bfa;font-weight:800;line-height:1.3;">' + avg + '</span>' +
         '</div>';
       }).join('');
       return '<div onclick="openClubDetail(\'' + safe + '\')" style="grid-column:span 3;background:#1a1a1a;border-radius:10px;padding:8px 10px;cursor:pointer;border:1px solid #2a2a2a;display:flex;align-items:center;gap:10px;">' +
         '<div style="min-width:36px;text-align:center;">' +
-          '<div style="font-size:14px;font-weight:800;color:#e2e8f0;line-height:1.2;">' + club.name + '</div>' +
-          '<div style="font-size:9px;color:#555;margin-top:2px;">C:' + (displayCarry !== '' ? displayCarry : '—') + ' T:' + (total !== '' ? total : '—') + '</div>' +
+          '<div style="font-size:14px;font-weight:800;color:#e2e8f0;line-height:1.2;">' + dName + '</div>' +
         '</div>' +
         '<div style="flex:1;display:grid;grid-template-columns:repeat(' + wgSwings.length + ',1fr);gap:4px;">' + partialsHtml + '</div>' +
       '</div>';
@@ -15633,7 +15637,7 @@ function renderBagClubs() {
 
     // Standard club tile (1 column)
     return '<div onclick="openClubDetail(\'' + safe + '\')" style="background:#1a1a1a;border-radius:10px;padding:10px 6px;cursor:pointer;border:1px solid #2a2a2a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:68px;">' +
-      '<div style="font-size:14px;font-weight:800;color:#e2e8f0;line-height:1.2;">' + club.name + '</div>' +
+      '<div style="font-size:14px;font-weight:800;color:#e2e8f0;line-height:1.2;">' + dName + '</div>' +
       '<div style="display:flex;gap:6px;margin-top:6px;align-items:baseline;">' +
         '<div style="text-align:center;"><div style="font-size:8px;color:#666;font-weight:600;line-height:1;">CARRY</div><div style="font-size:13px;font-weight:700;color:#fff;line-height:1.3;">' + (displayCarry !== '' ? displayCarry : '—') + '</div></div>' +
         '<div style="color:#333;font-size:10px;">|</div>' +
@@ -15661,21 +15665,24 @@ function openClubDetail(name) {
   var displayCarry = (wgFullAvg !== null) ? wgFullAvg : carry;
   var inStyle = 'height:36px;font-size:14px;font-weight:700;text-align:center;background:#222;border:1px solid #444;border-radius:8px;color:#fff;width:100%;box-sizing:border-box;';
 
+  var dName = bagDisplayName(club.name);
   var html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">';
-  html += '<div style="font-size:20px;font-weight:800;color:#e2e8f0;">' + club.name + '</div>';
+  html += '<div style="font-size:20px;font-weight:800;color:#e2e8f0;">' + dName + '</div>';
   html += '<button onclick="closeClubDetail()" style="width:32px;height:32px;background:transparent;border:1px solid #444;border-radius:8px;color:#aaa;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">×</button>';
   html += '</div>';
 
-  // Carry / Total
-  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">';
-  if (hasShots) {
-    html += '<div style="text-align:center;background:#222;border-radius:8px;padding:10px;"><div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;">CARRY</div><div style="font-size:18px;font-weight:700;color:#fff;">' + (displayCarry !== '' ? displayCarry : '—') + '</div></div>';
-    html += '<div style="text-align:center;background:#222;border-radius:8px;padding:10px;"><div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;">TOTAL</div><div style="font-size:18px;font-weight:700;color:#fff;">' + (total !== '' ? total : '—') + '</div></div>';
-  } else {
-    html += '<div style="text-align:center;"><div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;">CARRY</div><input type="number" value="' + displayCarry + '" placeholder="—" min="0" max="400" onchange="updateBagClub(\'' + safe + '\',\'carry\',this.value);openClubDetail(\'' + safe + '\')" style="' + inStyle + '"></div>';
-    html += '<div style="text-align:center;"><div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;">TOTAL</div><input type="number" value="' + total + '" placeholder="—" min="0" max="450" onchange="updateBagClub(\'' + safe + '\',\'total\',this.value);openClubDetail(\'' + safe + '\')" style="' + inStyle + '"></div>';
+  // Carry / Total — skip for wedges with gapping data (partials shown instead)
+  if (!(isWedge && wgSess)) {
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">';
+    if (hasShots) {
+      html += '<div style="text-align:center;background:#222;border-radius:8px;padding:10px;"><div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;">CARRY</div><div style="font-size:18px;font-weight:700;color:#fff;">' + (displayCarry !== '' ? displayCarry : '—') + '</div></div>';
+      html += '<div style="text-align:center;background:#222;border-radius:8px;padding:10px;"><div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;">TOTAL</div><div style="font-size:18px;font-weight:700;color:#fff;">' + (total !== '' ? total : '—') + '</div></div>';
+    } else {
+      html += '<div style="text-align:center;"><div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;">CARRY</div><input type="number" value="' + displayCarry + '" placeholder="—" min="0" max="400" onchange="updateBagClub(\'' + safe + '\',\'carry\',this.value);openClubDetail(\'' + safe + '\')" style="' + inStyle + '"></div>';
+      html += '<div style="text-align:center;"><div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;">TOTAL</div><input type="number" value="' + total + '" placeholder="—" min="0" max="450" onchange="updateBagClub(\'' + safe + '\',\'total\',this.value);openClubDetail(\'' + safe + '\')" style="' + inStyle + '"></div>';
+    }
+    html += '</div>';
   }
-  html += '</div>';
 
   // 3/4 carry for non-wedges
   if (!isWedge) {
@@ -15695,7 +15702,7 @@ function openClubDetail(name) {
     wgSwings.forEach(function(label, si) {
       var entry = wgClubData['sw' + si];
       var avg = entry && entry.avg != null ? entry.avg : '—';
-      html += '<div style="text-align:center;background:#222;border-radius:8px;padding:8px 4px;"><div style="font-size:9px;color:#666;font-weight:700;">' + label + '</div><div style="font-size:16px;color:#a78bfa;font-weight:800;">' + avg + '</div></div>';
+      html += '<div style="text-align:center;background:#222;border-radius:8px;padding:8px 4px;"><div style="font-size:11px;color:#ccc;font-weight:700;">' + label + '</div><div style="font-size:16px;color:#a78bfa;font-weight:800;">' + avg + '</div></div>';
     });
     html += '</div></div>';
   }
