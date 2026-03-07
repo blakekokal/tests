@@ -1616,11 +1616,13 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
   </div>
 
   <!-- Tabs -->
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);width:100%;max-width:360px;margin-bottom:16px;background:#1a1a1a;border-radius:12px;overflow:hidden;border:1px solid #333;position:sticky;top:0;z-index:10;">
-    <button id="bagTabMyBag" onclick="setBagTab('myBag')" style="height:40px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:#7c3aed;color:#fff;padding:0 2px;">My Bag</button>
-    <button id="bagTabFindYardages" onclick="setBagTab('findYardages')" style="height:40px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:transparent;color:#888;padding:0 2px;">Find Yardages</button>
-    <button id="bagTabWedgeGap" onclick="setBagTab('wedgeGap')" style="height:40px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:transparent;color:#888;padding:0 2px;">Wedge Gapping</button>
-    <button id="bagTabSpeed" onclick="setBagTab('speed')" style="height:40px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:transparent;color:#888;padding:0 2px;">Speed</button>
+  <div style="position:sticky;top:0;z-index:10;width:100%;display:flex;justify-content:center;background:#181818;padding:0 0 16px;">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);width:100%;max-width:360px;background:#1a1a1a;border-radius:12px;overflow:hidden;border:1px solid #333;">
+      <button id="bagTabMyBag" onclick="setBagTab('myBag')" style="height:40px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:#7c3aed;color:#fff;padding:0 2px;">My Bag</button>
+      <button id="bagTabFindYardages" onclick="setBagTab('findYardages')" style="height:40px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:transparent;color:#888;padding:0 2px;">Find Yardages</button>
+      <button id="bagTabWedgeGap" onclick="setBagTab('wedgeGap')" style="height:40px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:transparent;color:#888;padding:0 2px;">Wedge Gapping</button>
+      <button id="bagTabSpeed" onclick="setBagTab('speed')" style="height:40px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:transparent;color:#888;padding:0 2px;">Speed</button>
+    </div>
   </div>
 
   <!-- TAB 1: MY BAG -->
