@@ -1616,7 +1616,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
   </div>
 
   <!-- Tabs -->
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);width:100%;max-width:360px;margin-bottom:16px;background:#1a1a1a;border-radius:12px;overflow:hidden;border:1px solid #333;">
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);width:100%;max-width:360px;margin-bottom:16px;background:#1a1a1a;border-radius:12px;overflow:hidden;border:1px solid #333;position:sticky;top:0;z-index:10;">
     <button id="bagTabMyBag" onclick="setBagTab('myBag')" style="height:40px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:#7c3aed;color:#fff;padding:0 2px;">My Bag</button>
     <button id="bagTabFindYardages" onclick="setBagTab('findYardages')" style="height:40px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:transparent;color:#888;padding:0 2px;">Find Yardages</button>
     <button id="bagTabWedgeGap" onclick="setBagTab('wedgeGap')" style="height:40px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:transparent;color:#888;padding:0 2px;">Wedge Gapping</button>
@@ -2459,6 +2459,11 @@ function show(id){
     setPracticeHubTab(_currentPHTab || 'combines');
   }
   if(id === 'myBagPage') {
+    if (!currentUser) {
+      alert('Please log in to access My Bag.');
+      showAuthPage();
+      return;
+    }
     renderBagClubs(); // show local cache immediately
     setBagTab(_currentBagTab || 'myBag');
     // Pull latest from Supabase, then re-render
@@ -6011,6 +6016,10 @@ async function doLogin() {
 async function doLogout() {
   await _sb.auth.signOut();
   currentUser = null;
+  // Clear bag/wedge/speed data from localStorage so it doesn't persist when logged out
+  localStorage.removeItem(_BAG_KEY);
+  localStorage.removeItem(_WG_KEY);
+  localStorage.removeItem(_SPEED_KEY);
   updateAuthUI(false);
 }
 
@@ -6059,8 +6068,14 @@ _sb.auth.onAuthStateChange((event, session) => {
     updateAuthUI(true);
     // Fire-and-forget: sync email to profiles (no await, won't block auth)
     _sb.from('profiles').update({ email: currentUser.email }).eq('id', currentUser.id).then(function(){}).catch(function(){});
+    // Sync bag/wedge/speed data from profile
+    syncBagFromSupabase().catch(function(){});
   } else {
     currentUser = null;
+    // Clear bag/wedge/speed data from localStorage on logout
+    localStorage.removeItem('myBag_v1');
+    localStorage.removeItem('wedgeGap_v1');
+    localStorage.removeItem('speedSessions_v1');
     updateAuthUI(false);
   }
 });
@@ -15438,46 +15453,64 @@ function saveBagClubs(clubs) {
   }
 }
 
-// Pull bag data from Supabase and merge into localStorage
+// Pull bag, wedge gapping, and speed data from Supabase and merge into localStorage
 async function syncBagFromSupabase() {
   if (!currentUser) return;
   try {
-    var { data, error } = await _sb.from('profiles').select('bag_clubs').eq('id', currentUser.id).single();
+    var { data, error } = await _sb.from('profiles').select('bag_clubs, wedge_gapping, speed_sessions').eq('id', currentUser.id).single();
     if (error) { console.warn('syncBagFromSupabase: fetch error', error.message); return; }
     if (!data) return;
+
+    // --- Bag clubs ---
     var remote = data.bag_clubs;
-    if (!Array.isArray(remote)) return;
-    var local = getBagClubs();
-    if (remote.length === 0 && local.length === 0) return;
-    if (remote.length === 0) {
-      // Remote is empty but local has data — push local to Supabase
-      _sb.from('profiles').update({ bag_clubs: local }).eq('id', currentUser.id).then(function(){}).catch(function(){});
-      return;
+    if (Array.isArray(remote)) {
+      var local = getBagClubs();
+      if (remote.length === 0 && local.length === 0) { /* nothing */ }
+      else if (remote.length === 0) {
+        _sb.from('profiles').update({ bag_clubs: local }).eq('id', currentUser.id).then(function(){}).catch(function(){});
+      } else if (local.length === 0) {
+        localStorage.setItem(_BAG_KEY, JSON.stringify(remote));
+      } else {
+        var localMap = {};
+        local.forEach(function(c) { localMap[c.name] = c; });
+        var merged = remote.map(function(rc) {
+          var lc = localMap[rc.name];
+          if (!lc) return rc;
+          var m = {};
+          Object.keys(lc).forEach(function(k) { m[k] = lc[k]; });
+          m.carry = rc.carry;
+          m.total = rc.total;
+          return m;
+        });
+        var remoteNames = {};
+        remote.forEach(function(c) { remoteNames[c.name] = true; });
+        local.forEach(function(c) {
+          if (!remoteNames[c.name]) merged.push(c);
+        });
+        localStorage.setItem(_BAG_KEY, JSON.stringify(sortBagClubs(merged)));
+      }
     }
-    if (local.length === 0) {
-      // No local data — use remote
-      localStorage.setItem(_BAG_KEY, JSON.stringify(remote));
-    } else {
-      // Field-level merge: remote carry/total win, preserve local-only fields (e.g. shots)
-      var localMap = {};
-      local.forEach(function(c) { localMap[c.name] = c; });
-      var merged = remote.map(function(rc) {
-        var lc = localMap[rc.name];
-        if (!lc) return rc; // new club from remote (coach added)
-        // Remote carry/total win; preserve local-only fields like shots
-        var m = {};
-        Object.keys(lc).forEach(function(k) { m[k] = lc[k]; });
-        m.carry = rc.carry;
-        m.total = rc.total;
-        return m;
-      });
-      // Add local-only clubs not in remote
-      var remoteNames = {};
-      remote.forEach(function(c) { remoteNames[c.name] = true; });
-      local.forEach(function(c) {
-        if (!remoteNames[c.name]) merged.push(c);
-      });
-      localStorage.setItem(_BAG_KEY, JSON.stringify(sortBagClubs(merged)));
+
+    // --- Wedge gapping ---
+    var remoteWg = data.wedge_gapping;
+    if (Array.isArray(remoteWg)) {
+      var localWg = getWgSessions();
+      if (remoteWg.length === 0 && localWg.length > 0) {
+        _sb.from('profiles').update({ wedge_gapping: localWg }).eq('id', currentUser.id).then(function(){}).catch(function(){});
+      } else if (remoteWg.length > 0) {
+        localStorage.setItem(_WG_KEY, JSON.stringify(remoteWg));
+      }
+    }
+
+    // --- Speed sessions ---
+    var remoteSp = data.speed_sessions;
+    if (Array.isArray(remoteSp)) {
+      var localSp = getSpeedSessions();
+      if (remoteSp.length === 0 && localSp.length > 0) {
+        _sb.from('profiles').update({ speed_sessions: localSp }).eq('id', currentUser.id).then(function(){}).catch(function(){});
+      } else if (remoteSp.length > 0) {
+        localStorage.setItem(_SPEED_KEY, JSON.stringify(remoteSp));
+      }
     }
   } catch(e) { console.warn('syncBagFromSupabase: error', e.message || e); }
 }
@@ -16006,7 +16039,12 @@ var _spDateFilter = 'all';
 function getSpeedSessions() {
   try { return JSON.parse(localStorage.getItem(_SPEED_KEY)) || []; } catch(e) { return []; }
 }
-function saveSpeedSessions(s) { localStorage.setItem(_SPEED_KEY, JSON.stringify(s)); }
+function saveSpeedSessions(s) {
+  localStorage.setItem(_SPEED_KEY, JSON.stringify(s));
+  if (currentUser) {
+    _sb.from('profiles').update({ speed_sessions: s }).eq('id', currentUser.id).then(function(){}).catch(function(){});
+  }
+}
 
 function spClubGroup(name) {
   var n = (name || '').toLowerCase();
@@ -16308,7 +16346,12 @@ var _wgSelectedClubs = [];
 var _wgSwingType = null;
 
 function getWgSessions() { try { return JSON.parse(localStorage.getItem(_WG_KEY)) || []; } catch(e) { return []; } }
-function saveWgSessions(s) { localStorage.setItem(_WG_KEY, JSON.stringify(s)); }
+function saveWgSessions(s) {
+  localStorage.setItem(_WG_KEY, JSON.stringify(s));
+  if (currentUser) {
+    _sb.from('profiles').update({ wedge_gapping: s }).eq('id', currentUser.id).then(function(){}).catch(function(){});
+  }
+}
 
 function renderWgTab() {
   var list = document.getElementById('wgSessionList');
