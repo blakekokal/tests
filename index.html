@@ -15817,8 +15817,8 @@ function openClubDetail(name) {
       html += '<div style="text-align:center;background:#222;border-radius:8px;padding:10px;"><div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;">CARRY</div><div style="font-size:18px;font-weight:700;color:#fff;">' + (displayCarry !== '' ? displayCarry : '—') + '</div></div>';
       html += '<div style="text-align:center;background:#222;border-radius:8px;padding:10px;"><div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;">TOTAL</div><div style="font-size:18px;font-weight:700;color:#fff;">' + (total !== '' ? total : '—') + '</div></div>';
     } else {
-      html += '<div style="text-align:center;"><div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;">CARRY</div><input type="number" value="' + displayCarry + '" placeholder="—" min="0" max="400" onchange="updateBagClub(\'' + safe + '\',\'carry\',this.value);openClubDetail(\'' + safe + '\')" style="' + inStyle + '"></div>';
-      html += '<div style="text-align:center;"><div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;">TOTAL</div><input type="number" value="' + total + '" placeholder="—" min="0" max="450" onchange="updateBagClub(\'' + safe + '\',\'total\',this.value);openClubDetail(\'' + safe + '\')" style="' + inStyle + '"></div>';
+      html += '<div style="text-align:center;"><div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;">CARRY</div><input type="number" inputmode="numeric" value="' + displayCarry + '" placeholder="—" min="0" max="400" onchange="updateBagClub(\'' + safe + '\',\'carry\',this.value);openClubDetail(\'' + safe + '\')" style="' + inStyle + '"></div>';
+      html += '<div style="text-align:center;"><div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;">TOTAL</div><input type="number" inputmode="numeric" value="' + total + '" placeholder="—" min="0" max="450" onchange="updateBagClub(\'' + safe + '\',\'total\',this.value);openClubDetail(\'' + safe + '\')" style="' + inStyle + '"></div>';
     }
     html += '</div>';
   }
@@ -15828,7 +15828,7 @@ function openClubDetail(name) {
     var carry34 = (club.carry34 !== null && club.carry34 !== undefined) ? club.carry34 : '';
     html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">';
     html += '<div style="font-size:11px;color:#666;font-weight:700;">¾ CARRY</div>';
-    html += '<input type="number" value="' + carry34 + '" placeholder="—" min="0" max="400" onchange="updateBagClub(\'' + safe + '\',\'carry34\',this.value)" style="width:80px;height:32px;font-size:13px;font-weight:700;text-align:center;background:#222;border:1px solid #444;border-radius:8px;color:#fff;">';
+    html += '<input type="number" inputmode="numeric" value="' + carry34 + '" placeholder="—" min="0" max="400" onchange="updateBagClub(\'' + safe + '\',\'carry34\',this.value)" style="width:80px;height:32px;font-size:13px;font-weight:700;text-align:center;background:#222;border:1px solid #444;border-radius:8px;color:#fff;">';
     html += '</div>';
   }
 
@@ -16791,7 +16791,7 @@ function wgRenderInputs() {
       var inputs = '';
       for (var i = 0; i < shotCount; i++) {
         inputs += '<input type="number" id="wg_' + safeClub + '_' + si + '_' + i +
-          '" inputmode="decimal" placeholder="—" style="width:50px;height:34px;background:#111;border:1px solid #333;border-radius:6px;color:#e2e8f0;font-size:13px;font-weight:700;text-align:center;padding:0;">';
+          '" inputmode="numeric" placeholder="—" style="width:50px;height:34px;background:#111;border:1px solid #333;border-radius:6px;color:#e2e8f0;font-size:13px;font-weight:700;text-align:center;padding:0;">';
       }
       return '<div style="background:#1e1e1e;border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
         '<div style="font-size:11px;color:#888;font-weight:700;min-width:64px;">' + label + '</div>' +
