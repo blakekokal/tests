@@ -1350,7 +1350,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
     <button onclick="showStudentTab('rounds')" id="svTabRounds" style="flex:1;height:38px;font-size:10px;background:#222;border-radius:0;border:none;color:#888;font-weight:600;max-width:none;width:auto;padding:0;margin:0;">Rounds</button>
     <button onclick="showStudentTab('practice')" id="svTabPractice" style="flex:1;height:38px;font-size:10px;background:#222;border-radius:0;border:none;color:#888;font-weight:600;max-width:none;width:auto;padding:0;margin:0;">Practice</button>
     <button onclick="showStudentTab('notes')" id="svTabNotes" style="flex:1;height:38px;font-size:10px;background:#222;border-radius:0;border:none;color:#888;font-weight:600;max-width:none;width:auto;padding:0;margin:0;">Notes</button>
-    <button onclick="showStudentTab('misc')" id="svTabMisc" style="flex:1;height:38px;font-size:10px;background:#222;border-radius:0;border:none;color:#888;font-weight:600;max-width:none;width:auto;padding:0;margin:0;">Misc</button>
+    <button onclick="showStudentTab('misc')" id="svTabMisc" style="flex:1;height:38px;font-size:10px;background:#222;border-radius:0;border:none;color:#888;font-weight:600;max-width:none;width:auto;padding:0;margin:0;">Bag</button>
   </div>
   <div id="studentViewScroll" style="flex:1;overflow-y:auto;width:100%;display:flex;flex-direction:column;align-items:center;padding:12px 0 80px;">
     
@@ -1496,17 +1496,19 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
       </div>
     </div>
 
-    <!-- Student Misc Tab (Bag + Schedule) -->
+    <!-- Student Bag Tab (Bag, Find Yardages, Wedge Gapping, Speed + Schedule) -->
     <div id="svMiscTab" style="width:100%;max-width:360px;display:none;">
-      <!-- Toggle: Bag / Schedule -->
-      <div style="display:flex;gap:0;margin-bottom:12px;background:#111;border-radius:10px;overflow:hidden;border:1px solid #333;">
-        <button id="svMiscToggleBag" onclick="showSvMiscSubTab('bag')" style="flex:1;height:38px;font-size:13px;font-weight:700;background:#1d4ed8;border:none;color:#fff;cursor:pointer;">Student's Bag</button>
-        <button id="svMiscToggleSchedule" onclick="showSvMiscSubTab('schedule')" style="flex:1;height:38px;font-size:13px;font-weight:700;background:#111;border:none;color:#888;cursor:pointer;">Schedule</button>
+      <!-- 5-tab bar -->
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);width:100%;margin-bottom:12px;background:#1a1a1a;border-radius:10px;overflow:hidden;border:1px solid #333;">
+        <button id="svBagTabBag" onclick="showSvBagTab('bag')" style="height:38px;font-size:9px;font-weight:700;border:none;cursor:pointer;background:#7c3aed;color:#fff;padding:0 2px;">Bag</button>
+        <button id="svBagTabFY" onclick="showSvBagTab('fy')" style="height:38px;font-size:9px;font-weight:700;border:none;cursor:pointer;background:transparent;color:#888;padding:0 2px;">Yardages</button>
+        <button id="svBagTabWG" onclick="showSvBagTab('wg')" style="height:38px;font-size:9px;font-weight:700;border:none;cursor:pointer;background:transparent;color:#888;padding:0 2px;">Wedges</button>
+        <button id="svBagTabSp" onclick="showSvBagTab('sp')" style="height:38px;font-size:9px;font-weight:700;border:none;cursor:pointer;background:transparent;color:#888;padding:0 2px;">Speed</button>
+        <button id="svBagTabSched" onclick="showSvBagTab('sched')" style="height:38px;font-size:9px;font-weight:700;border:none;cursor:pointer;background:transparent;color:#888;padding:0 2px;">Schedule</button>
       </div>
 
-      <!-- Student Bag sub-tab -->
+      <!-- SUB-TAB 1: Student Bag -->
       <div id="svBagSubContent">
-        <!-- Add Club Section -->
         <div style="background:#1a1a1a;border-radius:14px;padding:16px;margin-bottom:16px;">
           <div style="font-size:12px;font-weight:700;color:#a78bfa;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Add Club</div>
           <select id="svBagClubName" style="width:100%;height:40px;font-size:14px;text-align:center;box-sizing:border-box;margin-bottom:8px;background:#222;color:#fff;border:1px solid #444;border-radius:8px;-webkit-appearance:none;appearance:none;">
@@ -1525,8 +1527,6 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
           <button onclick="addSvBagClub()" style="width:100%;height:42px;background:#7c3aed;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;">+ Add to Bag</button>
           <div id="svBagAddMsg" style="font-size:12px;min-height:16px;text-align:center;margin-top:6px;color:#4ade80;"></div>
         </div>
-
-        <!-- Club List -->
         <div id="svBagEmptyMsg" style="background:#1a1a1a;border-radius:12px;padding:24px;text-align:center;color:#555;font-size:13px;line-height:1.7;">
           No clubs in this student's bag yet.
         </div>
@@ -1540,7 +1540,201 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
         <div id="svBagSaveStatus" style="font-size:11px;min-height:14px;text-align:center;margin-top:8px;color:#555;"></div>
       </div>
 
-      <!-- Schedule sub-tab -->
+      <!-- SUB-TAB 2: Student Find Yardages -->
+      <div id="svFySubContent" style="display:none;width:100%;flex-direction:column;align-items:center;">
+        <div id="svFyStep1" style="width:100%;">
+          <div style="background:#1a1a1a;border-radius:14px;padding:16px;margin-bottom:12px;">
+            <div style="font-size:12px;font-weight:700;color:#a78bfa;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Select a Club</div>
+            <div id="svFyClubGrid" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"></div>
+            <div style="font-size:11px;color:#555;margin-bottom:8px;text-align:center;">— or add a new club —</div>
+            <select id="svFyNewClubSelect" style="width:100%;height:40px;font-size:14px;text-align:center;box-sizing:border-box;background:#222;color:#fff;border:1px solid #444;border-radius:8px;-webkit-appearance:none;appearance:none;">
+              <option value="" disabled selected>Select a club...</option>
+            </select>
+            <button onclick="svFyPickNewClub()" style="width:100%;height:38px;background:#7c3aed;border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;margin-top:8px;">+ Add & Select</button>
+          </div>
+        </div>
+        <div id="svFyStep2" style="width:100%;display:none;">
+          <div style="background:#1a1a1a;border-radius:14px;padding:16px;margin-bottom:12px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+              <button onclick="svFyBackToStep1()" style="background:#333;border:none;color:#fff;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;">←</button>
+              <div style="font-size:16px;font-weight:800;color:#e2e8f0;" id="svFySelectedClubName"></div>
+              <div style="width:32px;"></div>
+            </div>
+            <div style="font-size:12px;font-weight:700;color:#a78bfa;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">How many shots?</div>
+            <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;" id="svFyShotCountBtns"></div>
+          </div>
+        </div>
+        <div id="svFyStep3" style="width:100%;display:none;">
+          <div style="background:#1a1a1a;border-radius:14px;padding:16px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+              <button onclick="svFyBackToStep2()" style="background:#333;border:none;color:#fff;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;">←</button>
+              <div style="font-size:16px;font-weight:800;color:#e2e8f0;" id="svFyStep3ClubName"></div>
+              <div style="width:32px;"></div>
+            </div>
+            <div style="font-size:12px;font-weight:700;color:#a78bfa;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Enter Carry & Total for each shot</div>
+            <div style="display:grid;grid-template-columns:22px 1fr 1fr 70px;gap:4px;align-items:center;margin-bottom:4px;">
+              <div></div>
+              <div style="font-size:10px;color:#666;font-weight:600;text-align:center;">CARRY</div>
+              <div style="font-size:10px;color:#666;font-weight:600;text-align:center;">TOTAL</div>
+              <div style="font-size:10px;color:#4ade80;font-weight:600;text-align:center;">OFFLINE</div>
+            </div>
+            <div id="svFyShotInputs" style="display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto;margin-bottom:12px;"></div>
+            <button onclick="svFySaveShots()" style="width:100%;height:42px;background:#166534;border:none;border-radius:10px;color:#4ade80;font-size:14px;font-weight:700;cursor:pointer;">Save Yardages</button>
+            <div id="svFyMsg" style="font-size:12px;min-height:16px;text-align:center;margin-top:6px;color:#4ade80;"></div>
+          </div>
+        </div>
+        <!-- Conflict modal -->
+        <div id="svFyConflictModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;align-items:center;justify-content:center;padding:20px;">
+          <div style="background:#1a1a1a;border:1px solid #333;border-radius:14px;padding:20px;max-width:320px;width:100%;">
+            <div style="font-size:14px;font-weight:700;color:#e2e8f0;margin-bottom:12px;" id="svFyConflictMsg"></div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <button onclick="svFyResolveConflict('add')" style="height:40px;background:#166534;border:none;border-radius:10px;color:#4ade80;font-size:13px;font-weight:700;cursor:pointer;">Add to Existing</button>
+              <button onclick="svFyResolveConflict('replace')" style="height:40px;background:#7c3aed;border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">Replace All</button>
+              <button onclick="svFyResolveConflict('cancel')" style="height:40px;background:#333;border:none;border-radius:10px;color:#aaa;font-size:13px;font-weight:700;cursor:pointer;">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUB-TAB 3: Student Wedge Gapping -->
+      <div id="svWgSubContent" style="display:none;width:100%;flex-direction:column;align-items:center;">
+        <div id="svWgHistoryView" style="width:100%;padding:0 0 20px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:0 0 10px;">
+            <div style="font-size:16px;font-weight:800;color:#e2e8f0;">Wedge Gapping</div>
+            <button onclick="svWgStartNew()" style="background:#7c3aed;border:none;border-radius:10px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;padding:8px 14px;">+ New Session</button>
+          </div>
+          <div id="svWgSessionList"></div>
+        </div>
+        <div id="svWgEntryView" style="display:none;width:100%;padding:0 0 20px;">
+          <div id="svWgStep1">
+            <div style="display:flex;align-items:center;gap:8px;padding:0 0 10px;">
+              <button onclick="svWgCancelEntry()" style="background:#333;border:none;color:#fff;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;">←</button>
+              <div style="font-size:15px;font-weight:800;color:#e2e8f0;">Select Wedges</div>
+            </div>
+            <div style="font-size:11px;color:#666;margin-bottom:12px;">Pick 1–4 wedges. Brighter = in student's bag.</div>
+            <div id="svWgClubGrid" style="width:100%;margin-bottom:14px;"></div>
+            <div id="svWgStep1Msg" style="font-size:12px;color:#f87171;min-height:16px;margin-bottom:8px;"></div>
+            <button onclick="svWgNextStep1()" style="width:100%;height:42px;background:#7c3aed;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;">Next →</button>
+          </div>
+          <div id="svWgStep2" style="display:none;">
+            <div style="display:flex;align-items:center;gap:8px;padding:0 0 10px;">
+              <button onclick="svWgBackToStep1()" style="background:#333;border:none;color:#fff;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;">←</button>
+              <div style="font-size:15px;font-weight:800;color:#e2e8f0;">Session Setup</div>
+            </div>
+            <div style="background:#1a1a1a;border-radius:12px;padding:14px;margin-bottom:10px;">
+              <div style="font-size:11px;color:#888;margin-bottom:8px;">Shots per swing type</div>
+              <select id="svWgShotCount" style="width:100%;height:38px;background:#222;color:#fff;border:1px solid #444;border-radius:8px;font-size:14px;font-weight:700;padding:0 10px;">
+                <option value="1">1 shot</option>
+                <option value="2">2 shots</option>
+                <option value="3" selected>3 shots</option>
+                <option value="4">4 shots</option>
+                <option value="5">5 shots</option>
+              </select>
+            </div>
+            <div style="background:#1a1a1a;border-radius:12px;padding:14px;margin-bottom:14px;">
+              <div style="font-size:11px;color:#888;margin-bottom:10px;">Swing type</div>
+              <div style="display:flex;gap:8px;">
+                <button id="svWgTypeBtnPercent"  onclick="svWgSelectType('percent')"  style="flex:1;height:40px;background:#222;border:1px solid #444;border-radius:10px;color:#888;font-size:13px;font-weight:700;cursor:pointer;">Percent</button>
+                <button id="svWgTypeBtnFraction" onclick="svWgSelectType('fraction')" style="flex:1;height:40px;background:#222;border:1px solid #444;border-radius:10px;color:#888;font-size:13px;font-weight:700;cursor:pointer;">Fraction</button>
+                <button id="svWgTypeBtnBody"     onclick="svWgSelectType('body')"     style="flex:1;height:40px;background:#222;border:1px solid #444;border-radius:10px;color:#888;font-size:13px;font-weight:700;cursor:pointer;">Body</button>
+              </div>
+              <div id="svWgSwingPreview" style="font-size:11px;color:#666;margin-top:8px;text-align:center;min-height:14px;"></div>
+            </div>
+            <div id="svWgStep2Msg" style="font-size:12px;color:#f87171;min-height:16px;margin-bottom:8px;"></div>
+            <button onclick="svWgNextStep2()" style="width:100%;height:42px;background:#7c3aed;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;">Next →</button>
+          </div>
+          <div id="svWgStep3" style="display:none;">
+            <div style="display:flex;align-items:center;gap:8px;padding:0 0 10px;">
+              <button onclick="svWgBackToStep2()" style="background:#333;border:none;color:#fff;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;">←</button>
+              <div style="font-size:15px;font-weight:800;color:#e2e8f0;">Enter Carry (yds)</div>
+            </div>
+            <div id="svWgInputArea" style="display:flex;flex-direction:column;gap:12px;margin-bottom:14px;"></div>
+            <div id="svWgStep3Msg" style="font-size:12px;min-height:16px;margin-bottom:8px;color:#f87171;"></div>
+            <button onclick="svWgSaveSession()" style="width:100%;height:42px;background:#166534;border:none;border-radius:10px;color:#4ade80;font-size:14px;font-weight:700;cursor:pointer;">Save Session</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUB-TAB 4: Student Speed -->
+      <div id="svSpSubContent" style="display:none;width:100%;flex-direction:column;align-items:center;">
+        <div id="svSpHistoryView" style="width:100%;">
+          <button onclick="svSpStartNew()" style="width:100%;height:44px;background:#7c3aed;border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:14px;">+ New Speed Session</button>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px;justify-content:center;">
+            <select id="svSpClubFilterSel" onchange="svSpSetClubFilter(this.value)" style="background:#222;color:#fff;border:1px solid #444;border-radius:6px;padding:4px 6px;font-size:11px;">
+              <option value="all">All Clubs</option>
+              <option value="driver">Driver</option>
+              <option value="woods">Woods</option>
+              <option value="hybrids">Hybrids</option>
+              <option value="irons">Irons</option>
+              <option value="wedges">Wedges</option>
+            </select>
+            <select id="svSpDateFilterSel" onchange="svSpSetDateFilter(this.value)" style="background:#222;color:#fff;border:1px solid #444;border-radius:6px;padding:4px 6px;font-size:11px;">
+              <option value="all">All Time</option>
+              <option value="1mo">Last Month</option>
+              <option value="3mo">Last 3 Months</option>
+              <option value="6mo">Last 6 Months</option>
+              <option value="1yr">Last 12 Months</option>
+            </select>
+          </div>
+          <div id="svSpSummaryCard" style="background:#1a1a1a;border-radius:12px;padding:12px;margin-bottom:12px;display:none;">
+            <div style="font-size:11px;color:#a78bfa;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Filtered Averages</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;" id="svSpSummaryGrid"></div>
+          </div>
+          <div id="svSpSessionList" style="display:flex;flex-direction:column;gap:8px;"></div>
+        </div>
+        <div id="svSpEntryView" style="width:100%;display:none;">
+          <div id="svSpStep1">
+            <div style="background:#1a1a1a;border-radius:14px;padding:16px;margin-bottom:12px;">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                <button onclick="svSpCancelEntry()" style="background:#333;border:none;color:#fff;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;flex-shrink:0;">←</button>
+                <div style="font-size:15px;font-weight:800;color:#e2e8f0;">Select a Club</div>
+              </div>
+              <div id="svSpClubGrid" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"></div>
+              <div style="font-size:11px;color:#555;margin-bottom:8px;text-align:center;">— or add a new club —</div>
+              <select id="svSpNewClubSelect" style="width:100%;height:40px;font-size:14px;text-align:center;box-sizing:border-box;background:#222;color:#fff;border:1px solid #444;border-radius:8px;-webkit-appearance:none;appearance:none;">
+                <option value="" disabled selected>Select a club...</option>
+              </select>
+              <button onclick="svSpPickNewClub()" style="width:100%;height:38px;background:#7c3aed;border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;margin-top:8px;">+ Add & Select</button>
+            </div>
+          </div>
+          <div id="svSpStep2" style="display:none;">
+            <div style="background:#1a1a1a;border-radius:14px;padding:16px;margin-bottom:12px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                <button onclick="svSpBackToStep1()" style="background:#333;border:none;color:#fff;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;">←</button>
+                <div style="font-size:16px;font-weight:800;color:#e2e8f0;" id="svSpSelectedClubLabel"></div>
+                <div style="width:32px;"></div>
+              </div>
+              <div style="font-size:12px;font-weight:700;color:#a78bfa;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">How many swings?</div>
+              <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;" id="svSpShotCountBtns"></div>
+            </div>
+          </div>
+          <div id="svSpStep3" style="display:none;">
+            <div style="background:#1a1a1a;border-radius:14px;padding:16px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                <button onclick="svSpBackToStep2()" style="background:#333;border:none;color:#fff;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;">←</button>
+                <div style="font-size:15px;font-weight:800;color:#e2e8f0;" id="svSpStep3ClubLabel"></div>
+                <div style="width:32px;"></div>
+              </div>
+              <div style="display:grid;grid-template-columns:20px 1fr 1fr 1fr 1fr;gap:4px;align-items:center;margin-bottom:6px;">
+                <div></div>
+                <div style="font-size:9px;color:#f59e0b;font-weight:700;text-align:center;">CLB SPD</div>
+                <div style="font-size:9px;color:#60a5fa;font-weight:700;text-align:center;">BALL SPD</div>
+                <div style="font-size:9px;color:#e2e8f0;font-weight:700;text-align:center;">CARRY</div>
+                <div style="font-size:9px;color:#e2e8f0;font-weight:700;text-align:center;">TOTAL</div>
+              </div>
+              <div id="svSpShotInputs" style="display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto;margin-bottom:10px;"></div>
+              <div style="margin-bottom:10px;">
+                <div style="font-size:11px;color:#888;margin-bottom:4px;">Session note (optional)</div>
+                <input type="text" id="svSpSessionNote" placeholder="e.g. range session, warm day" style="width:100%;height:34px;background:#222;border:1px solid #333;border-radius:8px;color:#fff;font-size:12px;padding:0 10px;box-sizing:border-box;">
+              </div>
+              <button onclick="svSpSaveSession()" style="width:100%;height:42px;background:#166534;border:none;border-radius:10px;color:#4ade80;font-size:14px;font-weight:700;cursor:pointer;">Save Session</button>
+              <div id="svSpMsg" style="font-size:12px;min-height:16px;text-align:center;margin-top:6px;color:#4ade80;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUB-TAB 5: Schedule -->
       <div id="svScheduleSubContent" style="display:none;">
         <div style="background:#1a1a1a;border-radius:14px;padding:16px;margin-bottom:16px;">
           <div style="font-size:12px;font-weight:700;color:#a78bfa;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Add Upcoming Round</div>
@@ -9034,7 +9228,7 @@ function showStudentTab(tab) {
   if (tab === 'rounds')      loadStudentRounds();
   if (tab === 'practice')    { showSvPracticeSubTab('combines'); loadStudentCombines(); }
   if (tab === 'notes')       loadSvNotes();
-  if (tab === 'misc')        { showSvMiscSubTab('bag'); }
+  if (tab === 'misc')        { showSvBagTab('bag'); }
 }
 
 /* ── Student Performance Analysis ─────────────────────────────── */
@@ -15137,24 +15331,636 @@ function showSvPracticeSubTab(tab) {
   }
 }
 
-function showSvMiscSubTab(tab) {
-  var bagEl = document.getElementById('svBagSubContent');
-  var schedEl = document.getElementById('svScheduleSubContent');
-  var btnB = document.getElementById('svMiscToggleBag');
-  var btnS = document.getElementById('svMiscToggleSchedule');
-  if (tab === 'bag') {
-    if (bagEl) bagEl.style.display = 'block';
-    if (schedEl) schedEl.style.display = 'none';
-    if (btnB) { btnB.style.background = '#1d4ed8'; btnB.style.color = '#fff'; }
-    if (btnS) { btnS.style.background = '#111'; btnS.style.color = '#888'; }
-    loadStudentBag();
-  } else {
-    if (bagEl) bagEl.style.display = 'none';
-    if (schedEl) schedEl.style.display = 'block';
-    if (btnB) { btnB.style.background = '#111'; btnB.style.color = '#888'; }
-    if (btnS) { btnS.style.background = '#1d4ed8'; btnS.style.color = '#fff'; }
-    loadStudentSchedule();
+var _svCurrentBagTab = 'bag';
+
+function showSvBagTab(tab) {
+  _svCurrentBagTab = tab;
+  var panels = { bag: 'svBagSubContent', fy: 'svFySubContent', wg: 'svWgSubContent', sp: 'svSpSubContent', sched: 'svScheduleSubContent' };
+  var btns   = { bag: 'svBagTabBag', fy: 'svBagTabFY', wg: 'svBagTabWG', sp: 'svBagTabSp', sched: 'svBagTabSched' };
+  Object.keys(panels).forEach(function(key) {
+    var el = document.getElementById(panels[key]);
+    var btn = document.getElementById(btns[key]);
+    if (el) el.style.display = key === tab ? (key === 'bag' || key === 'sched' ? 'block' : 'flex') : 'none';
+    if (btn) { btn.style.background = key === tab ? '#7c3aed' : 'transparent'; btn.style.color = key === tab ? '#fff' : '#888'; }
+  });
+  if (tab === 'bag')   loadStudentBag();
+  if (tab === 'fy')    svFyShowStep1();
+  if (tab === 'wg')    { document.getElementById('svWgHistoryView').style.display = ''; document.getElementById('svWgEntryView').style.display = 'none'; svWgRenderHistory(); }
+  if (tab === 'sp')    { document.getElementById('svSpHistoryView').style.display = ''; document.getElementById('svSpEntryView').style.display = 'none'; svSpRenderHistory(); }
+  if (tab === 'sched') loadStudentSchedule();
+}
+
+/* ── Student Find Yardages ─────────────────────────────────────── */
+var _svFySelectedClub = null;
+var _svFyShotCount = 5;
+var _svFyPendingShots = null;
+
+function svFyShowStep1() {
+  document.getElementById('svFyStep1').style.display = '';
+  document.getElementById('svFyStep2').style.display = 'none';
+  document.getElementById('svFyStep3').style.display = 'none';
+  svFyRenderClubGrid();
+  svFyPopulateNewClubDropdown();
+}
+
+function svFyBackToStep1() { _svFySelectedClub = null; svFyShowStep1(); }
+function svFyBackToStep2() { document.getElementById('svFyStep2').style.display = ''; document.getElementById('svFyStep3').style.display = 'none'; svFyRenderShotCountBtns(); }
+
+function svFyRenderClubGrid() {
+  var clubs = (_svBagClubs || []).slice();
+  var grid = document.getElementById('svFyClubGrid');
+  if (!grid) return;
+  if (clubs.length === 0) {
+    grid.innerHTML = '<div style="color:#555;font-size:13px;width:100%;text-align:center;padding:8px 0;">No clubs in student\'s bag yet. Add one below.</div>';
+    return;
   }
+  grid.innerHTML = clubs.map(function(c) {
+    var safe = c.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return '<button onclick="svFySelectClub(\'' + safe + '\')" style="padding:8px 14px;background:#222;border:1px solid #444;border-radius:10px;color:#e2e8f0;font-size:13px;font-weight:700;cursor:pointer;">' + c.name + '</button>';
+  }).join('');
+}
+
+function svFyPopulateNewClubDropdown() {
+  var sel = document.getElementById('svFyNewClubSelect');
+  if (!sel) return;
+  var clubs = (_svBagClubs || []);
+  var inBag = {};
+  clubs.forEach(function(c) { inBag[c.name.toLowerCase()] = true; });
+  var opts = '<option value="" disabled selected>Select a club...</option>';
+  _BAG_ORDER.forEach(function(name) {
+    if (!inBag[name.toLowerCase()]) opts += '<option value="' + name + '">' + name + '</option>';
+  });
+  sel.innerHTML = opts;
+}
+
+function svFyPickNewClub() {
+  var sel = document.getElementById('svFyNewClubSelect');
+  var name = sel ? sel.value : '';
+  if (!name) return;
+  if (!_svBagClubs.some(function(c) { return c.name.toLowerCase() === name.toLowerCase(); })) {
+    _svBagClubs.push({ name: name, carry: null, total: null });
+    _svBagClubs = sortBagClubs(_svBagClubs);
+    saveSvBagClubs();
+  }
+  svFySelectClub(name);
+}
+
+function svFySelectClub(name) {
+  _svFySelectedClub = name;
+  document.getElementById('svFySelectedClubName').textContent = name;
+  document.getElementById('svFyStep1').style.display = 'none';
+  document.getElementById('svFyStep2').style.display = '';
+  document.getElementById('svFyStep3').style.display = 'none';
+  svFyRenderShotCountBtns();
+}
+
+function svFyRenderShotCountBtns() {
+  var container = document.getElementById('svFyShotCountBtns');
+  if (!container) return;
+  var counts = [3, 5, 10, 15, 20];
+  container.innerHTML = counts.map(function(n) {
+    var active = n === _svFyShotCount;
+    return '<button onclick="svFyPickShotCount(' + n + ')" style="width:52px;height:44px;font-size:16px;font-weight:800;border-radius:10px;border:2px solid ' +
+      (active ? '#7c3aed' : '#444') + ';background:' + (active ? '#7c3aed' : '#222') + ';color:' +
+      (active ? '#fff' : '#aaa') + ';cursor:pointer;">' + n + '</button>';
+  }).join('');
+  container.innerHTML += '<button onclick="svFyGoToStep3()" style="width:100%;height:42px;margin-top:8px;background:#166534;border:none;border-radius:10px;color:#4ade80;font-size:14px;font-weight:700;cursor:pointer;">Enter Shots →</button>';
+}
+
+function svFyPickShotCount(n) { _svFyShotCount = n; svFyRenderShotCountBtns(); }
+
+function svFyGoToStep3() {
+  document.getElementById('svFyStep2').style.display = 'none';
+  document.getElementById('svFyStep3').style.display = '';
+  document.getElementById('svFyStep3ClubName').textContent = _svFySelectedClub;
+  svFyRenderShotInputs();
+}
+
+function svFyRenderShotInputs() {
+  var container = document.getElementById('svFyShotInputs');
+  if (!container) return;
+  var distStyle = 'height:36px;font-size:13px;font-weight:700;text-align:center;background:#222;border:1px solid #333;border-radius:8px;color:#fff;width:100%;box-sizing:border-box;';
+  var offStyle = 'height:36px;font-size:12px;font-weight:700;text-align:center;background:#181f18;border:1px solid #2a3a2a;border-radius:8px;color:#4ade80;width:100%;box-sizing:border-box;';
+  var html = '';
+  for (var i = 0; i < _svFyShotCount; i++) {
+    html += '<div style="display:grid;grid-template-columns:22px 1fr 1fr 70px;gap:4px;align-items:center;">' +
+      '<div style="font-size:11px;color:#555;font-weight:700;text-align:center;">' + (i + 1) + '</div>' +
+      '<input type="number" id="svFyCarry_' + i + '" placeholder="—" min="0" max="400" style="' + distStyle + '">' +
+      '<input type="number" id="svFyTotal_' + i + '" placeholder="—" min="0" max="450" style="' + distStyle + '">' +
+      '<input type="number" id="svFyOff_' + i + '" placeholder="0" min="-99" max="99" style="' + offStyle + '">' +
+      '</div>';
+  }
+  container.innerHTML = html;
+  document.getElementById('svFyMsg').textContent = '';
+}
+
+function svFySaveShots() {
+  var msg = document.getElementById('svFyMsg');
+  var newCarryShots = [];
+  var newTotalShots = [];
+  for (var i = 0; i < _svFyShotCount; i++) {
+    var carry = (function(el){ return el && el.value !== '' ? parseInt(el.value) : null; })(document.getElementById('svFyCarry_' + i));
+    var total = (function(el){ return el && el.value !== '' ? parseInt(el.value) : null; })(document.getElementById('svFyTotal_' + i));
+    var totalOff = (function(el){ return el && el.value !== '' ? parseFloat(el.value) : null; })(document.getElementById('svFyOff_' + i));
+    var carryOff = null;
+    if (totalOff !== null && total !== null && total > 0 && carry !== null) {
+      carryOff = Math.round(totalOff * (carry / total) * 10) / 10;
+    }
+    if (carry !== null) newCarryShots.push({ total: carry, side: carryOff !== null ? carryOff : 0, target: carry });
+    if (total !== null) newTotalShots.push({ total: total, side: totalOff !== null ? totalOff : 0, target: total });
+  }
+  if (newCarryShots.length === 0 && newTotalShots.length === 0) {
+    msg.style.color = '#f87171'; msg.textContent = 'Enter at least one shot.'; return;
+  }
+  var club = _svBagClubs.find(function(c) { return c.name === _svFySelectedClub; });
+  if (club && club.shots && club.shots.length > 0) {
+    _svFyPendingShots = { carry: newCarryShots, total: newTotalShots };
+    document.getElementById('svFyConflictMsg').textContent =
+      _svFySelectedClub + ' already has ' + club.shots.length + ' shot(s). Add to existing or replace?';
+    document.getElementById('svFyConflictModal').style.display = 'flex';
+    return;
+  }
+  svFyApplyShots(newCarryShots, newTotalShots, 'replace');
+}
+
+function svFyResolveConflict(action) {
+  document.getElementById('svFyConflictModal').style.display = 'none';
+  if (action === 'cancel') { _svFyPendingShots = null; return; }
+  if (_svFyPendingShots) {
+    svFyApplyShots(_svFyPendingShots.carry, _svFyPendingShots.total, action);
+    _svFyPendingShots = null;
+  }
+}
+
+function svFyApplyShots(newCarryShots, newTotalShots, mode) {
+  var club = _svBagClubs.find(function(c) { return c.name === _svFySelectedClub; });
+  if (!club) {
+    club = { name: _svFySelectedClub, carry: null, total: null };
+    _svBagClubs.push(club);
+  }
+  if (mode === 'add') {
+    club.shots = (club.shots || []).concat(newCarryShots);
+    if (newTotalShots.length > 0) club.totalShots = (club.totalShots || []).concat(newTotalShots);
+  } else {
+    club.shots = newCarryShots;
+    club.totalShots = newTotalShots.length > 0 ? newTotalShots : null;
+  }
+  var allCarry = club.shots || [];
+  var allTotal = club.totalShots || [];
+  if (allCarry.length > 0) club.carry = Math.round(allCarry.reduce(function(s, v) { return s + v.total; }, 0) / allCarry.length);
+  if (allTotal.length > 0) club.total = Math.round(allTotal.reduce(function(s, v) { return s + v.total; }, 0) / allTotal.length);
+  else if (allCarry.length > 0) club.total = club.carry;
+  _svBagClubs = sortBagClubs(_svBagClubs);
+  saveSvBagClubs();
+  var msg = document.getElementById('svFyMsg');
+  msg.style.color = '#4ade80';
+  msg.textContent = 'Saved! ' + _svFySelectedClub + ': ' + (club.carry || '—') + ' carry / ' + (club.total || '—') + ' total';
+  setTimeout(function() { svFyShowStep1(); }, 1800);
+}
+
+/* ── Student Wedge Gapping ─────────────────────────────────────── */
+var _svWgSelectedClubs = [];
+var _svWgSwingType = null;
+
+function svWgGetSessions() {
+  if (!_currentStudentId) return [];
+  try { return JSON.parse(localStorage.getItem('svWedgeGap_' + _currentStudentId)) || []; } catch(e) { return []; }
+}
+function svWgSaveSessions(s) {
+  if (!_currentStudentId) return;
+  localStorage.setItem('svWedgeGap_' + _currentStudentId, JSON.stringify(s));
+}
+
+function svWgRenderHistory() {
+  var list = document.getElementById('svWgSessionList');
+  if (!list) return;
+  var sessions = svWgGetSessions();
+  if (sessions.length === 0) {
+    list.innerHTML = '<div style="background:#1a1a1a;border-radius:12px;padding:24px;text-align:center;color:#555;font-size:13px;">No sessions yet. Tap + New Session to start.</div>';
+    return;
+  }
+  list.innerHTML = sessions.slice().reverse().map(function(s) {
+    var swingLabels = WG_SWINGS[s.swingType] || [];
+    var gridCols = '52px ' + swingLabels.map(function(){ return '1fr'; }).join(' ');
+    var d = new Date(s.date + 'T12:00:00');
+    var dateStr = d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+    var typeLabel = s.swingType === 'percent' ? 'Percent' : s.swingType === 'fraction' ? 'Fraction' : 'Body';
+    var cells = '';
+    cells += '<div style="font-size:9px;font-weight:700;color:#555;padding:3px 2px;">Club</div>';
+    swingLabels.forEach(function(l) {
+      cells += '<div style="font-size:9px;font-weight:700;color:#555;text-align:center;padding:3px 2px;">' + l + '</div>';
+    });
+    s.clubs.forEach(function(club) {
+      var clubData = s.results[club] || {};
+      cells += '<div style="font-size:13px;font-weight:800;color:#a78bfa;padding:4px 3px;">' + club + '</div>';
+      swingLabels.forEach(function(l, i) {
+        var entry = clubData['sw' + i];
+        var avg = entry && entry.avg != null ? entry.avg : '—';
+        cells += '<div style="font-size:13px;font-weight:700;color:#e2e8f0;text-align:center;padding:4px 3px;">' + avg + '</div>';
+      });
+    });
+    return '<div style="background:#1a1a1a;border-radius:12px;padding:12px;margin-bottom:8px;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
+        '<div style="font-size:11px;color:#555;">' + dateStr + ' · ' + s.clubs.join(', ') + ' · ' + typeLabel + '</div>' +
+        '<button onclick="svWgDeleteSession(\'' + s.id + '\')" style="background:#2a1515;border:1px solid #5a2020;border-radius:6px;color:#f87171;font-size:13px;cursor:pointer;width:26px;height:26px;padding:0;display:flex;align-items:center;justify-content:center;">×</button>' +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:' + gridCols + ';gap:3px 6px;">' + cells + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function svWgDeleteSession(id) {
+  if (!confirm('Delete this wedge gapping session?')) return;
+  svWgSaveSessions(svWgGetSessions().filter(function(s){ return s.id !== id; }));
+  svWgRenderHistory();
+}
+
+function svWgStartNew() {
+  _svWgSelectedClubs = [];
+  _svWgSwingType = null;
+  document.getElementById('svWgHistoryView').style.display = 'none';
+  document.getElementById('svWgEntryView').style.display = '';
+  document.getElementById('svWgStep1').style.display = '';
+  document.getElementById('svWgStep2').style.display = 'none';
+  document.getElementById('svWgStep3').style.display = 'none';
+  document.getElementById('svWgStep1Msg').textContent = '';
+  svWgRenderClubGrid();
+}
+
+function svWgCancelEntry() {
+  document.getElementById('svWgEntryView').style.display = 'none';
+  document.getElementById('svWgHistoryView').style.display = '';
+  svWgRenderHistory();
+}
+
+function svWgRenderClubGrid() {
+  var grid = document.getElementById('svWgClubGrid');
+  if (!grid) return;
+  var bagNames = (_svBagClubs || []).map(function(c){ return c.name; });
+  function btn(w) {
+    var inBag = bagNames.indexOf(w) >= 0;
+    var sel   = _svWgSelectedClubs.indexOf(w) >= 0;
+    return '<button onclick="svWgToggleClub(\'' + w + '\')" style="' +
+      'flex:1;min-width:0;height:36px;font-size:12px;font-weight:700;border-radius:8px;cursor:pointer;' +
+      'background:' + (sel ? '#7c3aed' : '#222') + ';' +
+      'border:1px solid ' + (sel ? '#7c3aed' : inBag ? '#555' : '#2a2a2a') + ';' +
+      'color:' + (sel ? '#fff' : inBag ? '#e2e8f0' : '#444') + ';">' + w + '</button>';
+  }
+  grid.innerHTML =
+    '<div style="width:100%;">' +
+      '<div style="font-size:9px;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Named</div>' +
+      '<div style="display:flex;gap:6px;margin-bottom:10px;">' + WG_WEDGE_NAMED.map(btn).join('') + '</div>' +
+      '<div style="font-size:9px;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Degree</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">' + WG_WEDGE_DEGREE.map(btn).join('') + '</div>' +
+    '</div>';
+}
+
+function svWgToggleClub(name) {
+  var idx = _svWgSelectedClubs.indexOf(name);
+  if (idx >= 0) { _svWgSelectedClubs.splice(idx, 1); }
+  else {
+    if (_svWgSelectedClubs.length >= 4) { document.getElementById('svWgStep1Msg').textContent = 'Max 4 wedges.'; return; }
+    _svWgSelectedClubs.push(name);
+  }
+  document.getElementById('svWgStep1Msg').textContent = '';
+  svWgRenderClubGrid();
+}
+
+function svWgNextStep1() {
+  if (_svWgSelectedClubs.length === 0) { document.getElementById('svWgStep1Msg').textContent = 'Select at least 1 wedge.'; return; }
+  document.getElementById('svWgStep1').style.display = 'none';
+  document.getElementById('svWgStep2').style.display = '';
+  document.getElementById('svWgStep2Msg').textContent = '';
+  svWgUpdateTypeButtons();
+}
+
+function svWgBackToStep1() { document.getElementById('svWgStep2').style.display = 'none'; document.getElementById('svWgStep1').style.display = ''; }
+
+function svWgSelectType(type) { _svWgSwingType = type; svWgUpdateTypeButtons(); }
+
+function svWgUpdateTypeButtons() {
+  ['percent','fraction','body'].forEach(function(t) {
+    var btn = document.getElementById('svWgTypeBtn' + t.charAt(0).toUpperCase() + t.slice(1));
+    if (!btn) return;
+    btn.style.background  = _svWgSwingType === t ? '#7c3aed' : '#222';
+    btn.style.borderColor = _svWgSwingType === t ? '#7c3aed' : '#444';
+    btn.style.color       = _svWgSwingType === t ? '#fff'    : '#888';
+  });
+  var preview = document.getElementById('svWgSwingPreview');
+  if (preview) preview.textContent = _svWgSwingType ? WG_SWINGS[_svWgSwingType].join(' · ') : '';
+}
+
+function svWgNextStep2() {
+  if (!_svWgSwingType) { document.getElementById('svWgStep2Msg').textContent = 'Select a swing type.'; return; }
+  document.getElementById('svWgStep2').style.display = 'none';
+  document.getElementById('svWgStep3').style.display = '';
+  document.getElementById('svWgStep3Msg').textContent = '';
+  svWgRenderInputs();
+}
+
+function svWgBackToStep2() { document.getElementById('svWgStep3').style.display = 'none'; document.getElementById('svWgStep2').style.display = ''; }
+
+function svWgRenderInputs() {
+  var shotCount = parseInt(document.getElementById('svWgShotCount').value) || 3;
+  var swings = WG_SWINGS[_svWgSwingType];
+  var area = document.getElementById('svWgInputArea');
+  if (!area) return;
+  area.innerHTML = _svWgSelectedClubs.map(function(club) {
+    var safeClub = club.replace(/[^a-zA-Z0-9]/g, '_');
+    var blocks = swings.map(function(label, si) {
+      var inputs = '';
+      for (var i = 0; i < shotCount; i++) {
+        inputs += '<input type="number" id="svWg_' + safeClub + '_' + si + '_' + i +
+          '" inputmode="decimal" placeholder="—" style="width:50px;height:34px;background:#111;border:1px solid #333;border-radius:6px;color:#e2e8f0;font-size:13px;font-weight:700;text-align:center;padding:0;">';
+      }
+      return '<div style="background:#1e1e1e;border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
+        '<div style="font-size:11px;color:#888;font-weight:700;min-width:64px;">' + label + '</div>' +
+        '<div style="display:flex;gap:5px;flex-wrap:wrap;">' + inputs + '</div>' +
+      '</div>';
+    }).join('');
+    return '<div style="background:#1a1a1a;border-radius:12px;padding:12px;">' +
+      '<div style="font-size:14px;font-weight:800;color:#a78bfa;margin-bottom:8px;">' + club + '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:6px;">' + blocks + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function svWgSaveSession() {
+  var shotCount = parseInt(document.getElementById('svWgShotCount').value) || 3;
+  var swings = WG_SWINGS[_svWgSwingType];
+  var results = {};
+  var hasAny = false;
+  _svWgSelectedClubs.forEach(function(club) {
+    var safeClub = club.replace(/[^a-zA-Z0-9]/g, '_');
+    results[club] = {};
+    swings.forEach(function(label, si) {
+      var shots = [];
+      for (var i = 0; i < shotCount; i++) {
+        var el = document.getElementById('svWg_' + safeClub + '_' + si + '_' + i);
+        var val = el && el.value !== '' ? parseInt(el.value) : null;
+        if (val !== null && !isNaN(val)) { shots.push(val); hasAny = true; }
+      }
+      var avg = shots.length ? Math.round(shots.reduce(function(a,v){ return a+v; },0) / shots.length) : null;
+      results[club]['sw' + si] = { shots: shots, avg: avg };
+    });
+  });
+  if (!hasAny) {
+    var msg = document.getElementById('svWgStep3Msg');
+    msg.style.color = '#f87171'; msg.textContent = 'Enter at least one carry distance.'; return;
+  }
+  var today = new Date();
+  var dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+  var session = { id: Date.now().toString(), date: dateStr, clubs: _svWgSelectedClubs.slice(), swingType: _svWgSwingType, shotsPerSwing: shotCount, results: results };
+  var sessions = svWgGetSessions();
+  sessions.push(session);
+  svWgSaveSessions(sessions);
+  var msg = document.getElementById('svWgStep3Msg');
+  msg.style.color = '#4ade80'; msg.textContent = 'Session saved!';
+  setTimeout(function() { svWgCancelEntry(); }, 1200);
+}
+
+/* ── Student Speed Sessions ────────────────────────────────────── */
+var _svSpSelectedClub = null;
+var _svSpShotCount = 5;
+var _svSpClubFilter = 'all';
+var _svSpDateFilter = 'all';
+
+function svSpGetSessions() {
+  if (!_currentStudentId) return [];
+  try { return JSON.parse(localStorage.getItem('svSpeed_' + _currentStudentId)) || []; } catch(e) { return []; }
+}
+function svSpSaveSessions(s) {
+  if (!_currentStudentId) return;
+  localStorage.setItem('svSpeed_' + _currentStudentId, JSON.stringify(s));
+}
+
+function svSpSetClubFilter(v) { _svSpClubFilter = v; svSpRenderHistory(); }
+function svSpSetDateFilter(v) { _svSpDateFilter = v; svSpRenderHistory(); }
+
+function svSpFilteredSessions() {
+  var sessions = svSpGetSessions();
+  var now = new Date();
+  return sessions.filter(function(s) {
+    if (_svSpClubFilter !== 'all') {
+      if (spClubGroup(s.club) !== _svSpClubFilter) return false;
+    }
+    if (_svSpDateFilter !== 'all') {
+      var days = { '1mo': 30, '3mo': 90, '6mo': 180, '1yr': 365 }[_svSpDateFilter];
+      var cutoff = new Date(now); cutoff.setDate(cutoff.getDate() - days);
+      if (new Date(s.date) < cutoff) return false;
+    }
+    return true;
+  }).sort(function(a,b){ return new Date(b.date) - new Date(a.date); });
+}
+
+function svSpRenderHistory() {
+  var cs = document.getElementById('svSpClubFilterSel');
+  var ds = document.getElementById('svSpDateFilterSel');
+  if (cs) cs.value = _svSpClubFilter;
+  if (ds) ds.value = _svSpDateFilter;
+  var filtered = svSpFilteredSessions();
+  var summary = document.getElementById('svSpSummaryCard');
+  var grid = document.getElementById('svSpSummaryGrid');
+  if (filtered.length === 0) {
+    if (summary) summary.style.display = 'none';
+  } else {
+    if (summary) summary.style.display = 'block';
+    var metrics = [
+      { key: 'avgClubSpeed', label: 'Club Spd', color: '#f59e0b' },
+      { key: 'avgBallSpeed', label: 'Ball Spd', color: '#60a5fa' },
+      { key: 'avgCarry',     label: 'Carry',    color: '#e2e8f0' },
+      { key: 'avgTotal',     label: 'Total',    color: '#e2e8f0' }
+    ];
+    if (grid) grid.innerHTML = metrics.map(function(m) {
+      var val = spAvg(filtered, m.key);
+      return '<div style="text-align:center;background:#222;border-radius:8px;padding:8px 4px;">' +
+        '<div style="font-size:9px;color:#666;font-weight:600;margin-bottom:3px;">' + m.label + '</div>' +
+        '<div style="font-size:16px;font-weight:800;color:' + m.color + ';">' + (val !== null ? val : '—') + '</div>' +
+        spTrend(filtered, m.key) +
+        '</div>';
+    }).join('');
+  }
+  var list = document.getElementById('svSpSessionList');
+  if (!list) return;
+  if (filtered.length === 0) {
+    list.innerHTML = '<div style="background:#1a1a1a;border-radius:12px;padding:24px;text-align:center;color:#555;font-size:13px;">' +
+      (svSpGetSessions().length === 0 ? 'No sessions yet. Tap + New Speed Session to start.' : 'No sessions match your filters.') + '</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(function(s) {
+    var d = new Date(s.date + 'T12:00:00');
+    var dateStr = d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+    var vals = [
+      s.avgClubSpeed != null ? '<span style="color:#f59e0b;">' + s.avgClubSpeed + '</span> cs' : '',
+      s.avgBallSpeed != null ? '<span style="color:#60a5fa;">' + s.avgBallSpeed + '</span> bs' : '',
+      s.avgCarry     != null ? s.avgCarry + ' carry' : '',
+      s.avgTotal     != null ? s.avgTotal + ' total' : ''
+    ].filter(Boolean).join(' · ');
+    return '<div style="background:#1a1a1a;border-radius:12px;padding:12px;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">' +
+        '<div style="font-size:15px;font-weight:800;color:#e2e8f0;">' + s.club + '</div>' +
+        '<button onclick="svSpDeleteSession(\'' + s.id + '\')" style="background:#2a1515;border:1px solid #5a2020;border-radius:6px;color:#f87171;font-size:13px;cursor:pointer;width:26px;height:26px;padding:0;display:flex;align-items:center;justify-content:center;flex-shrink:0;">×</button>' +
+      '</div>' +
+      '<div style="font-size:12px;color:#888;margin-bottom:2px;">' + dateStr + (s.note ? ' · ' + s.note : '') + '</div>' +
+      '<div style="font-size:12px;color:#aaa;">' + vals + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function svSpDeleteSession(id) {
+  if (!confirm('Delete this speed session?')) return;
+  svSpSaveSessions(svSpGetSessions().filter(function(s){ return s.id !== id; }));
+  svSpRenderHistory();
+}
+
+function svSpStartNew() {
+  _svSpSelectedClub = null;
+  _svSpShotCount = 5;
+  document.getElementById('svSpHistoryView').style.display = 'none';
+  document.getElementById('svSpEntryView').style.display = '';
+  document.getElementById('svSpStep1').style.display = '';
+  document.getElementById('svSpStep2').style.display = 'none';
+  document.getElementById('svSpStep3').style.display = 'none';
+  svSpPopulateClubGrid();
+}
+
+function svSpCancelEntry() {
+  var noteEl = document.getElementById('svSpSessionNote');
+  if (noteEl) noteEl.value = '';
+  document.getElementById('svSpEntryView').style.display = 'none';
+  document.getElementById('svSpHistoryView').style.display = '';
+  svSpRenderHistory();
+}
+
+function svSpPopulateClubGrid() {
+  var clubs = (_svBagClubs || []).slice();
+  var grid = document.getElementById('svSpClubGrid');
+  if (!grid) return;
+  if (clubs.length === 0) {
+    grid.innerHTML = '<div style="color:#555;font-size:13px;width:100%;text-align:center;padding:8px 0;">No clubs in student\'s bag. Add one below.</div>';
+    return;
+  }
+  grid.innerHTML = clubs.map(function(c) {
+    var safe = c.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return '<button onclick="svSpSelectClub(\'' + safe + '\')" style="padding:8px 14px;background:#222;border:1px solid #444;border-radius:10px;color:#e2e8f0;font-size:13px;font-weight:700;cursor:pointer;">' + c.name + '</button>';
+  }).join('');
+  var sel = document.getElementById('svSpNewClubSelect');
+  if (sel) {
+    var inBag = {};
+    clubs.forEach(function(c) { inBag[c.name.toLowerCase()] = true; });
+    var opts = '<option value="" disabled selected>Select a club...</option>';
+    _BAG_ORDER.forEach(function(name) {
+      if (!inBag[name.toLowerCase()]) opts += '<option value="' + name + '">' + name + '</option>';
+    });
+    sel.innerHTML = opts;
+  }
+}
+
+function svSpPickNewClub() {
+  var sel = document.getElementById('svSpNewClubSelect');
+  var name = sel ? sel.value : '';
+  if (!name) return;
+  if (!_svBagClubs.some(function(c) { return c.name.toLowerCase() === name.toLowerCase(); })) {
+    _svBagClubs.push({ name: name, carry: null, total: null });
+    _svBagClubs = sortBagClubs(_svBagClubs);
+    saveSvBagClubs();
+  }
+  svSpSelectClub(name);
+}
+
+function svSpSelectClub(name) {
+  _svSpSelectedClub = name;
+  document.getElementById('svSpSelectedClubLabel').textContent = name;
+  document.getElementById('svSpStep3ClubLabel').textContent = name;
+  document.getElementById('svSpStep1').style.display = 'none';
+  document.getElementById('svSpStep2').style.display = '';
+  document.getElementById('svSpStep3').style.display = 'none';
+  svSpRenderShotCountBtns();
+}
+
+function svSpBackToStep1() {
+  _svSpSelectedClub = null;
+  document.getElementById('svSpStep2').style.display = 'none';
+  document.getElementById('svSpStep1').style.display = '';
+}
+
+function svSpRenderShotCountBtns() {
+  var container = document.getElementById('svSpShotCountBtns');
+  if (!container) return;
+  var counts = [3, 5, 10, 15, 20];
+  container.innerHTML = counts.map(function(n) {
+    var active = n === _svSpShotCount;
+    return '<button onclick="svSpPickShotCount(' + n + ')" style="width:52px;height:44px;font-size:16px;font-weight:800;border-radius:10px;border:2px solid ' +
+      (active ? '#7c3aed' : '#444') + ';background:' + (active ? '#7c3aed' : '#222') + ';color:' +
+      (active ? '#fff' : '#aaa') + ';cursor:pointer;">' + n + '</button>';
+  }).join('');
+  container.innerHTML += '<button onclick="svSpGoToStep3()" style="width:100%;height:42px;margin-top:8px;background:#166534;border:none;border-radius:10px;color:#4ade80;font-size:14px;font-weight:700;cursor:pointer;">Enter Swings →</button>';
+}
+
+function svSpPickShotCount(n) { _svSpShotCount = n; svSpRenderShotCountBtns(); }
+
+function svSpGoToStep3() {
+  document.getElementById('svSpStep2').style.display = 'none';
+  document.getElementById('svSpStep3').style.display = '';
+  svSpRenderShotInputs();
+}
+
+function svSpBackToStep2() {
+  document.getElementById('svSpStep3').style.display = 'none';
+  document.getElementById('svSpStep2').style.display = '';
+  svSpRenderShotCountBtns();
+}
+
+function svSpRenderShotInputs() {
+  var container = document.getElementById('svSpShotInputs');
+  if (!container) return;
+  var s1 = 'height:34px;font-size:12px;font-weight:700;text-align:center;background:#222;border:1px solid #333;border-radius:8px;color:#fff;width:100%;box-sizing:border-box;';
+  var html = '';
+  for (var i = 0; i < _svSpShotCount; i++) {
+    html += '<div style="display:grid;grid-template-columns:20px 1fr 1fr 1fr 1fr;gap:4px;align-items:center;">' +
+      '<div style="font-size:11px;color:#555;font-weight:700;text-align:center;">' + (i + 1) + '</div>' +
+      '<input type="number" id="svSpClubSpd_' + i + '" placeholder="—" style="' + s1 + '">' +
+      '<input type="number" id="svSpBallSpd_' + i + '" placeholder="—" style="' + s1 + '">' +
+      '<input type="number" id="svSpCarry_' + i + '" placeholder="—" style="' + s1 + '">' +
+      '<input type="number" id="svSpTotal_' + i + '" placeholder="—" style="' + s1 + '">' +
+      '</div>';
+  }
+  container.innerHTML = html;
+  document.getElementById('svSpMsg').textContent = '';
+}
+
+function svSpSaveSession() {
+  var msg = document.getElementById('svSpMsg');
+  var shots = [];
+  for (var i = 0; i < _svSpShotCount; i++) {
+    var cs = (function(el){ return el && el.value !== '' ? parseFloat(el.value) : null; })(document.getElementById('svSpClubSpd_' + i));
+    var bs = (function(el){ return el && el.value !== '' ? parseFloat(el.value) : null; })(document.getElementById('svSpBallSpd_' + i));
+    var ca = (function(el){ return el && el.value !== '' ? parseInt(el.value) : null; })(document.getElementById('svSpCarry_' + i));
+    var to = (function(el){ return el && el.value !== '' ? parseInt(el.value) : null; })(document.getElementById('svSpTotal_' + i));
+    if (cs !== null || bs !== null || ca !== null || to !== null) {
+      shots.push({ clubSpeed: cs, ballSpeed: bs, carry: ca, total: to });
+    }
+  }
+  if (shots.length === 0) { msg.style.color = '#f87171'; msg.textContent = 'Enter at least one swing.'; return; }
+  function avg(key) {
+    var vals = shots.filter(function(s){ return s[key] != null; });
+    return vals.length ? Math.round(vals.reduce(function(a,s){ return a + s[key]; }, 0) / vals.length * 10) / 10 : null;
+  }
+  var today = new Date();
+  var dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+  var noteEl = document.getElementById('svSpSessionNote');
+  var session = {
+    id: Date.now().toString(), date: dateStr, club: _svSpSelectedClub,
+    note: noteEl ? noteEl.value.trim() : '',
+    shots: shots,
+    avgClubSpeed: avg('clubSpeed'), avgBallSpeed: avg('ballSpeed'),
+    avgCarry: avg('carry'), avgTotal: avg('total')
+  };
+  var sessions = svSpGetSessions();
+  sessions.push(session);
+  svSpSaveSessions(sessions);
+  msg.style.color = '#4ade80'; msg.textContent = 'Session saved!';
+  setTimeout(function() { svSpCancelEntry(); }, 1200);
 }
 
 /* ── Student Schedule (under Misc tab) ─────────────────────────── */
