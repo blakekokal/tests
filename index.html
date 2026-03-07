@@ -15637,9 +15637,6 @@ async function syncBagFromSupabase() {
 
 function sortBagClubs(clubs) {
   return clubs.sort(function(a, b) {
-    var ac = (a.carry !== null && a.carry !== undefined) ? a.carry : -1;
-    var bc = (b.carry !== null && b.carry !== undefined) ? b.carry : -1;
-    if (ac !== bc) return bc - ac;
     var ai = _BAG_ORDER.indexOf(a.name), bi = _BAG_ORDER.indexOf(b.name);
     if (ai === -1) ai = 999;
     if (bi === -1) bi = 999;
@@ -15719,7 +15716,7 @@ function bagDisplayName(name) {
 }
 
 function renderBagClubs() {
-  var clubs = getBagClubs();
+  var clubs = sortBagClubs(getBagClubs());
   var list = document.getElementById('bagClubList');
   var emptyMsg = document.getElementById('bagEmptyMsg');
   var headers = document.getElementById('bagClubHeaders');
