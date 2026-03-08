@@ -581,10 +581,6 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
       <span id="coachingNotifDot" style="display:none;background:#ef4444;color:#fff;font-size:10px;font-weight:800;border-radius:10px;padding:2px 7px;flex-shrink:0;white-space:nowrap;">New Message</span>
     </button>
 
-    <button onclick="showStudentPicker()" id="homeStudentsBtn" style="display:none;align-items:center;gap:13px;height:auto;padding:13px 15px;font-size:15px;font-weight:700;background:#4a1d96;border-radius:13px;text-align:left;border:none;">
-      <span style="font-size:20px;width:28px;text-align:center;flex-shrink:0;">👥</span>
-      <div><div style="font-size:0.97rem;font-weight:700;line-height:1;">Students</div><div style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:3px;">View app as a student</div></div>
-    </button>
 
 
   </div>
@@ -592,10 +588,10 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
   <button id="homeLoginBtn" onclick="showAuthPage()" style="margin-top:18px;background:transparent;color:#64B5F6;font-size:13px;text-decoration:underline;border:none;cursor:pointer;height:auto;padding:4px;">Log In / Sign Up</button>
 </div>
 
-<!-- VIEWING AS STUDENT BANNER (fixed at bottom) -->
-<div id="viewingAsBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#7e22ce;padding:10px 16px;z-index:9999;align-items:center;justify-content:space-between;gap:8px;">
-  <div style="font-size:13px;font-weight:700;color:#fff;">Viewing as: <span id="viewingAsName"></span></div>
-  <button onclick="exitStudentView()" style="background:#fff;color:#7e22ce;font-size:12px;font-weight:800;border:none;border-radius:6px;padding:6px 14px;cursor:pointer;height:auto;max-width:none;width:auto;">Exit</button>
+<!-- VIEWING AS STUDENT BANNER (fixed at top center) -->
+<div id="viewingAsBanner" style="display:none;position:fixed;top:0;left:0;right:0;background:rgba(126,34,206,0.92);padding:4px 12px;z-index:9999;align-items:center;justify-content:center;gap:10px;">
+  <div style="font-size:11px;font-weight:600;color:#fff;opacity:0.9;">Viewing as <span id="viewingAsName" style="font-weight:800;"></span></div>
+  <button onclick="exitStudentView()" style="background:rgba(255,255,255,0.2);color:#fff;font-size:10px;font-weight:700;border:1px solid rgba(255,255,255,0.4);border-radius:4px;padding:2px 8px;cursor:pointer;height:auto;max-width:none;width:auto;">Exit</button>
 </div>
 
 <!-- STUDENT PICKER PAGE (Coach selects which student to view as) -->
@@ -5939,13 +5935,11 @@ function updateViewingAsBanner() {
   if (_viewingAsStudent) {
     banner.style.display = 'flex';
     document.getElementById('viewingAsName').textContent = _viewingAsStudent.name;
-    // Hide settings, coaching, and students buttons
+    // Hide settings and coaching buttons
     var settingsBtn = document.querySelector('#homePage button[onclick="goToSettings()"]');
     if (settingsBtn) settingsBtn.style.visibility = 'hidden';
     var coachingBtn = document.getElementById('homeCoachingBtn');
     if (coachingBtn) coachingBtn.style.display = 'none';
-    var studentsBtn = document.getElementById('homeStudentsBtn');
-    if (studentsBtn) studentsBtn.style.display = 'none';
     // Update home auth status to show student name
     var homeAuth = document.getElementById('homeAuthStatus');
     if (homeAuth) homeAuth.textContent = '👤 ' + _viewingAsStudent.name;
@@ -5957,9 +5951,6 @@ function updateViewingAsBanner() {
     // Restore coaching button
     var coachingBtn = document.getElementById('homeCoachingBtn');
     if (coachingBtn) coachingBtn.style.display = 'flex';
-    // Restore students button if coach
-    var studentsBtn = document.getElementById('homeStudentsBtn');
-    if (studentsBtn && _userRole === 'coach') studentsBtn.style.display = 'flex';
     // Restore home auth status
     var homeAuth = document.getElementById('homeAuthStatus');
     if (homeAuth && currentUser) {
@@ -8835,19 +8826,16 @@ function setRole(role) {
   // Update UI
   var sBtn = document.getElementById('roleStudentBtn');
   var cBtn = document.getElementById('roleCoachBtn');
-  var studentsBtn = document.getElementById('homeStudentsBtn');
   if (role === 'student') {
     sBtn.style.background = '#2E7D32'; sBtn.style.color = '#fff'; sBtn.style.fontWeight = '700';
     cBtn.style.background = '#333'; cBtn.style.color = '#888'; cBtn.style.fontWeight = '600';
     document.getElementById('studentCodeSection').style.display = 'flex';
     document.getElementById('coachInfoSection').style.display = 'none';
-    if (studentsBtn) studentsBtn.style.display = 'none';
   } else {
     cBtn.style.background = '#0f766e'; cBtn.style.color = '#fff'; cBtn.style.fontWeight = '700';
     sBtn.style.background = '#333'; sBtn.style.color = '#888'; sBtn.style.fontWeight = '600';
     document.getElementById('studentCodeSection').style.display = 'none';
     document.getElementById('coachInfoSection').style.display = 'flex';
-    if (studentsBtn) studentsBtn.style.display = 'flex';
     checkCoachNotifications();
   }
   // Save role to profiles table
