@@ -17101,9 +17101,16 @@ function renderGapVisualizerChart() {
   var labels = items.map(function(i) { return i.name; });
   var seg = gvBuildSegments(items);
 
-  // Alternating color pairs per club bar
-  var _GV_ALT_A = ['#6d28d9', '#7c3aed', '#8b5cf6', '#a78bfa', '#334155'];
-  var _GV_ALT_B = ['#1e40af', '#2563eb', '#3b82f6', '#60a5fa', '#475569'];
+  // Segment colors by swing type (index in sorted-ascending order):
+  // 0 = smallest partial (½ swing) = orange
+  // 1 = next partial (¾ swing) = green
+  // top (full swing extra) = white
+  var _GV_SWING_COLORS = {
+    '½': '#f97316',    // orange
+    '¾': '#22c55e',    // green
+    'Full': '#e2e8f0'  // white/light
+  };
+  var _GV_SEG_COLOR_DEFAULT = ['#f97316', '#22c55e', '#e2e8f0'];
 
   // Compute gaps between adjacent clubs (full swing carry difference)
   var gapLabels = [];
@@ -17116,16 +17123,20 @@ function renderGapVisualizerChart() {
   var datasets = [];
   for (var si = 0; si < seg.maxSegs; si++) {
     var isTop = (si === seg.maxSegs - 1 && seg.maxSegs > 1);
-    // Per-bar alternating colors
-    var bgColors = items.map(function(_, idx) {
-      var pal = (idx % 2 === 0) ? _GV_ALT_A : _GV_ALT_B;
-      return isTop ? pal[pal.length - 1] : pal[Math.min(si, pal.length - 2)];
-    });
+    var segLabel = seg.segLabels[si] || '';
+    var color;
+    if (isTop) {
+      color = _GV_SWING_COLORS['Full'] || _GV_SEG_COLOR_DEFAULT[2];
+    } else if (_GV_SWING_COLORS[segLabel]) {
+      color = _GV_SWING_COLORS[segLabel];
+    } else {
+      color = _GV_SEG_COLOR_DEFAULT[Math.min(si, _GV_SEG_COLOR_DEFAULT.length - 1)];
+    }
     datasets.push({
-      label: seg.segLabels[si] || ('Segment ' + si),
+      label: segLabel || ('Segment ' + si),
       data: seg.segData[si],
-      backgroundColor: bgColors,
-      borderColor: bgColors,
+      backgroundColor: color,
+      borderColor: color,
       borderWidth: 0,
       borderRadius: si === seg.maxSegs - 1 ? 4 : 0,
       barPercentage: 0.75,
@@ -17135,7 +17146,7 @@ function renderGapVisualizerChart() {
 
   if (_gapVizChart) { _gapVizChart.destroy(); _gapVizChart = null; }
 
-  // Plugin to draw gap numbers between bars
+  // Plugin to draw gap numbers + dotted connector lines between bars
   var gapLabelPlugin = {
     id: 'gapLabels',
     afterDraw: function(chart) {
@@ -17144,23 +17155,53 @@ function renderGapVisualizerChart() {
       var xScale = chart.scales.x;
       var yScale = chart.scales.y;
       ctx2.save();
-      ctx2.font = 'bold 11px sans-serif';
-      ctx2.textAlign = 'center';
-      ctx2.textBaseline = 'middle';
+
       for (var g = 0; g < gapLabels.length; g++) {
         var x1 = xScale.getPixelForValue(g);
         var x2 = xScale.getPixelForValue(g + 1);
         var midX = (x1 + x2) / 2;
-        // Position at mid-height of the shorter bar
+
+        // Get top of each bar (total stacked value)
         var leftTotal = 0, rightTotal = 0;
         for (var ds = 0; ds < chart.data.datasets.length; ds++) {
           leftTotal += (chart.data.datasets[ds].data[g] || 0);
           rightTotal += (chart.data.datasets[ds].data[g + 1] || 0);
         }
-        var midY = yScale.getPixelForValue(Math.min(leftTotal, rightTotal) / 2);
+        var leftTopY = yScale.getPixelForValue(leftTotal);
+        var rightTopY = yScale.getPixelForValue(rightTotal);
+        var higherY = Math.min(leftTopY, rightTopY); // smaller px = higher on screen
+        var lowerY = Math.max(leftTopY, rightTopY);
+
+        // Draw dotted line from top of left bar to top of right bar
+        ctx2.beginPath();
+        ctx2.setLineDash([3, 3]);
+        ctx2.strokeStyle = '#666';
+        ctx2.lineWidth = 1;
+        ctx2.moveTo(x1, leftTopY);
+        ctx2.lineTo(x2, rightTopY);
+        ctx2.stroke();
+        ctx2.setLineDash([]);
+
+        // Draw vertical bracket lines at midpoint showing the gap
+        var bracketTop = higherY;
+        var bracketBot = lowerY;
+        ctx2.beginPath();
+        ctx2.setLineDash([2, 2]);
+        ctx2.strokeStyle = '#888';
+        ctx2.lineWidth = 1;
+        ctx2.moveTo(midX, bracketTop);
+        ctx2.lineTo(midX, bracketBot);
+        ctx2.stroke();
+        ctx2.setLineDash([]);
+
+        // Gap label above the bars
         var gap = gapLabels[g];
-        ctx2.fillStyle = gap <= 5 ? '#f87171' : gap >= 20 ? '#fbbf24' : '#94a3b8';
-        ctx2.fillText(gap + 'y', midX, midY);
+        var labelY = higherY - 12;
+        ctx2.font = 'bold 11px sans-serif';
+        ctx2.textAlign = 'center';
+        ctx2.textBaseline = 'bottom';
+        ctx2.fillStyle = gap <= 5 ? '#f87171' : gap >= 20 ? '#fbbf24' : '#e2e8f0';
+        ctx2.fillText(gap + 'y', midX, labelY);
       }
       ctx2.restore();
     }
@@ -17174,7 +17215,7 @@ function renderGapVisualizerChart() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      layout: { padding: { top: 10, bottom: 4 } },
+      layout: { padding: { top: 24, bottom: 4 } },
       scales: {
         y: {
           stacked: true,
@@ -17214,19 +17255,22 @@ function renderGapVisualizerChart() {
     }
   });
 
-  // Build legend: one entry per segment showing both alternating colors
+  // Build legend with swing-type colors
   legendEl.innerHTML = '';
   for (var li = 0; li < seg.maxSegs; li++) {
     var isTopL = (li === seg.maxSegs - 1 && seg.maxSegs > 1);
-    var colA = isTopL ? _GV_ALT_A[_GV_ALT_A.length - 1] : _GV_ALT_A[Math.min(li, _GV_ALT_A.length - 2)];
-    var colB = isTopL ? _GV_ALT_B[_GV_ALT_B.length - 1] : _GV_ALT_B[Math.min(li, _GV_ALT_B.length - 2)];
-    var lbl = seg.segLabels[li] || ('Segment ' + li);
+    var segLbl = seg.segLabels[li] || ('Segment ' + li);
+    var col;
+    if (isTopL) {
+      col = _GV_SWING_COLORS['Full'] || _GV_SEG_COLOR_DEFAULT[2];
+    } else if (_GV_SWING_COLORS[segLbl]) {
+      col = _GV_SWING_COLORS[segLbl];
+    } else {
+      col = _GV_SEG_COLOR_DEFAULT[Math.min(li, _GV_SEG_COLOR_DEFAULT.length - 1)];
+    }
     legendEl.innerHTML += '<div style="display:flex;align-items:center;gap:5px;">' +
-      '<div style="display:flex;gap:2px;">' +
-      '<div style="width:7px;height:14px;background:' + colA + ';border-radius:2px 0 0 2px;"></div>' +
-      '<div style="width:7px;height:14px;background:' + colB + ';border-radius:0 2px 2px 0;"></div>' +
-      '</div>' +
-      '<span style="font-size:11px;color:#ccc;font-weight:600;">' + lbl + '</span></div>';
+      '<div style="width:14px;height:14px;background:' + col + ';border-radius:3px;"></div>' +
+      '<span style="font-size:11px;color:#ccc;font-weight:600;">' + segLbl + '</span></div>';
   }
 
   wrap.style.height = '320px';
