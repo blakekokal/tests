@@ -16907,14 +16907,20 @@ function processBagImportRows(rows) {
 var _gapVizChart = null;
 var _gapVizFilter = 'all';
 var _gapVizCustomClubs = {};
-var _gapVizItems = []; // current filtered items for the plugin to read
 
 var _GV_WOODS = ['Dr','Dr2','2W','3W','4W','5W','6W','7W','2HY','3HY','4HY','5HY','6HY','7HY'];
 var _GV_IRONS = ['2I','3I','4I','5I','6I','7I','8I','9I'];
 var _GV_WEDGES = ['48','PW','GW','AW','SW','50','52','54','56','58','60','62','LW'];
 
-// Colors for partial swing lines (index 1 = first partial, 2 = second, etc.)
-var _GV_PARTIAL_COLORS = ['#f59e0b', '#ef4444', '#22d3ee', '#4ade80'];
+// Segment colors: bottom (smallest partial) → top (full-only extra)
+// Index 0 = smallest partial, last index = full-only portion on top
+var _GV_SEG_COLORS = [
+  '#7c3aed',  // deep purple  — lowest partial covers this
+  '#9333ea',  // medium purple — next partial segment
+  '#a855f7',  // lighter purple
+  '#c084fc',  // lavender
+  '#ef4444'   // red — full-only extra on top
+];
 
 function gvClubCategory(name) {
   if (_GV_WOODS.indexOf(name) >= 0) return 'woods';
@@ -17002,51 +17008,57 @@ function gvGetAllItems() {
   return items;
 }
 
-// Chart.js plugin: draws dashed lines across each bar for partial swings
-var _gvPartialsPlugin = {
-  id: 'gvPartials',
-  afterDraw: function(chart) {
-    var items = _gapVizItems;
-    if (!items || !items.length) return;
-    var meta = chart.getDatasetMeta(0);
-    if (!meta || !meta.data) return;
-    var yScale = chart.scales.y;
-    var ctx = chart.ctx;
+// Build stacked segments from swings.
+// Swings come in order: Full (biggest), then partials (3/4, 1/2, etc. — decreasing).
+// We sort by carry ascending, then compute segment heights between each level.
+// Bottom segment = smallest partial distance. Each segment above = gap to next level.
+// Top segment (full-only extra) gets the red/accent color.
+function gvBuildSegments(items) {
+  // Find the max number of swing levels with data across all items
+  var maxSegs = 0;
+  items.forEach(function(item) {
+    var valid = item.swings.filter(function(s) { return s.carry !== null; });
+    if (valid.length > maxSegs) maxSegs = valid.length;
+  });
+  if (maxSegs === 0) return { datasets: [], segLabels: [] };
 
-    items.forEach(function(item, i) {
-      var bar = meta.data[i];
-      if (!bar) return;
-      var barLeft = bar.x - bar.width / 2;
-      var barRight = bar.x + bar.width / 2;
+  // For each item, sort swings by carry ascending and compute segment diffs
+  var segData = []; // segData[segIndex][itemIndex] = height of that segment
+  var segLabels = []; // label for each segment
+  for (var s = 0; s < maxSegs; s++) { segData.push([]); }
 
-      // Draw lines for partial swings (skip index 0 = full, that's the bar itself)
-      for (var si = 1; si < item.swings.length; si++) {
-        var sw = item.swings[si];
-        if (sw.carry === null) continue;
-        var yPos = yScale.getPixelForValue(sw.carry);
-        var color = _GV_PARTIAL_COLORS[Math.min(si - 1, _GV_PARTIAL_COLORS.length - 1)];
+  items.forEach(function(item) {
+    // Get valid swings sorted by carry ascending (smallest first)
+    var valid = item.swings.filter(function(sw) { return sw.carry !== null; });
+    valid.sort(function(a, b) { return a.carry - b.carry; });
 
-        ctx.save();
-        ctx.beginPath();
-        ctx.setLineDash([5, 3]);
-        ctx.lineWidth = 2.5;
-        ctx.strokeStyle = color;
-        ctx.moveTo(barLeft - 2, yPos);
-        ctx.lineTo(barRight + 2, yPos);
-        ctx.stroke();
-
-        // Small label to the right
-        ctx.setLineDash([]);
-        ctx.font = '600 9px sans-serif';
-        ctx.fillStyle = color;
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(sw.carry, barRight + 5, yPos);
-        ctx.restore();
+    // Pad to maxSegs: if this club has fewer levels, missing segments = 0
+    // Bottom segment = smallest carry value
+    // Each subsequent segment = difference between consecutive carries
+    for (var s = 0; s < maxSegs; s++) {
+      if (s === 0) {
+        segData[s].push(valid.length > 0 ? valid[0].carry : null);
+      } else if (s < valid.length) {
+        segData[s].push(valid[s].carry - valid[s - 1].carry);
+      } else {
+        segData[s].push(0);
       }
-    });
+    }
+  });
+
+  // Build segment labels from the first item that has the most swings
+  var refItem = items.reduce(function(best, item) {
+    var vc = item.swings.filter(function(s) { return s.carry !== null; }).length;
+    return vc > best.count ? { count: vc, item: item } : best;
+  }, { count: 0, item: null });
+  if (refItem.item) {
+    var refValid = refItem.item.swings.filter(function(s) { return s.carry !== null; });
+    refValid.sort(function(a, b) { return a.carry - b.carry; });
+    refValid.forEach(function(s) { segLabels.push(s.label); });
   }
-};
+
+  return { segData: segData, segLabels: segLabels, maxSegs: maxSegs };
+}
 
 function renderGapVisualizerChart() {
   var allItems = gvGetAllItems();
@@ -17065,13 +17077,12 @@ function renderGapVisualizerChart() {
     return true;
   });
 
+  // Sort by full swing (first swing) carry descending
   items.sort(function(a, b) {
     var aFull = (a.swings[0] && a.swings[0].carry) || 0;
     var bFull = (b.swings[0] && b.swings[0].carry) || 0;
     return bFull - aFull;
   });
-
-  _gapVizItems = items;
 
   if (items.length === 0) {
     emptyMsg.style.display = 'block';
@@ -17085,38 +17096,46 @@ function renderGapVisualizerChart() {
   legendEl.style.display = 'flex';
 
   var labels = items.map(function(i) { return i.name; });
-  var fullData = items.map(function(i) { return i.swings[0] ? i.swings[0].carry : null; });
+  var seg = gvBuildSegments(items);
+
+  // Assign colors: bottom segments get purples, top segment gets red
+  var datasets = [];
+  for (var si = 0; si < seg.maxSegs; si++) {
+    var isTop = (si === seg.maxSegs - 1 && seg.maxSegs > 1);
+    var color = isTop ? _GV_SEG_COLORS[_GV_SEG_COLORS.length - 1]
+      : _GV_SEG_COLORS[Math.min(si, _GV_SEG_COLORS.length - 2)];
+    datasets.push({
+      label: seg.segLabels[si] || ('Segment ' + si),
+      data: seg.segData[si],
+      backgroundColor: color,
+      borderColor: color,
+      borderWidth: 0,
+      borderRadius: si === seg.maxSegs - 1 ? 4 : 0,
+      barPercentage: 0.75,
+      categoryPercentage: 0.8
+    });
+  }
 
   if (_gapVizChart) { _gapVizChart.destroy(); _gapVizChart = null; }
 
   var ctx = canvas.getContext('2d');
   _gapVizChart = new Chart(ctx, {
     type: 'bar',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: 'Full Swing',
-        data: fullData,
-        backgroundColor: '#7c3aed',
-        borderColor: '#7c3aed',
-        borderWidth: 1,
-        borderRadius: 4,
-        barPercentage: 0.75,
-        categoryPercentage: 0.8
-      }]
-    },
+    data: { labels: labels, datasets: datasets },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      layout: { padding: { top: 10, bottom: 4, right: 30 } },
+      layout: { padding: { top: 10, bottom: 4 } },
       scales: {
         y: {
+          stacked: true,
           beginAtZero: true,
           title: { display: true, text: 'Yards', color: '#888', font: { size: 12, weight: '600' } },
           grid: { color: '#2a2a2a' },
           ticks: { color: '#aaa', font: { size: 11 } }
         },
         x: {
+          stacked: true,
           grid: { display: false },
           ticks: { color: '#e2e8f0', font: { size: 11, weight: '700' }, maxRotation: 45, minRotation: 0 }
         }
@@ -17130,42 +17149,31 @@ function renderGapVisualizerChart() {
           borderColor: '#444',
           borderWidth: 1,
           callbacks: {
-            afterBody: function(tooltipItems) {
-              var idx = tooltipItems[0].dataIndex;
-              var item = _gapVizItems[idx];
-              if (!item) return '';
-              var lines = [];
-              for (var si = 1; si < item.swings.length; si++) {
-                var sw = item.swings[si];
-                if (sw.carry !== null) lines.push(sw.label + ': ' + sw.carry + ' yds');
-              }
-              return lines.length ? lines : '';
+            label: function(c) {
+              // Show the actual carry for this swing level, not the segment height
+              var item = items[c.dataIndex];
+              if (!item) return null;
+              var valid = item.swings.filter(function(s) { return s.carry !== null; });
+              valid.sort(function(a, b) { return a.carry - b.carry; });
+              var sw = valid[c.datasetIndex];
+              if (!sw) return null;
+              return sw.label + ': ' + sw.carry + ' yds';
             }
           }
         }
       }
-    },
-    plugins: [_gvPartialsPlugin]
+    }
   });
 
-  // Build dynamic legend
-  var maxSwings = 0;
-  var swingLabelSet = [];
-  items.forEach(function(item) {
-    if (item.swings.length > maxSwings) maxSwings = item.swings.length;
-    item.swings.forEach(function(sw, si) {
-      if (swingLabelSet.length <= si) swingLabelSet.push(sw.label);
-    });
-  });
-
-  legendEl.innerHTML = '<div style="display:flex;align-items:center;gap:5px;">' +
-    '<div style="width:14px;height:14px;background:#7c3aed;border-radius:3px;"></div>' +
-    '<span style="font-size:11px;color:#ccc;font-weight:600;">' + (swingLabelSet[0] || 'Full') + '</span></div>';
-  for (var li = 1; li < maxSwings; li++) {
-    var col = _GV_PARTIAL_COLORS[Math.min(li - 1, _GV_PARTIAL_COLORS.length - 1)];
-    var lbl = swingLabelSet[li] || ('sw' + li);
+  // Build legend: one entry per segment (bottom to top)
+  legendEl.innerHTML = '';
+  for (var li = 0; li < seg.maxSegs; li++) {
+    var isTopL = (li === seg.maxSegs - 1 && seg.maxSegs > 1);
+    var col = isTopL ? _GV_SEG_COLORS[_GV_SEG_COLORS.length - 1]
+      : _GV_SEG_COLORS[Math.min(li, _GV_SEG_COLORS.length - 2)];
+    var lbl = seg.segLabels[li] || ('Segment ' + li);
     legendEl.innerHTML += '<div style="display:flex;align-items:center;gap:5px;">' +
-      '<div style="width:14px;height:3px;border-top:2.5px dashed ' + col + ';"></div>' +
+      '<div style="width:14px;height:14px;background:' + col + ';border-radius:3px;"></div>' +
       '<span style="font-size:11px;color:#ccc;font-weight:600;">' + lbl + '</span></div>';
   }
 
