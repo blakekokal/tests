@@ -17120,19 +17120,18 @@ function renderGapVisualizerChart() {
 
   if (_gapVizChart) { _gapVizChart.destroy(); _gapVizChart = null; }
 
-  // ── WEDGE MODE: flat bars, one per swing, sorted by distance ──
+  // ── WEDGE MODE: grouped bars colored by club, grouped by swing ──
   if (_gapVizFilter === 'wedges') {
     // Detect swing type from WG sessions to normalize labels
     var _wgSwingType = null;
-    var clubs = sortBagClubs(getBagClubs());
-    clubs.forEach(function(club) {
+    var _wgClubs = sortBagClubs(getBagClubs());
+    _wgClubs.forEach(function(club) {
       if (_wgSwingType) return;
       var isWedge = (typeof WG_WEDGE_LIST !== 'undefined') && WG_WEDGE_LIST.indexOf(club.name) >= 0;
       var wgSess = isWedge ? bagWgGetLatestForClub(club.name) : null;
       if (wgSess && wgSess.swingType) _wgSwingType = wgSess.swingType;
     });
-    // Map generic labels to the user's chosen notation
-    var _labelMap = { 'Full': 'Full', '¾': '¾' };
+    var _labelMap = { 'Full': 'FULL', '¾': '¾' };
     if (_wgSwingType === 'percent') {
       _labelMap['¾'] = '75%';
     } else if (_wgSwingType === 'fraction') {
@@ -17141,6 +17140,10 @@ function renderGapVisualizerChart() {
       _labelMap['¾'] = 'Ears';
     }
 
+    // Club color palette (assigned per unique club, ordered by loft/distance)
+    var _WG_CLUB_PALETTE = ['#0d6e6e', '#2980d4', '#e8880b', '#9b59b6', '#e74c3c', '#1abc9c'];
+
+    // Build flat bar list with normalized labels
     var flatBars = [];
     items.forEach(function(item) {
       item.swings.forEach(function(sw) {
@@ -17150,59 +17153,111 @@ function renderGapVisualizerChart() {
         }
       });
     });
-    flatBars.sort(function(a, b) { return a.carry - b.carry; });
 
-    var flatLabels = flatBars.map(function(b) { return b.label + ' ' + b.name; });
-    var flatData = flatBars.map(function(b) { return b.carry; });
-    var flatColors = flatBars.map(function(b) { return _gvSwingColor(b.label); });
+    // Get unique clubs (sorted by full swing carry ascending = lowest distance first)
+    var uniqueClubs = [];
+    items.forEach(function(item) {
+      if (uniqueClubs.indexOf(item.name) === -1) uniqueClubs.push(item.name);
+    });
+    var clubColorMap = {};
+    uniqueClubs.forEach(function(name, i) {
+      clubColorMap[name] = _WG_CLUB_PALETTE[i % _WG_CLUB_PALETTE.length];
+    });
 
-    // Compute gaps between adjacent flat bars
-    var flatGapLabels = [];
-    for (var fg = 0; fg < flatBars.length - 1; fg++) {
-      flatGapLabels.push(flatBars[fg + 1].carry - flatBars[fg].carry);
-    }
+    // Get unique swing labels in ascending order (smallest % first)
+    var swingOrder = [];
+    flatBars.forEach(function(b) {
+      if (swingOrder.indexOf(b.label) === -1) swingOrder.push(b.label);
+    });
+    // Sort: FULL always last, others by average carry of that swing level
+    var swingAvg = {};
+    swingOrder.forEach(function(lbl) {
+      var vals = flatBars.filter(function(b) { return b.label === lbl; });
+      var sum = vals.reduce(function(s, v) { return s + v.carry; }, 0);
+      swingAvg[lbl] = sum / vals.length;
+    });
+    swingOrder.sort(function(a, b) { return swingAvg[a] - swingAvg[b]; });
 
-    var flatGapPlugin = {
-      id: 'gapLabels',
+    // Build grouped bars: for each swing level, show all clubs in order
+    var groupedBars = [];
+    swingOrder.forEach(function(swLabel) {
+      uniqueClubs.forEach(function(clubName) {
+        var match = null;
+        flatBars.forEach(function(b) {
+          if (b.name === clubName && b.label === swLabel) match = b;
+        });
+        if (match) groupedBars.push(match);
+      });
+    });
+
+    var wgLabels = groupedBars.map(function(b) { return [b.name, b.label]; }); // two-line labels
+    var wgData = groupedBars.map(function(b) { return b.carry; });
+    var wgColors = groupedBars.map(function(b) { return clubColorMap[b.name]; });
+
+    // Build lookup: for each bar, find same club's carry at next swing level (for ghost outlines)
+    var ghostHeights = groupedBars.map(function(b, idx) {
+      var curSwingIdx = swingOrder.indexOf(b.label);
+      if (curSwingIdx >= swingOrder.length - 1) return null; // last swing level, no ghost
+      var nextSwing = swingOrder[curSwingIdx + 1];
+      var nextBar = null;
+      groupedBars.forEach(function(gb) {
+        if (gb.name === b.name && gb.label === nextSwing) nextBar = gb;
+      });
+      return nextBar ? nextBar.carry : null;
+    });
+
+    // Plugin: ghost outlines + value labels on bars
+    var wedgePlugin = {
+      id: 'wedgeGhost',
       afterDraw: function(chart) {
-        if (!flatGapLabels || flatGapLabels.length === 0) return;
         var ctx2 = chart.ctx;
         var xScale = chart.scales.x;
         var yScale = chart.scales.y;
+        var meta = chart.getDatasetMeta(0);
         ctx2.save();
-        for (var g = 0; g < flatGapLabels.length; g++) {
-          var x1 = xScale.getPixelForValue(g);
-          var x2 = xScale.getPixelForValue(g + 1);
-          var midX = (x1 + x2) / 2;
-          var leftTopY = yScale.getPixelForValue(flatData[g]);
-          var rightTopY = yScale.getPixelForValue(flatData[g + 1]);
-          var higherY = Math.min(leftTopY, rightTopY);
-          var lowerY = Math.max(leftTopY, rightTopY);
 
-          ctx2.beginPath();
-          ctx2.setLineDash([3, 3]);
-          ctx2.strokeStyle = '#666';
-          ctx2.lineWidth = 1;
-          ctx2.moveTo(x1, leftTopY);
-          ctx2.lineTo(x2, rightTopY);
-          ctx2.stroke();
-          ctx2.setLineDash([]);
+        for (var i = 0; i < groupedBars.length; i++) {
+          var bar = meta.data[i];
+          if (!bar) continue;
+          var barX = bar.x;
+          var barWidth = bar.width;
 
-          ctx2.beginPath();
-          ctx2.setLineDash([2, 2]);
-          ctx2.strokeStyle = '#888';
-          ctx2.lineWidth = 1;
-          ctx2.moveTo(midX, higherY);
-          ctx2.lineTo(midX, lowerY);
-          ctx2.stroke();
-          ctx2.setLineDash([]);
+          // Draw ghost outline for next swing level
+          if (ghostHeights[i] !== null) {
+            var ghostTopY = yScale.getPixelForValue(ghostHeights[i]);
+            var bottomY = yScale.getPixelForValue(0);
+            var color = wgColors[i];
+            ctx2.beginPath();
+            ctx2.setLineDash([5, 4]);
+            ctx2.strokeStyle = color;
+            ctx2.globalAlpha = 0.35;
+            ctx2.lineWidth = 1.5;
+            var gx = barX - barWidth / 2;
+            var gw = barWidth;
+            var gr = 4;
+            // Rounded rect top
+            ctx2.moveTo(gx + gr, ghostTopY);
+            ctx2.lineTo(gx + gw - gr, ghostTopY);
+            ctx2.quadraticCurveTo(gx + gw, ghostTopY, gx + gw, ghostTopY + gr);
+            ctx2.lineTo(gx + gw, bottomY);
+            ctx2.moveTo(gx, bottomY);
+            ctx2.lineTo(gx, ghostTopY + gr);
+            ctx2.quadraticCurveTo(gx, ghostTopY, gx + gr, ghostTopY);
+            ctx2.stroke();
+            ctx2.setLineDash([]);
+            ctx2.globalAlpha = 1;
+          }
 
-          var gap = flatGapLabels[g];
-          ctx2.font = 'bold 11px sans-serif';
-          ctx2.textAlign = 'center';
-          ctx2.textBaseline = 'bottom';
-          ctx2.fillStyle = gap <= 2 ? '#f87171' : gap >= 15 ? '#fbbf24' : '#e2e8f0';
-          ctx2.fillText(gap + 'y', midX, higherY - 12);
+          // Value label on top of bar
+          var val = wgData[i];
+          if (val != null) {
+            var topY = yScale.getPixelForValue(val);
+            ctx2.font = 'bold 12px sans-serif';
+            ctx2.textAlign = 'center';
+            ctx2.textBaseline = 'bottom';
+            ctx2.fillStyle = '#fff';
+            ctx2.fillText(Math.round(val), barX, topY - 4);
+          }
         }
         ctx2.restore();
       }
@@ -17212,32 +17267,37 @@ function renderGapVisualizerChart() {
     _gapVizChart = new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: flatLabels,
+        labels: wgLabels,
         datasets: [{
-          data: flatData,
-          backgroundColor: flatColors,
-          borderColor: flatColors,
+          data: wgData,
+          backgroundColor: wgColors,
+          borderColor: wgColors,
           borderWidth: 0,
-          borderRadius: 4,
-          barPercentage: 0.75,
-          categoryPercentage: 0.8
+          borderRadius: 6,
+          barPercentage: 0.82,
+          categoryPercentage: 0.88
         }]
       },
-      plugins: [flatGapPlugin],
+      plugins: [wedgePlugin],
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        layout: { padding: { top: 24, bottom: 4 } },
+        layout: { padding: { top: 32, bottom: 4, left: 8, right: 8 } },
         scales: {
           y: {
-            beginAtZero: true,
-            title: { display: true, text: 'Yards', color: '#888', font: { size: 12, weight: '600' } },
-            grid: { color: '#2a2a2a' },
-            ticks: { color: '#aaa', font: { size: 11 } }
+            display: false,
+            beginAtZero: true
           },
           x: {
             grid: { display: false },
-            ticks: { color: '#e2e8f0', font: { size: 11, weight: '700' }, maxRotation: 45, minRotation: 0, autoSkip: false }
+            border: { display: false },
+            ticks: {
+              color: '#ccc',
+              font: { size: 11, weight: '700' },
+              maxRotation: 0,
+              minRotation: 0,
+              autoSkip: false
+            }
           }
         },
         plugins: {
@@ -17249,8 +17309,12 @@ function renderGapVisualizerChart() {
             borderColor: '#444',
             borderWidth: 1,
             callbacks: {
+              title: function(items) {
+                var b = groupedBars[items[0].dataIndex];
+                return b.name + ' — ' + b.label;
+              },
               label: function(c) {
-                return flatBars[c.dataIndex].carry + ' yds';
+                return groupedBars[c.dataIndex].carry + ' yds';
               }
             }
           }
@@ -17258,25 +17322,22 @@ function renderGapVisualizerChart() {
       }
     });
 
-    // Build legend for wedge mode with unique swing types
-    var seenLabels = {};
+    // Build legend showing club colors
     legendEl.innerHTML = '';
-    flatBars.forEach(function(b) {
-      if (seenLabels[b.label]) return;
-      seenLabels[b.label] = true;
-      legendEl.innerHTML += '<div style="display:flex;align-items:center;gap:4px;">' +
-        '<div style="width:12px;height:12px;border-radius:3px;background:' + _gvSwingColor(b.label) + ';"></div>' +
-        '<span style="color:#ccc;font-size:12px;">' + b.label + '</span></div>';
+    uniqueClubs.forEach(function(name) {
+      legendEl.innerHTML += '<div style="display:flex;align-items:center;gap:5px;">' +
+        '<div style="width:14px;height:14px;border-radius:3px;background:' + clubColorMap[name] + ';"></div>' +
+        '<span style="font-size:12px;color:#ccc;font-weight:600;">' + name + '</span></div>';
     });
     legendEl.style.display = 'flex';
 
     // Resize canvas
-    var barCount = flatBars.length;
-    var minW = Math.max(barCount * 44, 320);
+    var barCount = groupedBars.length;
+    var minW = Math.max(barCount * 52, 320);
     canvas.parentElement.style.overflowX = barCount > 10 ? 'auto' : 'visible';
     canvas.style.width = minW + 'px';
-    canvas.style.minHeight = '260px';
-    canvas.style.height = '300px';
+    canvas.style.minHeight = '280px';
+    canvas.style.height = '320px';
     return;
   }
 
