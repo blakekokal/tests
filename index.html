@@ -16078,6 +16078,21 @@ function updateBagClub(name, field, value) {
   renderBagClubs();
 }
 
+function updateWgAvg(clubName, swingIndex, value) {
+  var sessions = getWgSessions();
+  for (var i = sessions.length - 1; i >= 0; i--) {
+    if (sessions[i].clubs && sessions[i].clubs.indexOf(clubName) >= 0) {
+      var key = 'sw' + swingIndex;
+      if (!sessions[i].results[clubName]) sessions[i].results[clubName] = {};
+      if (!sessions[i].results[clubName][key]) sessions[i].results[clubName][key] = { shots: [], avg: null };
+      sessions[i].results[clubName][key].avg = value !== '' ? parseInt(value) : null;
+      saveWgSessions(sessions);
+      renderBagClubs();
+      return;
+    }
+  }
+}
+
 function bagDisplayName(name) {
   return name.replace(/I$/, 'i').replace(/I(\d)/, 'i$1').replace(/^(\d+)I$/, '$1i');
 }
@@ -16177,18 +16192,20 @@ function openClubDetail(name) {
   html += '</div>';
   html += '<div style="margin-bottom:12px;"><input type="text" value="' + escapedLabel + '" placeholder="Add label (e.g. 48°, Titleist)" maxlength="20" onchange="updateBagClub(\'' + safe + '\',\'label\',this.value.trim());openClubDetail(\'' + safe + '\')" style="width:100%;height:32px;font-size:12px;text-align:center;background:#222;border:1px solid #444;border-radius:8px;color:#fff;box-sizing:border-box;padding:0 10px;"></div>';
 
-  // Carry / Total — skip for wedges with gapping data (partials shown instead)
-  if (!(isWedge && wgSess)) {
-    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">';
-    if (hasShots) {
-      html += '<div style="text-align:center;background:#222;border-radius:8px;padding:10px;"><div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;">CARRY</div><div style="font-size:18px;font-weight:700;color:#fff;">' + (displayCarry !== '' ? displayCarry : '—') + '</div></div>';
-      html += '<div style="text-align:center;background:#222;border-radius:8px;padding:10px;"><div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;">TOTAL</div><div style="font-size:18px;font-weight:700;color:#fff;">' + (total !== '' ? total : '—') + '</div></div>';
-    } else {
-      html += '<div style="text-align:center;"><div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;">CARRY</div><input type="number" inputmode="numeric" value="' + displayCarry + '" placeholder="—" min="0" max="400" onchange="updateBagClub(\'' + safe + '\',\'carry\',this.value);openClubDetail(\'' + safe + '\')" style="' + inStyle + '"></div>';
-      html += '<div style="text-align:center;"><div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;">TOTAL</div><input type="number" inputmode="numeric" value="' + total + '" placeholder="—" min="0" max="450" onchange="updateBagClub(\'' + safe + '\',\'total\',this.value);openClubDetail(\'' + safe + '\')" style="' + inStyle + '"></div>';
-    }
-    html += '</div>';
+  // Carry / Total
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">';
+  if (isWedge && wgSess) {
+    // Wedge with gapping data: editable carry (from wg full avg) and total
+    html += '<div style="text-align:center;"><div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;">CARRY</div><input type="number" inputmode="numeric" value="' + (displayCarry !== '' ? displayCarry : '') + '" placeholder="—" min="0" max="400" onchange="updateWgAvg(\'' + safe + '\',0,this.value);updateBagClub(\'' + safe + '\',\'carry\',this.value);openClubDetail(\'' + safe + '\')" style="' + inStyle + '"></div>';
+    html += '<div style="text-align:center;"><div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;">TOTAL</div><input type="number" inputmode="numeric" value="' + total + '" placeholder="—" min="0" max="450" onchange="updateBagClub(\'' + safe + '\',\'total\',this.value);openClubDetail(\'' + safe + '\')" style="' + inStyle + '"></div>';
+  } else if (hasShots) {
+    html += '<div style="text-align:center;background:#222;border-radius:8px;padding:10px;"><div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;">CARRY</div><div style="font-size:18px;font-weight:700;color:#fff;">' + (displayCarry !== '' ? displayCarry : '—') + '</div></div>';
+    html += '<div style="text-align:center;background:#222;border-radius:8px;padding:10px;"><div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;">TOTAL</div><div style="font-size:18px;font-weight:700;color:#fff;">' + (total !== '' ? total : '—') + '</div></div>';
+  } else {
+    html += '<div style="text-align:center;"><div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;">CARRY</div><input type="number" inputmode="numeric" value="' + displayCarry + '" placeholder="—" min="0" max="400" onchange="updateBagClub(\'' + safe + '\',\'carry\',this.value);openClubDetail(\'' + safe + '\')" style="' + inStyle + '"></div>';
+    html += '<div style="text-align:center;"><div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;">TOTAL</div><input type="number" inputmode="numeric" value="' + total + '" placeholder="—" min="0" max="450" onchange="updateBagClub(\'' + safe + '\',\'total\',this.value);openClubDetail(\'' + safe + '\')" style="' + inStyle + '"></div>';
   }
+  html += '</div>';
 
   // 3/4 carry for non-wedges
   if (!isWedge) {
@@ -16207,8 +16224,10 @@ function openClubDetail(name) {
     html += '<div style="display:grid;grid-template-columns:repeat(' + wgSwings.length + ',1fr);gap:6px;">';
     wgSwings.forEach(function(label, si) {
       var entry = wgClubData['sw' + si];
-      var avg = entry && entry.avg != null ? entry.avg : '—';
-      html += '<div style="text-align:center;background:#222;border-radius:8px;padding:8px 4px;"><div style="font-size:11px;color:#ccc;font-weight:700;">' + label + '</div><div style="font-size:16px;color:#a78bfa;font-weight:800;">' + avg + '</div></div>';
+      var avg = entry && entry.avg != null ? entry.avg : '';
+      html += '<div style="text-align:center;background:#222;border-radius:8px;padding:8px 4px;"><div style="font-size:11px;color:#ccc;font-weight:700;">' + label + '</div>';
+      html += '<input type="number" inputmode="numeric" value="' + avg + '" placeholder="—" min="0" max="400" onchange="updateWgAvg(\'' + safe + '\',' + si + ',this.value);openClubDetail(\'' + safe + '\')" style="width:100%;height:28px;font-size:14px;font-weight:800;text-align:center;background:transparent;border:1px solid #444;border-radius:6px;color:#a78bfa;box-sizing:border-box;">';
+      html += '</div>';
     });
     html += '</div></div>';
   }
