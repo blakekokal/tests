@@ -2019,15 +2019,30 @@ body.viewing-as .back-btn-top{top:38px;}
 <!-- GAP VISUALIZER PAGE -->
 <div id="gapVisualizerPage" class="page" style="justify-content:flex-start;padding-top:15px;overflow-y:auto;padding-bottom:80px;align-items:center;">
   <button class="back-btn-top" onclick="show('myBagPage')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
-  <div style="text-align:center;margin-bottom:16px;">
+  <div style="text-align:center;margin-bottom:12px;">
     <div style="font-size:22px;font-weight:800;">📊 Gap Visualizer</div>
     <div style="font-size:12px;color:#888;margin-top:4px;">Full swing distances &amp; ¾ swing gaps</div>
   </div>
   <div style="width:100%;max-width:400px;padding:0 16px;box-sizing:border-box;">
+    <!-- Filter buttons -->
+    <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:14px;">
+      <button id="gvFilterAll" onclick="setGapVizFilter('all')" style="padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid #7c3aed;background:#7c3aed;color:#fff;">All</button>
+      <button id="gvFilterWoods" onclick="setGapVizFilter('woods')" style="padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid #444;background:transparent;color:#aaa;">Woods</button>
+      <button id="gvFilterIrons" onclick="setGapVizFilter('irons')" style="padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid #444;background:transparent;color:#aaa;">Irons</button>
+      <button id="gvFilterWedges" onclick="setGapVizFilter('wedges')" style="padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid #444;background:transparent;color:#aaa;">Wedges</button>
+      <button id="gvFilterCustom" onclick="setGapVizFilter('custom')" style="padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid #444;background:transparent;color:#aaa;">Custom</button>
+    </div>
+    <!-- Custom club picker (hidden by default) -->
+    <div id="gvCustomPicker" style="display:none;background:#1a1a1a;border-radius:12px;padding:12px;margin-bottom:14px;">
+      <div style="font-size:11px;color:#a78bfa;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Select Clubs</div>
+      <div id="gvCustomClubGrid" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+    </div>
     <div id="gapVizEmpty" style="display:none;background:#1a1a1a;border-radius:12px;padding:24px;text-align:center;color:#555;font-size:13px;line-height:1.7;">
       No club data to visualize.<br>Add clubs and distances in My Bag first.
     </div>
-    <canvas id="gapVizChart" style="width:100%;"></canvas>
+    <div id="gapVizChartWrap" style="position:relative;width:100%;">
+      <canvas id="gapVizChart"></canvas>
+    </div>
     <div id="gapVizLegend" style="display:flex;gap:16px;justify-content:center;margin-top:16px;">
       <div style="display:flex;align-items:center;gap:6px;"><div style="width:14px;height:14px;background:#7c3aed;border-radius:3px;"></div><span style="font-size:12px;color:#ccc;font-weight:600;">Full Swing</span></div>
       <div style="display:flex;align-items:center;gap:6px;"><div style="width:14px;height:14px;background:transparent;border:2px dashed #a78bfa;border-radius:3px;box-sizing:border-box;"></div><span style="font-size:12px;color:#ccc;font-weight:600;">¾ Swing</span></div>
@@ -16893,60 +16908,119 @@ function processBagImportRows(rows) {
 
 // ─── GAP VISUALIZER ────────────────────────────────────────────────────────
 var _gapVizChart = null;
+var _gapVizFilter = 'all';
+var _gapVizCustomClubs = {};
+
+var _GV_WOODS = ['Dr','Dr2','2W','3W','4W','5W','6W','7W','2HY','3HY','4HY','5HY','6HY','7HY'];
+var _GV_IRONS = ['2I','3I','4I','5I','6I','7I','8I','9I'];
+var _GV_WEDGES = ['48','PW','GW','AW','SW','50','52','54','56','58','60','62','LW'];
+
+function gvClubCategory(name) {
+  if (_GV_WOODS.indexOf(name) >= 0) return 'woods';
+  if (_GV_IRONS.indexOf(name) >= 0) return 'irons';
+  if (_GV_WEDGES.indexOf(name) >= 0) return 'wedges';
+  return 'other';
+}
 
 function openGapVisualizer() {
+  _gapVizFilter = 'all';
+  _gapVizCustomClubs = {};
   show('gapVisualizerPage');
+  gvBuildCustomPicker();
+  setGapVizFilter('all');
+}
+
+function setGapVizFilter(filter) {
+  _gapVizFilter = filter;
+  var ids = ['All','Woods','Irons','Wedges','Custom'];
+  ids.forEach(function(id) {
+    var btn = document.getElementById('gvFilter' + id);
+    if (!btn) return;
+    var active = id.toLowerCase() === filter;
+    btn.style.background = active ? '#7c3aed' : 'transparent';
+    btn.style.color = active ? '#fff' : '#aaa';
+    btn.style.borderColor = active ? '#7c3aed' : '#444';
+  });
+  document.getElementById('gvCustomPicker').style.display = filter === 'custom' ? '' : 'none';
   renderGapVisualizerChart();
 }
 
-function renderGapVisualizerChart() {
+function gvBuildCustomPicker() {
   var clubs = sortBagClubs(getBagClubs());
-  var emptyMsg = document.getElementById('gapVizEmpty');
-  var canvas = document.getElementById('gapVizChart');
-  var legend = document.getElementById('gapVizLegend');
-  if (!canvas) return;
+  var grid = document.getElementById('gvCustomClubGrid');
+  if (!grid) return;
+  _gapVizCustomClubs = {};
+  clubs.forEach(function(c) { _gapVizCustomClubs[c.name] = true; });
+  grid.innerHTML = clubs.map(function(c) {
+    var dn = bagDisplayName(c.name);
+    return '<button id="gvCust_' + c.name + '" onclick="gvToggleCustomClub(\'' + c.name + '\')" style="padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid #7c3aed;background:#7c3aed;color:#fff;">' + dn + '</button>';
+  }).join('');
+}
 
-  // Gather club data: full swing carry and 3/4 carry
+function gvToggleCustomClub(name) {
+  _gapVizCustomClubs[name] = !_gapVizCustomClubs[name];
+  var btn = document.getElementById('gvCust_' + name);
+  if (btn) {
+    btn.style.background = _gapVizCustomClubs[name] ? '#7c3aed' : 'transparent';
+    btn.style.color = _gapVizCustomClubs[name] ? '#fff' : '#aaa';
+  }
+  renderGapVisualizerChart();
+}
+
+function gvGetAllItems() {
+  var clubs = sortBagClubs(getBagClubs());
   var items = [];
   clubs.forEach(function(club) {
     var fullCarry = null;
     var threeQCarry = null;
     var isWedge = (typeof WG_WEDGE_LIST !== 'undefined') && WG_WEDGE_LIST.indexOf(club.name) >= 0;
     var wgSess = isWedge ? bagWgGetLatestForClub(club.name) : null;
-
-    // Full swing carry
     if (wgSess) {
       var wgFull = (wgSess.results[club.name] || {})['sw0'];
       if (wgFull && wgFull.avg != null) fullCarry = wgFull.avg;
-      // 3/4 swing (sw1)
       var wg34 = (wgSess.results[club.name] || {})['sw1'];
       if (wg34 && wg34.avg != null) threeQCarry = wg34.avg;
     }
     if (fullCarry === null && club.carry != null) fullCarry = club.carry;
     if (threeQCarry === null && club.carry34 != null) threeQCarry = club.carry34;
-
     if (fullCarry !== null) {
-      items.push({
-        name: bagDisplayName(club.name),
-        full: fullCarry,
-        threeQ: threeQCarry
-      });
+      items.push({ raw: club.name, name: bagDisplayName(club.name), full: fullCarry, threeQ: threeQCarry });
     }
   });
+  return items;
+}
+
+function renderGapVisualizerChart() {
+  var allItems = gvGetAllItems();
+  var emptyMsg = document.getElementById('gapVizEmpty');
+  var canvas = document.getElementById('gapVizChart');
+  var wrap = document.getElementById('gapVizChartWrap');
+  var legend = document.getElementById('gapVizLegend');
+  if (!canvas) return;
+
+  // Apply filter
+  var items = allItems.filter(function(item) {
+    if (_gapVizFilter === 'all') return true;
+    if (_gapVizFilter === 'woods') return gvClubCategory(item.raw) === 'woods';
+    if (_gapVizFilter === 'irons') return gvClubCategory(item.raw) === 'irons';
+    if (_gapVizFilter === 'wedges') return gvClubCategory(item.raw) === 'wedges';
+    if (_gapVizFilter === 'custom') return !!_gapVizCustomClubs[item.raw];
+    return true;
+  });
+
+  // Sort by full carry descending (longest club first, left to right)
+  items.sort(function(a, b) { return b.full - a.full; });
 
   if (items.length === 0) {
     emptyMsg.style.display = 'block';
-    canvas.style.display = 'none';
+    wrap.style.display = 'none';
     legend.style.display = 'none';
     if (_gapVizChart) { _gapVizChart.destroy(); _gapVizChart = null; }
     return;
   }
   emptyMsg.style.display = 'none';
-  canvas.style.display = '';
+  wrap.style.display = '';
   legend.style.display = 'flex';
-
-  // Sort by full carry descending (longest club first)
-  items.sort(function(a, b) { return b.full - a.full; });
 
   var labels = items.map(function(i) { return i.name; });
   var fullData = items.map(function(i) { return i.full; });
@@ -16954,6 +17028,7 @@ function renderGapVisualizerChart() {
 
   if (_gapVizChart) { _gapVizChart.destroy(); _gapVizChart = null; }
 
+  // Vertical bar chart: clubs on x-axis, yards on y-axis
   var ctx = canvas.getContext('2d');
   _gapVizChart = new Chart(ctx, {
     type: 'bar',
@@ -16973,7 +17048,7 @@ function renderGapVisualizerChart() {
         {
           label: '¾ Swing',
           data: threeQData,
-          backgroundColor: 'transparent',
+          backgroundColor: 'rgba(167,139,250,0.15)',
           borderColor: '#a78bfa',
           borderWidth: 2,
           borderDash: [5, 3],
@@ -16986,18 +17061,17 @@ function renderGapVisualizerChart() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      indexAxis: 'y',
-      layout: { padding: { top: 10, bottom: 10 } },
+      layout: { padding: { top: 10, bottom: 4 } },
       scales: {
-        x: {
+        y: {
           beginAtZero: true,
           title: { display: true, text: 'Yards', color: '#888', font: { size: 12, weight: '600' } },
           grid: { color: '#2a2a2a' },
           ticks: { color: '#aaa', font: { size: 11 } }
         },
-        y: {
+        x: {
           grid: { display: false },
-          ticks: { color: '#e2e8f0', font: { size: 13, weight: '700' } }
+          ticks: { color: '#e2e8f0', font: { size: 11, weight: '700' }, maxRotation: 45, minRotation: 0 }
         }
       },
       plugins: {
@@ -17009,9 +17083,9 @@ function renderGapVisualizerChart() {
           borderColor: '#444',
           borderWidth: 1,
           callbacks: {
-            label: function(ctx) {
-              if (ctx.raw == null) return null;
-              return ctx.dataset.label + ': ' + ctx.raw + ' yds';
+            label: function(c) {
+              if (c.raw == null) return null;
+              return c.dataset.label + ': ' + c.raw + ' yds';
             }
           }
         }
@@ -17019,11 +17093,9 @@ function renderGapVisualizerChart() {
     }
   });
 
-  // Set canvas height based on item count
-  var chartHeight = Math.max(300, items.length * 44);
-  canvas.parentElement.style.height = chartHeight + 'px';
-  canvas.style.height = chartHeight + 'px';
-  _gapVizChart.resize();
+  // Set chart height
+  var chartHeight = Math.max(280, 320);
+  wrap.style.height = chartHeight + 'px';
 }
 
 // ─── BAG TABS ──────────────────────────────────────────────────────────────
