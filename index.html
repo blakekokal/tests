@@ -17120,29 +17120,41 @@ function renderGapVisualizerChart() {
     gapLabels.push(rightFull - leftFull);
   }
 
+  // Count valid swings per item for per-bar coloring
+  var itemSwingCounts = items.map(function(item) {
+    return item.swings.filter(function(s) { return s.carry !== null; }).length;
+  });
+
   var datasets = [];
   for (var si = 0; si < seg.maxSegs; si++) {
     var isTop = (si === seg.maxSegs - 1 && seg.maxSegs > 1);
     var segLabel = seg.segLabels[si] || '';
-    var color;
+    var defaultColor;
     if (seg.maxSegs === 1) {
-      // Only one segment = all clubs have just Full swing → white
-      color = _GV_SWING_COLORS['Full'];
+      defaultColor = _GV_SWING_COLORS['Full'];
     } else if (isTop) {
-      // Top segment is always the Full-only extra portion → white
-      color = _GV_SWING_COLORS['Full'];
+      defaultColor = _GV_SWING_COLORS['Full'];
     } else if (_GV_SWING_COLORS[segLabel]) {
-      color = _GV_SWING_COLORS[segLabel];
+      defaultColor = _GV_SWING_COLORS[segLabel];
     } else {
-      color = _GV_SEG_COLOR_DEFAULT[Math.min(si, _GV_SEG_COLOR_DEFAULT.length - 1)];
+      defaultColor = _GV_SEG_COLOR_DEFAULT[Math.min(si, _GV_SEG_COLOR_DEFAULT.length - 1)];
     }
+
+    // Per-bar colors: Full-only clubs get white in their base segment
+    var bgColors = items.map(function(_item, idx) {
+      if (itemSwingCounts[idx] === 1 && si === 0) {
+        return _GV_SWING_COLORS['Full']; // white for Full-only clubs
+      }
+      return defaultColor;
+    });
+
     datasets.push({
       label: segLabel || ('Segment ' + si),
       data: seg.segData[si],
-      backgroundColor: color,
-      borderColor: color,
+      backgroundColor: bgColors,
+      borderColor: bgColors,
       borderWidth: 0,
-      borderRadius: si === seg.maxSegs - 1 ? 4 : 0,
+      borderRadius: 4,
       barPercentage: 0.75,
       categoryPercentage: 0.8
     });
