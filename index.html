@@ -17080,11 +17080,11 @@ function renderGapVisualizerChart() {
     return true;
   });
 
-  // Sort by full swing (first swing) carry descending
+  // Sort by full swing carry ascending (lowest club on left)
   items.sort(function(a, b) {
     var aFull = (a.swings[0] && a.swings[0].carry) || 0;
     var bFull = (b.swings[0] && b.swings[0].carry) || 0;
-    return bFull - aFull;
+    return aFull - bFull;
   });
 
   if (items.length === 0) {
@@ -17101,17 +17101,31 @@ function renderGapVisualizerChart() {
   var labels = items.map(function(i) { return i.name; });
   var seg = gvBuildSegments(items);
 
-  // Assign colors: bottom segments get purples, top segment gets red
+  // Alternating color pairs per club bar
+  var _GV_ALT_A = ['#6d28d9', '#7c3aed', '#8b5cf6', '#a78bfa', '#334155'];
+  var _GV_ALT_B = ['#1e40af', '#2563eb', '#3b82f6', '#60a5fa', '#475569'];
+
+  // Compute gaps between adjacent clubs (full swing carry difference)
+  var gapLabels = [];
+  for (var gi = 0; gi < items.length - 1; gi++) {
+    var leftFull = (items[gi].swings[0] && items[gi].swings[0].carry) || 0;
+    var rightFull = (items[gi + 1].swings[0] && items[gi + 1].swings[0].carry) || 0;
+    gapLabels.push(rightFull - leftFull);
+  }
+
   var datasets = [];
   for (var si = 0; si < seg.maxSegs; si++) {
     var isTop = (si === seg.maxSegs - 1 && seg.maxSegs > 1);
-    var color = isTop ? _GV_SEG_COLORS[_GV_SEG_COLORS.length - 1]
-      : _GV_SEG_COLORS[Math.min(si, _GV_SEG_COLORS.length - 2)];
+    // Per-bar alternating colors
+    var bgColors = items.map(function(_, idx) {
+      var pal = (idx % 2 === 0) ? _GV_ALT_A : _GV_ALT_B;
+      return isTop ? pal[pal.length - 1] : pal[Math.min(si, pal.length - 2)];
+    });
     datasets.push({
       label: seg.segLabels[si] || ('Segment ' + si),
       data: seg.segData[si],
-      backgroundColor: color,
-      borderColor: color,
+      backgroundColor: bgColors,
+      borderColor: bgColors,
       borderWidth: 0,
       borderRadius: si === seg.maxSegs - 1 ? 4 : 0,
       barPercentage: 0.75,
@@ -17121,10 +17135,42 @@ function renderGapVisualizerChart() {
 
   if (_gapVizChart) { _gapVizChart.destroy(); _gapVizChart = null; }
 
+  // Plugin to draw gap numbers between bars
+  var gapLabelPlugin = {
+    id: 'gapLabels',
+    afterDraw: function(chart) {
+      if (!gapLabels || gapLabels.length === 0) return;
+      var ctx2 = chart.ctx;
+      var xScale = chart.scales.x;
+      var yScale = chart.scales.y;
+      ctx2.save();
+      ctx2.font = 'bold 11px sans-serif';
+      ctx2.textAlign = 'center';
+      ctx2.textBaseline = 'middle';
+      for (var g = 0; g < gapLabels.length; g++) {
+        var x1 = xScale.getPixelForValue(g);
+        var x2 = xScale.getPixelForValue(g + 1);
+        var midX = (x1 + x2) / 2;
+        // Position at mid-height of the shorter bar
+        var leftTotal = 0, rightTotal = 0;
+        for (var ds = 0; ds < chart.data.datasets.length; ds++) {
+          leftTotal += (chart.data.datasets[ds].data[g] || 0);
+          rightTotal += (chart.data.datasets[ds].data[g + 1] || 0);
+        }
+        var midY = yScale.getPixelForValue(Math.min(leftTotal, rightTotal) / 2);
+        var gap = gapLabels[g];
+        ctx2.fillStyle = gap <= 5 ? '#f87171' : gap >= 20 ? '#fbbf24' : '#94a3b8';
+        ctx2.fillText(gap + 'y', midX, midY);
+      }
+      ctx2.restore();
+    }
+  };
+
   var ctx = canvas.getContext('2d');
   _gapVizChart = new Chart(ctx, {
     type: 'bar',
     data: { labels: labels, datasets: datasets },
+    plugins: [gapLabelPlugin],
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -17168,15 +17214,18 @@ function renderGapVisualizerChart() {
     }
   });
 
-  // Build legend: one entry per segment (bottom to top)
+  // Build legend: one entry per segment showing both alternating colors
   legendEl.innerHTML = '';
   for (var li = 0; li < seg.maxSegs; li++) {
     var isTopL = (li === seg.maxSegs - 1 && seg.maxSegs > 1);
-    var col = isTopL ? _GV_SEG_COLORS[_GV_SEG_COLORS.length - 1]
-      : _GV_SEG_COLORS[Math.min(li, _GV_SEG_COLORS.length - 2)];
+    var colA = isTopL ? _GV_ALT_A[_GV_ALT_A.length - 1] : _GV_ALT_A[Math.min(li, _GV_ALT_A.length - 2)];
+    var colB = isTopL ? _GV_ALT_B[_GV_ALT_B.length - 1] : _GV_ALT_B[Math.min(li, _GV_ALT_B.length - 2)];
     var lbl = seg.segLabels[li] || ('Segment ' + li);
     legendEl.innerHTML += '<div style="display:flex;align-items:center;gap:5px;">' +
-      '<div style="width:14px;height:14px;background:' + col + ';border-radius:3px;"></div>' +
+      '<div style="display:flex;gap:2px;">' +
+      '<div style="width:7px;height:14px;background:' + colA + ';border-radius:2px 0 0 2px;"></div>' +
+      '<div style="width:7px;height:14px;background:' + colB + ';border-radius:0 2px 2px 0;"></div>' +
+      '</div>' +
       '<span style="font-size:11px;color:#ccc;font-weight:600;">' + lbl + '</span></div>';
   }
 
