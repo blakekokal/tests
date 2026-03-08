@@ -288,7 +288,7 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
     <div style="font-size:20px;font-weight:800;text-align:center;margin-bottom:8px;">📋 Round History</div>
     <button onclick="downloadRoundTemplate()" style="width:100%;height:40px;font-size:13px;background:#1e3a5f;border-radius:8px;margin-bottom:6px;">📥 Download Blank Scorecard Template</button>
     <button onclick="document.getElementById('uploadRoundFile').click()" style="width:100%;height:40px;font-size:13px;background:#0f766e;border-radius:8px;margin-bottom:8px;">📤 Upload Round (.xlsx)</button>
-    <input type="file" id="uploadRoundFile" accept=".xlsx,.xls,.csv" style="display:none;" onchange="handleRoundUpload(this, currentUser.id)">
+    <input type="file" id="uploadRoundFile" accept=".xlsx,.xls,.csv" style="display:none;" onchange="handleRoundUpload(this, activeUserId())">
     <div id="uploadRoundMsg" style="font-size:12px;min-height:16px;text-align:center;margin-bottom:6px;"></div>
     <input id="roundSearchInput" type="text" placeholder="🔍 Search course name..." oninput="filterRoundsList()" style="width:100%;max-width:360px;box-sizing:border-box;margin-bottom:6px;">
     <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-bottom:8px;">
@@ -575,16 +575,36 @@ input{width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-r
       <div><div style="font-size:0.97rem;font-weight:700;line-height:1;">Practice Hub</div><div style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:3px;">Combines · Drills · Practice</div></div>
     </button>
 
-    <button onclick="goToCoaching()" style="display:flex;align-items:center;gap:13px;height:auto;padding:13px 15px;font-size:15px;font-weight:700;background:#7e22ce;border-radius:13px;text-align:left;border:none;">
+    <button onclick="goToCoaching()" id="homeCoachingBtn" style="display:flex;align-items:center;gap:13px;height:auto;padding:13px 15px;font-size:15px;font-weight:700;background:#7e22ce;border-radius:13px;text-align:left;border:none;">
       <span style="font-size:20px;width:28px;text-align:center;flex-shrink:0;">🎓</span>
       <div style="flex:1;"><div style="font-size:0.97rem;font-weight:700;line-height:1;">Coaching</div><div style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:3px;">Connect with your coach</div></div>
       <span id="coachingNotifDot" style="display:none;background:#ef4444;color:#fff;font-size:10px;font-weight:800;border-radius:10px;padding:2px 7px;flex-shrink:0;white-space:nowrap;">New Message</span>
+    </button>
+
+    <button onclick="showStudentPicker()" id="homeStudentsBtn" style="display:none;align-items:center;gap:13px;height:auto;padding:13px 15px;font-size:15px;font-weight:700;background:#4a1d96;border-radius:13px;text-align:left;border:none;">
+      <span style="font-size:20px;width:28px;text-align:center;flex-shrink:0;">👥</span>
+      <div><div style="font-size:0.97rem;font-weight:700;line-height:1;">Students</div><div style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:3px;">View app as a student</div></div>
     </button>
 
 
   </div>
 
   <button id="homeLoginBtn" onclick="showAuthPage()" style="margin-top:18px;background:transparent;color:#64B5F6;font-size:13px;text-decoration:underline;border:none;cursor:pointer;height:auto;padding:4px;">Log In / Sign Up</button>
+</div>
+
+<!-- VIEWING AS STUDENT BANNER (fixed at bottom) -->
+<div id="viewingAsBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#7e22ce;padding:10px 16px;z-index:9999;align-items:center;justify-content:space-between;gap:8px;">
+  <div style="font-size:13px;font-weight:700;color:#fff;">Viewing as: <span id="viewingAsName"></span></div>
+  <button onclick="exitStudentView()" style="background:#fff;color:#7e22ce;font-size:12px;font-weight:800;border:none;border-radius:6px;padding:6px 14px;cursor:pointer;height:auto;max-width:none;width:auto;">Exit</button>
+</div>
+
+<!-- STUDENT PICKER PAGE (Coach selects which student to view as) -->
+<div id="studentPickerPage" class="page" style="justify-content:flex-start;padding-top:20px;overflow-y:auto;padding-bottom:80px;align-items:center;">
+  <button class="back-btn-top" onclick="show('homePage')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <div style="font-size:22px;font-weight:800;margin-bottom:4px;">Select Student</div>
+  <div style="font-size:13px;color:#666;margin-bottom:16px;">View the app as one of your students</div>
+  <div id="studentPickerMsg" style="font-size:13px;color:#888;margin-bottom:8px;"></div>
+  <div id="studentPickerList" style="width:100%;max-width:320px;"></div>
 </div>
 
 <!-- WHAT'S NEW PAGE -->
@@ -2472,6 +2492,9 @@ function show(id){
   processingClick=false; // Reset processing flag when changing pages
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  if(id === 'homePage') {
+    updateViewingAsBanner();
+  }
   if(id === 'performanceAnalysisPage') {
     // Reset cache so navigating away and back re-fetches fresh data
     _perfCachedRounds = null;
@@ -2496,13 +2519,22 @@ function show(id){
     _bagStudentSpeedSessions = null;
     var bss = document.getElementById('bagStudentSelect');
     if (bss) bss.value = '';
-    populateBagStudentSelect();
-    renderBagClubs(); // show local cache immediately
+
+    if (_viewingAsStudent) {
+      // Auto-load student's bag when viewing as student
+      onBagStudentChange(_viewingAsStudent.id + '|' + _viewingAsStudent.name);
+      // Hide the student selector since we're already viewing as student
+      var bar = document.getElementById('bagCoachStudentBar');
+      if (bar) bar.style.display = 'none';
+    } else {
+      populateBagStudentSelect();
+      renderBagClubs(); // show local cache immediately
+      // Pull latest from Supabase, then re-render
+      syncBagFromSupabase().then(function() {
+        renderBagClubs();
+      });
+    }
     setBagTab(_currentBagTab || 'myBag');
-    // Pull latest from Supabase, then re-render
-    syncBagFromSupabase().then(function() {
-      renderBagClubs();
-    });
   }
   if(id === 'parPage') {
     updateParPageRoundActions();
@@ -2975,7 +3007,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // CREATE POLICY "Users can manage own courses" ON custom_courses FOR ALL USING (auth.uid() = user_id);
 async function loadUserCustomCourses() {
   if (!currentUser) return;
-  var { data, error } = await _sb.from('custom_courses').select('*').eq('user_id', currentUser.id);
+  var { data, error } = await _sb.from('custom_courses').select('*').eq('user_id', activeUserId());
   if (error) { console.log('No custom_courses table or error:', error.message); return; }
   _userCustomCourses = (data || []).map(function(row) {
     return { dn: row.display_name, cn: row.club_name || row.display_name, co: row.course_name || row.display_name, ci: row.city || '', st: row.state || '', t: row.tees || [], _id: row.id };
@@ -2985,7 +3017,7 @@ async function loadUserCustomCourses() {
 async function saveCustomCourse(courseObj) {
   if (!currentUser) { alert('Please log in to save custom courses.'); return null; }
   var { data, error } = await _sb.from('custom_courses').insert({
-    user_id: currentUser.id,
+    user_id: activeUserId(),
     display_name: courseObj.dn,
     club_name: courseObj.cn,
     course_name: courseObj.co,
@@ -3005,7 +3037,7 @@ async function saveCustomCourse(courseObj) {
 
 async function deleteCustomCourse(courseId) {
   if (!currentUser) return;
-  var { error } = await _sb.from('custom_courses').delete().eq('id', courseId).eq('user_id', currentUser.id);
+  var { error } = await _sb.from('custom_courses').delete().eq('id', courseId).eq('user_id', activeUserId());
   if (!error) {
     _userCustomCourses = _userCustomCourses.filter(function(c) { return c._id !== courseId; });
   }
@@ -3156,7 +3188,7 @@ async function saveEditedCourse() {
     city: document.getElementById('ec_city').value.trim(),
     state: document.getElementById('ec_state').value.trim(),
     tees: [{ n: teeName, y: totalYards, p: totalPar, rm: rating, sm: slope, rf: null, sf: null, h: holes }]
-  }).eq('id', _editingCourseId).eq('user_id', currentUser.id);
+  }).eq('id', _editingCourseId).eq('user_id', activeUserId());
 
   if (error) { alert('Could not update course: ' + error.message); return; }
 
@@ -5876,6 +5908,98 @@ const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentUser = null;
 
+// ─── STUDENT IMPERSONATION (Coach viewing as student) ──────────────
+var _viewingAsStudent = null; // { id, name, email } when coach is viewing as a student
+
+function activeUserId() {
+  return _viewingAsStudent ? _viewingAsStudent.id : currentUser.id;
+}
+
+function exitStudentView() {
+  _viewingAsStudent = null;
+  // Reset bag student view variables
+  _bagViewingStudentId = null;
+  _bagViewingStudentName = null;
+  _bagStudentClubs = null;
+  if (typeof _bagStudentWgSessions !== 'undefined') _bagStudentWgSessions = null;
+  if (typeof _bagStudentSpeedSessions !== 'undefined') _bagStudentSpeedSessions = null;
+  updateViewingAsBanner();
+  show('homePage');
+}
+
+function enterStudentView(studentId, name, email) {
+  _viewingAsStudent = { id: studentId, name: name, email: email || '' };
+  updateViewingAsBanner();
+  show('homePage');
+}
+
+function updateViewingAsBanner() {
+  var banner = document.getElementById('viewingAsBanner');
+  if (!banner) return;
+  if (_viewingAsStudent) {
+    banner.style.display = 'flex';
+    document.getElementById('viewingAsName').textContent = _viewingAsStudent.name;
+    // Hide settings, coaching, and students buttons
+    var settingsBtn = document.querySelector('#homePage button[onclick="goToSettings()"]');
+    if (settingsBtn) settingsBtn.style.visibility = 'hidden';
+    var coachingBtn = document.getElementById('homeCoachingBtn');
+    if (coachingBtn) coachingBtn.style.display = 'none';
+    var studentsBtn = document.getElementById('homeStudentsBtn');
+    if (studentsBtn) studentsBtn.style.display = 'none';
+    // Update home auth status to show student name
+    var homeAuth = document.getElementById('homeAuthStatus');
+    if (homeAuth) homeAuth.textContent = '👤 ' + _viewingAsStudent.name;
+  } else {
+    banner.style.display = 'none';
+    // Restore settings button
+    var settingsBtn = document.querySelector('#homePage button[onclick="goToSettings()"]');
+    if (settingsBtn) settingsBtn.style.visibility = 'visible';
+    // Restore coaching button
+    var coachingBtn = document.getElementById('homeCoachingBtn');
+    if (coachingBtn) coachingBtn.style.display = 'flex';
+    // Restore students button if coach
+    var studentsBtn = document.getElementById('homeStudentsBtn');
+    if (studentsBtn && _userRole === 'coach') studentsBtn.style.display = 'flex';
+    // Restore home auth status
+    var homeAuth = document.getElementById('homeAuthStatus');
+    if (homeAuth && currentUser) {
+      var name = currentUser.user_metadata?.display_name || currentUser.email;
+      homeAuth.textContent = '👤 ' + name;
+    }
+  }
+}
+
+async function showStudentPicker() {
+  show('studentPickerPage');
+  var list = document.getElementById('studentPickerList');
+  var msg = document.getElementById('studentPickerMsg');
+  list.innerHTML = '';
+  msg.textContent = 'Loading students...';
+
+  var { data, error } = await _sb.from('coach_students')
+    .select('student_id, student_name, student_email')
+    .eq('coach_id', currentUser.id)
+    .order('student_name', { ascending: true });
+
+  if (error) { msg.textContent = 'Error: ' + error.message; return; }
+  if (!data || data.length === 0) { msg.textContent = 'No students yet. Add students from the Coaching page.'; return; }
+  msg.textContent = data.length + ' student(s)';
+
+  data.forEach(function(s) {
+    var card = document.createElement('div');
+    card.style.cssText = 'background:#222;border-radius:10px;padding:14px;margin:6px 0;cursor:pointer;';
+    card.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;">'
+      + '<div><div style="font-weight:700;font-size:15px;">' + (s.student_name || 'Student') + '</div>'
+      + '<div style="font-size:12px;color:#aaa;">' + (s.student_email || '') + '</div></div>'
+      + '<span style="font-size:20px;opacity:0.4;">→</span>'
+      + '</div>';
+    card.onclick = function() {
+      enterStudentView(s.student_id, s.student_name || 'Student', s.student_email || '');
+    };
+    list.appendChild(card);
+  });
+}
+
 async function checkAuth() {
   const { data: { session } } = await _sb.auth.getSession();
   if (session) {
@@ -6175,7 +6299,7 @@ async function autoSaveRound() {
     // Completing a previously incomplete round — update it
     resp = await _sb.from('rounds').update(payload).eq('id', _currentRoundId).select();
   } else {
-    payload.user_id = currentUser.id;
+    payload.user_id = activeUserId();
     resp = await _sb.from('rounds').insert(payload).select();
   }
 
@@ -6185,7 +6309,7 @@ async function autoSaveRound() {
     if (_currentRoundId) {
       resp = await _sb.from('rounds').update(payload).eq('id', _currentRoundId).select();
     } else {
-      payload.user_id = currentUser.id;
+      payload.user_id = activeUserId();
       resp = await _sb.from('rounds').insert(payload).select();
     }
   }
@@ -6332,7 +6456,7 @@ async function saveIncompleteRound(hbhFormData) {
   }
 
   var payload = {
-    user_id: currentUser.id,
+    user_id: activeUserId(),
     player_name: playerNameVal,
     course_name: courseNameVal,
     round_date: roundDateVal,
@@ -6606,7 +6730,7 @@ async function saveRoundToAccount() {
     resp = await _sb.from('rounds').update(payload).eq('id', _currentRoundId);
   } else {
     // Insert new round
-    payload.user_id = currentUser.id;
+    payload.user_id = activeUserId();
     resp = await _sb.from('rounds').insert(payload);
   }
 
@@ -6643,14 +6767,14 @@ async function loadMyRounds() {
   var { data, error } = await _sb
     .from('rounds')
     .select('id, player_name, course_name, round_date, round_type, holes, score, par, to_par, created_at, is_incomplete, round_data')
-    .eq('user_id', currentUser.id)
+    .eq('user_id', activeUserId())
     .order('round_date', { ascending: false });
 
   // Fallback if is_incomplete column doesn't exist
   if (error && error.message && error.message.indexOf('is_incomplete') !== -1) {
     var resp2 = await _sb.from('rounds')
       .select('id, player_name, course_name, round_date, round_type, holes, score, par, to_par, created_at, round_data')
-      .eq('user_id', currentUser.id)
+      .eq('user_id', activeUserId())
       .order('round_date', { ascending: false });
     data = resp2.data;
     error = resp2.error;
@@ -6813,8 +6937,14 @@ async function viewSavedRound(roundId) {
   document.getElementById('roundType').value = data.round_type || 'Casual';
   // Use user's saved handicap preference, not the round's saved handicap
   var userHcp = currentUser?.user_metadata?.hcp_preference || 'pro';
+  if (_viewingAsStudent) {
+    try {
+      var { data: _hp } = await _sb.from('profiles').select('hcp_preference').eq('id', _viewingAsStudent.id).single();
+      if (_hp && _hp.hcp_preference) userHcp = _hp.hcp_preference;
+    } catch(e) {}
+  }
   document.getElementById('playerHandicap').value = userHcp;
-  
+
   // Restore hole data
   allHoles = rd.allHoles;
   totalHoles = data.holes;
@@ -6897,7 +7027,7 @@ async function viewSavedRound(roundId) {
   document.getElementById('saveStatus').textContent = '(viewing saved round)';
   document.getElementById('backToRoundsBtn').style.display = '';
   // Track if this is a student's round (coach viewing)
-  _viewingStudentRound = (data.user_id !== currentUser.id);
+  _viewingStudentRound = (data.user_id !== activeUserId());
   _currentRoundId = data.id; // Track for updates
   document.getElementById('backToRoundsBtn').textContent = _viewingStudentRound ? '← BACK TO STUDENT' : '← BACK TO ROUND HISTORY';
   var saveBtn2 = document.getElementById('saveToAccountBtn');
@@ -6976,7 +7106,7 @@ function goToNewRound() {
   resetRoundState();
   show('roundPage');
   if (currentUser) {
-    var dname = currentUser.user_metadata?.display_name;
+    var dname = _viewingAsStudent ? _viewingAsStudent.name : currentUser.user_metadata?.display_name;
     var nameField = document.getElementById('playerName');
     if (dname) nameField.value = dname;
     loadUserCustomCourses();
@@ -6999,6 +7129,7 @@ function goToRoundHistory() {
 
 function goToSettings() {
   if (!currentUser) { showAuthPage(); return; }
+  if (_viewingAsStudent) return; // No settings access when viewing as student
   loadProfileInfo();
   show('profilePage');
   showProfileTab('account');
@@ -7770,7 +7901,7 @@ async function loadPerformanceAnalysis() {
     var resp = await _sb
       .from('rounds')
       .select('round_date, handicap, round_data, course_name')
-      .eq('user_id', currentUser.id)
+      .eq('user_id', activeUserId())
       .order('round_date', { ascending: false })
       .limit(10);
 
@@ -7790,7 +7921,15 @@ async function loadPerformanceAnalysis() {
     _perfCachedRounds = rounds;
 
     // Read hcp from user's saved profile setting — read-only, matches their profile
-    var profileHcp = (currentUser && currentUser.user_metadata && currentUser.user_metadata.hcp_preference) || 'pro';
+    var profileHcp;
+    if (_viewingAsStudent) {
+      try {
+        var { data: _shcp } = await _sb.from('profiles').select('hcp_preference').eq('id', _viewingAsStudent.id).single();
+        profileHcp = (_shcp && _shcp.hcp_preference) || 'pro';
+      } catch(e) { profileHcp = 'pro'; }
+    } else {
+      profileHcp = (currentUser && currentUser.user_metadata && currentUser.user_metadata.hcp_preference) || 'pro';
+    }
 
     // Show the hcp badge so user can confirm it matches their profile
     var badge = document.getElementById('perfHcpBadge');
@@ -8341,7 +8480,7 @@ async function loadPerfCombineData() {
     var resp = await _sb
       .from('combine_scores')
       .select('combine_date, combine_type, is_combine, total_sg, avg_pts, holes_count, filled_count, row_data, score_mode')
-      .eq('user_id', currentUser.id)
+      .eq('user_id', activeUserId())
       .eq('is_combine', true)
       .order('combine_date', { ascending: false })
       .limit(40);
@@ -8696,16 +8835,19 @@ function setRole(role) {
   // Update UI
   var sBtn = document.getElementById('roleStudentBtn');
   var cBtn = document.getElementById('roleCoachBtn');
+  var studentsBtn = document.getElementById('homeStudentsBtn');
   if (role === 'student') {
     sBtn.style.background = '#2E7D32'; sBtn.style.color = '#fff'; sBtn.style.fontWeight = '700';
     cBtn.style.background = '#333'; cBtn.style.color = '#888'; cBtn.style.fontWeight = '600';
     document.getElementById('studentCodeSection').style.display = 'flex';
     document.getElementById('coachInfoSection').style.display = 'none';
+    if (studentsBtn) studentsBtn.style.display = 'none';
   } else {
     cBtn.style.background = '#0f766e'; cBtn.style.color = '#fff'; cBtn.style.fontWeight = '700';
     sBtn.style.background = '#333'; sBtn.style.color = '#888'; sBtn.style.fontWeight = '600';
     document.getElementById('studentCodeSection').style.display = 'none';
     document.getElementById('coachInfoSection').style.display = 'flex';
+    if (studentsBtn) studentsBtn.style.display = 'flex';
     checkCoachNotifications();
   }
   // Save role to profiles table
@@ -8951,6 +9093,11 @@ async function removeStudent(studentId, btn) {
 // ===== STUDENT VIEWER =====
 
 async function viewStudent(studentId, name, email) {
+  // Use new impersonation mode — view the app as this student
+  enterStudentView(studentId, name, email);
+  return;
+
+  // Legacy student viewer below (kept for reference, no longer used)
   _currentStudentId  = studentId;
   _currentStudentHcp = 'pro'; // default while loading
   document.getElementById('studentViewName').textContent = name;
@@ -9439,7 +9586,7 @@ async function handleRoundUpload(input, targetUserId) {
   if (!file) return;
   
   // Determine which message element to use
-  var isStudent = (targetUserId !== currentUser.id);
+  var isStudent = (targetUserId !== activeUserId());
   var msgEl = document.getElementById(isStudent ? 'uploadStudentRoundMsg' : 'uploadRoundMsg');
   msgEl.style.color = '#888';
   msgEl.textContent = 'Parsing file...';
@@ -10128,7 +10275,7 @@ async function loadDashboard() {
   var resp = await _sb
     .from('rounds')
     .select('*')
-    .eq('user_id', currentUser.id)
+    .eq('user_id', activeUserId())
     .order('round_date', { ascending: false });
   
   var data = resp.data;
@@ -10149,9 +10296,11 @@ async function onDashHcpChange(hcp) {
   applyDashFilters();
   // Save to user's profile
   if (currentUser) {
-    await _sb.auth.updateUser({ data: { hcp_preference: hcp } });
-    await _sb.from('profiles').update({ hcp_preference: hcp }).eq('id', currentUser.id);
-    currentUser.user_metadata.hcp_preference = hcp;
+    await _sb.from('profiles').update({ hcp_preference: hcp }).eq('id', activeUserId());
+    if (!_viewingAsStudent) {
+      await _sb.auth.updateUser({ data: { hcp_preference: hcp } });
+      currentUser.user_metadata.hcp_preference = hcp;
+    }
     document.getElementById('playerHandicap').value = hcp;
     // Sync the settings dropdown if it exists
     var settingsHcp = document.getElementById('settingsHcpSelect');
@@ -10676,14 +10825,13 @@ async function updateProfile() {
 
 async function saveHcpPreference(hcp) {
   const msg = document.getElementById('hcpPrefMsg');
-  const { error } = await _sb.auth.updateUser({ data: { hcp_preference: hcp } });
+  await _sb.from('profiles').update({ hcp_preference: hcp }).eq('id', activeUserId());
+  const { error } = _viewingAsStudent ? {} : await _sb.auth.updateUser({ data: { hcp_preference: hcp } });
   if (error) {
     msg.textContent = 'Error saving'; msg.style.color = '#f44';
   } else {
-    // Also persist to profiles table so coaches can read it
-    await _sb.from('profiles').update({ hcp_preference: hcp }).eq('id', currentUser.id);
     msg.textContent = '✓ Saved'; msg.style.color = '#4CAF50';
-    currentUser.user_metadata.hcp_preference = hcp;
+    if (!_viewingAsStudent) currentUser.user_metadata.hcp_preference = hcp;
     document.getElementById('playerHandicap').value = hcp;
     setTimeout(function() { msg.textContent = ''; }, 2000);
   }
@@ -13188,7 +13336,7 @@ async function combSave(){
   btn.disabled=true; btn.textContent='Saving...'; msg.textContent='';
 
   // If coach is running this for a student, save to student's profile
-  var saveUserId = (_combSaveForStudent && _combSaveForStudent.id) ? _combSaveForStudent.id : currentUser.id;
+  var saveUserId = (_combSaveForStudent && _combSaveForStudent.id) ? _combSaveForStudent.id : activeUserId();
 
   var payload = {
     user_id:       saveUserId,
@@ -13283,7 +13431,7 @@ async function combLoadHistory(){
 
   var query = _sb.from('combine_scores')
     .select('*')
-    .eq('user_id', currentUser.id)
+    .eq('user_id', activeUserId())
     .order('combine_date', {ascending:false})
     .order('created_at',   {ascending:false});
 
@@ -13329,7 +13477,7 @@ async function loadMyCombines(){
   var timeF = document.getElementById('profileCombFilterTime').value;
   msg.textContent='Loading...'; list.innerHTML='';
 
-  var query = _sb.from('combine_scores').select('*').eq('user_id',currentUser.id).order('combine_date',{ascending:false}).order('created_at',{ascending:false});
+  var query = _sb.from('combine_scores').select('*').eq('user_id',activeUserId()).order('combine_date',{ascending:false}).order('created_at',{ascending:false});
   if(typeF!=='all') query=query.eq('combine_type',typeF);
   if(timeF!=='all'){
     var cutoff=new Date(); cutoff.setMonth(cutoff.getMonth()-parseInt(timeF));
@@ -13489,7 +13637,7 @@ function toggleCombDetails(id) {
 
 async function deleteCombScore(id){
   if(!confirm('Delete this combine score?')) return;
-  var {error} = await _sb.from('combine_scores').delete().eq('id',id).eq('user_id',currentUser.id);
+  var {error} = await _sb.from('combine_scores').delete().eq('id',id).eq('user_id',activeUserId());
   if(error){ alert('Delete failed: '+error.message); return; }
   var card = document.getElementById('combcard-'+id);
   if(card) card.remove();
@@ -13500,7 +13648,7 @@ function editCombNote(id, userId) {
   if (!panel) return;
   if (panel.style.display !== 'none') { panel.style.display = 'none'; return; }
   var curNote = (window._combNoteMap || {})[id] || '';
-  var ownerId = userId || currentUser.id;
+  var ownerId = userId || activeUserId();
   panel.innerHTML = '<div style="background:#1c1c1c;border:1px solid #444;border-radius:8px;padding:10px;">'
     + '<input type="text" id="combnote-input-'+id+'" value="'+escapeHtml(curNote)+'" placeholder="Add a note..." style="width:100%;box-sizing:border-box;background:#2a2a2a;color:#e0e0e0;border:1px solid #333;border-radius:6px;padding:7px 10px;font-size:0.9rem;margin-bottom:8px;">'
     + '<div style="display:flex;gap:6px;">'
@@ -13518,7 +13666,7 @@ async function saveCombNote(id, userId) {
   var msgEl = document.getElementById('combnote-msg-' + id);
   if (!input) return;
   var newNote = input.value.trim();
-  var ownerId = userId || currentUser.id;
+  var ownerId = userId || activeUserId();
   msgEl.style.color = '#888'; msgEl.textContent = 'Saving...';
   var { data: updatedRows, error } = await _sb.from('combine_scores').update({ note: newNote }).eq('id', id).eq('user_id', ownerId).select();
   if (error) { msgEl.style.color = '#f44'; msgEl.textContent = 'Error: ' + error.message; return; }
@@ -13633,6 +13781,7 @@ function setCoachNoteType(type) {
 }
 
 async function goToCoaching() {
+  if (_viewingAsStudent) { show('homePage'); return; } // No coaching access when viewing as student
   show('coachingCornerPage');
   document.getElementById('coachingLoginGate').style.display = 'none';
   document.getElementById('coachingStudentView').style.display = 'none';
@@ -14888,7 +15037,7 @@ async function loadPHCombineHistory() {
   var typeF = (document.getElementById('phCombFilterType') || {}).value || 'all';
   var modeF = (document.getElementById('phCombFilterMode') || {}).value || 'all';
 
-  var query = _sb.from('combine_scores').select('*').eq('user_id', currentUser.id).order('combine_date', {ascending: false}).order('created_at', {ascending: false});
+  var query = _sb.from('combine_scores').select('*').eq('user_id', activeUserId()).order('combine_date', {ascending: false}).order('created_at', {ascending: false});
   if (typeF !== 'all') query = query.eq('combine_type', typeF);
   if (modeF === 'combine') query = query.eq('is_combine', true);
   if (modeF === 'custom')  query = query.eq('is_combine', false);
@@ -14936,7 +15085,7 @@ async function loadPracticePlanCombineOptions() {
   var sel = document.getElementById('ppSessionCombine');
   if (!sel) return;
   sel.innerHTML = '<option value="">None</option>';
-  var { data } = await _sb.from('combine_scores').select('id, combine_date, combine_type, total_sg, is_combine').eq('user_id', currentUser.id).order('combine_date', {ascending: false}).limit(20);
+  var { data } = await _sb.from('combine_scores').select('id, combine_date, combine_type, total_sg, is_combine').eq('user_id', activeUserId()).order('combine_date', {ascending: false}).limit(20);
   if (!data || data.length === 0) return;
   data.forEach(function(c) {
     var label = c.combine_date + ' - ' + c.combine_type + (c.is_combine ? ' (Combine)' : ' (Practice)');
@@ -15018,7 +15167,7 @@ async function savePracticeSession() {
       notes: JSON.stringify(_practiceNotes),
       total_minutes: totalMins
     };
-    var { error } = await _sb.from('practice_sessions').update(updatePayload).eq('id', _editingPracticeSessionId).eq('user_id', currentUser.id);
+    var { error } = await _sb.from('practice_sessions').update(updatePayload).eq('id', _editingPracticeSessionId).eq('user_id', activeUserId());
     if (error) { msg.style.color = '#f44'; msg.textContent = 'Update failed: ' + error.message; return; }
     msg.style.color = '#4CAF50'; msg.textContent = 'Practice session updated!';
     _editingPracticeSessionId = null;
@@ -15032,7 +15181,7 @@ async function savePracticeSession() {
 
   // INSERT new session
   var payload = {
-    user_id: currentUser.id,
+    user_id: activeUserId(),
     session_date: dateVal,
     combine_score_id: combineId,
     notes: JSON.stringify(_practiceNotes),
@@ -15071,7 +15220,7 @@ async function loadPracticeHistory() {
   if (!currentUser) { list.textContent = 'Log in to see practice history.'; return; }
   list.textContent = 'Loading...';
 
-  var { data, error } = await _sb.from('practice_sessions').select('*').eq('user_id', currentUser.id).order('session_date', {ascending: false}).order('created_at', {ascending: false});
+  var { data, error } = await _sb.from('practice_sessions').select('*').eq('user_id', activeUserId()).order('session_date', {ascending: false}).order('created_at', {ascending: false});
   if (error) { list.textContent = 'Error: ' + error.message; return; }
   if (!data || data.length === 0) { list.textContent = 'No practice sessions yet. Log your first session!'; return; }
 
@@ -15156,7 +15305,7 @@ function editPracticeSession(id) {
 
 async function deletePracticeSession(id) {
   if (!confirm('Delete this practice session?')) return;
-  var { error } = await _sb.from('practice_sessions').delete().eq('id', id).eq('user_id', currentUser.id);
+  var { error } = await _sb.from('practice_sessions').delete().eq('id', id).eq('user_id', activeUserId());
   if (error) { alert('Delete failed: ' + error.message); return; }
   loadPracticeHistory();
 }
@@ -15498,7 +15647,7 @@ function saveBagClubs(clubs) {
   localStorage.setItem(_BAG_KEY, JSON.stringify(clubs));
   // Sync to Supabase so coach can view/edit
   if (currentUser) {
-    _sb.from('profiles').update({ bag_clubs: clubs }).eq('id', currentUser.id).then(function(){}).catch(function(){});
+    _sb.from('profiles').update({ bag_clubs: clubs }).eq('id', activeUserId()).then(function(){}).catch(function(){});
   }
 }
 
@@ -16300,7 +16449,7 @@ function saveSpeedSessions(s) {
   }
   localStorage.setItem(_SPEED_KEY, JSON.stringify(s));
   if (currentUser) {
-    _sb.from('profiles').update({ speed_sessions: s }).eq('id', currentUser.id).then(function(){}).catch(function(){});
+    _sb.from('profiles').update({ speed_sessions: s }).eq('id', activeUserId()).then(function(){}).catch(function(){});
   }
 }
 
@@ -16617,7 +16766,7 @@ function saveWgSessions(s) {
   }
   localStorage.setItem(_WG_KEY, JSON.stringify(s));
   if (currentUser) {
-    _sb.from('profiles').update({ wedge_gapping: s }).eq('id', currentUser.id).then(function(){}).catch(function(){});
+    _sb.from('profiles').update({ wedge_gapping: s }).eq('id', activeUserId()).then(function(){}).catch(function(){});
   }
 }
 
