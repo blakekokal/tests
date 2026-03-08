@@ -17098,19 +17098,171 @@ function renderGapVisualizerChart() {
   wrap.style.display = '';
   legendEl.style.display = 'flex';
 
+  // Swing type color map
+  var _GV_SWING_COLORS = {
+    '½': '#3b82f6',      // blue
+    '1/2': '#3b82f6',
+    '50%': '#3b82f6',
+    'Hips': '#3b82f6',
+    '¾': '#15803d',      // darker green
+    '3/4': '#15803d',
+    '75%': '#15803d',
+    'Ribs': '#15803d',
+    'Shoulders': '#6d28d9', // purple
+    'Ears': '#a855f7',      // light purple
+    'Full': '#e2e8f0'    // white/light
+  };
+  var _GV_SEG_COLOR_DEFAULT = ['#3b82f6', '#15803d', '#e2e8f0'];
+
+  function _gvSwingColor(label) {
+    return _GV_SWING_COLORS[label] || _GV_SEG_COLOR_DEFAULT[0];
+  }
+
+  if (_gapVizChart) { _gapVizChart.destroy(); _gapVizChart = null; }
+
+  // ── WEDGE MODE: flat bars, one per swing, sorted by distance ──
+  if (_gapVizFilter === 'wedges') {
+    var flatBars = [];
+    items.forEach(function(item) {
+      item.swings.forEach(function(sw) {
+        if (sw.carry !== null) {
+          flatBars.push({ name: item.name, raw: item.raw, label: sw.label, carry: sw.carry });
+        }
+      });
+    });
+    flatBars.sort(function(a, b) { return a.carry - b.carry; });
+
+    var flatLabels = flatBars.map(function(b) { return b.label + ' ' + b.name; });
+    var flatData = flatBars.map(function(b) { return b.carry; });
+    var flatColors = flatBars.map(function(b) { return _gvSwingColor(b.label); });
+
+    // Compute gaps between adjacent flat bars
+    var flatGapLabels = [];
+    for (var fg = 0; fg < flatBars.length - 1; fg++) {
+      flatGapLabels.push(flatBars[fg + 1].carry - flatBars[fg].carry);
+    }
+
+    var flatGapPlugin = {
+      id: 'gapLabels',
+      afterDraw: function(chart) {
+        if (!flatGapLabels || flatGapLabels.length === 0) return;
+        var ctx2 = chart.ctx;
+        var xScale = chart.scales.x;
+        var yScale = chart.scales.y;
+        ctx2.save();
+        for (var g = 0; g < flatGapLabels.length; g++) {
+          var x1 = xScale.getPixelForValue(g);
+          var x2 = xScale.getPixelForValue(g + 1);
+          var midX = (x1 + x2) / 2;
+          var leftTopY = yScale.getPixelForValue(flatData[g]);
+          var rightTopY = yScale.getPixelForValue(flatData[g + 1]);
+          var higherY = Math.min(leftTopY, rightTopY);
+          var lowerY = Math.max(leftTopY, rightTopY);
+
+          ctx2.beginPath();
+          ctx2.setLineDash([3, 3]);
+          ctx2.strokeStyle = '#666';
+          ctx2.lineWidth = 1;
+          ctx2.moveTo(x1, leftTopY);
+          ctx2.lineTo(x2, rightTopY);
+          ctx2.stroke();
+          ctx2.setLineDash([]);
+
+          ctx2.beginPath();
+          ctx2.setLineDash([2, 2]);
+          ctx2.strokeStyle = '#888';
+          ctx2.lineWidth = 1;
+          ctx2.moveTo(midX, higherY);
+          ctx2.lineTo(midX, lowerY);
+          ctx2.stroke();
+          ctx2.setLineDash([]);
+
+          var gap = flatGapLabels[g];
+          ctx2.font = 'bold 11px sans-serif';
+          ctx2.textAlign = 'center';
+          ctx2.textBaseline = 'bottom';
+          ctx2.fillStyle = gap <= 2 ? '#f87171' : gap >= 15 ? '#fbbf24' : '#e2e8f0';
+          ctx2.fillText(gap + 'y', midX, higherY - 12);
+        }
+        ctx2.restore();
+      }
+    };
+
+    var ctx = canvas.getContext('2d');
+    _gapVizChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: flatLabels,
+        datasets: [{
+          data: flatData,
+          backgroundColor: flatColors,
+          borderColor: flatColors,
+          borderWidth: 0,
+          borderRadius: 4,
+          barPercentage: 0.75,
+          categoryPercentage: 0.8
+        }]
+      },
+      plugins: [flatGapPlugin],
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: { padding: { top: 24, bottom: 4 } },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: 'Yards', color: '#888', font: { size: 12, weight: '600' } },
+            grid: { color: '#2a2a2a' },
+            ticks: { color: '#aaa', font: { size: 11 } }
+          },
+          x: {
+            grid: { display: false },
+            ticks: { color: '#e2e8f0', font: { size: 11, weight: '700' }, maxRotation: 45, minRotation: 0, autoSkip: false }
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1a1a1a',
+            titleColor: '#fff',
+            bodyColor: '#ccc',
+            borderColor: '#444',
+            borderWidth: 1,
+            callbacks: {
+              label: function(c) {
+                return flatBars[c.dataIndex].carry + ' yds';
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Build legend for wedge mode with unique swing types
+    var seenLabels = {};
+    legendEl.innerHTML = '';
+    flatBars.forEach(function(b) {
+      if (seenLabels[b.label]) return;
+      seenLabels[b.label] = true;
+      legendEl.innerHTML += '<div style="display:flex;align-items:center;gap:4px;">' +
+        '<div style="width:12px;height:12px;border-radius:3px;background:' + _gvSwingColor(b.label) + ';"></div>' +
+        '<span style="color:#ccc;font-size:12px;">' + b.label + '</span></div>';
+    });
+    legendEl.style.display = 'flex';
+
+    // Resize canvas
+    var barCount = flatBars.length;
+    var minW = Math.max(barCount * 44, 320);
+    canvas.parentElement.style.overflowX = barCount > 10 ? 'auto' : 'visible';
+    canvas.style.width = minW + 'px';
+    canvas.style.minHeight = '260px';
+    canvas.style.height = '300px';
+    return;
+  }
+
+  // ── STANDARD STACKED MODE (all/woods/irons/custom) ──
   var labels = items.map(function(i) { return i.name; });
   var seg = gvBuildSegments(items);
-
-  // Segment colors by swing type (index in sorted-ascending order):
-  // 0 = smallest partial (½ swing) = orange
-  // 1 = next partial (¾ swing) = green
-  // top (full swing extra) = white
-  var _GV_SWING_COLORS = {
-    '½': '#b8860b',    // gold
-    '¾': '#15803d',    // darker green
-    'Full': '#e2e8f0'  // white/light
-  };
-  var _GV_SEG_COLOR_DEFAULT = ['#b8860b', '#15803d', '#e2e8f0'];
 
   // Compute gaps between adjacent clubs (full swing carry difference)
   var gapLabels = [];
@@ -17159,8 +17311,6 @@ function renderGapVisualizerChart() {
       categoryPercentage: 0.8
     });
   }
-
-  if (_gapVizChart) { _gapVizChart.destroy(); _gapVizChart = null; }
 
   // Plugin to draw gap numbers + dotted connector lines between bars
   var gapLabelPlugin = {
