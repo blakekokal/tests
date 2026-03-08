@@ -1771,6 +1771,11 @@ body.viewing-as .back-btn-top{top:38px;}
       <input type="file" id="bagImportCSV" accept=".csv,.xlsx,.xls" style="display:none;" onchange="importBagFile(this)">
     </div>
 
+    <!-- Gap Visualizer -->
+    <div style="width:100%;max-width:360px;margin-bottom:16px;">
+      <button onclick="openGapVisualizer()" style="width:100%;height:40px;background:#1a1a1a;border:1px solid #7c3aed;border-radius:10px;color:#a78bfa;font-size:13px;font-weight:700;cursor:pointer;">📊 Gap Visualizer</button>
+    </div>
+
     <!-- Club Tile Grid -->
     <div style="width:100%;max-width:360px;">
       <div id="bagEmptyMsg" style="background:#1a1a1a;border-radius:12px;padding:24px;text-align:center;color:#555;font-size:13px;line-height:1.7;">
@@ -2007,6 +2012,25 @@ body.viewing-as .back-btn-top{top:38px;}
         <button onclick="fyResolveConflict('replace')" style="width:100%;height:42px;background:#b91c1c;border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">Replace with New Data Only</button>
         <button onclick="fyResolveConflict('cancel')" style="width:100%;height:42px;background:#333;border:none;border-radius:10px;color:#aaa;font-size:13px;font-weight:700;cursor:pointer;">Cancel</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- GAP VISUALIZER PAGE -->
+<div id="gapVisualizerPage" class="page" style="justify-content:flex-start;padding-top:15px;overflow-y:auto;padding-bottom:80px;align-items:center;">
+  <button class="back-btn-top" onclick="show('myBagPage')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <div style="text-align:center;margin-bottom:16px;">
+    <div style="font-size:22px;font-weight:800;">📊 Gap Visualizer</div>
+    <div style="font-size:12px;color:#888;margin-top:4px;">Full swing distances &amp; ¾ swing gaps</div>
+  </div>
+  <div style="width:100%;max-width:400px;padding:0 16px;box-sizing:border-box;">
+    <div id="gapVizEmpty" style="display:none;background:#1a1a1a;border-radius:12px;padding:24px;text-align:center;color:#555;font-size:13px;line-height:1.7;">
+      No club data to visualize.<br>Add clubs and distances in My Bag first.
+    </div>
+    <canvas id="gapVizChart" style="width:100%;"></canvas>
+    <div id="gapVizLegend" style="display:flex;gap:16px;justify-content:center;margin-top:16px;">
+      <div style="display:flex;align-items:center;gap:6px;"><div style="width:14px;height:14px;background:#7c3aed;border-radius:3px;"></div><span style="font-size:12px;color:#ccc;font-weight:600;">Full Swing</span></div>
+      <div style="display:flex;align-items:center;gap:6px;"><div style="width:14px;height:14px;background:transparent;border:2px dashed #a78bfa;border-radius:3px;box-sizing:border-box;"></div><span style="font-size:12px;color:#ccc;font-weight:600;">¾ Swing</span></div>
     </div>
   </div>
 </div>
@@ -2642,6 +2666,7 @@ var _backTargetMap = {
   'helpPage': 'homePage',
   'studentViewPage': 'coachingCornerPage',
   'myBagPage': 'homePage',
+  'gapVisualizerPage': 'myBagPage',
   'roundPage': 'homePage',
   'holeByHolePage': 'roundPage',
   'summaryPage': 'homePage',
@@ -16864,6 +16889,141 @@ function processBagImportRows(rows) {
   msg.style.color = '#4ade80';
   msg.textContent = count + ' clubs imported!' + (hasRollData ? ' (carry + total data)' : '');
   setTimeout(function() { msg.textContent = ''; }, 3000);
+}
+
+// ─── GAP VISUALIZER ────────────────────────────────────────────────────────
+var _gapVizChart = null;
+
+function openGapVisualizer() {
+  show('gapVisualizerPage');
+  renderGapVisualizerChart();
+}
+
+function renderGapVisualizerChart() {
+  var clubs = sortBagClubs(getBagClubs());
+  var emptyMsg = document.getElementById('gapVizEmpty');
+  var canvas = document.getElementById('gapVizChart');
+  var legend = document.getElementById('gapVizLegend');
+  if (!canvas) return;
+
+  // Gather club data: full swing carry and 3/4 carry
+  var items = [];
+  clubs.forEach(function(club) {
+    var fullCarry = null;
+    var threeQCarry = null;
+    var isWedge = (typeof WG_WEDGE_LIST !== 'undefined') && WG_WEDGE_LIST.indexOf(club.name) >= 0;
+    var wgSess = isWedge ? bagWgGetLatestForClub(club.name) : null;
+
+    // Full swing carry
+    if (wgSess) {
+      var wgFull = (wgSess.results[club.name] || {})['sw0'];
+      if (wgFull && wgFull.avg != null) fullCarry = wgFull.avg;
+      // 3/4 swing (sw1)
+      var wg34 = (wgSess.results[club.name] || {})['sw1'];
+      if (wg34 && wg34.avg != null) threeQCarry = wg34.avg;
+    }
+    if (fullCarry === null && club.carry != null) fullCarry = club.carry;
+    if (threeQCarry === null && club.carry34 != null) threeQCarry = club.carry34;
+
+    if (fullCarry !== null) {
+      items.push({
+        name: bagDisplayName(club.name),
+        full: fullCarry,
+        threeQ: threeQCarry
+      });
+    }
+  });
+
+  if (items.length === 0) {
+    emptyMsg.style.display = 'block';
+    canvas.style.display = 'none';
+    legend.style.display = 'none';
+    if (_gapVizChart) { _gapVizChart.destroy(); _gapVizChart = null; }
+    return;
+  }
+  emptyMsg.style.display = 'none';
+  canvas.style.display = '';
+  legend.style.display = 'flex';
+
+  // Sort by full carry descending (longest club first)
+  items.sort(function(a, b) { return b.full - a.full; });
+
+  var labels = items.map(function(i) { return i.name; });
+  var fullData = items.map(function(i) { return i.full; });
+  var threeQData = items.map(function(i) { return i.threeQ; });
+
+  if (_gapVizChart) { _gapVizChart.destroy(); _gapVizChart = null; }
+
+  var ctx = canvas.getContext('2d');
+  _gapVizChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Full Swing',
+          data: fullData,
+          backgroundColor: '#7c3aed',
+          borderColor: '#7c3aed',
+          borderWidth: 1,
+          borderRadius: 4,
+          barPercentage: 0.7,
+          categoryPercentage: 0.8
+        },
+        {
+          label: '¾ Swing',
+          data: threeQData,
+          backgroundColor: 'transparent',
+          borderColor: '#a78bfa',
+          borderWidth: 2,
+          borderDash: [5, 3],
+          borderRadius: 4,
+          barPercentage: 0.7,
+          categoryPercentage: 0.8
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: 'y',
+      layout: { padding: { top: 10, bottom: 10 } },
+      scales: {
+        x: {
+          beginAtZero: true,
+          title: { display: true, text: 'Yards', color: '#888', font: { size: 12, weight: '600' } },
+          grid: { color: '#2a2a2a' },
+          ticks: { color: '#aaa', font: { size: 11 } }
+        },
+        y: {
+          grid: { display: false },
+          ticks: { color: '#e2e8f0', font: { size: 13, weight: '700' } }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1a1a1a',
+          titleColor: '#fff',
+          bodyColor: '#ccc',
+          borderColor: '#444',
+          borderWidth: 1,
+          callbacks: {
+            label: function(ctx) {
+              if (ctx.raw == null) return null;
+              return ctx.dataset.label + ': ' + ctx.raw + ' yds';
+            }
+          }
+        }
+      }
+    }
+  });
+
+  // Set canvas height based on item count
+  var chartHeight = Math.max(300, items.length * 44);
+  canvas.parentElement.style.height = chartHeight + 'px';
+  canvas.style.height = chartHeight + 'px';
+  _gapVizChart.resize();
 }
 
 // ─── BAG TABS ──────────────────────────────────────────────────────────────
