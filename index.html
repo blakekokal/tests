@@ -227,6 +227,18 @@ body.viewing-as .back-btn-top{top:38px;}
       </div>
     </div>
 
+  <!-- COACH REQUEST MODAL -->
+  <div id="coachRequestModal" onclick="if(event.target===this)document.getElementById('coachRequestModal').style.display='none'" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:500;align-items:center;justify-content:center;">
+    <div style="background:#1a1a1a;border-radius:16px;padding:24px 20px;width:300px;max-width:90vw;box-shadow:0 8px 32px rgba(0,0,0,0.5);display:flex;flex-direction:column;align-items:center;gap:12px;">
+      <div style="font-size:22px;">🏌️</div>
+      <div style="font-size:16px;font-weight:800;text-align:center;">Become a Coach</div>
+      <div style="font-size:13px;color:#aaa;text-align:center;line-height:1.6;">Coach accounts require admin approval. Tap below to send a request — you'll be notified once it's approved.</div>
+      <div id="coachRequestModalMsg" style="font-size:12px;min-height:14px;text-align:center;"></div>
+      <button id="coachRequestSendBtn" onclick="submitCoachRequest()" style="width:100%;height:42px;background:#2E7D32;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;">Send Request</button>
+      <button onclick="document.getElementById('coachRequestModal').style.display='none'" style="width:100%;height:36px;background:#333;border:none;border-radius:10px;color:#aaa;font-size:13px;font-weight:600;cursor:pointer;">Cancel</button>
+    </div>
+  </div>
+
     <!-- HANDICAP PREFERENCE -->
     <div style="margin-top:6px;width:100%;border-top:1px solid #333;padding-top:8px;display:flex;flex-direction:column;align-items:center;gap:4px;">
       <div style="font-size:12px;color:#888;">Strokes Gained Comparison</div>
@@ -8884,15 +8896,32 @@ var _ADMIN_EMAIL         = 'blakekokal@gmail.com';
 async function requestCoachRole() {
   if (!currentUser) return;
 
-  var msg = document.getElementById('roleMsg');
-
   // Admin always gets direct access
   if (window._isAdmin) { setRole('coach'); return; }
 
-  // If already coach, this is "switch back to student" — handled by Student btn
+  // If already coach, switch back to student via Student btn
   if (_userRole === 'coach') { setRole('student'); return; }
 
-  msg.style.color = '#888'; msg.textContent = 'Submitting request...';
+  // Show the explanation modal
+  var modalMsg = document.getElementById('coachRequestModalMsg');
+  var sendBtn = document.getElementById('coachRequestSendBtn');
+  modalMsg.textContent = '';
+  sendBtn.disabled = false;
+  sendBtn.textContent = 'Send Request';
+  var modal = document.getElementById('coachRequestModal');
+  modal.style.display = 'flex';
+}
+
+async function submitCoachRequest() {
+  if (!currentUser) return;
+
+  var modalMsg = document.getElementById('coachRequestModalMsg');
+  var sendBtn = document.getElementById('coachRequestSendBtn');
+
+  sendBtn.disabled = true;
+  sendBtn.textContent = 'Sending...';
+  modalMsg.style.color = '#888';
+  modalMsg.textContent = 'Submitting request...';
 
   try {
     // Check for existing pending request
@@ -8900,8 +8929,10 @@ async function requestCoachRole() {
       .select('id').eq('user_id', currentUser.id).eq('status', 'pending').limit(1);
 
     if (existing && existing.length > 0) {
-      msg.style.color = '#f59e0b';
-      msg.textContent = '⏳ Request already pending — waiting for admin approval.';
+      modalMsg.style.color = '#f59e0b';
+      modalMsg.textContent = '⏳ Request already pending — waiting for admin approval.';
+      sendBtn.disabled = false;
+      sendBtn.textContent = 'Send Request';
       return;
     }
 
@@ -8936,11 +8967,22 @@ async function requestCoachRole() {
     // Email notification
     await sendCoachRequestEmail(displayName, email);
 
-    msg.style.color = '#4CAF50';
-    msg.textContent = '✓ Request sent! You\'ll be notified when approved.';
+    modalMsg.style.color = '#4CAF50';
+    modalMsg.textContent = '✓ Request sent! You\'ll be notified when approved.';
+    sendBtn.textContent = 'Sent!';
+
+    // Close modal after short delay
+    setTimeout(function() {
+      document.getElementById('coachRequestModal').style.display = 'none';
+      var roleMsg = document.getElementById('roleMsg');
+      roleMsg.style.color = '#4CAF50';
+      roleMsg.textContent = '✓ Request sent! You\'ll be notified when approved.';
+    }, 1500);
   } catch(e) {
-    msg.style.color = '#f44';
-    msg.textContent = 'Error: ' + (e.message || e);
+    modalMsg.style.color = '#f44';
+    modalMsg.textContent = 'Error: ' + (e.message || e);
+    sendBtn.disabled = false;
+    sendBtn.textContent = 'Send Request';
   }
 }
 
