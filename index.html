@@ -16907,19 +16907,14 @@ function processBagImportRows(rows) {
 var _gapVizChart = null;
 var _gapVizFilter = 'all';
 var _gapVizCustomClubs = {};
+var _gapVizItems = []; // current filtered items for the plugin to read
 
 var _GV_WOODS = ['Dr','Dr2','2W','3W','4W','5W','6W','7W','2HY','3HY','4HY','5HY','6HY','7HY'];
 var _GV_IRONS = ['2I','3I','4I','5I','6I','7I','8I','9I'];
 var _GV_WEDGES = ['48','PW','GW','AW','SW','50','52','54','56','58','60','62','LW'];
 
-// Swing level styles: index 0 = full (solid), higher = more hollow
-var _GV_SWING_STYLES = [
-  { bg: '#7c3aed',                  border: '#7c3aed', dash: [], width: 1 },
-  { bg: 'rgba(167,139,250,0.35)',   border: '#a78bfa', dash: [5,3], width: 2 },
-  { bg: 'rgba(129,140,248,0.18)',   border: '#818cf8', dash: [3,3], width: 2 },
-  { bg: 'rgba(99,102,241,0.10)',    border: '#6366f1', dash: [2,4], width: 2 },
-  { bg: 'transparent',              border: '#4f46e5', dash: [2,5], width: 2 }
-];
+// Colors for partial swing lines (index 1 = first partial, 2 = second, etc.)
+var _GV_PARTIAL_COLORS = ['#f59e0b', '#ef4444', '#22d3ee', '#4ade80'];
 
 function gvClubCategory(name) {
   if (_GV_WOODS.indexOf(name) >= 0) return 'woods';
@@ -16979,12 +16974,9 @@ function gvGetAllItems() {
   clubs.forEach(function(club) {
     var isWedge = (typeof WG_WEDGE_LIST !== 'undefined') && WG_WEDGE_LIST.indexOf(club.name) >= 0;
     var wgSess = isWedge ? bagWgGetLatestForClub(club.name) : null;
-
-    // Collect all swing levels: { label, carry }
     var swings = [];
 
     if (wgSess) {
-      // Use wedge gapping session data — includes full, 3/4, 1/2, body parts, etc.
       var swingLabels = WG_SWINGS[wgSess.swingType] || [];
       var wgClubData = wgSess.results[club.name] || {};
       swingLabels.forEach(function(label, si) {
@@ -16992,19 +16984,16 @@ function gvGetAllItems() {
         var avg = entry && entry.avg != null ? entry.avg : null;
         swings.push({ label: label, carry: avg });
       });
-      // If full swing missing from wg, fall back to bag carry
       if (swings.length > 0 && swings[0].carry === null && club.carry != null) {
         swings[0].carry = club.carry;
       }
     } else {
-      // Non-wedge or no gapping session: use bag carry + carry34
       var fullCarry = club.carry != null ? club.carry : null;
       var threeQCarry = club.carry34 != null ? club.carry34 : null;
       if (fullCarry !== null) swings.push({ label: 'Full', carry: fullCarry });
       if (threeQCarry !== null) swings.push({ label: '¾', carry: threeQCarry });
     }
 
-    // Only include if at least one swing has data
     var hasAny = swings.some(function(s) { return s.carry !== null; });
     if (hasAny) {
       items.push({ raw: club.name, name: bagDisplayName(club.name), swings: swings });
@@ -17012,6 +17001,52 @@ function gvGetAllItems() {
   });
   return items;
 }
+
+// Chart.js plugin: draws dashed lines across each bar for partial swings
+var _gvPartialsPlugin = {
+  id: 'gvPartials',
+  afterDraw: function(chart) {
+    var items = _gapVizItems;
+    if (!items || !items.length) return;
+    var meta = chart.getDatasetMeta(0);
+    if (!meta || !meta.data) return;
+    var yScale = chart.scales.y;
+    var ctx = chart.ctx;
+
+    items.forEach(function(item, i) {
+      var bar = meta.data[i];
+      if (!bar) return;
+      var barLeft = bar.x - bar.width / 2;
+      var barRight = bar.x + bar.width / 2;
+
+      // Draw lines for partial swings (skip index 0 = full, that's the bar itself)
+      for (var si = 1; si < item.swings.length; si++) {
+        var sw = item.swings[si];
+        if (sw.carry === null) continue;
+        var yPos = yScale.getPixelForValue(sw.carry);
+        var color = _GV_PARTIAL_COLORS[Math.min(si - 1, _GV_PARTIAL_COLORS.length - 1)];
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.setLineDash([5, 3]);
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = color;
+        ctx.moveTo(barLeft - 2, yPos);
+        ctx.lineTo(barRight + 2, yPos);
+        ctx.stroke();
+
+        // Small label to the right
+        ctx.setLineDash([]);
+        ctx.font = '600 9px sans-serif';
+        ctx.fillStyle = color;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(sw.carry, barRight + 5, yPos);
+        ctx.restore();
+      }
+    });
+  }
+};
 
 function renderGapVisualizerChart() {
   var allItems = gvGetAllItems();
@@ -17021,7 +17056,6 @@ function renderGapVisualizerChart() {
   var legendEl = document.getElementById('gapVizLegend');
   if (!canvas) return;
 
-  // Apply filter
   var items = allItems.filter(function(item) {
     if (_gapVizFilter === 'all') return true;
     if (_gapVizFilter === 'woods') return gvClubCategory(item.raw) === 'woods';
@@ -17031,12 +17065,13 @@ function renderGapVisualizerChart() {
     return true;
   });
 
-  // Sort by first swing (full) carry descending
   items.sort(function(a, b) {
     var aFull = (a.swings[0] && a.swings[0].carry) || 0;
     var bFull = (b.swings[0] && b.swings[0].carry) || 0;
     return bFull - aFull;
   });
+
+  _gapVizItems = items;
 
   if (items.length === 0) {
     emptyMsg.style.display = 'block';
@@ -17049,48 +17084,31 @@ function renderGapVisualizerChart() {
   wrap.style.display = '';
   legendEl.style.display = 'flex';
 
-  // Find the max number of swing levels across all items
-  var maxSwings = 0;
-  items.forEach(function(item) { if (item.swings.length > maxSwings) maxSwings = item.swings.length; });
-
-  // Collect unique swing labels in order
-  var swingLabelSet = [];
-  items.forEach(function(item) {
-    item.swings.forEach(function(sw, si) {
-      if (swingLabelSet.length <= si) swingLabelSet.push(sw.label);
-    });
-  });
-
   var labels = items.map(function(i) { return i.name; });
-
-  // Build one dataset per swing level
-  var datasets = [];
-  for (var si = 0; si < maxSwings; si++) {
-    var style = _GV_SWING_STYLES[Math.min(si, _GV_SWING_STYLES.length - 1)];
-    var swLabel = swingLabelSet[si] || ('sw' + si);
-    datasets.push({
-      label: swLabel,
-      data: items.map(function(item) { return item.swings[si] ? item.swings[si].carry : null; }),
-      backgroundColor: style.bg,
-      borderColor: style.border,
-      borderWidth: style.width,
-      borderDash: style.dash,
-      borderRadius: 4,
-      barPercentage: 0.85,
-      categoryPercentage: 0.75
-    });
-  }
+  var fullData = items.map(function(i) { return i.swings[0] ? i.swings[0].carry : null; });
 
   if (_gapVizChart) { _gapVizChart.destroy(); _gapVizChart = null; }
 
   var ctx = canvas.getContext('2d');
   _gapVizChart = new Chart(ctx, {
     type: 'bar',
-    data: { labels: labels, datasets: datasets },
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Full Swing',
+        data: fullData,
+        backgroundColor: '#7c3aed',
+        borderColor: '#7c3aed',
+        borderWidth: 1,
+        borderRadius: 4,
+        barPercentage: 0.75,
+        categoryPercentage: 0.8
+      }]
+    },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      layout: { padding: { top: 10, bottom: 4 } },
+      layout: { padding: { top: 10, bottom: 4, right: 30 } },
       scales: {
         y: {
           beginAtZero: true,
@@ -17112,25 +17130,43 @@ function renderGapVisualizerChart() {
           borderColor: '#444',
           borderWidth: 1,
           callbacks: {
-            label: function(c) {
-              if (c.raw == null) return null;
-              return c.dataset.label + ': ' + c.raw + ' yds';
+            afterBody: function(tooltipItems) {
+              var idx = tooltipItems[0].dataIndex;
+              var item = _gapVizItems[idx];
+              if (!item) return '';
+              var lines = [];
+              for (var si = 1; si < item.swings.length; si++) {
+                var sw = item.swings[si];
+                if (sw.carry !== null) lines.push(sw.label + ': ' + sw.carry + ' yds');
+              }
+              return lines.length ? lines : '';
             }
           }
         }
       }
-    }
+    },
+    plugins: [_gvPartialsPlugin]
   });
 
   // Build dynamic legend
-  legendEl.innerHTML = '';
-  for (var li = 0; li < maxSwings; li++) {
-    var ls = _GV_SWING_STYLES[Math.min(li, _GV_SWING_STYLES.length - 1)];
+  var maxSwings = 0;
+  var swingLabelSet = [];
+  items.forEach(function(item) {
+    if (item.swings.length > maxSwings) maxSwings = item.swings.length;
+    item.swings.forEach(function(sw, si) {
+      if (swingLabelSet.length <= si) swingLabelSet.push(sw.label);
+    });
+  });
+
+  legendEl.innerHTML = '<div style="display:flex;align-items:center;gap:5px;">' +
+    '<div style="width:14px;height:14px;background:#7c3aed;border-radius:3px;"></div>' +
+    '<span style="font-size:11px;color:#ccc;font-weight:600;">' + (swingLabelSet[0] || 'Full') + '</span></div>';
+  for (var li = 1; li < maxSwings; li++) {
+    var col = _GV_PARTIAL_COLORS[Math.min(li - 1, _GV_PARTIAL_COLORS.length - 1)];
     var lbl = swingLabelSet[li] || ('sw' + li);
-    var swatch = li === 0
-      ? '<div style="width:14px;height:14px;background:' + ls.bg + ';border-radius:3px;"></div>'
-      : '<div style="width:14px;height:14px;background:' + ls.bg + ';border:2px dashed ' + ls.border + ';border-radius:3px;box-sizing:border-box;"></div>';
-    legendEl.innerHTML += '<div style="display:flex;align-items:center;gap:5px;">' + swatch + '<span style="font-size:11px;color:#ccc;font-weight:600;">' + lbl + '</span></div>';
+    legendEl.innerHTML += '<div style="display:flex;align-items:center;gap:5px;">' +
+      '<div style="width:14px;height:3px;border-top:2.5px dashed ' + col + ';"></div>' +
+      '<span style="font-size:11px;color:#ccc;font-weight:600;">' + lbl + '</span></div>';
   }
 
   wrap.style.height = '320px';
