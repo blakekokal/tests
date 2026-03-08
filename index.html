@@ -17122,11 +17122,31 @@ function renderGapVisualizerChart() {
 
   // ── WEDGE MODE: flat bars, one per swing, sorted by distance ──
   if (_gapVizFilter === 'wedges') {
+    // Detect swing type from WG sessions to normalize labels
+    var _wgSwingType = null;
+    var clubs = sortBagClubs(getBagClubs());
+    clubs.forEach(function(club) {
+      if (_wgSwingType) return;
+      var isWedge = (typeof WG_WEDGE_LIST !== 'undefined') && WG_WEDGE_LIST.indexOf(club.name) >= 0;
+      var wgSess = isWedge ? bagWgGetLatestForClub(club.name) : null;
+      if (wgSess && wgSess.swingType) _wgSwingType = wgSess.swingType;
+    });
+    // Map generic labels to the user's chosen notation
+    var _labelMap = { 'Full': 'Full', '¾': '¾' };
+    if (_wgSwingType === 'percent') {
+      _labelMap['¾'] = '75%';
+    } else if (_wgSwingType === 'fraction') {
+      _labelMap['¾'] = '3/4';
+    } else if (_wgSwingType === 'body') {
+      _labelMap['¾'] = 'Ears';
+    }
+
     var flatBars = [];
     items.forEach(function(item) {
       item.swings.forEach(function(sw) {
         if (sw.carry !== null) {
-          flatBars.push({ name: item.name, raw: item.raw, label: sw.label, carry: sw.carry });
+          var lbl = _labelMap[sw.label] || sw.label;
+          flatBars.push({ name: item.name, raw: item.raw, label: lbl, carry: sw.carry });
         }
       });
     });
