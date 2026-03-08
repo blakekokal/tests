@@ -1754,26 +1754,23 @@ body.viewing-as .back-btn-top{top:38px;}
 
   <!-- TAB 1: MY BAG -->
   <div id="bagTabContentMyBag" style="width:100%;display:flex;flex-direction:column;align-items:center;">
-    <!-- Add Club Section -->
-    <div style="width:100%;max-width:360px;background:#1a1a1a;border-radius:14px;padding:16px;margin-bottom:16px;">
-      <div style="font-size:12px;font-weight:700;color:#a78bfa;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Add Club</div>
+    <!-- Add Club Toggle -->
+    <div style="width:100%;max-width:360px;margin-bottom:12px;display:flex;gap:8px;">
+      <button onclick="toggleBagAddClub()" style="flex:1;height:40px;background:#1a1a1a;border:1px solid #333;border-radius:10px;color:#aaa;font-size:13px;font-weight:600;cursor:pointer;">+ Add a Club</button>
+      <button onclick="openGapVisualizer()" style="flex:1;height:40px;background:#1a1a1a;border:1px solid #7c3aed;border-radius:10px;color:#a78bfa;font-size:13px;font-weight:700;cursor:pointer;">📊 Gap Visualizer</button>
+    </div>
+    <!-- Add Club Expandable Section -->
+    <div id="bagAddClubSection" style="display:none;width:100%;max-width:360px;background:#1a1a1a;border-radius:14px;padding:16px;margin-bottom:16px;">
       <select id="bagClubName" style="width:100%;height:40px;font-size:14px;text-align:center;box-sizing:border-box;margin-bottom:10px;background:#222;color:#fff;border:1px solid #444;border-radius:8px;-webkit-appearance:none;appearance:none;">
         <option value="" disabled selected>Select a club...</option>
       </select>
       <input id="bagClubLabel" type="text" placeholder="Custom label (e.g. 48°, Titleist)" maxlength="20" style="width:100%;height:36px;font-size:13px;text-align:center;box-sizing:border-box;margin-bottom:10px;background:#222;color:#fff;border:1px solid #444;border-radius:8px;padding:0 10px;">
       <button onclick="addBagClub()" style="width:100%;height:42px;background:#7c3aed;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;">+ Add to Bag</button>
       <div id="bagAddMsg" style="font-size:12px;min-height:16px;text-align:center;margin-top:6px;color:#4ade80;"></div>
-    </div>
-
-    <!-- Import CSV -->
-    <div style="width:100%;max-width:360px;margin-bottom:16px;">
-      <button onclick="document.getElementById('bagImportCSV').click()" style="width:100%;height:40px;background:#1a1a1a;border:1px solid #333;border-radius:10px;color:#aaa;font-size:13px;font-weight:600;cursor:pointer;">📤 Import Club Data (.csv / .xlsx)</button>
-      <input type="file" id="bagImportCSV" accept=".csv,.xlsx,.xls" style="display:none;" onchange="importBagFile(this)">
-    </div>
-
-    <!-- Gap Visualizer -->
-    <div style="width:100%;max-width:360px;margin-bottom:16px;">
-      <button onclick="openGapVisualizer()" style="width:100%;height:40px;background:#1a1a1a;border:1px solid #7c3aed;border-radius:10px;color:#a78bfa;font-size:13px;font-weight:700;cursor:pointer;">📊 Gap Visualizer</button>
+      <div style="text-align:center;margin-top:8px;">
+        <button onclick="document.getElementById('bagImportCSV').click()" style="background:none;border:none;color:#666;font-size:11px;font-weight:600;cursor:pointer;text-decoration:underline;">Import from .csv / .xlsx</button>
+        <input type="file" id="bagImportCSV" accept=".csv,.xlsx,.xls" style="display:none;" onchange="importBagFile(this)">
+      </div>
     </div>
 
     <!-- Club Tile Grid -->
@@ -16555,6 +16552,12 @@ function populateBagDropdown() {
   sel.innerHTML = opts;
 }
 
+function toggleBagAddClub() {
+  var sec = document.getElementById('bagAddClubSection');
+  if (!sec) return;
+  sec.style.display = sec.style.display === 'none' ? '' : 'none';
+}
+
 function addBagClub() {
   var nameEl = document.getElementById('bagClubName');
   var labelEl = document.getElementById('bagClubLabel');
@@ -16913,13 +16916,13 @@ var _GV_IRONS = ['2I','3I','4I','5I','6I','7I','8I','9I'];
 var _GV_WEDGES = ['48','PW','GW','AW','SW','50','52','54','56','58','60','62','LW'];
 
 // Segment colors: bottom (smallest partial) → top (full-only extra)
-// Index 0 = smallest partial, last index = full-only portion on top
+// Purple gradient bottom-up, top segment is a muted slate to show "extra" distance
 var _GV_SEG_COLORS = [
-  '#7c3aed',  // deep purple  — lowest partial covers this
-  '#9333ea',  // medium purple — next partial segment
-  '#a855f7',  // lighter purple
-  '#c084fc',  // lavender
-  '#ef4444'   // red — full-only extra on top
+  '#6d28d9',  // deep violet — smallest partial
+  '#7c3aed',  // purple
+  '#8b5cf6',  // medium purple
+  '#a78bfa',  // soft purple
+  '#334155'   // slate — full-only extra on top
 ];
 
 function gvClubCategory(name) {
