@@ -17164,46 +17164,24 @@ function renderGapVisualizerChart() {
       clubColorMap[name] = _WG_CLUB_PALETTE[i % _WG_CLUB_PALETTE.length];
     });
 
-    // Get unique swing labels in ascending order (smallest % first)
-    var swingOrder = [];
-    flatBars.forEach(function(b) {
-      if (swingOrder.indexOf(b.label) === -1) swingOrder.push(b.label);
-    });
-    // Sort: FULL always last, others by average carry of that swing level
-    var swingAvg = {};
-    swingOrder.forEach(function(lbl) {
-      var vals = flatBars.filter(function(b) { return b.label === lbl; });
-      var sum = vals.reduce(function(s, v) { return s + v.carry; }, 0);
-      swingAvg[lbl] = sum / vals.length;
-    });
-    swingOrder.sort(function(a, b) { return swingAvg[a] - swingAvg[b]; });
-
-    // Build grouped bars: for each swing level, show all clubs in order
-    var groupedBars = [];
-    swingOrder.forEach(function(swLabel) {
-      uniqueClubs.forEach(function(clubName) {
-        var match = null;
-        flatBars.forEach(function(b) {
-          if (b.name === clubName && b.label === swLabel) match = b;
-        });
-        if (match) groupedBars.push(match);
-      });
-    });
+    // Sort all bars by carry distance ascending (left to right)
+    var groupedBars = flatBars.slice().sort(function(a, b) { return a.carry - b.carry; });
 
     var wgLabels = groupedBars.map(function(b) { return [b.name, b.label]; }); // two-line labels
     var wgData = groupedBars.map(function(b) { return b.carry; });
     var wgColors = groupedBars.map(function(b) { return clubColorMap[b.name]; });
 
-    // Build lookup: for each bar, find same club's carry at next swing level (for ghost outlines)
+    // Build lookup: for each bar, find same club's next higher carry (for ghost outlines)
     var ghostHeights = groupedBars.map(function(b, idx) {
-      var curSwingIdx = swingOrder.indexOf(b.label);
-      if (curSwingIdx >= swingOrder.length - 1) return null; // last swing level, no ghost
-      var nextSwing = swingOrder[curSwingIdx + 1];
-      var nextBar = null;
-      groupedBars.forEach(function(gb) {
-        if (gb.name === b.name && gb.label === nextSwing) nextBar = gb;
-      });
-      return nextBar ? nextBar.carry : null;
+      // Find all bars for the same club, sorted by carry
+      var sameClub = groupedBars.filter(function(gb) { return gb.name === b.name; });
+      sameClub.sort(function(a, c) { return a.carry - c.carry; });
+      var myIdx = -1;
+      for (var si = 0; si < sameClub.length; si++) {
+        if (sameClub[si].carry === b.carry && sameClub[si].label === b.label) { myIdx = si; break; }
+      }
+      if (myIdx >= 0 && myIdx < sameClub.length - 1) return sameClub[myIdx + 1].carry;
+      return null;
     });
 
     // Plugin: ghost outlines + value labels on bars
