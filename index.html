@@ -212,8 +212,9 @@ body.viewing-as .back-btn-top{top:38px;}
       <div style="font-size:12px;color:#888;">Account Role</div>
       <div style="display:flex;gap:6px;width:100%;max-width:280px;">
         <button id="roleStudentBtn" onclick="setRole('student')" style="flex:1;height:36px;font-size:12px;background:#2E7D32;border-radius:8px;font-weight:700;">Student</button>
-        <button id="roleCoachBtn" onclick="setRole('coach')" style="flex:1;height:36px;font-size:12px;background:#333;border-radius:8px;font-weight:600;color:#888;">Coach</button>
+        <button id="roleCoachBtn" onclick="requestCoachRole()" style="flex:1;height:36px;font-size:12px;background:#333;border-radius:8px;font-weight:600;color:#888;">Coach</button>
       </div>
+      <div id="roleMsg" style="font-size:11px;min-height:14px;text-align:center;"></div>
       <!-- Student: invite code -->
       <div id="studentCodeSection" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:2px;">
         <div style="font-size:11px;color:#888;">Share this code with your coach:</div>
@@ -1155,6 +1156,12 @@ body.viewing-as .back-btn-top{top:38px;}
             <div style="font-size:10px;color:#666;margin-top:2px;">Notes Sent</div>
           </div>
         </div>
+        <!-- Admin: Pending Coach Requests (only visible to admin) -->
+        <div id="coachRequestsSection" style="display:none;background:#1a1a1a;border-radius:14px;padding:16px 18px;margin-bottom:14px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#f59e0b;margin-bottom:10px;">⏳ Pending Coach Requests</div>
+          <div id="coachRequestsList"><div style="color:#555;font-size:13px;">Loading...</div></div>
+        </div>
+
         <!-- Recent activity -->
         <div style="background:#1a1a1a;border-radius:14px;padding:16px 18px;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
@@ -8847,6 +8854,172 @@ function setRole(role) {
   }
 }
 
+// ─── COACH ROLE REQUEST SYSTEM ───────────────────────────────────────────────
+// Supabase SQL to create the table (run once in your Supabase SQL editor):
+//
+//   CREATE TABLE coach_requests (
+//     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+//     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+//     user_email TEXT,
+//     display_name TEXT,
+//     status TEXT DEFAULT 'pending',  -- 'pending' | 'approved' | 'denied'
+//     created_at TIMESTAMPTZ DEFAULT now()
+//   );
+//   ALTER TABLE coach_requests ENABLE ROW LEVEL SECURITY;
+//   CREATE POLICY "Users insert own" ON coach_requests FOR INSERT WITH CHECK (auth.uid() = user_id);
+//   CREATE POLICY "Users read own" ON coach_requests FOR SELECT USING (auth.uid() = user_id OR EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = true));
+//   CREATE POLICY "Admin update" ON coach_requests FOR UPDATE USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = true));
+//
+// Email via EmailJS (emailjs.com — free, 200 emails/month):
+//   1. Sign up at emailjs.com
+//   2. Add a Gmail service, create a template with variables:
+//      {{from_name}}, {{from_email}}, {{to_email}}
+//   3. Fill in the three constants below.
+
+var _EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';   // e.g. 'service_abc123'
+var _EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';  // e.g. 'template_xyz789'
+var _EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';   // e.g. 'user_XXXXXXXXXX'
+var _ADMIN_EMAIL         = 'blakekokal@gmail.com';
+
+async function requestCoachRole() {
+  if (!currentUser) return;
+
+  var msg = document.getElementById('roleMsg');
+
+  // Admin always gets direct access
+  if (window._isAdmin) { setRole('coach'); return; }
+
+  // If already coach, this is "switch back to student" — handled by Student btn
+  if (_userRole === 'coach') { setRole('student'); return; }
+
+  msg.style.color = '#888'; msg.textContent = 'Submitting request...';
+
+  try {
+    // Check for existing pending request
+    var { data: existing } = await _sb.from('coach_requests')
+      .select('id').eq('user_id', currentUser.id).eq('status', 'pending').limit(1);
+
+    if (existing && existing.length > 0) {
+      msg.style.color = '#f59e0b';
+      msg.textContent = '⏳ Request already pending — waiting for admin approval.';
+      return;
+    }
+
+    var displayName = (currentUser.user_metadata && currentUser.user_metadata.display_name) || 'Unknown';
+    var email = currentUser.email || '';
+
+    // Insert request row
+    var { error: insertErr } = await _sb.from('coach_requests').insert({
+      user_id: currentUser.id,
+      user_email: email,
+      display_name: displayName,
+      status: 'pending',
+      created_at: new Date().toISOString()
+    });
+    if (insertErr) throw insertErr;
+
+    // In-app notification to admin
+    var { data: admins } = await _sb.from('profiles').select('id').eq('is_admin', true);
+    if (admins) {
+      for (var i = 0; i < admins.length; i++) {
+        await _sb.from('notifications').insert({
+          user_id: admins[i].id,
+          type: 'coach_request',
+          title: 'Coach Role Request',
+          message: displayName + ' (' + email + ') is requesting coach access.',
+          read: false,
+          created_at: new Date().toISOString()
+        });
+      }
+    }
+
+    // Email notification
+    await sendCoachRequestEmail(displayName, email);
+
+    msg.style.color = '#4CAF50';
+    msg.textContent = '✓ Request sent! You\'ll be notified when approved.';
+  } catch(e) {
+    msg.style.color = '#f44';
+    msg.textContent = 'Error: ' + (e.message || e);
+  }
+}
+
+async function sendCoachRequestEmail(displayName, requesterEmail) {
+  // Skip if EmailJS not configured
+  if (_EMAILJS_SERVICE_ID === 'YOUR_SERVICE_ID') return;
+  try {
+    await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        service_id:  _EMAILJS_SERVICE_ID,
+        template_id: _EMAILJS_TEMPLATE_ID,
+        user_id:     _EMAILJS_PUBLIC_KEY,
+        template_params: {
+          to_email:    _ADMIN_EMAIL,
+          from_name:   displayName,
+          from_email:  requesterEmail,
+          message:     displayName + ' (' + requesterEmail + ') has requested coach access to Blake Kokal Golf. Open the app → Coaching → Home to approve or deny.'
+        }
+      })
+    });
+  } catch(e) { console.warn('Email send failed:', e); }
+}
+
+async function loadCoachRequests() {
+  var section = document.getElementById('coachRequestsSection');
+  var list = document.getElementById('coachRequestsList');
+  if (!section || !list || !window._isAdmin) return;
+
+  var { data, error } = await _sb.from('coach_requests')
+    .select('*').eq('status', 'pending').order('created_at', { ascending: true });
+
+  if (error || !data || data.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+
+  section.style.display = 'block';
+  list.innerHTML = '';
+  data.forEach(function(req) {
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #2a2a2a;gap:8px;';
+    row.innerHTML = '<div style="flex:1;min-width:0;">'
+      + '<div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (req.display_name || 'Unknown') + '</div>'
+      + '<div style="font-size:11px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (req.user_email || '') + '</div>'
+      + '</div>'
+      + '<div style="display:flex;gap:6px;flex-shrink:0;">'
+      + '<button onclick="approveCoachRequest(\'' + req.id + '\',\'' + req.user_id + '\')" style="background:#0f766e;border:none;border-radius:6px;color:#fff;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;height:auto;width:auto;max-width:none;">Approve</button>'
+      + '<button onclick="denyCoachRequest(\'' + req.id + '\',this)" style="background:#7f1d1d;border:none;border-radius:6px;color:#fff;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;height:auto;width:auto;max-width:none;">Deny</button>'
+      + '</div>';
+    list.appendChild(row);
+  });
+}
+
+async function approveCoachRequest(requestId, userId) {
+  // Update the request status
+  await _sb.from('coach_requests').update({ status: 'approved' }).eq('id', requestId);
+  // Promote the user's role
+  await _sb.from('profiles').update({ role: 'coach' }).eq('id', userId);
+  // Notify the user
+  await _sb.from('notifications').insert({
+    user_id: userId,
+    type: 'coach_approved',
+    title: 'Coach Access Approved! 🎉',
+    message: 'Your request for coach access has been approved. Go to Settings to switch to Coach mode.',
+    read: false,
+    created_at: new Date().toISOString()
+  });
+  loadCoachRequests();
+}
+
+async function denyCoachRequest(requestId, btn) {
+  btn.textContent = '...';
+  await _sb.from('coach_requests').update({ status: 'denied' }).eq('id', requestId);
+  loadCoachRequests();
+}
+// ─── END COACH ROLE REQUEST SYSTEM ───────────────────────────────────────────
+
 function copyInviteCode() {
   var code = document.getElementById('myInviteCode').textContent;
   if (navigator.clipboard) {
@@ -8875,6 +9048,17 @@ async function loadUserRole() {
     setRole(data.role);
   } else {
     setRole('student');
+  }
+
+  // Show pending notice if user has an outstanding coach request
+  if (!window._isAdmin && (!data || data.role !== 'coach')) {
+    var { data: pending } = await _sb.from('coach_requests')
+      .select('id').eq('user_id', currentUser.id).eq('status', 'pending').limit(1);
+    var roleMsg = document.getElementById('roleMsg');
+    if (roleMsg && pending && pending.length > 0) {
+      roleMsg.style.color = '#f59e0b';
+      roleMsg.textContent = '⏳ Coach request pending approval';
+    }
   }
   // Check coaching notifications for home page dot
   if (typeof checkCoachingStudentNotifications === 'function') {
@@ -14212,6 +14396,7 @@ function escapeHtml(str) {
 }
 
 async function loadCoachingPageCoachView() {
+  loadCoachRequests(); // Show pending coach requests for admin
   var { data: students, error } = await _sb.from('coach_students')
     .select('student_id, student_name, student_email')
     .eq('coach_id', currentUser.id)
