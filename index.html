@@ -17106,11 +17106,11 @@ function renderGapVisualizerChart() {
   // 1 = next partial (¾ swing) = green
   // top (full swing extra) = white
   var _GV_SWING_COLORS = {
-    '½': '#f97316',    // orange
-    '¾': '#22c55e',    // green
+    '½': '#c2410c',    // darker orange
+    '¾': '#15803d',    // darker green
     'Full': '#e2e8f0'  // white/light
   };
-  var _GV_SEG_COLOR_DEFAULT = ['#f97316', '#22c55e', '#e2e8f0'];
+  var _GV_SEG_COLOR_DEFAULT = ['#c2410c', '#15803d', '#e2e8f0'];
 
   // Compute gaps between adjacent clubs (full swing carry difference)
   var gapLabels = [];
@@ -17125,8 +17125,12 @@ function renderGapVisualizerChart() {
     var isTop = (si === seg.maxSegs - 1 && seg.maxSegs > 1);
     var segLabel = seg.segLabels[si] || '';
     var color;
-    if (isTop) {
-      color = _GV_SWING_COLORS['Full'] || _GV_SEG_COLOR_DEFAULT[2];
+    if (seg.maxSegs === 1) {
+      // Only one segment = all clubs have just Full swing → white
+      color = _GV_SWING_COLORS['Full'];
+    } else if (isTop) {
+      // Top segment is always the Full-only extra portion → white
+      color = _GV_SWING_COLORS['Full'];
     } else if (_GV_SWING_COLORS[segLabel]) {
       color = _GV_SWING_COLORS[segLabel];
     } else {
