@@ -6439,6 +6439,16 @@ async function autoSaveRound() {
     }
   }
 
+  // If tournament_place column doesn't exist yet, retry without it
+  if (resp.error && resp.error.message && resp.error.message.indexOf('tournament_place') !== -1) {
+    delete payload.tournament_place;
+    if (_currentRoundId) {
+      resp = await _sb.from('rounds').update(payload).eq('id', _currentRoundId).select();
+    } else {
+      resp = await _sb.from('rounds').insert(payload).select();
+    }
+  }
+
   var data = resp.data;
   var error = resp.error;
 
@@ -6893,14 +6903,14 @@ async function loadMyRounds() {
   
   var { data, error } = await _sb
     .from('rounds')
-    .select('id, player_name, course_name, round_date, round_type, tournament_place, holes, score, par, to_par, created_at, is_incomplete, round_data')
+    .select('*')
     .eq('user_id', activeUserId())
     .order('round_date', { ascending: false });
 
   // Fallback if is_incomplete column doesn't exist
   if (error && error.message && error.message.indexOf('is_incomplete') !== -1) {
     var resp2 = await _sb.from('rounds')
-      .select('id, player_name, course_name, round_date, round_type, tournament_place, holes, score, par, to_par, created_at, round_data')
+      .select('*')
       .eq('user_id', activeUserId())
       .order('round_date', { ascending: false });
     data = resp2.data;
@@ -9823,7 +9833,7 @@ async function loadStudentRounds() {
   msg.textContent = 'Loading...'; list.innerHTML = '';
   
   var { data, error } = await _sb.from('rounds')
-    .select('id, player_name, course_name, round_date, round_type, holes, score, par, to_par')
+    .select('*')
     .eq('user_id', _currentStudentId)
     .order('round_date', { ascending: false });
   
@@ -12614,18 +12624,18 @@ async function saveEditRoundInfo(ev) {
   var rType = document.getElementById('eriRoundType').value;
   var rPlace = rType === 'Tournament' ? (parseInt(document.getElementById('eriPlace').value) || null) : null;
 
-  const { error } = await _sb.from('rounds')
-    .update({
-      course_name: cName,
-      round_date: rDate,
-      player_name: pName,
-      round_type: rType,
-      tournament_place: rPlace
-    })
-    .eq('id', _eriRoundId);
-    
+  var updatePayload = { course_name: cName, round_date: rDate, player_name: pName, round_type: rType, tournament_place: rPlace };
+  var { error } = await _sb.from('rounds').update(updatePayload).eq('id', _eriRoundId);
+
+  // If tournament_place column doesn't exist yet, retry without it
+  if (error && error.message && error.message.indexOf('tournament_place') !== -1) {
+    delete updatePayload.tournament_place;
+    var resp2 = await _sb.from('rounds').update(updatePayload).eq('id', _eriRoundId);
+    error = resp2.error;
+  }
+
   btn.innerText = oldText;
-  
+
   if (error) {
     alert('Error updating round: ' + error.message);
   } else {
