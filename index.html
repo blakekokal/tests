@@ -17169,16 +17169,17 @@ function renderGapVisualizerChart() {
     var wgColors = groupedBars.map(function(b) { return clubColorMap[b.name]; });
 
     // Build lookup: for each bar, find same club's next higher carry (for ghost outlines)
-    var ghostHeights = groupedBars.map(function(b, idx) {
-      // Find all bars for the same club, sorted by carry
-      var sameClub = groupedBars.filter(function(gb) { return gb.name === b.name; });
-      sameClub.sort(function(a, c) { return a.carry - c.carry; });
-      var myIdx = -1;
-      for (var si = 0; si < sameClub.length; si++) {
-        if (sameClub[si].carry === b.carry && sameClub[si].label === b.label) { myIdx = si; break; }
-      }
-      if (myIdx >= 0 && myIdx < sameClub.length - 1) return sameClub[myIdx + 1].carry;
-      return null;
+    // Ghost outline always reaches the Full swing carry for that club
+    var _fullCarryByClub = {};
+    groupedBars.forEach(function(b) {
+      var lbl = b.label.toUpperCase();
+      if (lbl === 'FULL') _fullCarryByClub[b.name] = b.carry;
+    });
+    var ghostHeights = groupedBars.map(function(b) {
+      var lbl = b.label.toUpperCase();
+      if (lbl === 'FULL') return null; // Full swing doesn't need a ghost
+      var fullCarry = _fullCarryByClub[b.name];
+      return (fullCarry != null && fullCarry > b.carry) ? fullCarry : null;
     });
 
     // Plugin: ghost outlines + value labels on bars
