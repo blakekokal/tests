@@ -6377,6 +6377,7 @@ _sb.auth.onAuthStateChange((event, session) => {
 
 function buildRoundBlob() {
   return {
+    entryMode: _entryMode || 'shot',
     allHoles: allHoles.map(h => ({
       hole: h.hole, par: h.par, yards: h.yards, score: h.score, putts: h.putts,
       firstPuttDist: h.firstPuttDist, expectedPutts: h.expectedPutts,
@@ -8299,6 +8300,15 @@ function computePerfAnalysis(rounds, displayHcp) {
     var isRecent = roundIdx < 3;
     var rd = round.round_data;
     var holes = rd.allHoles || [];
+    var isSimple = rd.entryMode === 'simple';
+
+    // Simple rounds only contribute scoring stats — skip shot-level analysis
+    if (isSimple) {
+      totals.totalHoles += holes.length;
+      if (isRecent) totals.recentCount += holes.length;
+      else totals.priorCount += holes.length;
+      return;
+    }
 
     holes.forEach(function(h) {
       // Recompute SG live from raw shots against the selected hcp baseline
@@ -8489,8 +8499,9 @@ function computePerfAnalysis(rounds, displayHcp) {
     totals.argBuckets.bunker.opp  += st.bunOpp  || 0;
   });
 
-  // Normalize SG per round
-  var n = rounds.length;
+  // Normalize SG per round (exclude simple rounds from SG counts)
+  var detailedRounds = rounds.filter(function(r) { return r.round_data && r.round_data.entryMode !== 'simple'; });
+  var n = detailedRounds.length || 1;
   var r3 = Math.min(3, n);
   var prior = n - r3;
 
@@ -10902,26 +10913,34 @@ function renderDashboard(data, hcp, targetId) {
     var rd = r.round_data || {};
     var holes = rd.allHoles || [];
     var st = rd.stats || {};
+    var isSimple = rd.entryMode === 'simple';
     A.holes += holes.length;
     A.totScore += r.score; A.totPar += r.par;
     if (r.to_par < A.bestToPar) { A.bestToPar = r.to_par; A.bestRound = r; }
     if (holes.length >= 14) { A.r18s.push(r.score); A.r18tp.push(r.to_par); }
     else { A.r9s.push(r.score); A.r9tp.push(r.to_par); }
-    A.fwHit += st.fwHit||0; A.fwOpp += st.fwOpp||0; A.fwLeft += st.fwLeft||0; A.fwRight += st.fwRight||0;
-    A.girHit += st.girHit||0;
-    A.scrMade += st.scrMade||0; A.scrOpp += st.scrOpp||0;
-    A.bunMade += st.bunMade||0; A.bunOpp += st.bunOpp||0;
-    A.onePutt += st.onePutts||0; A.threePutt += st.threePutts||0;
-    
+
+    // Simple rounds: only count scoring, skip shot-level stats
+    if (!isSimple) {
+      A.fwHit += st.fwHit||0; A.fwOpp += st.fwOpp||0; A.fwLeft += st.fwLeft||0; A.fwRight += st.fwRight||0;
+      A.girHit += st.girHit||0;
+      A.scrMade += st.scrMade||0; A.scrOpp += st.scrOpp||0;
+      A.bunMade += st.bunMade||0; A.bunOpp += st.bunOpp||0;
+      A.onePutt += st.onePutts||0; A.threePutt += st.threePutts||0;
+    }
+
     var rOTT=0, rAPP=0, rARG=0, rPutt=0;
     var roundPBP = [];
-    
+
     holes.forEach(function(h) {
-      A.totPutts += h.putts||0;
+      if (!isSimple) A.totPutts += h.putts||0;
       var diff = h.score - h.par;
       if (diff <= -2) A.eagles++; else if (diff === -1) A.birdies++; else if (diff === 0) A.pars++; else if (diff === 1) A.bogeys++; else A.dblPlus++;
       if (h.par===3) { A.c3++; A.p3+=h.score; } if (h.par===4) { A.c4++; A.p4+=h.score; } if (h.par===5) { A.c5++; A.p5+=h.score; }
-      
+
+      // Simple rounds have no shot data — skip shot-level analysis
+      if (isSimple) return;
+
       // Check if this was a GIR (hit green in par - 2 shots)
       var shotsToGreen = 0;
       for (var sti = 0; sti < (h.shots || []).length; sti++) {
@@ -11082,6 +11101,8 @@ function renderDashboard(data, hcp, targetId) {
   function sgRow(l,v,s){return'<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #2a2a2a;"><span style="color:#ccc;">'+l+'</span><span style="font-weight:700;color:'+sgC(v)+';">'+sgFmt(v)+(s?' <span style="font-size:11px;color:#888;">'+s+'</span>':'')+'</span></div>';}
   
   var n=A.n;
+  // For SG and non-scoring stats, only count detailed (non-simple) rounds
+  var nDetailed = data.filter(function(r){ return !r.round_data || r.round_data.entryMode !== 'simple'; }).length || 1;
   var avg18=A.r18s.length>0?avgF(A.r18s):'\u2013';
   var avg18tp=A.r18tp.length>0?A.r18tp.reduce(function(a,b){return a+b;},0)/A.r18tp.length:null;
   var avg9=A.r9s.length>0?avgF(A.r9s):'\u2013';
@@ -11089,16 +11110,18 @@ function renderDashboard(data, hcp, targetId) {
   var bestStr=A.bestRound?A.bestRound.score+' ('+ftp(A.bestRound.to_par)+') \u2014 '+A.bestRound.course_name:'\u2013';
   var avgDrv=davg(A.drives);
   var avgFirstPutt=davg(A.firstPuttDists);
-  var twoPutts=A.holes-A.onePutt-A.threePutt;
+  // Count holes from detailed rounds only for putting stats
+  var detailedHoles = data.reduce(function(sum, r) { return sum + (r.round_data && r.round_data.entryMode === 'simple' ? 0 : (r.round_data && r.round_data.allHoles ? r.round_data.allHoles.length : 0)); }, 0);
+  var twoPutts=detailedHoles-A.onePutt-A.threePutt;
   var sgTot=A.sgOTT+A.sgAPP+A.sgARG+A.sgPutt;
   
-  // Store SG data for radar chart (per round averages)
+  // Store SG data for radar chart (per round averages, exclude simple rounds)
   window._dashSGData = {
-    tot: sgTot/n,
-    ott: A.sgOTT/n,
-    app: A.sgAPP/n,
-    arg: A.sgARG/n,
-    putt: A.sgPutt/n
+    tot: sgTot/nDetailed,
+    ott: A.sgOTT/nDetailed,
+    app: A.sgAPP/nDetailed,
+    arg: A.sgARG/nDetailed,
+    putt: A.sgPutt/nDetailed
   };
   
   // Store all radar chart data
@@ -11110,27 +11133,27 @@ function renderDashboard(data, hcp, targetId) {
     par4Avg: A.c4 ? A.p4/A.c4 : 4,
     par3Avg: A.c3 ? A.p3/A.c3 : 3,
     // Driving
-    sgOTT: A.sgOTT/n,
+    sgOTT: A.sgOTT/nDetailed,
     missRight: A.fwOpp > 0 ? Math.round(A.fwRight/A.fwOpp*100) : 0,
     accuracy: A.fwOpp > 0 ? Math.round(A.fwHit/A.fwOpp*100) : 0,
     avgDistance: avgDrv,
     missLeft: A.fwOpp > 0 ? Math.round(A.fwLeft/A.fwOpp*100) : 0,
     // Approach
-    girPct: A.holes > 0 ? Math.round(A.girHit/A.holes*100) : 0,
-    sgAPP: A.sgAPP/n,
+    girPct: detailedHoles > 0 ? Math.round(A.girHit/detailedHoles*100) : 0,
+    sgAPP: A.sgAPP/nDetailed,
     proxOutside100: A.appRanges.filter(function(r){return r.min>=100;}).reduce(function(sum,r){return sum.concat(r.s);},[]).length > 0 ? davg(A.appRanges.filter(function(r){return r.min>=100;}).reduce(function(sum,r){return sum.concat(r.s);},[])) : 30,
     proxInside100: A.shortRanges.reduce(function(sum,r){return sum.concat(r.s);},[]).length > 0 ? davg(A.shortRanges.reduce(function(sum,r){return sum.concat(r.s);},[])) : 20,
     proximity: A.girHit > 0 ? Math.round(A.girFirstPuttDist/A.girHit) : 30,
     // ARG
     scrambling: A.scrOpp > 0 ? Math.round(A.scrMade/A.scrOpp*100) : 0,
-    sgARG: A.sgARG/n,
+    sgARG: A.sgARG/nDetailed,
     scrFromRough: A.scrOpp > 0 ? Math.round(A.scrMade/A.scrOpp*100) : 0,
     sandSave: A.bunOpp > 0 ? Math.round(A.bunMade/A.bunOpp*100) : 0,
     scr30In: A.scrOpp > 0 ? Math.round(A.scrMade/A.scrOpp*100) : 0,
     // Putting
-    puttsPerRound: A.totPutts/n,
+    puttsPerRound: A.totPutts/nDetailed,
     make9ft: A.allPuttRanges[0].t + A.allPuttRanges[1].t + A.allPuttRanges[2].t > 0 ? Math.round((A.allPuttRanges[0].m + A.allPuttRanges[1].m + A.allPuttRanges[2].m) / (A.allPuttRanges[0].t + A.allPuttRanges[1].t + A.allPuttRanges[2].t) * 100) : 70,
-    sgPutt: A.sgPutt/n,
+    sgPutt: A.sgPutt/nDetailed,
     avgMadeDist: A.longestMadePutt > 0 ? Math.min(A.longestMadePutt/2, 15) : 5,
     threePuttAvoid: A.holes > 0 ? Math.round((1 - A.threePutt/A.holes) * 100) : 90,
     onePuttPct: A.holes > 0 ? Math.round(A.onePutt/A.holes*100) : 30
@@ -11202,8 +11225,8 @@ function renderDashboard(data, hcp, targetId) {
      + '<canvas id="drivingRadarDash" style="display:block; margin:0 auto;"></canvas>'
      + '</div>';
   html+=hdr('SG: OFF THE TEE vs '+hcpLabel);
-  html+=sgRow('Total',A.sgOTT,n+' rounds');
-  html+=sgRow('Per Round',A.sgOTT/n);
+  html+=sgRow('Total',A.sgOTT,nDetailed+' rounds');
+  html+=sgRow('Per Round',A.sgOTT/nDetailed);
   html+=hdr('FAIRWAY ACCURACY');
   html+=row('Fairways Hit',pct(A.fwHit,A.fwOpp),A.fwHit+'/'+A.fwOpp);
   html+=row('Missed Left',A.fwLeft,pct(A.fwLeft,A.fwOpp));
@@ -11223,10 +11246,10 @@ function renderDashboard(data, hcp, targetId) {
      + '<canvas id="approachRadarDash" style="display:block; margin:0 auto;"></canvas>'
      + '</div>';
   html+=hdr('SG: APPROACH vs '+hcpLabel);
-  html+=sgRow('Total',A.sgAPP,n+' rounds');
-  html+=sgRow('Per Round',A.sgAPP/n);
+  html+=sgRow('Total',A.sgAPP,nDetailed+' rounds');
+  html+=sgRow('Per Round',A.sgAPP/nDetailed);
   html+=hdr('GREENS IN REGULATION');
-  html+=row('GIR',pct(A.girHit,A.holes),A.girHit+'/'+A.holes);
+  html+=row('GIR',pct(A.girHit,detailedHoles),A.girHit+'/'+detailedHoles);
   html+=row('Proximity when GIR',A.girHit>0?Math.round(A.girFirstPuttDist/A.girHit)+' ft':'\u2013');
   html+=hdr('MISSED GREENS');
   var totalMiss=A.missShort+A.missLong+A.missLeft+A.missRight;
@@ -11254,8 +11277,8 @@ function renderDashboard(data, hcp, targetId) {
      + '<canvas id="argRadarDash" style="display:block; margin:0 auto;"></canvas>'
      + '</div>';
   html+=hdr('SG: AROUND THE GREEN vs '+hcpLabel);
-  html+=sgRow('Total',A.sgARG,n+' rounds');
-  html+=sgRow('Per Round',A.sgARG/n);
+  html+=sgRow('Total',A.sgARG,nDetailed+' rounds');
+  html+=sgRow('Per Round',A.sgARG/nDetailed);
   html+=hdr('SCRAMBLING');
   html+=row('Scrambling',pct(A.scrMade,A.scrOpp),A.scrMade+'/'+A.scrOpp);
   html+=row('Bunker Saves',pct(A.bunMade,A.bunOpp),A.bunMade+'/'+A.bunOpp);
@@ -11273,16 +11296,16 @@ function renderDashboard(data, hcp, targetId) {
      + '<canvas id="puttingRadarDash" style="display:block; margin:0 auto;"></canvas>'
      + '</div>';
   html+=hdr('SG: PUTTING vs '+hcpLabel);
-  html+=sgRow('Total',A.sgPutt,n+' rounds');
-  html+=sgRow('Per Round',A.sgPutt/n);
+  html+=sgRow('Total',A.sgPutt,nDetailed+' rounds');
+  html+=sgRow('Per Round',A.sgPutt/nDetailed);
   html+=hdr('PUTTING SUMMARY');
-  html+=row('Total Putts',A.totPutts,A.holes>0?(A.totPutts/A.holes).toFixed(1)+'/hole':'');
+  html+=row('Total Putts',A.totPutts,detailedHoles>0?(A.totPutts/detailedHoles).toFixed(1)+'/hole':'');
   html+=row('Putts per GIR',A.girHit>0?(A.girPutts/A.girHit).toFixed(1):'\u2013');
   html+=row('Avg First Putt Distance',avgFirstPutt+' ft');
   html+=hdr('PUTTING PERFORMANCE');
-  html+=row('One-Putts',A.onePutt,pct(A.onePutt,A.holes));
-  html+=row('Two-Putts',twoPutts,pct(twoPutts,A.holes));
-  html+=row('Three-Putts',A.threePutt,pct(A.threePutt,A.holes));
+  html+=row('One-Putts',A.onePutt,pct(A.onePutt,detailedHoles));
+  html+=row('Two-Putts',twoPutts,pct(twoPutts,detailedHoles));
+  html+=row('Three-Putts',A.threePutt,pct(A.threePutt,detailedHoles));
   html+=row('Longest Made Putt',A.longestMadePutt+' ft');
   html+=hdr('MAKE % BY DISTANCE');
   var puttRows=[];A.allPuttRanges.forEach(function(r){puttRows.push([r.l,r.t>0?r.m+'/'+r.t:'0/0',r.t>0?Math.round(r.m/r.t*100)+'%':'\u2013']);});
