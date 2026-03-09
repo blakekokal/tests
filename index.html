@@ -17336,6 +17336,7 @@ function renderGapVisualizerChart() {
 
   var datasets = [];
   for (var si = 0; si < seg.maxSegs; si++) {
+    var segLabel = seg.segLabels[si] || '';
     // Per-bar colors based on each item's own swing label at this segment index
     var bgColors = items.map(function(item, idx) {
       var valid = item.swings.filter(function(s) { return s.carry !== null; });
