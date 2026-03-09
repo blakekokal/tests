@@ -1845,7 +1845,7 @@ body.viewing-as .back-btn-top{top:38px;}
     <div id="wgHistoryView" style="width:100%;max-width:400px;padding:0 10px 80px;">
       <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0 10px;">
         <div style="font-size:16px;font-weight:800;color:#e2e8f0;">Wedge Gapping</div>
-        <button onclick="wgStartNew()" style="background:#7c3aed;border:none;border-radius:10px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;padding:8px 14px;">+ New Session</button>
+        <button onclick="wgStartNew()" id="wgNewBtn" style="background:#7c3aed;border:none;border-radius:10px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;padding:8px 14px;">+ New Session</button>
       </div>
       <div id="wgSessionList"></div>
     </div>
@@ -18093,42 +18093,50 @@ function saveWgSessions(s) {
 
 function renderWgTab() {
   var list = document.getElementById('wgSessionList');
+  var newBtn = document.getElementById('wgNewBtn');
   if (!list) return;
   var sessions = getWgSessions();
-  if (sessions.length === 0) {
-    list.innerHTML = '<div style="background:#1a1a1a;border-radius:12px;padding:24px;text-align:center;color:#555;font-size:13px;">No sessions yet. Tap + New Session to start.</div>';
+  // Use only the latest session (single session model)
+  var s = sessions.length > 0 ? sessions[sessions.length - 1] : null;
+  if (!s) {
+    list.innerHTML = '<div style="background:#1a1a1a;border-radius:12px;padding:24px;text-align:center;color:#555;font-size:13px;">No session yet. Tap + New Session to start.</div>';
+    if (newBtn) newBtn.textContent = '+ New Session';
     return;
   }
-  list.innerHTML = sessions.slice().reverse().map(function(s) {
-    var swingLabels = WG_SWINGS[s.swingType] || [];
-    var gridCols = '52px ' + swingLabels.map(function(){ return '1fr'; }).join(' ');
-    var d = new Date(s.date + 'T12:00:00');
-    var dateStr = d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
-    var typeLabel = s.swingType === 'percent' ? 'Percent' : s.swingType === 'fraction' ? 'Fraction' : 'Body';
-    var cells = '';
-    // Header
-    cells += '<div style="font-size:9px;font-weight:700;color:#555;padding:3px 2px;">Club</div>';
-    swingLabels.forEach(function(l) {
-      cells += '<div style="font-size:9px;font-weight:700;color:#555;text-align:center;padding:3px 2px;">' + l + '</div>';
+  if (newBtn) newBtn.textContent = 'Update Session';
+  var swingLabels = WG_SWINGS[s.swingType] || [];
+  var typeLabel = s.swingType === 'percent' ? 'Percent' : s.swingType === 'fraction' ? 'Fraction' : 'Body';
+  var d = new Date(s.date + 'T12:00:00');
+  var dateStr = d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+  var gridCols = '52px ' + swingLabels.map(function(){ return '1fr'; }).join(' ');
+  var cells = '';
+  // Header row
+  cells += '<div style="font-size:9px;font-weight:700;color:#555;padding:3px 2px;">Club</div>';
+  swingLabels.forEach(function(l) {
+    cells += '<div style="font-size:9px;font-weight:700;color:#555;text-align:center;padding:3px 2px;">' + l + '</div>';
+  });
+  // Editable rows
+  s.clubs.forEach(function(club) {
+    var clubData = s.results[club] || {};
+    cells += '<div style="font-size:13px;font-weight:800;color:#a78bfa;padding:4px 3px;display:flex;align-items:center;">' + club + '</div>';
+    swingLabels.forEach(function(l, i) {
+      var entry = clubData['sw' + i];
+      var avg = entry && entry.avg != null ? entry.avg : '';
+      var safeClub = club.replace(/[^a-zA-Z0-9]/g, '_');
+      cells += '<div style="text-align:center;padding:2px 1px;">' +
+        '<input type="number" inputmode="numeric" value="' + avg + '" placeholder="—" ' +
+        'onchange="wgEditAvg(\'' + safeClub + '\',\'' + club + '\',' + i + ',this.value)" ' +
+        'style="width:100%;height:32px;background:#111;border:1px solid #333;border-radius:6px;color:#e2e8f0;font-size:13px;font-weight:700;text-align:center;padding:0;box-sizing:border-box;">' +
+      '</div>';
     });
-    // Rows
-    s.clubs.forEach(function(club) {
-      var clubData = s.results[club] || {};
-      cells += '<div style="font-size:13px;font-weight:800;color:#a78bfa;padding:4px 3px;">' + club + '</div>';
-      swingLabels.forEach(function(l, i) {
-        var entry = clubData['sw' + i];
-        var avg = entry && entry.avg != null ? entry.avg : '—';
-        cells += '<div style="font-size:13px;font-weight:700;color:#e2e8f0;text-align:center;padding:4px 3px;">' + avg + '</div>';
-      });
-    });
-    return '<div style="background:#1a1a1a;border-radius:12px;padding:12px;margin-bottom:8px;">' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
-        '<div style="font-size:11px;color:#555;">' + dateStr + ' · ' + s.clubs.join(', ') + ' · ' + typeLabel + '</div>' +
-        '<button onclick="wgDeleteSession(\'' + s.id + '\')" style="background:#2a1515;border:1px solid #5a2020;border-radius:6px;color:#f87171;font-size:13px;cursor:pointer;width:26px;height:26px;padding:0;display:flex;align-items:center;justify-content:center;">×</button>' +
-      '</div>' +
-      '<div style="display:grid;grid-template-columns:' + gridCols + ';gap:3px 6px;">' + cells + '</div>' +
-    '</div>';
-  }).join('');
+  });
+  list.innerHTML = '<div style="background:#1a1a1a;border-radius:12px;padding:12px;">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
+      '<div style="font-size:11px;color:#555;">' + dateStr + ' · ' + typeLabel + '</div>' +
+      '<button onclick="wgClearSession()" style="background:#2a1515;border:1px solid #5a2020;border-radius:6px;color:#f87171;font-size:11px;font-weight:600;cursor:pointer;padding:4px 10px;">Clear</button>' +
+    '</div>' +
+    '<div style="display:grid;grid-template-columns:' + gridCols + ';gap:3px 6px;align-items:center;">' + cells + '</div>' +
+  '</div>';
 }
 
 function wgGetLatestForClub(clubName) {
@@ -18145,9 +18153,45 @@ function wgDeleteSession(id) {
   renderWgTab();
 }
 
+function wgClearSession() {
+  if (!confirm('Clear your wedge gapping data?')) return;
+  saveWgSessions([]);
+  renderWgTab();
+  renderBagClubList();
+}
+
+function wgEditAvg(safeClub, club, swingIndex, value) {
+  var sessions = getWgSessions();
+  if (sessions.length === 0) return;
+  var s = sessions[sessions.length - 1];
+  if (!s.results[club]) return;
+  var key = 'sw' + swingIndex;
+  var entry = s.results[club][key];
+  if (!entry) entry = s.results[club][key] = { shots: [], avg: null };
+  var newVal = value !== '' ? parseInt(value) : null;
+  if (newVal !== null && isNaN(newVal)) return;
+  entry.avg = newVal;
+  entry.shots = newVal !== null ? [newVal] : [];
+  saveWgSessions(sessions);
+  // Update bag club carry if this is the full swing (sw0)
+  if (swingIndex === 0 && newVal !== null) {
+    var clubs = getBagClubs();
+    var bagClub = clubs.find(function(c) { return c.name === club; });
+    if (bagClub) {
+      bagClub.carry = newVal;
+      saveBagClubs(sortBagClubs(clubs));
+    }
+  }
+  renderBagClubList();
+  if (typeof renderGapVisualizerChart === 'function') renderGapVisualizerChart();
+}
+
 function wgStartNew() {
-  _wgSelectedClubs = [];
-  _wgSwingType = null;
+  // Pre-populate from existing session if available
+  var sessions = getWgSessions();
+  var existing = sessions.length > 0 ? sessions[sessions.length - 1] : null;
+  _wgSelectedClubs = existing ? existing.clubs.slice() : [];
+  _wgSwingType = existing ? existing.swingType : null;
   document.getElementById('wgHistoryView').style.display = 'none';
   document.getElementById('wgEntryView').style.display = '';
   document.getElementById('wgStep1').style.display = '';
@@ -18208,6 +18252,12 @@ function wgNextStep1() {
   document.getElementById('wgStep1').style.display = 'none';
   document.getElementById('wgStep2').style.display = '';
   document.getElementById('wgStep2Msg').textContent = '';
+  // Pre-select shot count from existing session
+  var sessions = getWgSessions();
+  var existing = sessions.length > 0 ? sessions[sessions.length - 1] : null;
+  if (existing && existing.shotsPerSwing) {
+    document.getElementById('wgShotCount').value = existing.shotsPerSwing;
+  }
   wgUpdateTypeButtons();
 }
 
@@ -18255,13 +18305,20 @@ function wgRenderInputs() {
   var swings = WG_SWINGS[_wgSwingType];
   var area = document.getElementById('wgInputArea');
   if (!area) return;
+  // Get existing session data to pre-fill inputs
+  var sessions = getWgSessions();
+  var existing = sessions.length > 0 ? sessions[sessions.length - 1] : null;
   area.innerHTML = _wgSelectedClubs.map(function(club) {
     var safeClub = club.replace(/[^a-zA-Z0-9]/g, '_');
+    var existingClub = existing && existing.results && existing.results[club] ? existing.results[club] : null;
     var blocks = swings.map(function(label, si) {
+      var existingEntry = existingClub ? existingClub['sw' + si] : null;
+      var existingShots = existingEntry ? existingEntry.shots || [] : [];
       var inputs = '';
       for (var i = 0; i < shotCount; i++) {
+        var prefill = i < existingShots.length && existingShots[i] != null ? existingShots[i] : '';
         inputs += '<input type="number" id="wg_' + safeClub + '_' + si + '_' + i +
-          '" inputmode="numeric" placeholder="—" style="width:50px;height:34px;background:#111;border:1px solid #333;border-radius:6px;color:#e2e8f0;font-size:13px;font-weight:700;text-align:center;padding:0;">';
+          '" inputmode="numeric" placeholder="—" value="' + prefill + '" style="width:50px;height:34px;background:#111;border:1px solid #333;border-radius:6px;color:#e2e8f0;font-size:13px;font-weight:700;text-align:center;padding:0;">';
       }
       return '<div style="background:#1e1e1e;border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
         '<div style="font-size:11px;color:#888;font-weight:700;min-width:64px;">' + label + '</div>' +
@@ -18310,9 +18367,8 @@ function wgSaveSession() {
     shotsPerSwing: shotCount,
     results: results
   };
-  var sessions = getWgSessions();
-  sessions.push(session);
-  saveWgSessions(sessions);
+  // Single session model: replace all with just this one
+  saveWgSessions([session]);
 
   // Update bag clubs carry with full-swing averages from this session
   var clubs = getBagClubs();
