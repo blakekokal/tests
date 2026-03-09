@@ -7786,9 +7786,10 @@ function buildSimpleForm() {
     div.dataset.par = holePar;
     div.style.cssText = 'background:#1a1a1a;border-radius:12px;padding:10px 14px;border:1px solid #2a2a2a;';
 
+    var parColors = {3:'#4fc3f7',4:'#66bb6a',5:'#ffb74d'};
     var parBtns = [3,4,5].map(function(p) {
       var sel = p === holePar;
-      return '<button onclick="simpleSetPar(' + h + ',' + p + ',this)" style="width:32px;height:32px;border-radius:8px;border:none;font-size:13px;font-weight:700;cursor:pointer;background:' + (sel ? '#7c3aed' : '#333') + ';color:' + (sel ? '#fff' : '#888') + ';">' + p + '</button>';
+      return '<button onclick="simpleSetPar(' + h + ',' + p + ',this)" style="width:32px;height:32px;border-radius:8px;border:none;font-size:13px;font-weight:700;cursor:pointer;background:' + (sel ? parColors[p] : '#333') + ';color:' + (sel ? '#fff' : '#888') + ';">' + p + '</button>';
     }).join('');
 
     div.innerHTML = '<div style="display:flex;align-items:center;gap:10px;">'
@@ -7805,25 +7806,43 @@ function buildSimpleForm() {
       + '<div style="font-size:9px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Score</div>'
       + '<div style="display:flex;align-items:center;gap:4px;">'
       + '<button onclick="simpleAdj(' + h + ',-1)" style="width:30px;height:30px;border-radius:8px;border:none;background:#333;color:#fff;font-size:18px;font-weight:700;cursor:pointer;">-</button>'
-      + '<input id="simple_score_' + h + '" type="number" inputmode="numeric" value="' + holePar + '" min="1" style="width:40px;height:32px;background:#222;color:#fff;border:none;border-radius:8px;text-align:center;font-size:16px;font-weight:700;" onfocus="this.select()">'
+      + '<input id="simple_score_' + h + '" type="number" inputmode="numeric" value="' + holePar + '" min="1" style="width:40px;height:32px;background:#222;color:#fff;border:none;border-radius:8px;text-align:center;font-size:16px;font-weight:700;" onfocus="this.select()" oninput="simpleUpdateToPar(' + h + ')">'
       + '<button onclick="simpleAdj(' + h + ',1)" style="width:30px;height:30px;border-radius:8px;border:none;background:#333;color:#fff;font-size:18px;font-weight:700;cursor:pointer;">+</button>'
+      + '<span id="simple_topar_' + h + '" style="font-size:12px;font-weight:700;min-width:28px;text-align:center;">' + simpleToParLabel(holePar, holePar) + '</span>'
       + '</div></div></div>';
     container.appendChild(div);
   }
 }
 
+function simpleToParLabel(score, par) {
+  var diff = score - par;
+  if (diff === 0) return '<span style="color:#66bb6a;">E</span>';
+  if (diff > 0) return '<span style="color:#ef5350;">+' + diff + '</span>';
+  return '<span style="color:#4fc3f7;">' + diff + '</span>';
+}
+
+function simpleUpdateToPar(hole) {
+  var card = document.getElementById('simple_hole_' + hole);
+  var par = parseInt(card.dataset.par) || 4;
+  var score = parseInt(document.getElementById('simple_score_' + hole).value) || 0;
+  document.getElementById('simple_topar_' + hole).innerHTML = simpleToParLabel(score, par);
+}
+
 function simpleSetPar(hole, p, btn) {
   var card = document.getElementById('simple_hole_' + hole);
   card.dataset.par = p;
+  var parColors = {3:'#4fc3f7',4:'#66bb6a',5:'#ffb74d'};
   var btns = card.querySelectorAll('button[onclick^="simpleSetPar"]');
-  btns.forEach(function(b) { b.style.background = '#333'; b.style.color = '#888'; });
-  btn.style.background = '#7c3aed'; btn.style.color = '#fff';
+  btns.forEach(function(b) { var bp = parseInt(b.textContent); b.style.background = '#333'; b.style.color = '#888'; });
+  btn.style.background = parColors[p]; btn.style.color = '#fff';
+  simpleUpdateToPar(hole);
 }
 
 function simpleAdj(hole, delta) {
   var inp = document.getElementById('simple_score_' + hole);
   var v = Math.max(1, (parseInt(inp.value) || 0) + delta);
   inp.value = v;
+  simpleUpdateToPar(hole);
 }
 
 function submitSimple() {
