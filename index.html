@@ -7812,26 +7812,50 @@ function simpleAdj(hole, delta) {
 }
 
 function submitSimple() {
-  resetRoundState();
-  _currentRoundId = null;
+  // Save values before reset clears them
+  var savedTotalHoles = totalHoles;
+  var savedCourseName = document.getElementById('courseName').value || '';
+  var savedPlayerName = document.getElementById('playerName').value || '';
+  var savedRoundDate = document.getElementById('roundDate').value || '';
+  var savedRoundType = document.getElementById('roundType').value || 'Casual';
+  var savedHandicap = document.getElementById('playerHandicap').value || 'pro';
+  var savedCourseHoleData = _courseHoleData;
 
+  // Read form data before reset
+  var holeData = [];
   for (var h = 1; h <= totalHoles; h++) {
     var card = document.getElementById('simple_hole_' + h);
     var parVal = parseInt(card.dataset.par) || 4;
     var scoreVal = parseInt(document.getElementById('simple_score_' + h).value) || parVal;
+    var yardsVal = (savedCourseHoleData && savedCourseHoleData[h - 1]) ? savedCourseHoleData[h - 1].yards : 0;
+    holeData.push({ hole: h, par: parVal, score: scoreVal, yards: yardsVal });
+  }
 
+  resetRoundState();
+  _currentRoundId = null;
+  totalHoles = savedTotalHoles;
+
+  // Restore form fields so autoSaveRound can read them
+  document.getElementById('courseName').value = savedCourseName;
+  document.getElementById('playerName').value = savedPlayerName;
+  document.getElementById('roundDate').value = savedRoundDate;
+  document.getElementById('roundType').value = savedRoundType;
+  document.getElementById('playerHandicap').value = savedHandicap;
+
+  for (var i = 0; i < holeData.length; i++) {
+    var hd = holeData[i];
     allHoles.push({
-      hole: h, par: parVal, yards: 0, score: scoreVal, putts: 0,
+      hole: hd.hole, par: hd.par, yards: hd.yards, score: hd.score, putts: 0,
       firstPuttDist: 0, expectedPutts: 0,
       sgOTT: 0, sgAPP: 0, sgARG: 0, sgPutting: 0,
       shots: []
     });
 
-    if (parVal === 3) { c3++; p3 += scoreVal; }
-    if (parVal === 4) { c4++; p4 += scoreVal; }
-    if (parVal === 5) { c5++; p5 += scoreVal; }
-    totalStrokes += scoreVal;
-    totalPar += parVal;
+    if (hd.par === 3) { c3++; p3 += hd.score; }
+    if (hd.par === 4) { c4++; p4 += hd.score; }
+    if (hd.par === 5) { c5++; p5 += hd.score; }
+    totalStrokes += hd.score;
+    totalPar += hd.par;
   }
 
   scoreBar.style.display = 'none';
