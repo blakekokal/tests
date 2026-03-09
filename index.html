@@ -16735,7 +16735,8 @@ async function populateBagStudentSelect() {
 async function syncBagFromSupabase() {
   if (!currentUser) return;
   try {
-    var { data, error } = await _sb.from('profiles').select('bag_clubs, wedge_gapping, speed_sessions').eq('id', currentUser.id).single();
+    var uid = activeUserId();
+    var { data, error } = await _sb.from('profiles').select('bag_clubs, wedge_gapping, speed_sessions').eq('id', uid).single();
     if (error) { console.warn('syncBagFromSupabase: fetch error', error.message); return; }
     if (!data) return;
 
@@ -16745,7 +16746,7 @@ async function syncBagFromSupabase() {
       var local = getBagClubs();
       if (remote.length === 0 && local.length === 0) { /* nothing */ }
       else if (remote.length === 0) {
-        _sb.from('profiles').update({ bag_clubs: local }).eq('id', currentUser.id).then(function(){}).catch(function(){});
+        _sb.from('profiles').update({ bag_clubs: local }).eq('id', uid).then(function(){}).catch(function(){});
       } else if (local.length === 0) {
         localStorage.setItem(_BAG_KEY, JSON.stringify(remote));
       } else {
@@ -16774,7 +16775,7 @@ async function syncBagFromSupabase() {
     if (Array.isArray(remoteWg)) {
       var localWg = getWgSessions();
       if (remoteWg.length === 0 && localWg.length > 0) {
-        _sb.from('profiles').update({ wedge_gapping: localWg }).eq('id', currentUser.id).then(function(){}).catch(function(){});
+        _sb.from('profiles').update({ wedge_gapping: localWg }).eq('id', uid).then(function(){}).catch(function(){});
       } else if (remoteWg.length > 0) {
         localStorage.setItem(_WG_KEY, JSON.stringify(remoteWg));
       }
@@ -16785,7 +16786,7 @@ async function syncBagFromSupabase() {
     if (Array.isArray(remoteSp)) {
       var localSp = getSpeedSessions();
       if (remoteSp.length === 0 && localSp.length > 0) {
-        _sb.from('profiles').update({ speed_sessions: localSp }).eq('id', currentUser.id).then(function(){}).catch(function(){});
+        _sb.from('profiles').update({ speed_sessions: localSp }).eq('id', uid).then(function(){}).catch(function(){});
       } else if (remoteSp.length > 0) {
         localStorage.setItem(_SPEED_KEY, JSON.stringify(remoteSp));
       }
