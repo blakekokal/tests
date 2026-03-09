@@ -18130,9 +18130,19 @@ function renderWgTab() {
       '</div>';
     });
   });
+  // Swing type switcher buttons
+  var typeBtns = ['percent','fraction','body'].map(function(t) {
+    var lbl = t === 'percent' ? '%' : t === 'fraction' ? '½' : 'Body';
+    var active = s.swingType === t;
+    return '<button onclick="wgChangeSwingType(\'' + t + '\')" style="' +
+      'padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid ' +
+      (active ? '#7c3aed' : '#333') + ';background:' + (active ? '#7c3aed' : '#222') +
+      ';color:' + (active ? '#fff' : '#666') + ';">' + lbl + '</button>';
+  }).join('');
+
   list.innerHTML = '<div style="background:#1a1a1a;border-radius:12px;padding:12px;">' +
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
-      '<div style="font-size:11px;color:#555;">' + dateStr + ' · ' + typeLabel + '</div>' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
+      '<div style="display:flex;gap:4px;">' + typeBtns + '</div>' +
       '<button onclick="wgClearSession()" style="background:#2a1515;border:1px solid #5a2020;border-radius:6px;color:#f87171;font-size:11px;font-weight:600;cursor:pointer;padding:4px 10px;">Clear</button>' +
     '</div>' +
     '<div style="display:grid;grid-template-columns:' + gridCols + ';gap:3px 6px;align-items:center;">' + cells + '</div>' +
@@ -18158,6 +18168,33 @@ function wgClearSession() {
   saveWgSessions([]);
   renderWgTab();
   renderBagClubList();
+}
+
+function wgChangeSwingType(newType) {
+  var sessions = getWgSessions();
+  if (sessions.length === 0) return;
+  var s = sessions[sessions.length - 1];
+  if (s.swingType === newType) return;
+  var oldSwings = WG_SWINGS[s.swingType] || [];
+  var newSwings = WG_SWINGS[newType] || [];
+  // Remap results: keep data for shared indices, clear extras or add empty
+  s.clubs.forEach(function(club) {
+    var clubData = s.results[club] || {};
+    var newData = {};
+    for (var i = 0; i < newSwings.length; i++) {
+      if (i < oldSwings.length && clubData['sw' + i]) {
+        newData['sw' + i] = clubData['sw' + i];
+      } else {
+        newData['sw' + i] = { shots: [], avg: null };
+      }
+    }
+    s.results[club] = newData;
+  });
+  s.swingType = newType;
+  saveWgSessions(sessions);
+  renderWgTab();
+  renderBagClubList();
+  if (typeof renderGapVisualizerChart === 'function') renderGapVisualizerChart();
 }
 
 function wgEditAvg(safeClub, club, swingIndex, value) {
