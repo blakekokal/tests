@@ -6710,6 +6710,8 @@ async function resumeIncompleteRound(roundId) {
       }
       var scoreEl = document.getElementById('simple_score_' + hd.hole);
       if (scoreEl && hd.score) scoreEl.value = hd.score;
+      var yardsEl = document.getElementById('simple_yards_' + hd.hole);
+      if (yardsEl && hd.yards) yardsEl.value = hd.yards;
     });
     show('simpleEntryPage');
   } else if (rd.entryMode === 'hole' && rd.hbhFormData) {
@@ -7778,23 +7780,34 @@ function buildSimpleForm() {
   for (var h = 1; h <= totalHoles; h++) {
     var hasCourseData = _courseHoleData && _courseHoleData[h - 1];
     var holePar = hasCourseData ? _courseHoleData[h - 1].par : 4;
+    var holeYards = hasCourseData ? _courseHoleData[h - 1].yards : '';
     var div = document.createElement('div');
     div.id = 'simple_hole_' + h;
     div.dataset.par = holePar;
-    div.style.cssText = 'background:#1a1a1a;border-radius:12px;padding:10px 14px;border:1px solid #2a2a2a;display:flex;align-items:center;gap:10px;';
+    div.style.cssText = 'background:#1a1a1a;border-radius:12px;padding:10px 14px;border:1px solid #2a2a2a;';
 
     var parBtns = [3,4,5].map(function(p) {
       var sel = p === holePar;
       return '<button onclick="simpleSetPar(' + h + ',' + p + ',this)" style="width:32px;height:32px;border-radius:8px;border:none;font-size:13px;font-weight:700;cursor:pointer;background:' + (sel ? '#7c3aed' : '#333') + ';color:' + (sel ? '#fff' : '#888') + ';">' + p + '</button>';
     }).join('');
 
-    div.innerHTML = '<div style="font-size:14px;font-weight:800;color:#fff;width:50px;">Hole ' + h + '</div>'
+    div.innerHTML = '<div style="display:flex;align-items:center;gap:10px;">'
+      + '<div style="font-size:14px;font-weight:800;color:#fff;width:50px;">Hole ' + h + '</div>'
+      + '<div style="display:flex;flex-direction:column;align-items:center;gap:2px;">'
+      + '<div style="font-size:9px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Par</div>'
       + '<div style="display:flex;gap:4px;">' + parBtns + '</div>'
-      + '<div style="margin-left:auto;display:flex;align-items:center;gap:6px;">'
-      + '<button onclick="simpleAdj(' + h + ',-1)" style="width:32px;height:32px;border-radius:8px;border:none;background:#333;color:#fff;font-size:18px;font-weight:700;cursor:pointer;">-</button>'
-      + '<input id="simple_score_' + h + '" type="number" inputmode="numeric" value="' + holePar + '" min="1" style="width:44px;height:36px;background:#222;color:#fff;border:none;border-radius:8px;text-align:center;font-size:16px;font-weight:700;" onfocus="this.select()">'
-      + '<button onclick="simpleAdj(' + h + ',1)" style="width:32px;height:32px;border-radius:8px;border:none;background:#333;color:#fff;font-size:18px;font-weight:700;cursor:pointer;">+</button>'
-      + '</div>';
+      + '</div>'
+      + '<div style="display:flex;flex-direction:column;align-items:center;gap:2px;">'
+      + '<div style="font-size:9px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Yds</div>'
+      + '<input id="simple_yards_' + h + '" type="number" inputmode="numeric" value="' + (holeYards || '') + '" placeholder="-" style="width:52px;height:32px;background:#222;color:#fff;border:none;border-radius:8px;text-align:center;font-size:12px;" onfocus="this.select()">'
+      + '</div>'
+      + '<div style="margin-left:auto;display:flex;flex-direction:column;align-items:center;gap:2px;">'
+      + '<div style="font-size:9px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Score</div>'
+      + '<div style="display:flex;align-items:center;gap:4px;">'
+      + '<button onclick="simpleAdj(' + h + ',-1)" style="width:30px;height:30px;border-radius:8px;border:none;background:#333;color:#fff;font-size:18px;font-weight:700;cursor:pointer;">-</button>'
+      + '<input id="simple_score_' + h + '" type="number" inputmode="numeric" value="' + holePar + '" min="1" style="width:40px;height:32px;background:#222;color:#fff;border:none;border-radius:8px;text-align:center;font-size:16px;font-weight:700;" onfocus="this.select()">'
+      + '<button onclick="simpleAdj(' + h + ',1)" style="width:30px;height:30px;border-radius:8px;border:none;background:#333;color:#fff;font-size:18px;font-weight:700;cursor:pointer;">+</button>'
+      + '</div></div></div>';
     container.appendChild(div);
   }
 }
@@ -7829,7 +7842,7 @@ function submitSimple() {
     var card = document.getElementById('simple_hole_' + h);
     var parVal = parseInt(card.dataset.par) || 4;
     var scoreVal = parseInt(document.getElementById('simple_score_' + h).value) || parVal;
-    var yardsVal = (savedCourseHoleData && savedCourseHoleData[h - 1]) ? savedCourseHoleData[h - 1].yards : 0;
+    var yardsVal = parseInt(document.getElementById('simple_yards_' + h).value) || 0;
     holeData.push({ hole: h, par: parVal, score: scoreVal, yards: yardsVal });
   }
 
@@ -7883,7 +7896,8 @@ async function saveSimpleForLater() {
     var card = document.getElementById('simple_hole_' + h);
     var parVal = parseInt(card.dataset.par) || 4;
     var scoreVal = parseInt(document.getElementById('simple_score_' + h).value) || 0;
-    simpleFormData.push({ hole: h, par: parVal, score: scoreVal });
+    var yardsVal = parseInt(document.getElementById('simple_yards_' + h).value) || 0;
+    simpleFormData.push({ hole: h, par: parVal, score: scoreVal, yards: yardsVal });
     if (scoreVal > 0) enteredCount++;
   }
   if (enteredCount === 0) { alert('Enter at least one score before saving.'); return; }
