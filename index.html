@@ -2263,8 +2263,9 @@ body.viewing-as .back-btn-top{top:38px;}
   <div style="width:100%;max-width:320px;margin-top:4px;">
     <div style="font-size:11px;color:#555;text-align:center;margin-bottom:6px;letter-spacing:0.5px;text-transform:uppercase;">Entry Mode</div>
     <div style="display:flex;gap:0;background:#1a1a1a;border-radius:10px;overflow:hidden;border:1px solid #333;">
-      <button id="modeBtn_shot" onclick="setEntryMode('shot')" style="flex:1;height:40px;border:none;border-radius:0;font-size:13px;font-weight:700;background:#2E7D32;color:#fff;cursor:pointer;transition:background 0.2s;">🎯 Shot by Shot</button>
-      <button id="modeBtn_hole" onclick="setEntryMode('hole')" style="flex:1;height:40px;border:none;border-radius:0;font-size:13px;font-weight:700;background:transparent;color:#555;cursor:pointer;transition:background 0.2s;">📋 Hole by Hole</button>
+      <button id="modeBtn_simple" onclick="setEntryMode('simple')" style="flex:1;height:40px;border:none;border-radius:0;font-size:13px;font-weight:700;background:transparent;color:#555;cursor:pointer;transition:background 0.2s;">Simple</button>
+      <button id="modeBtn_hole" onclick="setEntryMode('hole')" style="flex:1;height:40px;border:none;border-radius:0;font-size:13px;font-weight:700;background:transparent;color:#555;cursor:pointer;transition:background 0.2s;">Hole by Hole</button>
+      <button id="modeBtn_shot" onclick="setEntryMode('shot')" style="flex:1;height:40px;border:none;border-radius:0;font-size:13px;font-weight:700;background:#2E7D32;color:#fff;cursor:pointer;transition:background 0.2s;">Shot by Shot</button>
     </div>
   </div>
 
@@ -2351,6 +2352,19 @@ body.viewing-as .back-btn-top{top:38px;}
   <div style="width:100%;max-width:360px;margin-top:16px;display:flex;flex-direction:column;gap:8px;">
     <button onclick="submitHoleByHole()" style="width:100%;height:52px;background:#2E7D32;border:none;border-radius:12px;color:#fff;font-size:16px;font-weight:800;cursor:pointer;">✅ Submit Round</button>
     <button onclick="saveHoleByHoleForLater()" style="width:100%;height:44px;background:#e65100;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;">💾 Save & Finish Later</button>
+  </div>
+</div>
+
+<!-- SIMPLE ENTRY PAGE -->
+<div id="simpleEntryPage" class="page" style="justify-content:flex-start;padding-top:50px;padding-bottom:80px;overflow-y:auto;">
+  <button class="back-btn-top" onclick="show('roundPage')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <div style="font-size:20px;font-weight:800;margin-bottom:4px;">Simple Score Entry</div>
+  <div id="simplCourseName" style="font-size:13px;color:#888;margin-bottom:2px;display:none;"></div>
+  <div style="font-size:12px;color:#555;margin-bottom:16px;">Enter your score for each hole</div>
+  <div id="simpleHolesList" style="width:100%;max-width:360px;display:flex;flex-direction:column;gap:8px;"></div>
+  <div style="width:100%;max-width:360px;margin-top:16px;display:flex;flex-direction:column;gap:8px;">
+    <button onclick="submitSimple()" style="width:100%;height:52px;background:#7c3aed;border:none;border-radius:12px;color:#fff;font-size:16px;font-weight:800;cursor:pointer;">Submit Round</button>
+    <button onclick="saveSimpleForLater()" style="width:100%;height:44px;background:#e65100;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;">Save & Finish Later</button>
   </div>
 </div>
 
@@ -6553,7 +6567,7 @@ async function saveHoleByHoleForLater() {
 }
 
 // Core function to save an incomplete round to Supabase
-async function saveIncompleteRound(hbhFormData) {
+async function saveIncompleteRound(hbhFormData, simpleFormData) {
   var playerNameVal = document.getElementById('playerName').value || 'Player';
   var courseNameVal = document.getElementById('courseName').value || 'Course';
   var roundDateVal = document.getElementById('roundDate').value || getTodayCentral();
@@ -6561,7 +6575,17 @@ async function saveIncompleteRound(hbhFormData) {
 
   // Build the partial round blob
   var roundBlob;
-  if (hbhFormData) {
+  if (simpleFormData) {
+    // Simple mode — store form state for resuming
+    var enteredCount = simpleFormData.filter(function(h) { return h.score > 0; }).length;
+    roundBlob = {
+      allHoles: [], stats: {}, incomplete: true,
+      entryMode: 'simple', totalHoles: totalHoles,
+      holesCompleted: enteredCount,
+      simpleFormData: simpleFormData
+    };
+    holesCompleted = enteredCount;
+  } else if (hbhFormData) {
     // Hole-by-hole mode — store form state for resuming
     roundBlob = {
       allHoles: [],
@@ -6662,7 +6686,32 @@ async function resumeIncompleteRound(roundId) {
   var cLabel = document.getElementById('courseLabel');
   if (cLabel) cLabel.innerText = data.course_name || '';
 
-  if (rd.entryMode === 'hole' && rd.hbhFormData) {
+  if (rd.entryMode === 'simple' && rd.simpleFormData) {
+    // Resume simple mode
+    _entryMode = 'simple';
+    setEntryMode('simple');
+    var customHolesEl = document.getElementById('customHoles');
+    if (customHolesEl) customHolesEl.value = totalHoles;
+    buildSimpleForm();
+    var sCN = document.getElementById('simplCourseName');
+    if (sCN) { sCN.innerText = data.course_name || ''; sCN.style.display = data.course_name ? 'block' : 'none'; }
+    // Restore scores and pars
+    rd.simpleFormData.forEach(function(hd) {
+      var card = document.getElementById('simple_hole_' + hd.hole);
+      if (card) {
+        card.dataset.par = hd.par;
+        var parBtns = card.querySelectorAll('button[onclick^="simpleSetPar"]');
+        parBtns.forEach(function(b) {
+          var match = b.getAttribute('onclick').match(/simpleSetPar\(\d+,(\d+)/);
+          if (match && parseInt(match[1]) === hd.par) { b.style.background = '#7c3aed'; b.style.color = '#fff'; }
+          else { b.style.background = '#333'; b.style.color = '#888'; }
+        });
+      }
+      var scoreEl = document.getElementById('simple_score_' + hd.hole);
+      if (scoreEl && hd.score) scoreEl.value = hd.score;
+    });
+    show('simpleEntryPage');
+  } else if (rd.entryMode === 'hole' && rd.hbhFormData) {
     // Resume hole-by-hole mode
     _entryMode = 'hole';
     setEntryMode('hole');
@@ -7284,19 +7333,20 @@ function goToPracticeHub() {
 }
 
 // ─── ENTRY MODE ───────────────────────────────────────────
-var _entryMode = 'shot'; // 'shot' or 'hole'
+var _entryMode = 'shot'; // 'shot', 'hole', or 'simple'
 
 function setEntryMode(mode) {
   _entryMode = mode;
   var shotBtn = document.getElementById('modeBtn_shot');
   var holeBtn = document.getElementById('modeBtn_hole');
-  if (mode === 'shot') {
-    shotBtn.style.background = '#2E7D32'; shotBtn.style.color = '#fff';
-    holeBtn.style.background = 'transparent'; holeBtn.style.color = '#666';
-  } else {
-    holeBtn.style.background = '#1565C0'; holeBtn.style.color = '#fff';
-    shotBtn.style.background = 'transparent'; shotBtn.style.color = '#666';
-  }
+  var simpleBtn = document.getElementById('modeBtn_simple');
+  var off = 'transparent', offC = '#666';
+  shotBtn.style.background = off; shotBtn.style.color = offC;
+  holeBtn.style.background = off; holeBtn.style.color = offC;
+  simpleBtn.style.background = off; simpleBtn.style.color = offC;
+  if (mode === 'shot') { shotBtn.style.background = '#2E7D32'; shotBtn.style.color = '#fff'; }
+  else if (mode === 'hole') { holeBtn.style.background = '#1565C0'; holeBtn.style.color = '#fff'; }
+  else { simpleBtn.style.background = '#7c3aed'; simpleBtn.style.color = '#fff'; }
 }
 
 function enterScoring() {
@@ -7310,7 +7360,12 @@ function enterScoring() {
   var cName = document.getElementById('courseName').value || '';
   if (cLabel) cLabel.innerText = cName;
 
-  if (_entryMode === 'hole') {
+  if (_entryMode === 'simple') {
+    var sCN = document.getElementById('simplCourseName');
+    if (sCN) { sCN.innerText = cName; sCN.style.display = cName ? 'block' : 'none'; }
+    buildSimpleForm();
+    show('simpleEntryPage');
+  } else if (_entryMode === 'hole') {
     var hbhCN = document.getElementById('hbhCourseName');
     if (hbhCN) { hbhCN.innerText = cName; hbhCN.style.display = cName ? 'block' : 'none'; }
     buildHoleByHoleForm();
@@ -7712,6 +7767,103 @@ function finishHole_hbh() {
   if (par === 5) { c5++; p5 += holeStrokes; }
   totalStrokes += holeStrokes;
   totalPar += par;
+}
+
+// ─── SIMPLE ENTRY ─────────────────────────────────────────────────────────────
+function buildSimpleForm() {
+  var container = document.getElementById('simpleHolesList');
+  container.innerHTML = '';
+  for (var h = 1; h <= totalHoles; h++) {
+    var hasCourseData = _courseHoleData && _courseHoleData[h - 1];
+    var holePar = hasCourseData ? _courseHoleData[h - 1].par : 4;
+    var div = document.createElement('div');
+    div.id = 'simple_hole_' + h;
+    div.dataset.par = holePar;
+    div.style.cssText = 'background:#1a1a1a;border-radius:12px;padding:10px 14px;border:1px solid #2a2a2a;display:flex;align-items:center;gap:10px;';
+
+    var parBtns = [3,4,5].map(function(p) {
+      var sel = p === holePar;
+      return '<button onclick="simpleSetPar(' + h + ',' + p + ',this)" style="width:32px;height:32px;border-radius:8px;border:none;font-size:13px;font-weight:700;cursor:pointer;background:' + (sel ? '#7c3aed' : '#333') + ';color:' + (sel ? '#fff' : '#888') + ';">' + p + '</button>';
+    }).join('');
+
+    div.innerHTML = '<div style="font-size:14px;font-weight:800;color:#fff;width:50px;">Hole ' + h + '</div>'
+      + '<div style="display:flex;gap:4px;">' + parBtns + '</div>'
+      + '<div style="margin-left:auto;display:flex;align-items:center;gap:6px;">'
+      + '<button onclick="simpleAdj(' + h + ',-1)" style="width:32px;height:32px;border-radius:8px;border:none;background:#333;color:#fff;font-size:18px;font-weight:700;cursor:pointer;">-</button>'
+      + '<input id="simple_score_' + h + '" type="number" inputmode="numeric" value="' + holePar + '" min="1" style="width:44px;height:36px;background:#222;color:#fff;border:none;border-radius:8px;text-align:center;font-size:16px;font-weight:700;" onfocus="this.select()">'
+      + '<button onclick="simpleAdj(' + h + ',1)" style="width:32px;height:32px;border-radius:8px;border:none;background:#333;color:#fff;font-size:18px;font-weight:700;cursor:pointer;">+</button>'
+      + '</div>';
+    container.appendChild(div);
+  }
+}
+
+function simpleSetPar(hole, p, btn) {
+  var card = document.getElementById('simple_hole_' + hole);
+  card.dataset.par = p;
+  var btns = card.querySelectorAll('button[onclick^="simpleSetPar"]');
+  btns.forEach(function(b) { b.style.background = '#333'; b.style.color = '#888'; });
+  btn.style.background = '#7c3aed'; btn.style.color = '#fff';
+}
+
+function simpleAdj(hole, delta) {
+  var inp = document.getElementById('simple_score_' + hole);
+  var v = Math.max(1, (parseInt(inp.value) || 0) + delta);
+  inp.value = v;
+}
+
+function submitSimple() {
+  resetRoundState();
+  _currentRoundId = null;
+
+  for (var h = 1; h <= totalHoles; h++) {
+    var card = document.getElementById('simple_hole_' + h);
+    var parVal = parseInt(card.dataset.par) || 4;
+    var scoreVal = parseInt(document.getElementById('simple_score_' + h).value) || parVal;
+
+    allHoles.push({
+      hole: h, par: parVal, yards: 0, score: scoreVal, putts: 0,
+      firstPuttDist: 0, expectedPutts: 0,
+      sgOTT: 0, sgAPP: 0, sgARG: 0, sgPutting: 0,
+      shots: []
+    });
+
+    if (parVal === 3) { c3++; p3 += scoreVal; }
+    if (parVal === 4) { c4++; p4 += scoreVal; }
+    if (parVal === 5) { c5++; p5 += scoreVal; }
+    totalStrokes += scoreVal;
+    totalPar += parVal;
+  }
+
+  scoreBar.style.display = 'none';
+  renderSummary();
+  document.getElementById('backToRoundsBtn').style.display = 'none';
+  document.getElementById('saveStatus').textContent = '';
+  _viewingStudentRound = false;
+  var saveBtn = document.getElementById('saveToAccountBtn');
+  if (saveBtn) saveBtn.style.display = currentUser ? '' : 'none';
+  show('summaryPage');
+
+  if (currentUser && allHoles.length > 0) {
+    autoSaveRound();
+  }
+}
+
+async function saveSimpleForLater() {
+  if (!currentUser) { alert('Please log in to save rounds.'); showAuthPage(); return; }
+
+  var enteredCount = 0;
+  var simpleFormData = [];
+  for (var h = 1; h <= totalHoles; h++) {
+    var card = document.getElementById('simple_hole_' + h);
+    var parVal = parseInt(card.dataset.par) || 4;
+    var scoreVal = parseInt(document.getElementById('simple_score_' + h).value) || 0;
+    simpleFormData.push({ hole: h, par: parVal, score: scoreVal });
+    if (scoreVal > 0) enteredCount++;
+  }
+  if (enteredCount === 0) { alert('Enter at least one score before saving.'); return; }
+  if (!confirm('Save your progress and finish later?')) return;
+
+  await saveIncompleteRound(null, simpleFormData);
 }
 
 
