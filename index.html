@@ -2246,10 +2246,13 @@ body.viewing-as .back-btn-top{top:38px;}
   </select>
   <!-- Tee info display -->
   <div id="teeInfo" style="display:none;width:100%;max-width:320px;text-align:center;font-size:12px;color:#888;margin-top:-4px;"></div>
-  <select id="roundType" style="width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-radius:10px;border:none;text-align:center;font-size:15px;appearance:none;-webkit-appearance:none;padding:0 10px;">
+  <select id="roundType" onchange="document.getElementById('tournamentPlaceWrap').style.display=this.value==='Tournament'?'':'none'" style="width:100%;max-width:320px;height:44px;background:#222;color:#fff;border-radius:10px;border:none;text-align:center;font-size:15px;appearance:none;-webkit-appearance:none;padding:0 10px;">
     <option value="Casual">Round Type: Casual</option>
     <option value="Tournament">Round Type: Tournament</option>
   </select>
+  <div id="tournamentPlaceWrap" style="display:none;width:100%;max-width:320px;">
+    <input id="tournamentPlace" type="number" inputmode="numeric" min="1" placeholder="Place (e.g. 1, 2, 3...)" style="width:100%;height:44px;background:#222;color:#fff;border-radius:10px;border:none;text-align:center;font-size:15px;" onfocus="this.select()">
+  </div>
   <div class="row">
     <button class="holes9" onclick="highlight(this);selectPresetHoles(9)">9 Holes</button>
     <button class="holes18" onclick="highlight(this);selectPresetHoles(18)">18 Holes</button>
@@ -2591,10 +2594,15 @@ body.viewing-as .back-btn-top{top:38px;}
     <input id="eriPlayerName" type="text" style="width:100%;margin-bottom:12px;">
     
     <p style="margin:0 0 4px;font-size:12px;color:#aaa;">Round Type</p>
-    <select id="eriRoundType" style="width:100%;height:44px;background:#333;color:#fff;border-radius:10px;border:none;padding:0 10px;font-size:16px;">
+    <select id="eriRoundType" onchange="document.getElementById('eriPlaceWrap').style.display=this.value==='Tournament'?'':'none'" style="width:100%;height:44px;background:#333;color:#fff;border-radius:10px;border:none;padding:0 10px;font-size:16px;">
       <option value="Casual">Casual</option>
       <option value="Tournament">Tournament</option>
     </select>
+
+    <div id="eriPlaceWrap" style="display:none;margin-top:12px;">
+      <p style="margin:0 0 4px;font-size:12px;color:#aaa;">Place</p>
+      <input id="eriPlace" type="number" inputmode="numeric" min="1" placeholder="Place (e.g. 1, 2, 3...)" style="width:100%;height:44px;background:#333;color:#fff;border-radius:10px;border:none;padding:0 10px;font-size:16px;text-align:center;" onfocus="this.select()">
+    </div>
   </div>
 
   <button class="holes9" style="margin-bottom:12px;" onclick="saveEditRoundInfo(event)">Save Changes</button>
@@ -6401,6 +6409,7 @@ async function autoSaveRound() {
     course_name: courseName,
     round_date: roundDate,
     round_type: document.getElementById('roundType').value || 'Casual',
+    tournament_place: document.getElementById('roundType').value === 'Tournament' ? (parseInt(document.getElementById('tournamentPlace').value) || null) : null,
     handicap: document.getElementById('playerHandicap').value || 'pro',
     holes: allHoles.length,
     score: totalStrokes,
@@ -6577,6 +6586,7 @@ async function saveIncompleteRound(hbhFormData) {
     course_name: courseNameVal,
     round_date: roundDateVal,
     round_type: document.getElementById('roundType').value || 'Casual',
+    tournament_place: document.getElementById('roundType').value === 'Tournament' ? (parseInt(document.getElementById('tournamentPlace').value) || null) : null,
     handicap: document.getElementById('playerHandicap').value || 'pro',
     holes: totalHoles,
     score: totalStrokes || 0,
@@ -6831,6 +6841,7 @@ async function saveRoundToAccount() {
     course_name: document.getElementById('courseName').value || 'Course',
     round_date: document.getElementById('roundDate').value || getTodayCentral(),
     round_type: document.getElementById('roundType').value || 'Casual',
+    tournament_place: document.getElementById('roundType').value === 'Tournament' ? (parseInt(document.getElementById('tournamentPlace').value) || null) : null,
     handicap: document.getElementById('playerHandicap').value || 'pro',
     holes: allHoles.length,
     score: totalStrokes,
@@ -6882,14 +6893,14 @@ async function loadMyRounds() {
   
   var { data, error } = await _sb
     .from('rounds')
-    .select('id, player_name, course_name, round_date, round_type, holes, score, par, to_par, created_at, is_incomplete, round_data')
+    .select('id, player_name, course_name, round_date, round_type, tournament_place, holes, score, par, to_par, created_at, is_incomplete, round_data')
     .eq('user_id', activeUserId())
     .order('round_date', { ascending: false });
 
   // Fallback if is_incomplete column doesn't exist
   if (error && error.message && error.message.indexOf('is_incomplete') !== -1) {
     var resp2 = await _sb.from('rounds')
-      .select('id, player_name, course_name, round_date, round_type, holes, score, par, to_par, created_at, round_data')
+      .select('id, player_name, course_name, round_date, round_type, tournament_place, holes, score, par, to_par, created_at, round_data')
       .eq('user_id', activeUserId())
       .order('round_date', { ascending: false });
     data = resp2.data;
@@ -6989,7 +7000,8 @@ function filterRoundsList() {
     var tp = r.to_par > 0 ? '+' + r.to_par : r.to_par === 0 ? 'E' : r.to_par;
     var d = new Date(r.round_date + 'T12:00:00');
     var dateStr = (d.getMonth()+1) + '/' + d.getDate() + '/' + d.getFullYear();
-    var typeTag = r.round_type === 'Tournament' ? '<span style="color:#ff9800;font-size:10px;"> ★ Tournament</span>' : '';
+    var placeStr = (r.round_type === 'Tournament' && r.tournament_place) ? ' — ' + ordinalSuffix(r.tournament_place) + ' Place' : '';
+    var typeTag = r.round_type === 'Tournament' ? '<span style="color:#ff9800;font-size:10px;"> ★ Tournament' + placeStr + '</span>' : '';
     var incompleteTag = incomplete ? '<span style="color:#ff9800;font-size:10px;font-weight:700;"> ⏸ In Progress</span>' : '';
 
     // For incomplete rounds, show holes completed info
@@ -12539,6 +12551,11 @@ function sgCatCard(title, desc, color) {
 }
 
 
+function ordinalSuffix(n) {
+  var s = ['th','st','nd','rd'], v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
 // --- EDIT ROUND INFO LOGIC ---
 var _eriRoundId = null;
 var _eriIsStudentRound = false;
@@ -12569,7 +12586,9 @@ function openEditRoundInfo(id, ev) {
   if (rt) {
     rt.value = r.round_type === 'Tournament' ? 'Tournament' : 'Casual';
   }
-  
+  document.getElementById('eriPlaceWrap').style.display = r.round_type === 'Tournament' ? '' : 'none';
+  document.getElementById('eriPlace').value = r.tournament_place || '';
+
   show('editRoundInfoPage');
 }
 
@@ -12593,13 +12612,15 @@ async function saveEditRoundInfo(ev) {
   var rDate = document.getElementById('eriRoundDate').value;
   var pName = document.getElementById('eriPlayerName').value;
   var rType = document.getElementById('eriRoundType').value;
-  
+  var rPlace = rType === 'Tournament' ? (parseInt(document.getElementById('eriPlace').value) || null) : null;
+
   const { error } = await _sb.from('rounds')
     .update({
       course_name: cName,
       round_date: rDate,
       player_name: pName,
-      round_type: rType
+      round_type: rType,
+      tournament_place: rPlace
     })
     .eq('id', _eriRoundId);
     
