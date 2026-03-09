@@ -72,6 +72,7 @@ body.viewing-as .back-btn-top{top:38px;}
 .par3{background:#4fc3f7;}
 .par4{background:#66bb6a;}
 .par5{background:#ffb74d;}
+input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
 
 .hole{background:#424242;}
 .green{background:#43a047;outline:2px solid #a5d6a7;}
@@ -7806,10 +7807,11 @@ function buildSimpleForm() {
       + '<div style="font-size:9px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Score</div>'
       + '<div style="display:flex;align-items:center;gap:4px;">'
       + '<button onclick="simpleAdj(' + h + ',-1)" style="width:30px;height:30px;border-radius:8px;border:none;background:#333;color:#fff;font-size:18px;font-weight:700;cursor:pointer;">-</button>'
-      + '<input id="simple_score_' + h + '" type="number" inputmode="numeric" value="' + holePar + '" min="1" style="width:40px;height:32px;background:#222;color:#fff;border:none;border-radius:8px;text-align:center;font-size:16px;font-weight:700;" onfocus="this.select()" oninput="simpleUpdateToPar(' + h + ')">'
+      + '<input id="simple_score_' + h + '" type="number" inputmode="numeric" value="' + holePar + '" min="1" style="width:40px;height:32px;background:#222;color:#fff;border:none;border-radius:8px;text-align:center;font-size:16px;font-weight:700;-moz-appearance:textfield;" onfocus="this.select()" oninput="simpleUpdateToPar(' + h + ')">'
       + '<button onclick="simpleAdj(' + h + ',1)" style="width:30px;height:30px;border-radius:8px;border:none;background:#333;color:#fff;font-size:18px;font-weight:700;cursor:pointer;">+</button>'
-      + '<span id="simple_topar_' + h + '" style="font-size:12px;font-weight:700;min-width:28px;text-align:center;">' + simpleToParLabel(holePar, holePar) + '</span>'
-      + '</div></div></div>';
+      + '</div></div>'
+      + '<span id="simple_topar_' + h + '" style="font-size:12px;font-weight:700;min-width:24px;text-align:center;">' + simpleToParLabel(holePar, holePar) + '</span>'
+      + '</div>';
     container.appendChild(div);
   }
 }
