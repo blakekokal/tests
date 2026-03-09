@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;700&family=Cormorant+Garamond:wght@300;400;600&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;700&display=swap" rel="stylesheet">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -17,16 +17,11 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-/* Fairway Dark Typography */
-h1,h2,h3,.summary-title,.score-summary{font-family:"Cormorant Garamond",serif;font-weight:400;}
-h3{font-weight:600;}
-button{font-family:"DM Mono",monospace;font-weight:400;}
-input,select{font-family:"DM Mono",monospace;font-weight:300;}
 html,body{margin:0;padding:0;height:100%;overflow:hidden;}
 * { box-sizing:border-box; }
 #pbvWrap input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;height:26px;border-radius:50%;background:#e8ede9;cursor:pointer;box-shadow:0 1px 6px rgba(0,0,0,0.6);}
 #pbvWrap input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;background:#e8ede9;cursor:pointer;border:none;box-shadow:0 1px 6px rgba(0,0,0,0.6);}
-body{background:#0d0f0e;color:#e8ede9;font-family:'DM Mono',monospace;font-weight:300;}
+body{background:#0d0f0e;color:#e8ede9;font-family:system-ui,sans-serif;}
 #scoreBar{position:fixed;top:0;left:0;right:0;background:#0d0f0e;display:none;flex-direction:column;align-items:center;justify-content:center;font-weight:600;z-index:10;padding:10px 0 8px;}
 #scoreBarText{font-size:18px;}
 #courseLabel{font-size:13px;color:#5a6b60;font-weight:500;margin-top:2px;max-width:80%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
