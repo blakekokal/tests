@@ -17110,9 +17110,9 @@ function renderGapVisualizerChart() {
     'Ribs': '#2980d4',
     'Shoulders': '#2980d4',
     'Ears': '#2980d4',
-    'Full': '#e8880b'    // orange
+    'Full': '#e2e8f0'    // white
   };
-  var _GV_SEG_COLOR_DEFAULT = ['#0d6e6e', '#2980d4', '#e8880b'];
+  var _GV_SEG_COLOR_DEFAULT = ['#0d6e6e', '#2980d4', '#e2e8f0'];
 
   function _gvSwingColor(label) {
     return _GV_SWING_COLORS[label] || _GV_SEG_COLOR_DEFAULT[0];
@@ -17336,25 +17336,16 @@ function renderGapVisualizerChart() {
 
   var datasets = [];
   for (var si = 0; si < seg.maxSegs; si++) {
-    var isTop = (si === seg.maxSegs - 1 && seg.maxSegs > 1);
-    var segLabel = seg.segLabels[si] || '';
-    var defaultColor;
-    if (seg.maxSegs === 1) {
-      defaultColor = _GV_SWING_COLORS['Full'];
-    } else if (isTop) {
-      defaultColor = _GV_SWING_COLORS['Full'];
-    } else if (_GV_SWING_COLORS[segLabel]) {
-      defaultColor = _GV_SWING_COLORS[segLabel];
-    } else {
-      defaultColor = _GV_SEG_COLOR_DEFAULT[Math.min(si, _GV_SEG_COLOR_DEFAULT.length - 1)];
-    }
-
-    // Per-bar colors: Full-only clubs get white in their base segment
-    var bgColors = items.map(function(_item, idx) {
-      if (itemSwingCounts[idx] === 1 && si === 0) {
-        return '#e2e8f0'; // white for Full-only clubs
+    // Per-bar colors based on each item's own swing label at this segment index
+    var bgColors = items.map(function(item, idx) {
+      var valid = item.swings.filter(function(s) { return s.carry !== null; });
+      valid.sort(function(a, b) { return a.carry - b.carry; });
+      if (si < valid.length) {
+        var lbl = valid[si].label;
+        return _GV_SWING_COLORS[lbl] || _GV_SEG_COLOR_DEFAULT[Math.min(si, _GV_SEG_COLOR_DEFAULT.length - 1)];
       }
-      return defaultColor;
+      // No data at this segment for this club
+      return _GV_SWING_COLORS['Full'];
     });
 
     datasets.push({
