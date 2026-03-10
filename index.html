@@ -8603,14 +8603,14 @@ function appBucketFor(dist) {
 
 function sgColor(val) {
   if (val >= 0) return '#00b87a';
-  return '#d4706e';
+  return '#c97a7a';
 }
 
 function sgTrend(recent, prior) {
   if (recent === null || prior === null) return { icon: '— steady', color: '#9a9a9a' };
   var diff = recent - prior;
   if (diff > 0.15)  return { icon: '▲ improving', color: '#00b87a' };
-  if (diff < -0.15) return { icon: '▼ declining', color: '#d4706e' };
+  if (diff < -0.15) return { icon: '▼ declining', color: '#c97a7a' };
   return { icon: '— steady', color: '#9a9a9a' };
 }
 
@@ -8628,7 +8628,7 @@ function bucketGirColor(girPct) {
   if (girPct >= 55) return '#00b87a';
   if (girPct >= 35) return '#f0c830';
 
-  return '#d4706e';
+  return '#c97a7a';
 }
 
 function bucketGirBg(girPct) {
@@ -8681,7 +8681,7 @@ function renderPerfAnalysis(a) {
   var argCard  = document.getElementById('perfCardArg');
   var puttCard = document.getElementById('perfCardPutt');
 
-  var cardBgPos = 'background:#00402c;border:1px solid #00402c;border-radius:11px;padding:12px;cursor:pointer;';
+  var cardBgPos = 'background:#002e20;border:1px solid #002e20;border-radius:11px;padding:12px;cursor:pointer;';
   var cardBgNeg = 'background:#1a0d0d;border:1px solid #351a1a;border-radius:11px;padding:12px;cursor:pointer;';
   ottCard.style.cssText  = a.sgOTTperRound  >= 0 ? cardBgPos : cardBgNeg;
   appCard.style.cssText  = a.sgAPPperRound  >= 0 ? cardBgPos : cardBgNeg;
@@ -8700,9 +8700,9 @@ function renderPerfAnalysis(a) {
   // ── OTT Detail ─────────────────────────────────────────────
   var ottTrend = '';
   if (a.recentFwRightPct > a.priorFwRightPct + 8)
-    ottTrend = '<div style="font-size:11px;color:#d4706e;margin-top:8px;line-height:1.5;">⚠ Missing right more in last 3 rounds (' + a.recentFwRightPct + '%) vs prior avg (' + a.priorFwRightPct + '%)</div>';
+    ottTrend = '<div style="font-size:11px;color:#c97a7a;margin-top:8px;line-height:1.5;">⚠ Missing right more in last 3 rounds (' + a.recentFwRightPct + '%) vs prior avg (' + a.priorFwRightPct + '%)</div>';
   else if (a.recentFwLeftPct > a.priorFwLeftPct + 8)
-    ottTrend = '<div style="font-size:11px;color:#d4706e;margin-top:8px;line-height:1.5;">⚠ Missing left more in last 3 rounds (' + a.recentFwLeftPct + '%) vs prior avg (' + a.priorFwLeftPct + '%)</div>';
+    ottTrend = '<div style="font-size:11px;color:#c97a7a;margin-top:8px;line-height:1.5;">⚠ Missing left more in last 3 rounds (' + a.recentFwLeftPct + '%) vs prior avg (' + a.priorFwLeftPct + '%)</div>';
 
   document.getElementById('perfTab-ott').innerHTML =
     perfTabHeader('ott', 'Off the Tee · Detail', '#ffffff') +
@@ -8711,15 +8711,15 @@ function renderPerfAnalysis(a) {
     '<div style="font-size:14px;font-weight:700;color:#ffffff;">Fairways Hit</div>' +
     '<div style="font-size:14px;font-weight:800;color:#00b87a;">' + a.fwPct + '%</div></div>' +
     '<div style="display:flex;gap:2px;height:28px;border-radius:8px;overflow:hidden;margin-bottom:4px;">' +
-    '<div style="flex:0 0 ' + a.fwLeftPct + '%;background:#2a1a1a;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#d4706e;flex-direction:column;min-width:' + (a.fwLeftPct > 0 ? '28px' : '0') + '"><div>◀L</div><div>' + a.fwLeftPct + '%</div></div>' +
-    '<div style="flex:1;background:#007a52;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#00b87a;gap:4px;"><div>FW ' + a.fwPct + '%</div></div>' +
+    '<div style="flex:0 0 ' + a.fwLeftPct + '%;background:#2a1a1a;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#c97a7a;flex-direction:column;min-width:' + (a.fwLeftPct > 0 ? '28px' : '0') + '"><div>◀L</div><div>' + a.fwLeftPct + '%</div></div>' +
+    '<div style="flex:1;background:#005c3f;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#00b87a;gap:4px;"><div>FW ' + a.fwPct + '%</div></div>' +
     '<div style="flex:0 0 ' + a.fwRightPct + '%;background:#2a1a1a;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#ffffff;flex-direction:column;min-width:' + (a.fwRightPct > 0 ? '28px' : '0') + '"><div>R▶</div><div>' + a.fwRightPct + '%</div></div>' +
     '</div>' + ottTrend + '</div>' +
     (a.avgDrive > 0 ? (function() {
       var trendDiff = (a.recentAvgDrive > 0 && a.priorAvgDrive > 0) ? (a.recentAvgDrive - a.priorAvgDrive) : null;
       var trendHtml = '';
       if (trendDiff !== null) {
-        var trendCol = trendDiff >= 0 ? '#00b87a' : '#d4706e';
+        var trendCol = trendDiff >= 0 ? '#00b87a' : '#c97a7a';
         var trendIcon = trendDiff >= 0 ? '▲' : '▼';
         trendHtml = '<div style="font-size:11px;color:' + trendCol + ';margin-top:4px;">' + trendIcon + ' ' + (trendDiff >= 0 ? '+' : '') + trendDiff + ' yds vs prior (last 3: ' + a.recentAvgDrive + ' · prior: ' + a.priorAvgDrive + ')</div>';
       }
@@ -8735,7 +8735,7 @@ function renderPerfAnalysis(a) {
           '<div style="font-size:22px;font-weight:800;color:#f0c830;">' + a.longestDrive + ' yds</div>' +
           '</div>';
       }
-      return '<div style="background:#00402c;border:1px solid #00402c;border-radius:12px;padding:14px;margin-bottom:8px;">' +
+      return '<div style="background:#002e20;border:1px solid #002e20;border-radius:12px;padding:14px;margin-bottom:8px;">' +
         '<div style="display:flex;justify-content:space-between;align-items:center;">' +
         '<div style="font-size:14px;font-weight:700;color:#ffffff;">Avg Drive Distance</div>' +
         '<div style="font-size:22px;font-weight:800;color:#00b87a;">' + a.avgDrive + ' yds</div></div>' +
@@ -8762,13 +8762,13 @@ function renderPerfAnalysis(a) {
     var girP  = Math.round(100 * b.gir / b.opp);
     var col   = bucketGirColor(girP);
     var bg    = bucketGirBg(girP);
-    var border = girP >= 55 ? '#00402c' : girP >= 35 ? '#2a2008' : girP >= 20 ? '#351a1a' : '#351a1a';
+    var border = girP >= 55 ? '#002e20' : girP >= 35 ? '#2a2008' : girP >= 20 ? '#351a1a' : '#351a1a';
     var misses = [{dir:'Short',count:b.missShort},{dir:'Left',count:b.missLeft},{dir:'Right',count:b.missRight},{dir:'Long',count:b.missLong}];
     misses.sort(function(x,y){return y.count-x.count;});
     var topMiss = misses[0].count > 0 ? ' <span style="color:#9a9a9a;">·</span> ' + misses[0].dir + ' ' + Math.round(100*misses[0].count/b.opp) + '% of misses' : '';
     var proxPart = b.proxCount > 0 ? ' <span style="color:#9a9a9a;">·</span> ' + Math.round(b.proxTotal / b.proxCount) + ' ft avg proximity' : '';
     var isWorst = worstBucket && worstBucket.key === bKey;
-    var infoLine = (isWorst ? '<span style="color:#d4706e;">⚠ Weakest</span> <span style="color:#9a9a9a;">·</span> ' : '') + girP + '% GIR' + topMiss + proxPart;
+    var infoLine = (isWorst ? '<span style="color:#c97a7a;">⚠ Weakest</span> <span style="color:#9a9a9a;">·</span> ' : '') + girP + '% GIR' + topMiss + proxPart;
     appHtml += statCard(bKey + ' yds', col, bg, border, 'GIR ' + girP + '%', infoLine);
   });
   document.getElementById('perfTab-app').innerHTML = appHtml;
@@ -8777,9 +8777,9 @@ function renderPerfAnalysis(a) {
   var ab = a.argBuckets;
   function argRow(label, makes, opp) {
     var p    = opp > 0 ? Math.round(100 * makes / opp) : null;
-    var col  = p === null ? '#9a9a9a' : p >= 40 ? '#00b87a' : '#d4706e';
+    var col  = p === null ? '#9a9a9a' : p >= 40 ? '#00b87a' : '#c97a7a';
     var bg   = p === null ? '#222222' : p >= 40 ? '#2a2008' : '#2a1a1a';
-    var bord = p === null ? '#282828' : p >= 40 ? '#00402c' : '#351a1a';
+    var bord = p === null ? '#282828' : p >= 40 ? '#002e20' : '#351a1a';
     var badge = p !== null ? p + '%' : 'N/A';
     var info  = p !== null ? p + '% up & down · ' + opp + ' opp' : 'No data';
     return statCard(label, col, bg, bord, badge, info);
@@ -8797,15 +8797,15 @@ function renderPerfAnalysis(a) {
     var p = att > 0 ? Math.round(100 * makes / att) : null;
     var col, bg, bord, badge, info;
     if (is3putt) {
-      col   = p === null ? '#9a9a9a' : p >= 20 ? '#d4706e' : '#00b87a';
+      col   = p === null ? '#9a9a9a' : p >= 20 ? '#c97a7a' : '#00b87a';
       bg    = p === null ? '#222222' : p >= 20 ? '#2a1a1a' : '#2a2008';
-      bord  = p === null ? '#282828' : p >= 20 ? '#351a1a' : '#00402c';
+      bord  = p === null ? '#282828' : p >= 20 ? '#351a1a' : '#002e20';
       badge = p !== null ? p + '%' : 'N/A';
       info  = p !== null ? p + '% 3-putt rate · ' + att + ' opp' : 'No data';
     } else {
-      col   = p === null ? '#9a9a9a' : p >= 50 ? '#00b87a' : '#d4706e';
+      col   = p === null ? '#9a9a9a' : p >= 50 ? '#00b87a' : '#c97a7a';
       bg    = p === null ? '#222222' : p >= 50 ? '#2a2008' : '#2a1a1a';
-      bord  = p === null ? '#282828' : p >= 50 ? '#00402c' : '#351a1a';
+      bord  = p === null ? '#282828' : p >= 50 ? '#002e20' : '#351a1a';
       badge = p !== null ? p + '%' : 'N/A';
       info  = p !== null ? p + '% make rate · ' + makes + '/' + att : 'No data';
     }
@@ -8957,7 +8957,7 @@ function renderCombinePutt(sessions) {
   var trendDiff = (overallSg !== null && priorOverallSg !== null) ? (overallSg - priorOverallSg) : null;
   var trendStr = trendDiff === null ? '' : (trendDiff >= 0
     ? '<span style="color:#00b87a;">\u25b2 improving</span>'
-    : '<span style="color:#d4706e;">\u25bc declining</span>');
+    : '<span style="color:#c97a7a;">\u25bc declining</span>');
 
   // Worst bucket (focus area)
   var worst = null;
@@ -8968,20 +8968,20 @@ function renderCombinePutt(sessions) {
   });
 
   var focusIsBad = worst && worst.avg < 0;
-  var focusBg    = focusIsBad ? 'linear-gradient(135deg,#2a1a1a,#2a1a1a)' : 'linear-gradient(135deg,#00402c,#00402c)';
-  var focusBord  = focusIsBad ? '#351a1a' : '#007a52';
-  var focusEye   = focusIsBad ? '<span style="color:#d4706e;">\u26a0 Focus Area</span>' : '<span style="color:#00b87a;">\u2713 Strong Area</span>';
+  var focusBg    = focusIsBad ? 'linear-gradient(135deg,#2a1a1a,#2a1a1a)' : 'linear-gradient(135deg,#002e20,#002e20)';
+  var focusBord  = focusIsBad ? '#351a1a' : '#005c3f';
+  var focusEye   = focusIsBad ? '<span style="color:#c97a7a;">\u26a0 Focus Area</span>' : '<span style="color:#00b87a;">\u2713 Strong Area</span>';
   var focusSub   = worst ? (worst.avg >= 0 ? '+' : '') + worst.avg.toFixed(2) + ' SG avg' : '';
   var focusRange = worst ? (worst.key + (worst.key.indexOf('yds') === -1 ? ' ft' : '')) : '\u2014';
 
   focusEl.innerHTML = '<div style="border-radius:10px;padding:10px 11px;margin-bottom:6px;border:1px solid ' + focusBord + ';background:' + focusBg + ';">' +
     '<div style="font-size:8px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px;">' + focusEye + '</div>' +
     '<div style="font-size:15px;font-weight:800;color:#ffffff;line-height:1.1;margin-bottom:1px;">' + focusRange + '</div>' +
-    '<div style="font-size:9px;font-weight:700;color:' + (focusIsBad ? '#d4706e' : '#00b87a') + ';">' + focusSub + '</div></div>';
+    '<div style="font-size:9px;font-weight:700;color:' + (focusIsBad ? '#c97a7a' : '#00b87a') + ';">' + focusSub + '</div></div>';
 
-  var sgCol = overallSg === null ? '#9a9a9a' : overallSg >= 0 ? '#00b87a' : '#d4706e';
-  var ovBg   = overallSg === null ? '#222222' : overallSg >= 0 ? '#00402c' : '#1a0d0d';
-  var ovBord = overallSg === null ? '#282828' : overallSg >= 0 ? '#00402c' : '#351a1a';
+  var sgCol = overallSg === null ? '#9a9a9a' : overallSg >= 0 ? '#00b87a' : '#c97a7a';
+  var ovBg   = overallSg === null ? '#222222' : overallSg >= 0 ? '#002e20' : '#1a0d0d';
+  var ovBord = overallSg === null ? '#282828' : overallSg >= 0 ? '#002e20' : '#351a1a';
   var sgStr  = overallSg !== null ? (overallSg >= 0 ? '+' : '') + overallSg.toFixed(2) : 'N/A';
 
   overviewEl.innerHTML = '<div style="border-radius:11px;padding:12px 13px;border:1px solid ' + ovBord + ';background:' + ovBg + ';cursor:pointer;user-select:none;margin-bottom:6px;" onclick="toggleCombineDetail(\'Putt\')">' +
@@ -9008,15 +9008,15 @@ function renderCombinePutt(sessions) {
       var pb = pBucks[bk];
       if (pb.count > 0) {
         var diff = avgSg - (pb.sgTotal / pb.count);
-        var tc = diff >= 0 ? '#00b87a' : '#d4706e';
+        var tc = diff >= 0 ? '#00b87a' : '#c97a7a';
         trendH = ' <span style="color:' + tc + ';">' + (diff >= 0 ? '\u25b2' : '\u25bc') + ' ' + (diff >= 0 ? '+' : '') + diff.toFixed(2) + '</span>';
       }
     }
     var isWorst = worst && worst.key === bk;
-    var col  = avgSg >= 0 ? '#00b87a' : '#d4706e';
+    var col  = avgSg >= 0 ? '#00b87a' : '#c97a7a';
     var bg   = avgSg >= 0 ? '#2a2008' : '#2a1a1a';
-    var bord = avgSg >= 0 ? '#00402c' : '#351a1a';
-    var info = (isWorst ? '<span style="color:#d4706e;">\u26a0 Needs work</span> \u00b7 ' : '') + rb.count + ' shots' + trendH;
+    var bord = avgSg >= 0 ? '#002e20' : '#351a1a';
+    var info = (isWorst ? '<span style="color:#c97a7a;">\u26a0 Needs work</span> \u00b7 ' : '') + rb.count + ' shots' + trendH;
     dHtml += combStatCard(bk + ' ft', col, bg, bord, (avgSg >= 0 ? '+' : '') + avgSg.toFixed(2) + ' SG', info);
   });
   detailEl.innerHTML = dHtml;
@@ -9083,7 +9083,7 @@ function renderCombineWedge(sessions) {
   var trendDiff = (overallSg !== null && priorOverallSg !== null) ? (overallSg - priorOverallSg) : null;
   var trendStr = trendDiff === null ? '' : (trendDiff >= 0
     ? '<span style="color:#00b87a;">\u25b2 improving</span>'
-    : '<span style="color:#d4706e;">\u25bc declining</span>');
+    : '<span style="color:#c97a7a;">\u25bc declining</span>');
 
   // Worst bucket
   var worst = null;
@@ -9094,20 +9094,20 @@ function renderCombineWedge(sessions) {
   });
 
   var focusIsBad = worst && worst.avg < 0;
-  var focusBg    = focusIsBad ? 'linear-gradient(135deg,#2a1a1a,#2a1a1a)' : 'linear-gradient(135deg,#00402c,#00402c)';
-  var focusBord  = focusIsBad ? '#351a1a' : '#007a52';
-  var focusEye   = focusIsBad ? '<span style="color:#d4706e;">\u26a0 Focus Area</span>' : '<span style="color:#00b87a;">\u2713 Strong Area</span>';
+  var focusBg    = focusIsBad ? 'linear-gradient(135deg,#2a1a1a,#2a1a1a)' : 'linear-gradient(135deg,#002e20,#002e20)';
+  var focusBord  = focusIsBad ? '#351a1a' : '#005c3f';
+  var focusEye   = focusIsBad ? '<span style="color:#c97a7a;">\u26a0 Focus Area</span>' : '<span style="color:#00b87a;">\u2713 Strong Area</span>';
   var focusSub   = worst ? (worst.avg >= 0 ? '+' : '') + worst.avg.toFixed(2) + ' SG avg' : '';
   var focusRange = worst ? worst.key + ' yds' : '\u2014';
 
   focusEl.innerHTML = '<div style="border-radius:10px;padding:10px 11px;margin-bottom:6px;border:1px solid ' + focusBord + ';background:' + focusBg + ';">' +
     '<div style="font-size:8px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px;">' + focusEye + '</div>' +
     '<div style="font-size:15px;font-weight:800;color:#ffffff;line-height:1.1;margin-bottom:1px;">' + focusRange + '</div>' +
-    '<div style="font-size:9px;font-weight:700;color:' + (focusIsBad ? '#d4706e' : '#00b87a') + ';">' + focusSub + '</div></div>';
+    '<div style="font-size:9px;font-weight:700;color:' + (focusIsBad ? '#c97a7a' : '#00b87a') + ';">' + focusSub + '</div></div>';
 
-  var sgCol  = overallSg === null ? '#9a9a9a' : overallSg >= 0 ? '#00b87a' : '#d4706e';
-  var ovBg   = overallSg === null ? '#222222' : overallSg >= 0 ? '#00402c' : '#1a0d0d';
-  var ovBord = overallSg === null ? '#282828' : overallSg >= 0 ? '#00402c' : '#351a1a';
+  var sgCol  = overallSg === null ? '#9a9a9a' : overallSg >= 0 ? '#00b87a' : '#c97a7a';
+  var ovBg   = overallSg === null ? '#222222' : overallSg >= 0 ? '#002e20' : '#1a0d0d';
+  var ovBord = overallSg === null ? '#282828' : overallSg >= 0 ? '#002e20' : '#351a1a';
   var sgStr  = overallSg !== null ? (overallSg >= 0 ? '+' : '') + overallSg.toFixed(2) : 'N/A';
 
   overviewEl.innerHTML = '<div style="border-radius:11px;padding:12px 13px;border:1px solid ' + ovBord + ';background:' + ovBg + ';cursor:pointer;user-select:none;margin-bottom:6px;" onclick="toggleCombineDetail(\'Wedge\')">' +
@@ -9134,15 +9134,15 @@ function renderCombineWedge(sessions) {
       var pb = pBucks[bk];
       if (pb.count > 0) {
         var diff = avgSg - (pb.sgTotal / pb.count);
-        var tc = diff >= 0 ? '#00b87a' : '#d4706e';
+        var tc = diff >= 0 ? '#00b87a' : '#c97a7a';
         trendH = ' <span style="color:' + tc + ';">' + (diff >= 0 ? '\u25b2' : '\u25bc') + ' ' + (diff >= 0 ? '+' : '') + diff.toFixed(2) + '</span>';
       }
     }
     var isWorst = worst && worst.key === bk;
-    var col  = avgSg >= 0 ? '#00b87a' : '#d4706e';
+    var col  = avgSg >= 0 ? '#00b87a' : '#c97a7a';
     var bg   = avgSg >= 0 ? '#2a2008' : '#2a1a1a';
-    var bord = avgSg >= 0 ? '#00402c' : '#351a1a';
-    var info = (isWorst ? '<span style="color:#d4706e;">\u26a0 Needs work</span> \u00b7 ' : '') + rb.count + ' shots \u00b7 ' + Math.round(avgPts) + ' avg score' + trendH;
+    var bord = avgSg >= 0 ? '#002e20' : '#351a1a';
+    var info = (isWorst ? '<span style="color:#c97a7a;">\u26a0 Needs work</span> \u00b7 ' : '') + rb.count + ' shots \u00b7 ' + Math.round(avgPts) + ' avg score' + trendH;
     dHtml += combStatCard(bk + ' yds', col, bg, bord, (avgSg >= 0 ? '+' : '') + avgSg.toFixed(2) + ' SG', info);
   });
   detailEl.innerHTML = dHtml;
