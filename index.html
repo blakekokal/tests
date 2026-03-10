@@ -8602,16 +8602,16 @@ function appBucketFor(dist) {
 }
 
 function sgColor(val) {
-  if (val >= 0) return '#00b87a';
-  return '#c97a7a';
+  if (val >= 0) return '#00e08a';
+  return '#ff5c5c';
 }
 
 function sgTrend(recent, prior) {
-  if (recent === null || prior === null) return { icon: '— steady', color: '#9aab9e' };
+  if (recent === null || prior === null) return { icon: '— steady', color: '#8a9a8e' };
   var diff = recent - prior;
-  if (diff > 0.15)  return { icon: '▲ improving', color: '#00b87a' };
-  if (diff < -0.15) return { icon: '▼ declining', color: '#c97a7a' };
-  return { icon: '— steady', color: '#9aab9e' };
+  if (diff > 0.15)  return { icon: '▲ improving', color: '#00e08a' };
+  if (diff < -0.15) return { icon: '▼ declining', color: '#ff5c5c' };
+  return { icon: '— steady', color: '#8a9a8e' };
 }
 
 function pct(makes, att) {
@@ -8625,18 +8625,18 @@ function pctStr(makes, att, suffix) {
 
 function bucketGirColor(girPct) {
   if (girPct === null) return '#5a6b60';
-  if (girPct >= 55) return '#00b87a';
-  if (girPct >= 35) return '#c9a84c';
+  if (girPct >= 55) return '#00e08a';
+  if (girPct >= 35) return '#e8c840';
 
-  return '#c97a7a';
+  return '#ff5c5c';
 }
 
 function bucketGirBg(girPct) {
   if (girPct === null) return '#141817';
-  if (girPct >= 55) return '#1e1a0e';
-  if (girPct >= 35) return '#1e1a0e';
-  if (girPct >= 20) return '#2a1a08';
-  return '#2a1a1a';
+  if (girPct >= 55) return '#0a2a18';
+  if (girPct >= 35) return '#2a2508';
+  if (girPct >= 20) return '#2a1510';
+  return '#2a0e0e';
 }
 
 function renderPerfAnalysis(a) {
@@ -8649,7 +8649,7 @@ function renderPerfAnalysis(a) {
     ? 'Averaging <strong style="color:' + pcColor + ';">' + pc.val.toFixed(1) + ' per round</strong> vs ' + hcpCtx
     : 'Weakest category vs ' + hcpCtx + '. Room to improve.';
   document.getElementById('perfPriorityCard').innerHTML =
-    '<div style="background:linear-gradient(135deg,#2a1a1a,#2a1a1a);border:1px solid #351a1a;border-radius:12px;padding:16px;">' +
+    '<div style="background:linear-gradient(135deg,#2a0e0e,#2a0e0e);border:1px solid #3d1515;border-radius:12px;padding:16px;">' +
     '<div style="font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:' + pcColor + ';margin-bottom:8px;">' + pcBadge + '</div>' +
     '<div style="font-size:17px;font-weight:800;color:#e8ede9;margin-bottom:4px;">' + pc.label + '</div>' +
     '<div style="font-size:12px;color:#e8ede9;margin-bottom:10px;">' + pcMsg + '</div>' +
@@ -8681,8 +8681,8 @@ function renderPerfAnalysis(a) {
   var argCard  = document.getElementById('perfCardArg');
   var puttCard = document.getElementById('perfCardPutt');
 
-  var cardBgPos = 'background:#002e20;border:1px solid #002e20;border-radius:11px;padding:12px;cursor:pointer;';
-  var cardBgNeg = 'background:#1a0d0d;border:1px solid #351a1a;border-radius:11px;padding:12px;cursor:pointer;';
+  var cardBgPos = 'background:#0a2a18;border:1px solid #0d3a20;border-radius:11px;padding:12px;cursor:pointer;';
+  var cardBgNeg = 'background:#2a0e0e;border:1px solid #3d1515;border-radius:11px;padding:12px;cursor:pointer;';
   ottCard.style.cssText  = a.sgOTTperRound  >= 0 ? cardBgPos : cardBgNeg;
   appCard.style.cssText  = a.sgAPPperRound  >= 0 ? cardBgPos : cardBgNeg;
   argCard.style.cssText  = a.sgARGperRound  >= 0 ? cardBgPos : cardBgNeg;
@@ -8700,26 +8700,26 @@ function renderPerfAnalysis(a) {
   // ── OTT Detail ─────────────────────────────────────────────
   var ottTrend = '';
   if (a.recentFwRightPct > a.priorFwRightPct + 8)
-    ottTrend = '<div style="font-size:11px;color:#c97a7a;margin-top:8px;line-height:1.5;">⚠ Missing right more in last 3 rounds (' + a.recentFwRightPct + '%) vs prior avg (' + a.priorFwRightPct + '%)</div>';
+    ottTrend = '<div style="font-size:11px;color:#ff5c5c;margin-top:8px;line-height:1.5;">⚠ Missing right more in last 3 rounds (' + a.recentFwRightPct + '%) vs prior avg (' + a.priorFwRightPct + '%)</div>';
   else if (a.recentFwLeftPct > a.priorFwLeftPct + 8)
-    ottTrend = '<div style="font-size:11px;color:#c97a7a;margin-top:8px;line-height:1.5;">⚠ Missing left more in last 3 rounds (' + a.recentFwLeftPct + '%) vs prior avg (' + a.priorFwLeftPct + '%)</div>';
+    ottTrend = '<div style="font-size:11px;color:#ff5c5c;margin-top:8px;line-height:1.5;">⚠ Missing left more in last 3 rounds (' + a.recentFwLeftPct + '%) vs prior avg (' + a.priorFwLeftPct + '%)</div>';
 
   document.getElementById('perfTab-ott').innerHTML =
     perfTabHeader('ott', 'Off the Tee · Detail', '#e8ede9') +
     '<div style="background:#141817;border:1px solid #1c2120;border-radius:12px;padding:14px;margin-bottom:8px;">' +
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
     '<div style="font-size:14px;font-weight:700;color:#e8ede9;">Fairways Hit</div>' +
-    '<div style="font-size:14px;font-weight:800;color:#00b87a;">' + a.fwPct + '%</div></div>' +
+    '<div style="font-size:14px;font-weight:800;color:#00e08a;">' + a.fwPct + '%</div></div>' +
     '<div style="display:flex;gap:2px;height:28px;border-radius:8px;overflow:hidden;margin-bottom:4px;">' +
-    '<div style="flex:0 0 ' + a.fwLeftPct + '%;background:#2a1a1a;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#c97a7a;flex-direction:column;min-width:' + (a.fwLeftPct > 0 ? '28px' : '0') + '"><div>◀L</div><div>' + a.fwLeftPct + '%</div></div>' +
-    '<div style="flex:1;background:#005c3f;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#00b87a;gap:4px;"><div>FW ' + a.fwPct + '%</div></div>' +
-    '<div style="flex:0 0 ' + a.fwRightPct + '%;background:#2a1a1a;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#e8ede9;flex-direction:column;min-width:' + (a.fwRightPct > 0 ? '28px' : '0') + '"><div>R▶</div><div>' + a.fwRightPct + '%</div></div>' +
+    '<div style="flex:0 0 ' + a.fwLeftPct + '%;background:#2a0e0e;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#ff5c5c;flex-direction:column;min-width:' + (a.fwLeftPct > 0 ? '28px' : '0') + '"><div>◀L</div><div>' + a.fwLeftPct + '%</div></div>' +
+    '<div style="flex:1;background:#0a3a20;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#00e08a;gap:4px;"><div>FW ' + a.fwPct + '%</div></div>' +
+    '<div style="flex:0 0 ' + a.fwRightPct + '%;background:#2a0e0e;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#e8ede9;flex-direction:column;min-width:' + (a.fwRightPct > 0 ? '28px' : '0') + '"><div>R▶</div><div>' + a.fwRightPct + '%</div></div>' +
     '</div>' + ottTrend + '</div>' +
     (a.avgDrive > 0 ? (function() {
       var trendDiff = (a.recentAvgDrive > 0 && a.priorAvgDrive > 0) ? (a.recentAvgDrive - a.priorAvgDrive) : null;
       var trendHtml = '';
       if (trendDiff !== null) {
-        var trendCol = trendDiff >= 0 ? '#00b87a' : '#c97a7a';
+        var trendCol = trendDiff >= 0 ? '#00e08a' : '#ff5c5c';
         var trendIcon = trendDiff >= 0 ? '▲' : '▼';
         trendHtml = '<div style="font-size:11px;color:' + trendCol + ';margin-top:4px;">' + trendIcon + ' ' + (trendDiff >= 0 ? '+' : '') + trendDiff + ' yds vs prior (last 3: ' + a.recentAvgDrive + ' · prior: ' + a.priorAvgDrive + ')</div>';
       }
@@ -8732,13 +8732,13 @@ function renderPerfAnalysis(a) {
           '<div style="font-size:11px;color:#5a6b60;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:2px;">Longest Drive</div>' +
           '<div style="font-size:11px;color:#9aab9e;">' + ldCourse + ldHole + '</div>' +
           '</div>' +
-          '<div style="font-size:22px;font-weight:800;color:#c9a84c;">' + a.longestDrive + ' yds</div>' +
+          '<div style="font-size:22px;font-weight:800;color:#e8c840;">' + a.longestDrive + ' yds</div>' +
           '</div>';
       }
-      return '<div style="background:#002e20;border:1px solid #002e20;border-radius:12px;padding:14px;margin-bottom:8px;">' +
+      return '<div style="background:#0a2a18;border:1px solid #0d3a20;border-radius:12px;padding:14px;margin-bottom:8px;">' +
         '<div style="display:flex;justify-content:space-between;align-items:center;">' +
         '<div style="font-size:14px;font-weight:700;color:#e8ede9;">Avg Drive Distance</div>' +
-        '<div style="font-size:22px;font-weight:800;color:#00b87a;">' + a.avgDrive + ' yds</div></div>' +
+        '<div style="font-size:22px;font-weight:800;color:#00e08a;">' + a.avgDrive + ' yds</div></div>' +
         trendHtml + longestHtml + '</div>';
     })() : '');
 
@@ -8762,13 +8762,13 @@ function renderPerfAnalysis(a) {
     var girP  = Math.round(100 * b.gir / b.opp);
     var col   = bucketGirColor(girP);
     var bg    = bucketGirBg(girP);
-    var border = girP >= 55 ? '#002e20' : girP >= 35 ? '#1e1a0e' : girP >= 20 ? '#351a1a' : '#351a1a';
+    var border = girP >= 55 ? '#0d3a20' : girP >= 35 ? '#3a3010' : girP >= 20 ? '#3d1515' : '#3d1515';
     var misses = [{dir:'Short',count:b.missShort},{dir:'Left',count:b.missLeft},{dir:'Right',count:b.missRight},{dir:'Long',count:b.missLong}];
     misses.sort(function(x,y){return y.count-x.count;});
-    var topMiss = misses[0].count > 0 ? ' <span style="color:#9aab9e;">·</span> ' + misses[0].dir + ' ' + Math.round(100*misses[0].count/b.opp) + '% of misses' : '';
-    var proxPart = b.proxCount > 0 ? ' <span style="color:#9aab9e;">·</span> ' + Math.round(b.proxTotal / b.proxCount) + ' ft avg proximity' : '';
+    var topMiss = misses[0].count > 0 ? ' <span style="color:#8a9a8e;">·</span> ' + misses[0].dir + ' ' + Math.round(100*misses[0].count/b.opp) + '% of misses' : '';
+    var proxPart = b.proxCount > 0 ? ' <span style="color:#8a9a8e;">·</span> ' + Math.round(b.proxTotal / b.proxCount) + ' ft avg proximity' : '';
     var isWorst = worstBucket && worstBucket.key === bKey;
-    var infoLine = (isWorst ? '<span style="color:#c97a7a;">⚠ Weakest</span> <span style="color:#9aab9e;">·</span> ' : '') + girP + '% GIR' + topMiss + proxPart;
+    var infoLine = (isWorst ? '<span style="color:#ff5c5c;">⚠ Weakest</span> <span style="color:#8a9a8e;">·</span> ' : '') + girP + '% GIR' + topMiss + proxPart;
     appHtml += statCard(bKey + ' yds', col, bg, border, 'GIR ' + girP + '%', infoLine);
   });
   document.getElementById('perfTab-app').innerHTML = appHtml;
@@ -8777,9 +8777,9 @@ function renderPerfAnalysis(a) {
   var ab = a.argBuckets;
   function argRow(label, makes, opp) {
     var p    = opp > 0 ? Math.round(100 * makes / opp) : null;
-    var col  = p === null ? '#9aab9e' : p >= 40 ? '#00b87a' : '#c97a7a';
-    var bg   = p === null ? '#141817' : p >= 40 ? '#1e1a0e' : '#2a1a1a';
-    var bord = p === null ? '#1c2120' : p >= 40 ? '#002e20' : '#351a1a';
+    var col  = p === null ? '#8a9a8e' : p >= 40 ? '#00e08a' : '#ff5c5c';
+    var bg   = p === null ? '#141817' : p >= 40 ? '#0a2a18' : '#2a0e0e';
+    var bord = p === null ? '#1c2120' : p >= 40 ? '#0d3a20' : '#3d1515';
     var badge = p !== null ? p + '%' : 'N/A';
     var info  = p !== null ? p + '% up & down · ' + opp + ' opp' : 'No data';
     return statCard(label, col, bg, bord, badge, info);
@@ -8797,15 +8797,15 @@ function renderPerfAnalysis(a) {
     var p = att > 0 ? Math.round(100 * makes / att) : null;
     var col, bg, bord, badge, info;
     if (is3putt) {
-      col   = p === null ? '#9aab9e' : p >= 20 ? '#c97a7a' : '#00b87a';
-      bg    = p === null ? '#141817' : p >= 20 ? '#2a1a1a' : '#1e1a0e';
-      bord  = p === null ? '#1c2120' : p >= 20 ? '#351a1a' : '#002e20';
+      col   = p === null ? '#8a9a8e' : p >= 20 ? '#ff5c5c' : '#00e08a';
+      bg    = p === null ? '#141817' : p >= 20 ? '#2a0e0e' : '#0a2a18';
+      bord  = p === null ? '#1c2120' : p >= 20 ? '#3d1515' : '#0d3a20';
       badge = p !== null ? p + '%' : 'N/A';
       info  = p !== null ? p + '% 3-putt rate · ' + att + ' opp' : 'No data';
     } else {
-      col   = p === null ? '#9aab9e' : p >= 50 ? '#00b87a' : '#c97a7a';
-      bg    = p === null ? '#141817' : p >= 50 ? '#1e1a0e' : '#2a1a1a';
-      bord  = p === null ? '#1c2120' : p >= 50 ? '#002e20' : '#351a1a';
+      col   = p === null ? '#8a9a8e' : p >= 50 ? '#00e08a' : '#ff5c5c';
+      bg    = p === null ? '#141817' : p >= 50 ? '#0a2a18' : '#2a0e0e';
+      bord  = p === null ? '#1c2120' : p >= 50 ? '#0d3a20' : '#3d1515';
       badge = p !== null ? p + '%' : 'N/A';
       info  = p !== null ? p + '% make rate · ' + makes + '/' + att : 'No data';
     }
