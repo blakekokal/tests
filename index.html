@@ -67,10 +67,10 @@ body.viewing-as .back-btn-top{top:38px;}
 .back-btn-top svg{width:20px;height:20px;stroke:#ffffff;stroke-width:2;fill:none;}
 
 .holes9{background:#007a52;}
-.holes18{background:#345a78;}
-.par3{background:#5580a6;}
+.holes18{background:#3a8fd4;}
+.par3{background:#4da6ff;}
 .par4{background:#00a06d;}
-.par5{background:#d4b85a;}
+.par5{background:#ffd740;}
 input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
 
 .hole{background:#424242;}
@@ -108,7 +108,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
 }
 .comb-grid-btn small { font-size:0.75rem; font-weight:400; opacity:.85; }
 .comb-green { background:#007a52; }
-.comb-blue  { background:#345a78; }
+.comb-blue  { background:#3a8fd4; }
 .comb-grid-btn:active { filter:brightness(.8); }
 
 /* Table styles for combines */
@@ -192,7 +192,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
   </div>
   <button class="holes18" id="authLoginBtn" onclick="doLogin()">LOG IN</button>
   <button class="holes9" id="authSignupBtn" onclick="handleSignupClick()">SIGN UP</button>
-  <button style="background:transparent;color:#8db3d0;font-size:12px;text-decoration:underline;border:none;cursor:pointer;height:auto;padding:4px;" onclick="doResetPassword()">Forgot Password?</button>
+  <button style="background:transparent;color:#5cc8ff;font-size:12px;text-decoration:underline;border:none;cursor:pointer;height:auto;padding:4px;" onclick="doResetPassword()">Forgot Password?</button>
 </div>
 
 <!-- PROFILE HUB -->
@@ -222,7 +222,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
       <div id="studentCodeSection" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:2px;">
         <div style="font-size:11px;color:#5a6b60;">Share this code with your coach:</div>
         <div id="myInviteCode" style="font-size:22px;font-weight:800;letter-spacing:4px;color:#00b87a;background:#141817;padding:6px 16px;border-radius:8px;font-family:monospace;"></div>
-        <button onclick="copyInviteCode()" style="background:transparent;color:#8db3d0;font-size:11px;border:none;cursor:pointer;height:auto;padding:1px;text-decoration:underline;">Copy Code</button>
+        <button onclick="copyInviteCode()" style="background:transparent;color:#5cc8ff;font-size:11px;border:none;cursor:pointer;height:auto;padding:1px;text-decoration:underline;">Copy Code</button>
       </div>
       <!-- Coach: info -->
       <div id="coachInfoSection" style="width:100%;display:none;flex-direction:column;align-items:center;gap:4px;">
@@ -263,7 +263,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
       <div style="font-size:12px;color:#5a6b60;">Change Password</div>
       <input id="newPassword" type="password" placeholder="New Password (min 6 chars)">
       <input id="newPasswordConfirm" type="password" placeholder="Confirm New Password">
-      <button style="background:#d4b85a;" onclick="changePassword()">UPDATE PASSWORD</button>
+      <button style="background:#ffd740;" onclick="changePassword()">UPDATE PASSWORD</button>
       <div id="pwMsg" style="font-size:12px;min-height:14px;"></div>
     </div>
     <button style="background:#e06060;margin-top:8px;" onclick="doLogout();show('homePage')">LOG OUT</button>
@@ -303,7 +303,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
   <!-- SAVED ROUNDS TAB -->
   <div id="profileRoundsTab" style="width:100%;max-width:360px;display:none;">
     <div style="font-size:20px;font-weight:800;text-align:center;margin-bottom:8px;">📋 Round History</div>
-    <button onclick="downloadRoundTemplate()" style="width:100%;height:40px;font-size:13px;background:#345a78;border-radius:8px;margin-bottom:6px;">📥 Download Blank Scorecard Template</button>
+    <button onclick="downloadRoundTemplate()" style="width:100%;height:40px;font-size:13px;background:#3a8fd4;border-radius:8px;margin-bottom:6px;">📥 Download Blank Scorecard Template</button>
     <button onclick="document.getElementById('uploadRoundFile').click()" style="width:100%;height:40px;font-size:13px;background:#007a52;border-radius:8px;margin-bottom:8px;">📤 Upload Round (.xlsx)</button>
     <input type="file" id="uploadRoundFile" accept=".xlsx,.xls,.csv" style="display:none;" onchange="handleRoundUpload(this, activeUserId())">
     <div id="uploadRoundMsg" style="font-size:12px;min-height:16px;text-align:center;margin-bottom:6px;"></div>
@@ -376,7 +376,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
 
     <!-- Tab buttons -->
     <div style="display:flex;gap:4px;margin-bottom:14px;background:#141817;border-radius:10px;padding:3px;">
-      <button id="helpTab_start" onclick="showHelpTab('start')" style="flex:1;height:34px;font-size:11px;font-weight:700;background:#345a78;color:#ffffff;border:none;border-radius:8px;cursor:pointer;max-width:none;">Getting Started</button>
+      <button id="helpTab_start" onclick="showHelpTab('start')" style="flex:1;height:34px;font-size:11px;font-weight:700;background:#3a8fd4;color:#ffffff;border:none;border-radius:8px;cursor:pointer;max-width:none;">Getting Started</button>
       <button id="helpTab_sg" onclick="showHelpTab('sg')" style="flex:1;height:34px;font-size:11px;font-weight:700;background:#141817;color:#5a6b60;border:none;border-radius:8px;cursor:pointer;max-width:none;">Strokes Gained</button>
       <button id="helpTab_faq" onclick="showHelpTab('faq')" style="flex:1;height:34px;font-size:11px;font-weight:700;background:#141817;color:#5a6b60;border:none;border-radius:8px;cursor:pointer;max-width:none;">FAQs</button>
       <button id="helpTab_contact" onclick="showHelpTab('contact')" style="flex:1;height:34px;font-size:11px;font-weight:700;background:#141817;color:#5a6b60;border:none;border-radius:8px;cursor:pointer;max-width:none;">Contact</button>
@@ -393,7 +393,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
     <div id="helpContent_sg" style="display:none;">
       <!-- Sub-tab toggle buttons -->
       <div style="display:flex;gap:4px;margin-bottom:12px;background:#0d0f0e;border-radius:8px;padding:2px;">
-        <button id="sgSubTab_explained" onclick="showSgSubTab('explained')" style="flex:1;height:32px;font-size:11px;font-weight:700;background:#345a78;color:#ffffff;border:none;border-radius:6px;cursor:pointer;max-width:none;">SG Explained</button>
+        <button id="sgSubTab_explained" onclick="showSgSubTab('explained')" style="flex:1;height:32px;font-size:11px;font-weight:700;background:#3a8fd4;color:#ffffff;border:none;border-radius:6px;cursor:pointer;max-width:none;">SG Explained</button>
         <button id="sgSubTab_calc" onclick="showSgSubTab('calc')" style="flex:1;height:32px;font-size:11px;font-weight:700;background:#0d0f0e;color:#5a6b60;border:none;border-radius:6px;cursor:pointer;max-width:none;">SG Calculator</button>
       </div>
       <!-- SG Explained content -->
@@ -423,14 +423,14 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
         <!-- Row 2: Par tabs -->
         <div style="display:flex;gap:4px;margin-bottom:5px;background:#141817;border-radius:8px;padding:2px;">
           <button id="sgCalcTab3" onclick="sgCalcSetHole(3)" style="flex:1;height:28px;font-size:12px;font-weight:700;background:#141817;color:#5a6b60;border:none;border-radius:6px;cursor:pointer;">Par 3</button>
-          <button id="sgCalcTab4" onclick="sgCalcSetHole(4)" style="flex:1;height:28px;font-size:12px;font-weight:700;background:#345a78;color:#ffffff;border:none;border-radius:6px;cursor:pointer;">Par 4</button>
+          <button id="sgCalcTab4" onclick="sgCalcSetHole(4)" style="flex:1;height:28px;font-size:12px;font-weight:700;background:#3a8fd4;color:#ffffff;border:none;border-radius:6px;cursor:pointer;">Par 4</button>
           <button id="sgCalcTab5" onclick="sgCalcSetHole(5)" style="flex:1;height:28px;font-size:12px;font-weight:700;background:#141817;color:#5a6b60;border:none;border-radius:6px;cursor:pointer;">Par 5</button>
         </div>
         <!-- Row 3: Stats bar -->
         <div id="sgCalcStatsBar" style="background:#141817;border-radius:8px;padding:5px 10px;margin-bottom:5px;">
           <div style="display:flex;justify-content:space-around;align-items:center;">
             <div style="text-align:center;"><div style="font-size:8px;color:#5a6b60;text-transform:uppercase;">Exp</div><div id="sgCalcStatExp" style="font-size:15px;font-weight:800;color:#00b87a;">–</div></div>
-            <div style="text-align:center;"><div style="font-size:8px;color:#5a6b60;text-transform:uppercase;">Rem</div><div id="sgCalcStatRemain" style="font-size:15px;font-weight:800;color:#8db3d0;">–</div></div>
+            <div style="text-align:center;"><div style="font-size:8px;color:#5a6b60;text-transform:uppercase;">Rem</div><div id="sgCalcStatRemain" style="font-size:15px;font-weight:800;color:#5cc8ff;">–</div></div>
             <div style="text-align:center;"><div style="font-size:8px;color:#5a6b60;text-transform:uppercase;">SG</div><div id="sgCalcStatSg" style="font-size:15px;font-weight:800;color:#232a27;">–</div></div>
           </div>
         </div>
@@ -552,7 +552,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
 
     <!-- Centered brand -->
     <div style="text-align:center;margin-bottom:6px;">
-      <div style="font-family:'Barlow Condensed',system-ui,sans-serif;font-size:2.8rem;font-weight:900;letter-spacing:1px;line-height:1.0;color:#ffffff;">Blake Kokal<br><span style="display:inline-flex;align-items:baseline;justify-content:center;"><span style="font-size:10px;visibility:hidden;font-weight:600;">What's new</span><span style="font-size:13px;visibility:hidden;font-weight:700;margin-right:5px;">v4.7.1</span>Golf<span onclick="show('whatsNewPage')" style="font-size:13px;color:#232a27;font-weight:700;cursor:pointer;margin-left:6px;">v4.7.1</span><span onclick="show('whatsNewPage')" style="font-size:10px;color:#8db3d0;font-weight:600;cursor:pointer;margin-left:5px;">&#x2190; What's new</span></span></div>
+      <div style="font-family:'Barlow Condensed',system-ui,sans-serif;font-size:2.8rem;font-weight:900;letter-spacing:1px;line-height:1.0;color:#ffffff;">Blake Kokal<br><span style="display:inline-flex;align-items:baseline;justify-content:center;"><span style="font-size:10px;visibility:hidden;font-weight:600;">What's new</span><span style="font-size:13px;visibility:hidden;font-weight:700;margin-right:5px;">v4.7.1</span>Golf<span onclick="show('whatsNewPage')" style="font-size:13px;color:#232a27;font-weight:700;cursor:pointer;margin-left:6px;">v4.7.1</span><span onclick="show('whatsNewPage')" style="font-size:10px;color:#5cc8ff;font-weight:600;cursor:pointer;margin-left:5px;">&#x2190; What's new</span></span></div>
       <div id="homeAuthStatus" style="font-size:11px;color:#232a27;margin-top:3px;"></div>
     </div>
 
@@ -568,17 +568,17 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
 
     <div style="height:1px;background:#1c2120;margin:3px 0;"></div>
 
-    <button onclick="goToDashboard()" style="display:flex;align-items:center;gap:13px;height:auto;padding:13px 15px;font-size:15px;font-weight:700;background:#5580a6;border-radius:13px;text-align:left;border:none;">
+    <button onclick="goToDashboard()" style="display:flex;align-items:center;gap:13px;height:auto;padding:13px 15px;font-size:15px;font-weight:700;background:#4da6ff;border-radius:13px;text-align:left;border:none;">
       <span style="font-size:20px;width:28px;text-align:center;flex-shrink:0;">📊</span>
       <div><div style="font-size:0.97rem;font-weight:700;line-height:1;">Stats Dashboard</div><div style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:3px;">Analytics &amp; trends</div></div>
     </button>
 
-    <button onclick="show('performanceAnalysisPage')" style="display:flex;align-items:center;gap:13px;height:auto;padding:13px 15px;font-size:15px;font-weight:700;background:#345a78;border-radius:13px;text-align:left;border:none;">
+    <button onclick="show('performanceAnalysisPage')" style="display:flex;align-items:center;gap:13px;height:auto;padding:13px 15px;font-size:15px;font-weight:700;background:#3a8fd4;border-radius:13px;text-align:left;border:none;">
       <span style="font-size:20px;width:28px;text-align:center;flex-shrink:0;">🔍</span>
       <div><div style="font-size:0.97rem;font-weight:700;line-height:1;">Performance Analysis</div><div style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:3px;">Uncover your biggest misses &amp; areas to improve</div></div>
     </button>
 
-    <button onclick="show('myBagPage')" style="display:flex;align-items:center;gap:13px;height:auto;padding:13px 15px;font-size:15px;font-weight:700;background:#1f3048;border:none;border-radius:13px;color:#ffffff;text-align:left;">
+    <button onclick="show('myBagPage')" style="display:flex;align-items:center;gap:13px;height:auto;padding:13px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border:none;border-radius:13px;color:#ffffff;text-align:left;">
       <span style="font-size:20px;width:28px;text-align:center;flex-shrink:0;">🎒</span>
       <div style="flex:1;"><div style="font-size:0.97rem;font-weight:700;line-height:1;">My Bag</div><div style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:3px;">Club distances &amp; yardages</div></div>
       <span style="background:#d4706e;color:#ffffff;font-size:10px;font-weight:800;border-radius:10px;padding:2px 7px;flex-shrink:0;white-space:nowrap;animation:pulse 1.5s infinite;">NEW!</span>
@@ -587,7 +587,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
 
     <div style="height:1px;background:#1c2120;margin:3px 0;"></div>
 
-    <button onclick="goToPracticeHub()" style="display:flex;align-items:center;gap:13px;height:auto;padding:13px 15px;font-size:15px;font-weight:700;background:#a6853a;border-radius:13px;text-align:left;border:none;">
+    <button onclick="goToPracticeHub()" style="display:flex;align-items:center;gap:13px;height:auto;padding:13px 15px;font-size:15px;font-weight:700;background:#e6a817;border-radius:13px;text-align:left;border:none;">
       <span style="font-size:20px;width:28px;text-align:center;flex-shrink:0;">🏌️</span>
       <div><div style="font-size:0.97rem;font-weight:700;line-height:1;">Practice Hub</div><div style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:3px;">Combines · Drills · Practice</div></div>
     </button>
@@ -602,7 +602,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
 
   </div>
 
-  <button id="homeLoginBtn" onclick="showAuthPage()" style="margin-top:18px;background:transparent;color:#8db3d0;font-size:13px;text-decoration:underline;border:none;cursor:pointer;height:auto;padding:4px;">Log In / Sign Up</button>
+  <button id="homeLoginBtn" onclick="showAuthPage()" style="margin-top:18px;background:transparent;color:#5cc8ff;font-size:13px;text-decoration:underline;border:none;cursor:pointer;height:auto;padding:4px;">Log In / Sign Up</button>
 </div>
 
 <!-- VIEWING AS STUDENT BANNER (fixed at top center, narrow) -->
@@ -837,7 +837,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
 
     <!-- 4-tab bar -->
     <div style="display:flex;gap:0;width:100%;max-width:360px;margin-bottom:0;border-radius:10px;overflow:hidden;">
-      <button onclick="setPracticeHubTab('combines')" id="phTabCombines" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#345a78;border:none;color:#ffffff;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Combines</button>
+      <button onclick="setPracticeHubTab('combines')" id="phTabCombines" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#3a8fd4;border:none;color:#ffffff;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Combines</button>
       <button onclick="setPracticeHubTab('drills')" id="phTabDrills" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#1c2120;border:none;color:#5a6b60;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Drills</button>
       <button onclick="setPracticeHubTab('plan')" id="phTabPlan" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#1c2120;border:none;color:#5a6b60;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Practice</button>
       <button onclick="setPracticeHubTab('learn')" id="phTabLearn" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#1c2120;border:none;color:#5a6b60;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Learn</button>
@@ -851,11 +851,11 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
     <!-- COMBINES TAB -->
     <div id="phCombinesContent">
       <div style="display:flex;flex-direction:column;gap:10px;align-items:center;">
-        <button onclick="goToCombines()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1f3048;border-radius:12px;text-align:left;">
+        <button onclick="goToCombines()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
           <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🏌️</span>
           <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Short Game Combines</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Structured practice sessions</div></div>
         </button>
-        <button onclick="goToDriverCombinePicker()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1f3048;border:2px solid #345a78;border-radius:12px;text-align:left;">
+        <button onclick="goToDriverCombinePicker()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border:2px solid #3a8fd4;border-radius:12px;text-align:left;">
           <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🏌️‍♂️</span>
           <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Driver Combine</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Track drive distance &amp; accuracy</div></div>
         </button>
@@ -886,7 +886,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
     <!-- DRILLS TAB -->
     <div id="phDrillsContent" style="display:none;">
       <div style="display:flex;flex-direction:column;gap:10px;align-items:center;">
-        <button onclick="goToDrills()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1e1a0e;border-radius:12px;text-align:left;">
+        <button onclick="goToDrills()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#2a2008;border-radius:12px;text-align:left;">
           <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🎯</span>
           <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Drills Library</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Skill-building drills &amp; exercises</div></div>
         </button>
@@ -897,7 +897,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
     <div id="phPlanContent" style="display:none;">
       <!-- Sub-tabs: New Session / History -->
       <div style="display:flex;gap:0;border-radius:10px;overflow:hidden;margin-bottom:14px;">
-        <button onclick="setPracticePlanSubTab('new')" id="ppSubNew" style="flex:1;height:36px;font-size:13px;font-weight:700;background:#345a78;border:none;color:#ffffff;cursor:pointer;max-width:none;">New Session</button>
+        <button onclick="setPracticePlanSubTab('new')" id="ppSubNew" style="flex:1;height:36px;font-size:13px;font-weight:700;background:#3a8fd4;border:none;color:#ffffff;cursor:pointer;max-width:none;">New Session</button>
         <button onclick="setPracticePlanSubTab('history')" id="ppSubHistory" style="flex:1;height:36px;font-size:13px;font-weight:700;background:#1c2120;border:none;color:#5a6b60;cursor:pointer;max-width:none;">History</button>
       </div>
 
@@ -957,11 +957,11 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
     <!-- LEARN TAB -->
     <div id="phLearnContent" style="display:none;">
       <div style="display:flex;flex-direction:column;gap:10px;align-items:center;">
-        <button onclick="toggleLearnSGCalc()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1f3048;border-radius:12px;text-align:left;">
+        <button onclick="toggleLearnSGCalc()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
           <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">📊</span>
           <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Strokes Gained Calculator</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Calculate SG for any shot</div></div>
         </button>
-        <button onclick="toggleLearnPBV()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1f3048;border-radius:12px;text-align:left;">
+        <button onclick="toggleLearnPBV()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
           <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🟢</span>
           <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Putting Break Calculator</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Visualize putt break & aim point</div></div>
         </button>
@@ -990,7 +990,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
         <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
           <div style="display:flex;align-items:center;gap:10px;">
             <span style="color:#ffffff;font-size:1.15rem;font-weight:bold;letter-spacing:0.04em;text-shadow:0 1px 4px rgba(0,0,0,0.9);">Inches past hole:</span>
-            <span id="pbvOvershootVal" style="color:#8db3d0;font-size:1.25rem;font-weight:bold;text-shadow:0 1px 4px rgba(0,0,0,0.9);min-width:48px;text-align:left;">12"</span>
+            <span id="pbvOvershootVal" style="color:#5cc8ff;font-size:1.25rem;font-weight:bold;text-shadow:0 1px 4px rgba(0,0,0,0.9);min-width:48px;text-align:left;">12"</span>
           </div>
           <input type="range" id="pbvOvershootIn" value="12" min="0" max="24" step="1" style="-webkit-appearance:none;appearance:none;width:85%;height:6px;background:rgba(255,255,255,0.3);border-radius:3px;outline:none;cursor:pointer;margin-top:12px;pointer-events:auto;">
         </div>
@@ -998,14 +998,14 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
           <div style="display:flex;flex-direction:column;align-items:center;gap:6px;width:45%;">
             <div style="display:flex;align-items:center;gap:10px;">
               <span style="color:#ffffff;font-size:1.0rem;font-weight:bold;letter-spacing:0.04em;text-shadow:0 1px 4px rgba(0,0,0,0.9);">Stimp:</span>
-              <span id="pbvStimpVal" style="color:#8db3d0;font-size:1.1rem;font-weight:bold;text-shadow:0 1px 4px rgba(0,0,0,0.9);min-width:20px;text-align:left;">10</span>
+              <span id="pbvStimpVal" style="color:#5cc8ff;font-size:1.1rem;font-weight:bold;text-shadow:0 1px 4px rgba(0,0,0,0.9);min-width:20px;text-align:left;">10</span>
             </div>
             <input type="range" id="pbvStimpIn" value="10" min="8" max="13" step="1" style="-webkit-appearance:none;appearance:none;width:100%;height:6px;background:rgba(255,255,255,0.3);border-radius:3px;outline:none;cursor:pointer;margin-top:12px;pointer-events:auto;">
           </div>
           <div style="display:flex;flex-direction:column;align-items:center;gap:6px;width:45%;">
             <div style="display:flex;align-items:center;gap:10px;">
               <span style="color:#ffffff;font-size:1.0rem;font-weight:bold;letter-spacing:0.04em;text-shadow:0 1px 4px rgba(0,0,0,0.9);">Slope:</span>
-              <span id="pbvSlopeVal" style="color:#8db3d0;font-size:1.1rem;font-weight:bold;text-shadow:0 1px 4px rgba(0,0,0,0.9);min-width:35px;text-align:left;">2.0%</span>
+              <span id="pbvSlopeVal" style="color:#5cc8ff;font-size:1.1rem;font-weight:bold;text-shadow:0 1px 4px rgba(0,0,0,0.9);min-width:35px;text-align:left;">2.0%</span>
             </div>
             <input type="range" id="pbvSlopeIn" value="2.0" min="0.5" max="5.0" step="0.5" style="-webkit-appearance:none;appearance:none;width:100%;height:6px;background:rgba(255,255,255,0.3);border-radius:3px;outline:none;cursor:pointer;margin-top:12px;pointer-events:auto;">
           </div>
@@ -1020,7 +1020,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
       <canvas id="pbvCanvas" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;touch-action:none;"></canvas>
       <div style="position:absolute;bottom:0;left:0;right:0;z-index:10;display:flex;gap:10px;color:rgba(255,255,255,0.75);font-size:0.65rem;letter-spacing:0.06em;flex-wrap:wrap;justify-content:center;padding:20px 8px 8px;background:linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 100%);">
         <div style="display:flex;align-items:center;gap:5px;"><div style="width:22px;border-top:2px dashed white"></div><span>Aim Line</span></div>
-        <div style="display:flex;align-items:center;gap:5px;"><div style="width:22px;height:2px;background:#d4b85a"></div><span>Path</span></div>
+        <div style="display:flex;align-items:center;gap:5px;"><div style="width:22px;height:2px;background:#ffd740"></div><span>Path</span></div>
         <div style="display:flex;align-items:center;gap:5px;"><div style="width:8px;height:8px;border-radius:50%;background:#000;border:1px solid #ffffff;"></div><span>Aim Point</span></div>
         <div style="display:flex;align-items:center;gap:5px;"><div style="width:22px;border-top:2px dashed rgba(255,255,255,0.45)"></div><span>Slope</span></div>
         <div style="display:flex;align-items:center;gap:5px;"><div style="width:22px;border-top:2px dotted rgba(0,0,0,0.4)"></div><span>Grid</span></div>
@@ -1039,15 +1039,15 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
     <div style="font-size:22px;font-weight:800;margin-bottom:2px;text-align:center;">Performance Analysis</div>
     <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
       <div id="perfAnalysisSubtitle" style="font-size:12px;color:#232a27;">Loading...</div>
-      <div id="perfHcpBadge" style="display:none;background:#1f3048;border:1px solid #345a78;border-radius:20px;padding:4px 10px;align-items:center;gap:5px;">
+      <div id="perfHcpBadge" style="display:none;background:#1a4a8a;border:1px solid #3a8fd4;border-radius:20px;padding:4px 10px;align-items:center;gap:5px;">
         <span style="font-size:10px;color:#5a6b60;">vs</span>
-        <span id="perfHcpLabel" style="font-size:11px;font-weight:700;color:#8db3d0;">—</span>
+        <span id="perfHcpLabel" style="font-size:11px;font-weight:700;color:#5cc8ff;">—</span>
       </div>
     </div>
 
     <!-- Page toggle tabs -->
     <div style="display:flex;gap:6px;margin-bottom:16px;background:#0d0f0e;border-radius:12px;padding:4px;">
-      <button id="perfTabBtnRounds"   onclick="setPerfPage('rounds')"   style="flex:1;height:38px;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;background:#345a78;color:#ffffff;">Past Rounds</button>
+      <button id="perfTabBtnRounds"   onclick="setPerfPage('rounds')"   style="flex:1;height:38px;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;background:#3a8fd4;color:#ffffff;">Past Rounds</button>
       <button id="perfTabBtnCombines" onclick="setPerfPage('combines')" style="flex:1;height:38px;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;background:transparent;color:#232a27;">Combines</button>
     </div>
 
@@ -1121,7 +1121,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
       <div style="font-size:36px;margin-bottom:12px;">🔒</div>
       <div style="font-size:15px;font-weight:700;margin-bottom:6px;">Sign In Required</div>
       <div style="font-size:13px;color:#5a6b60;margin-bottom:18px;">Create an account or log in to access coaching features.</div>
-      <button onclick="showAuthPage()" style="background:#345a78;width:100%;height:44px;font-size:14px;font-weight:700;max-width:none;">Log In / Sign Up</button>
+      <button onclick="showAuthPage()" style="background:#3a8fd4;width:100%;height:44px;font-size:14px;font-weight:700;max-width:none;">Log In / Sign Up</button>
     </div>
   </div>
 
@@ -1132,7 +1132,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
 
     <!-- Tab bar -->
     <div style="display:flex;gap:0;width:100%;flex-shrink:0;border-radius:10px;overflow:hidden;">
-      <button id="cstTab0" onclick="showStudentCoachingTab(0)" style="flex:1;height:38px;font-size:12px;font-weight:700;background:#345a78;border-radius:0;border:none;color:#ffffff;max-width:none;width:auto;padding:0;margin:0;">Feedback</button>
+      <button id="cstTab0" onclick="showStudentCoachingTab(0)" style="flex:1;height:38px;font-size:12px;font-weight:700;background:#3a8fd4;border-radius:0;border:none;color:#ffffff;max-width:none;width:auto;padding:0;margin:0;">Feedback</button>
       <button id="cstTab1" onclick="showStudentCoachingTab(1)" style="flex:1;height:38px;font-size:12px;font-weight:700;background:#1c2120;border-radius:0;border:none;color:#5a6b60;max-width:none;width:auto;padding:0;margin:0;">Drills &amp; Combines</button>
       <button id="cstTab2" onclick="showStudentCoachingTab(2)" style="flex:1;height:38px;font-size:12px;font-weight:700;background:#1c2120;border-radius:0;border:none;color:#5a6b60;max-width:none;width:auto;padding:0;margin:0;">Info</button>
     </div>
@@ -1184,10 +1184,10 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
       <!-- TAB 2: Info -->
       <div id="cstTabContent2" style="display:none;height:100%;overflow-y:auto;padding:14px 0 80px;">
         <!-- Invite Code -->
-        <div style="background:linear-gradient(135deg,#1f3048,#1f3048);border-radius:14px;padding:18px 20px;margin-bottom:14px;">
+        <div style="background:linear-gradient(135deg,#1a4a8a,#1a4a8a);border-radius:14px;padding:18px 20px;margin-bottom:14px;">
           <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.55);margin-bottom:6px;">Your Invite Code</div>
           <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-            <div id="coachingMyCode" style="font-size:30px;font-weight:800;letter-spacing:6px;font-family:monospace;color:#8db3d0;"></div>
+            <div id="coachingMyCode" style="font-size:30px;font-weight:800;letter-spacing:6px;font-family:monospace;color:#5cc8ff;"></div>
             <button onclick="copyCoachingCode()" style="background:rgba(255,255,255,0.15);border:none;border-radius:8px;color:#ffffff;font-size:12px;font-weight:700;padding:8px 12px;cursor:pointer;height:auto;max-width:none;width:auto;">COPY</button>
           </div>
           <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px;">Share this code with your coach to connect.</div>
@@ -1211,7 +1211,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
 
     <!-- Tab bar -->
     <div style="display:flex;gap:0;width:100%;flex-shrink:0;border-radius:10px;overflow:hidden;">
-      <button id="cctTab0" onclick="showCoachCoachingTab(0)" style="flex:1;height:38px;font-size:11px;font-weight:700;background:#345a78;border-radius:0;border:none;color:#ffffff;max-width:none;width:auto;padding:0;margin:0;">Home</button>
+      <button id="cctTab0" onclick="showCoachCoachingTab(0)" style="flex:1;height:38px;font-size:11px;font-weight:700;background:#3a8fd4;border-radius:0;border:none;color:#ffffff;max-width:none;width:auto;padding:0;margin:0;">Home</button>
       <button id="cctTab1" onclick="showCoachCoachingTab(1)" style="flex:1;height:38px;font-size:11px;font-weight:700;background:#1c2120;border-radius:0;border:none;color:#5a6b60;max-width:none;width:auto;padding:0;margin:0;">Lesson Notes</button>
       <button id="cctTab2" onclick="showCoachCoachingTab(2)" style="flex:1;height:38px;font-size:11px;font-weight:700;background:#1c2120;border-radius:0;border:none;color:#5a6b60;max-width:none;width:auto;padding:0;margin:0;">Assign</button>
       <button id="cctTab3" onclick="showCoachCoachingTab(3)" style="flex:1;height:38px;font-size:11px;font-weight:700;background:#1c2120;border-radius:0;border:none;color:#5a6b60;max-width:none;width:auto;padding:0;margin:0;">Students</button>
@@ -1225,7 +1225,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
         <!-- Stats bar -->
         <div style="display:flex;gap:8px;margin-bottom:14px;">
           <div style="flex:1;background:#141817;border-radius:12px;padding:14px 6px;text-align:center;">
-            <div id="coachStatStudents" style="font-size:24px;font-weight:800;color:#8db3d0;">–</div>
+            <div id="coachStatStudents" style="font-size:24px;font-weight:800;color:#5cc8ff;">–</div>
             <div style="font-size:10px;color:#232a27;margin-top:2px;">Students</div>
           </div>
           <div style="flex:1;background:#141817;border-radius:12px;padding:14px 6px;text-align:center;">
@@ -1233,13 +1233,13 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
             <div style="font-size:10px;color:#232a27;margin-top:2px;">New Rounds</div>
           </div>
           <div style="flex:1;background:#141817;border-radius:12px;padding:14px 6px;text-align:center;">
-            <div id="coachStatNotes" style="font-size:24px;font-weight:800;color:#d4b85a;">–</div>
+            <div id="coachStatNotes" style="font-size:24px;font-weight:800;color:#ffd740;">–</div>
             <div style="font-size:10px;color:#232a27;margin-top:2px;">Notes Sent</div>
           </div>
         </div>
         <!-- Admin: Pending Coach Requests (only visible to admin) -->
         <div id="coachRequestsSection" style="display:none;background:#141817;border-radius:14px;padding:16px 18px;margin-bottom:14px;">
-          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#d4b85a;margin-bottom:10px;">⏳ Pending Coach Requests</div>
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#ffd740;margin-bottom:10px;">⏳ Pending Coach Requests</div>
           <div id="coachRequestsList"><div style="color:#232a27;font-size:13px;">Loading...</div></div>
         </div>
 
@@ -1247,7 +1247,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
         <div style="background:#141817;border-radius:14px;padding:16px 18px;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
             <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#5a6b60;">🔔 Recent Activity</div>
-            <button onclick="markCoachNotificationsRead()" id="markReadBtn" style="display:none;background:transparent;border:none;color:#8db3d0;font-size:11px;font-weight:700;cursor:pointer;height:auto;width:auto;max-width:none;padding:0;">Mark all read</button>
+            <button onclick="markCoachNotificationsRead()" id="markReadBtn" style="display:none;background:transparent;border:none;color:#5cc8ff;font-size:11px;font-weight:700;cursor:pointer;height:auto;width:auto;max-width:none;padding:0;">Mark all read</button>
           </div>
           <div id="coachActivityList"><div style="text-align:center;color:#232a27;font-size:13px;padding:10px 0;">No recent activity.</div></div>
         </div>
@@ -1258,7 +1258,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
 
         <!-- Type toggle -->
         <div style="display:flex;gap:0;border-radius:10px;overflow:hidden;margin-bottom:12px;">
-          <button id="coachNoteTypeLesson" onclick="setCoachNoteType('lesson')" style="flex:1;height:38px;font-size:12px;font-weight:700;background:#345a78;border-radius:0;border:none;color:#ffffff;max-width:none;width:auto;padding:0;margin:0;">📅 Lesson Note</button>
+          <button id="coachNoteTypeLesson" onclick="setCoachNoteType('lesson')" style="flex:1;height:38px;font-size:12px;font-weight:700;background:#3a8fd4;border-radius:0;border:none;color:#ffffff;max-width:none;width:auto;padding:0;margin:0;">📅 Lesson Note</button>
           <button id="coachNoteTypeGeneral" onclick="setCoachNoteType('general')" style="flex:1;height:38px;font-size:12px;font-weight:700;background:#1c2120;border-radius:0;border:none;color:#5a6b60;max-width:none;width:auto;padding:0;margin:0;">💬 General Feedback</button>
         </div>
 
@@ -1269,7 +1269,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
         </div>
         <input type="hidden" id="coachNoteStudentSelect" value="">
         <input type="hidden" id="coachNoteType" value="lesson">
-        <div id="coachNoteSelectedStudent" style="display:none;background:#345a78;border-radius:8px;padding:8px 12px;margin-bottom:8px;font-size:13px;font-weight:700;color:#8db3d0;align-items:center;justify-content:space-between;">
+        <div id="coachNoteSelectedStudent" style="display:none;background:#3a8fd4;border-radius:8px;padding:8px 12px;margin-bottom:8px;font-size:13px;font-weight:700;color:#5cc8ff;align-items:center;justify-content:space-between;">
           <span id="coachNoteSelectedName"></span>
           <button onclick="clearCoachNoteStudent()" style="background:transparent;border:none;color:#5a6b60;font-size:18px;cursor:pointer;height:auto;width:auto;max-width:none;padding:0;line-height:1;">×</button>
         </div>
@@ -1281,7 +1281,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
         </div>
 
         <textarea id="coachNoteText" placeholder="Write feedback, notes, focus areas, or encouragement..." style="width:100%;min-height:100px;background:#1c2120;color:#ffffff;border:1px solid #2a3530;border-radius:8px;padding:10px;font-size:13px;resize:vertical;box-sizing:border-box;font-family:inherit;margin-bottom:8px;"></textarea>
-        <button onclick="sendCoachNote()" style="background:#345a78;width:100%;height:44px;font-size:14px;font-weight:700;max-width:none;">Send Feedback</button>
+        <button onclick="sendCoachNote()" style="background:#3a8fd4;width:100%;height:44px;font-size:14px;font-weight:700;max-width:none;">Send Feedback</button>
         <div id="coachNoteMsg" style="font-size:12px;min-height:14px;text-align:center;margin-top:6px;"></div>
       </div>
 
@@ -1305,7 +1305,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
           <!-- Mode: Combine vs Custom -->
           <div id="coachCombModeRow" style="display:none;margin-bottom:8px;">
             <div style="display:flex;gap:6px;">
-              <button id="coachCombModeBtn_combine" onclick="coachCombSetMode('combine')" style="flex:1;height:36px;font-size:12px;font-weight:700;background:#1f3048;border:2px solid #345a78;border-radius:8px;color:#ffffff;cursor:pointer;max-width:none;">Combine</button>
+              <button id="coachCombModeBtn_combine" onclick="coachCombSetMode('combine')" style="flex:1;height:36px;font-size:12px;font-weight:700;background:#1a4a8a;border:2px solid #3a8fd4;border-radius:8px;color:#ffffff;cursor:pointer;max-width:none;">Combine</button>
               <button id="coachCombModeBtn_custom" onclick="coachCombSetMode('custom')" style="flex:1;height:36px;font-size:12px;font-weight:700;background:#1c2120;border:2px solid #3d5048;border-radius:8px;color:#5a6b60;cursor:pointer;max-width:none;">Custom</button>
             </div>
             <div id="coachCombModeDesc" style="font-size:10px;color:#232a27;margin-top:4px;text-align:center;">Fixed set of yardages, scrambled randomly</div>
@@ -1350,7 +1350,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
 
           <!-- Shot preview -->
           <div id="coachCombShotsBuilder" style="display:none;margin-bottom:8px;">
-            <div style="font-size:11px;font-weight:700;color:#8db3d0;margin-bottom:6px;">Shot Setup <span style="font-weight:400;color:#232a27;">(edit distances below)</span></div>
+            <div style="font-size:11px;font-weight:700;color:#5cc8ff;margin-bottom:6px;">Shot Setup <span style="font-weight:400;color:#232a27;">(edit distances below)</span></div>
             <div id="coachCombShotsList" style="max-height:220px;overflow-y:auto;background:#0d0f0e;border-radius:10px;padding:8px;"></div>
           </div>
 
@@ -1386,7 +1386,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
             <option value="">Select drill...</option>
           </select>
           <input id="coachDrillNote" placeholder="Optional note..." style="width:100%;height:40px;font-size:13px;margin-bottom:8px;">
-          <button onclick="sendCoachDrillAssignment()" style="background:#345a78;width:100%;height:42px;font-size:14px;font-weight:700;max-width:none;">Assign Drill</button>
+          <button onclick="sendCoachDrillAssignment()" style="background:#3a8fd4;width:100%;height:42px;font-size:14px;font-weight:700;max-width:none;">Assign Drill</button>
           <div id="coachDrillMsg" style="font-size:12px;min-height:14px;text-align:center;margin-top:6px;"></div>
         </div>
       </div>
@@ -1398,7 +1398,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
           <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#5a6b60;margin-bottom:10px;">Add Student by Invite Code</div>
           <div style="display:flex;gap:6px;">
             <input id="coachAddStudentCode" placeholder="Enter invite code" style="flex:1;text-transform:uppercase;letter-spacing:2px;font-family:monospace;text-align:center;height:40px;font-size:14px;">
-            <button onclick="coachAddStudentFromCoachingPage()" style="width:70px;height:40px;font-size:12px;font-weight:700;background:#345a78;border-radius:8px;max-width:none;">ADD</button>
+            <button onclick="coachAddStudentFromCoachingPage()" style="width:70px;height:40px;font-size:12px;font-weight:700;background:#3a8fd4;border-radius:8px;max-width:none;">ADD</button>
           </div>
           <div id="coachAddStudentMsg" style="font-size:12px;min-height:14px;text-align:center;margin-top:6px;"></div>
         </div>
@@ -1428,7 +1428,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
 
     <!-- Category button tabs -->
     <div style="display:flex;gap:8px;margin-bottom:10px;">
-      <button id="drillTabPutting"   onclick="setDrillCategory('putting')"   style="flex:1;height:44px;font-size:14px;font-weight:700;border:none;border-radius:10px;cursor:pointer;background:#345a78;color:#ffffff;min-width:0;max-width:none;width:auto;">Putting</button>
+      <button id="drillTabPutting"   onclick="setDrillCategory('putting')"   style="flex:1;height:44px;font-size:14px;font-weight:700;border:none;border-radius:10px;cursor:pointer;background:#3a8fd4;color:#ffffff;min-width:0;max-width:none;width:auto;">Putting</button>
       <button id="drillTabShortgame" onclick="setDrillCategory('shortgame')" style="flex:1;height:44px;font-size:14px;font-weight:700;border:none;border-radius:10px;cursor:pointer;background:#1c2120;color:#5a6b60;min-width:0;max-width:none;width:auto;">Short Game</button>
       <button id="drillTabFullswing" onclick="setDrillCategory('fullswing')" style="flex:1;height:44px;font-size:14px;font-weight:700;border:none;border-radius:10px;cursor:pointer;background:#1c2120;color:#5a6b60;min-width:0;max-width:none;width:auto;">Full Swing</button>
     </div>
@@ -1455,7 +1455,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
   <div id="studentViewHeader" style="text-align:center;margin-bottom:6px;flex-shrink:0;">
     <div style="display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;">
       <div id="studentViewName" style="font-size:20px;font-weight:800;"></div>
-      <div id="studentViewHcpBadge" onclick="toggleStudentHcpDropdown(event)" style="display:none;position:relative;background:#1f3048;border:1px solid #345a78;border-radius:20px;padding:3px 9px;font-size:11px;font-weight:700;color:#8db3d0;white-space:nowrap;cursor:pointer;user-select:none;">
+      <div id="studentViewHcpBadge" onclick="toggleStudentHcpDropdown(event)" style="display:none;position:relative;background:#1a4a8a;border:1px solid #3a8fd4;border-radius:20px;padding:3px 9px;font-size:11px;font-weight:700;color:#5cc8ff;white-space:nowrap;cursor:pointer;user-select:none;">
         <span id="studentViewHcpLabel"></span><span style="opacity:0.5;margin-left:4px;font-size:9px;">▼</span>
         <div id="studentHcpDropdown" style="display:none;position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#141817;border:1px solid #2a3530;border-radius:10px;padding:6px;z-index:100;min-width:160px;box-shadow:0 8px 24px rgba(0,0,0,0.6);">
           <div style="font-size:10px;color:#232a27;text-align:center;padding:2px 0 6px;border-bottom:1px solid #1c2120;margin-bottom:4px;">Compare stats to</div>
@@ -1465,7 +1465,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
     <div id="studentViewEmail" style="font-size:12px;color:#5a6b60;"></div>
   </div>
   <div style="display:flex;gap:0;width:100%;max-width:360px;margin-bottom:0;border-radius:10px;overflow:hidden;flex-shrink:0;">
-    <button onclick="showStudentTab('dashboard')" id="svTabDash" style="flex:1;height:38px;font-size:10px;background:#345a78;border-radius:0;border:none;color:#ffffff;font-weight:700;max-width:none;width:auto;padding:0;margin:0;">Dashboard</button>
+    <button onclick="showStudentTab('dashboard')" id="svTabDash" style="flex:1;height:38px;font-size:10px;background:#3a8fd4;border-radius:0;border:none;color:#ffffff;font-weight:700;max-width:none;width:auto;padding:0;margin:0;">Dashboard</button>
     <button onclick="showStudentTab('performance')" id="svTabPerf" style="flex:1;height:38px;font-size:10px;background:#1c2120;border-radius:0;border:none;color:#5a6b60;font-weight:600;max-width:none;width:auto;padding:0;margin:0;">Analysis</button>
     <button onclick="showStudentTab('rounds')" id="svTabRounds" style="flex:1;height:38px;font-size:10px;background:#1c2120;border-radius:0;border:none;color:#5a6b60;font-weight:600;max-width:none;width:auto;padding:0;margin:0;">Rounds</button>
     <button onclick="showStudentTab('practice')" id="svTabPractice" style="flex:1;height:38px;font-size:10px;background:#1c2120;border-radius:0;border:none;color:#5a6b60;font-weight:600;max-width:none;width:auto;padding:0;margin:0;">Practice</button>
@@ -1507,7 +1507,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
     <!-- Student Performance Analysis -->
     <div id="svPerfTab" style="width:100%;max-width:360px;display:none;">
       <div style="display:flex;gap:0;border-radius:9px;overflow:hidden;margin-bottom:10px;">
-        <button id="svPerfBtnRounds" onclick="setSvPerfPage('rounds')" style="flex:1;height:36px;border:none;font-size:12px;font-weight:700;cursor:pointer;background:#345a78;color:#ffffff;max-width:none;width:auto;padding:0;margin:0;">Past Rounds</button>
+        <button id="svPerfBtnRounds" onclick="setSvPerfPage('rounds')" style="flex:1;height:36px;border:none;font-size:12px;font-weight:700;cursor:pointer;background:#3a8fd4;color:#ffffff;max-width:none;width:auto;padding:0;margin:0;">Past Rounds</button>
         <button id="svPerfBtnCombines" onclick="setSvPerfPage('combines')" style="flex:1;height:36px;border:none;font-size:12px;font-weight:700;cursor:pointer;background:transparent;color:#232a27;max-width:none;width:auto;padding:0;margin:0;">Combines</button>
       </div>
       <!-- Rounds sub-page -->
@@ -1549,7 +1549,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
 
     <!-- Student Rounds -->
     <div id="svRoundsTab" style="width:100%;max-width:360px;display:none;">
-      <button onclick="downloadRoundTemplate()" style="width:100%;height:40px;font-size:13px;background:#345a78;border-radius:8px;margin-bottom:6px;">📥 Download Blank Scorecard Template</button>
+      <button onclick="downloadRoundTemplate()" style="width:100%;height:40px;font-size:13px;background:#3a8fd4;border-radius:8px;margin-bottom:6px;">📥 Download Blank Scorecard Template</button>
       <button onclick="document.getElementById('uploadStudentRoundFile').click()" style="width:100%;height:40px;font-size:13px;background:#007a52;border-radius:8px;margin-bottom:6px;">📤 Upload Round for Student (.xlsx)</button>
       <input type="file" id="uploadStudentRoundFile" accept=".xlsx,.xls,.csv" style="display:none;" onchange="handleRoundUpload(this, _currentStudentId)">
       <div id="uploadStudentRoundMsg" style="font-size:12px;min-height:16px;text-align:center;margin-bottom:6px;"></div>
@@ -1582,7 +1582,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
     <div id="svPracticePlanTab" style="width:100%;max-width:360px;display:none;">
       <!-- Toggle: Combines / Practice Sessions -->
       <div style="display:flex;gap:0;margin-bottom:12px;background:#0d0f0e;border-radius:10px;overflow:hidden;border:1px solid #2a3530;">
-        <button id="svPracticeToggleCombines" onclick="showSvPracticeSubTab('combines')" style="flex:1;height:38px;font-size:13px;font-weight:700;background:#345a78;border:none;color:#ffffff;cursor:pointer;">Combines</button>
+        <button id="svPracticeToggleCombines" onclick="showSvPracticeSubTab('combines')" style="flex:1;height:38px;font-size:13px;font-weight:700;background:#3a8fd4;border:none;color:#ffffff;cursor:pointer;">Combines</button>
         <button id="svPracticeTogglePractice" onclick="showSvPracticeSubTab('practice')" style="flex:1;height:38px;font-size:13px;font-weight:700;background:#0d0f0e;border:none;color:#5a6b60;cursor:pointer;">Practice Sessions</button>
       </div>
 
@@ -1620,7 +1620,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
     <div id="svMiscTab" style="width:100%;max-width:360px;display:none;">
       <!-- Toggle: Bag / Schedule -->
       <div style="display:flex;gap:0;margin-bottom:12px;background:#0d0f0e;border-radius:10px;overflow:hidden;border:1px solid #2a3530;">
-        <button id="svMiscToggleBag" onclick="showSvMiscSubTab('bag')" style="flex:1;height:38px;font-size:13px;font-weight:700;background:#345a78;border:none;color:#ffffff;cursor:pointer;">Student's Bag</button>
+        <button id="svMiscToggleBag" onclick="showSvMiscSubTab('bag')" style="flex:1;height:38px;font-size:13px;font-weight:700;background:#3a8fd4;border:none;color:#ffffff;cursor:pointer;">Student's Bag</button>
         <button id="svMiscToggleSchedule" onclick="showSvMiscSubTab('schedule')" style="flex:1;height:38px;font-size:13px;font-weight:700;background:#0d0f0e;border:none;color:#5a6b60;cursor:pointer;">Schedule</button>
       </div>
 
@@ -1628,7 +1628,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
       <div id="svBagSubContent">
         <!-- Add Club Section -->
         <div style="background:#141817;border-radius:14px;padding:16px;margin-bottom:16px;">
-          <div style="font-size:12px;font-weight:700;color:#8db3d0;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Add Club</div>
+          <div style="font-size:12px;font-weight:700;color:#5cc8ff;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Add Club</div>
           <select id="svBagClubName" style="width:100%;height:40px;font-size:14px;text-align:center;box-sizing:border-box;margin-bottom:8px;background:#1c2120;color:#ffffff;border:1px solid #3d5048;border-radius:8px;-webkit-appearance:none;appearance:none;">
             <option value="" disabled selected>Select a club...</option>
           </select>
@@ -1663,7 +1663,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
       <!-- Schedule sub-tab -->
       <div id="svScheduleSubContent" style="display:none;">
         <div style="background:#141817;border-radius:14px;padding:16px;margin-bottom:16px;">
-          <div style="font-size:12px;font-weight:700;color:#8db3d0;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Add Upcoming Round</div>
+          <div style="font-size:12px;font-weight:700;color:#5cc8ff;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Add Upcoming Round</div>
           <input id="svSchedDate" type="date" style="width:100%;height:40px;font-size:14px;text-align:center;box-sizing:border-box;margin-bottom:8px;background:#1c2120;color:#ffffff;border:1px solid #3d5048;border-radius:8px;">
           <input id="svSchedCourse" type="text" placeholder="Course name" style="width:100%;height:40px;font-size:14px;text-align:center;box-sizing:border-box;margin-bottom:8px;background:#1c2120;color:#ffffff;border:1px solid #3d5048;border-radius:8px;">
           <input id="svSchedTournament" type="text" placeholder="Tournament name (optional)" style="width:100%;height:40px;font-size:14px;text-align:center;box-sizing:border-box;margin-bottom:10px;background:#1c2120;color:#ffffff;border:1px solid #3d5048;border-radius:8px;">
@@ -1682,8 +1682,8 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
     <div id="svNotesTab" style="width:100%;max-width:360px;display:none;">
 
       <!-- Send note form -->
-      <div style="background:#1f3048;border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid #345a78;">
-        <div style="font-size:12px;font-weight:700;color:#8db3d0;margin-bottom:8px;">Send Feedback</div>
+      <div style="background:#1a4a8a;border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid #3a8fd4;">
+        <div style="font-size:12px;font-weight:700;color:#5cc8ff;margin-bottom:8px;">Send Feedback</div>
         <div style="display:flex;gap:6px;margin-bottom:8px;">
           <select id="svNoteType" style="flex:1;height:34px;background:#1c2120;color:#ffffff;border:1px solid #3d5048;border-radius:8px;font-size:12px;padding:0 8px;">
             <option value="lesson">Lesson Note</option>
@@ -1693,7 +1693,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
         </div>
         <textarea id="svNoteText" placeholder="Write feedback..." rows="3" style="width:100%;box-sizing:border-box;background:#1c2120;color:#ffffff;border:1px solid #3d5048;border-radius:8px;font-size:13px;padding:8px;resize:vertical;margin-bottom:8px;"></textarea>
         <div style="display:flex;align-items:center;gap:6px;">
-          <button onclick="sendSvNote()" id="svNoteSendBtn" style="flex:1;height:38px;font-size:13px;font-weight:700;background:#345a78;border:none;border-radius:8px;color:#ffffff;max-width:none;cursor:pointer;">Send</button>
+          <button onclick="sendSvNote()" id="svNoteSendBtn" style="flex:1;height:38px;font-size:13px;font-weight:700;background:#3a8fd4;border:none;border-radius:8px;color:#ffffff;max-width:none;cursor:pointer;">Send</button>
           <button onclick="cancelSvNoteEdit()" id="svNoteCancelBtn" style="display:none;height:38px;font-size:13px;font-weight:700;background:#2a3530;border:none;border-radius:8px;color:#9aab9e;max-width:none;cursor:pointer;padding:0 14px;">Cancel</button>
           <div id="svNoteMsg" style="font-size:11px;min-height:14px;flex:1;"></div>
         </div>
@@ -1745,7 +1745,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
   <!-- Tabs -->
   <div style="position:sticky;top:0;z-index:10;width:100%;display:flex;justify-content:center;background:#0d0f0e;padding:0 0 16px;">
     <div style="display:grid;grid-template-columns:repeat(4,1fr);width:100%;max-width:360px;background:#141817;border-radius:12px;overflow:hidden;border:1px solid #2a3530;">
-      <button id="bagTabMyBag" onclick="setBagTab('myBag')" style="height:40px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:#345a78;color:#ffffff;padding:0 2px;">My Bag</button>
+      <button id="bagTabMyBag" onclick="setBagTab('myBag')" style="height:40px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:#3a8fd4;color:#ffffff;padding:0 2px;">My Bag</button>
       <button id="bagTabFindYardages" onclick="setBagTab('findYardages')" style="height:40px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:transparent;color:#5a6b60;padding:0 2px;">Find Yardages</button>
       <button id="bagTabWedgeGap" onclick="setBagTab('wedgeGap')" style="height:40px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:transparent;color:#5a6b60;padding:0 2px;">Wedge Gapping</button>
       <button id="bagTabSpeed" onclick="setBagTab('speed')" style="height:40px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:transparent;color:#5a6b60;padding:0 2px;">Speed</button>
@@ -1757,7 +1757,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
     <!-- Add Club Toggle -->
     <div style="width:100%;max-width:360px;margin-bottom:12px;display:flex;gap:8px;">
       <button onclick="toggleBagAddClub()" style="flex:1;height:40px;background:#141817;border:1px solid #2a3530;border-radius:10px;color:#9aab9e;font-size:13px;font-weight:600;cursor:pointer;">+ Add a Club</button>
-      <button onclick="openGapVisualizer()" style="flex:1;height:40px;background:#141817;border:1px solid #5580a6;border-radius:10px;color:#8db3d0;font-size:13px;font-weight:700;cursor:pointer;">📊 Gap Visualizer</button>
+      <button onclick="openGapVisualizer()" style="flex:1;height:40px;background:#141817;border:1px solid #4da6ff;border-radius:10px;color:#5cc8ff;font-size:13px;font-weight:700;cursor:pointer;">📊 Gap Visualizer</button>
     </div>
     <!-- Add Club Expandable Section -->
     <div id="bagAddClubSection" style="display:none;width:100%;max-width:360px;background:#141817;border-radius:14px;padding:16px;margin-bottom:16px;">
@@ -1793,7 +1793,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
     <!-- Step 1: Select Club -->
     <div id="fyStep1" style="width:100%;max-width:360px;">
       <div style="background:#141817;border-radius:14px;padding:16px;margin-bottom:12px;">
-        <div style="font-size:12px;font-weight:700;color:#8db3d0;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Select a Club</div>
+        <div style="font-size:12px;font-weight:700;color:#5cc8ff;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Select a Club</div>
         <div id="fyClubGrid" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"></div>
         <div style="font-size:11px;color:#232a27;margin-bottom:8px;text-align:center;">— or add a new club —</div>
         <select id="fyNewClubSelect" style="width:100%;height:40px;font-size:14px;text-align:center;box-sizing:border-box;background:#1c2120;color:#ffffff;border:1px solid #3d5048;border-radius:8px;-webkit-appearance:none;appearance:none;">
@@ -1811,7 +1811,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
           <div style="font-size:16px;font-weight:800;color:#9aab9e;" id="fySelectedClubName"></div>
           <div style="width:32px;"></div>
         </div>
-        <div style="font-size:12px;font-weight:700;color:#8db3d0;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">How many shots?</div>
+        <div style="font-size:12px;font-weight:700;color:#5cc8ff;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">How many shots?</div>
         <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;" id="fyShotCountBtns"></div>
       </div>
     </div>
@@ -1824,7 +1824,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
           <div style="font-size:16px;font-weight:800;color:#9aab9e;" id="fyStep3ClubName"></div>
           <div style="width:32px;"></div>
         </div>
-        <div style="font-size:12px;font-weight:700;color:#8db3d0;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Enter Carry & Total for each shot</div>
+        <div style="font-size:12px;font-weight:700;color:#5cc8ff;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Enter Carry & Total for each shot</div>
         <div style="display:grid;grid-template-columns:22px 1fr 1fr 70px;gap:4px;align-items:center;margin-bottom:4px;">
           <div></div>
           <div style="font-size:10px;color:#232a27;font-weight:600;text-align:center;">CARRY</div>
@@ -1936,7 +1936,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
 
       <!-- Summary averages -->
       <div id="spSummaryCard" style="background:#141817;border-radius:12px;padding:12px;margin-bottom:12px;display:none;">
-        <div style="font-size:11px;color:#8db3d0;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Filtered Averages</div>
+        <div style="font-size:11px;color:#5cc8ff;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Filtered Averages</div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;" id="spSummaryGrid"></div>
       </div>
 
@@ -1970,7 +1970,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
             <div style="font-size:16px;font-weight:800;color:#9aab9e;" id="spSelectedClubLabel"></div>
             <div style="width:32px;"></div>
           </div>
-          <div style="font-size:12px;font-weight:700;color:#8db3d0;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">How many swings?</div>
+          <div style="font-size:12px;font-weight:700;color:#5cc8ff;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">How many swings?</div>
           <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;" id="spShotCountBtns"></div>
         </div>
       </div>
@@ -1985,8 +1985,8 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
           </div>
           <div style="display:grid;grid-template-columns:20px 1fr 1fr 1fr 1fr;gap:4px;align-items:center;margin-bottom:6px;">
             <div></div>
-            <div style="font-size:9px;color:#d4b85a;font-weight:700;text-align:center;">CLB SPD</div>
-            <div style="font-size:9px;color:#8db3d0;font-weight:700;text-align:center;">BALL SPD</div>
+            <div style="font-size:9px;color:#ffd740;font-weight:700;text-align:center;">CLB SPD</div>
+            <div style="font-size:9px;color:#5cc8ff;font-weight:700;text-align:center;">BALL SPD</div>
             <div style="font-size:9px;color:#232a27;font-weight:700;text-align:center;">CARRY</div>
             <div style="font-size:9px;color:#232a27;font-weight:700;text-align:center;">TOTAL</div>
           </div>
@@ -2005,7 +2005,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
       <div style="font-size:15px;font-weight:700;margin-bottom:4px;">Existing Shot Data</div>
       <div id="fyConflictMsg" style="font-size:13px;color:#9aab9e;margin-bottom:16px;line-height:1.5;"></div>
       <div style="display:flex;flex-direction:column;gap:8px;">
-        <button onclick="fyResolveConflict('add')" style="width:100%;height:42px;background:#345a78;border:none;border-radius:10px;color:#ffffff;font-size:13px;font-weight:700;cursor:pointer;">Add to Existing Shots</button>
+        <button onclick="fyResolveConflict('add')" style="width:100%;height:42px;background:#3a8fd4;border:none;border-radius:10px;color:#ffffff;font-size:13px;font-weight:700;cursor:pointer;">Add to Existing Shots</button>
         <button onclick="fyResolveConflict('replace')" style="width:100%;height:42px;background:#2a1a1a;border:none;border-radius:10px;color:#ffffff;font-size:13px;font-weight:700;cursor:pointer;">Replace with New Data Only</button>
         <button onclick="fyResolveConflict('cancel')" style="width:100%;height:42px;background:#2a3530;border:none;border-radius:10px;color:#9aab9e;font-size:13px;font-weight:700;cursor:pointer;">Cancel</button>
       </div>
@@ -2023,7 +2023,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
   <div style="width:100%;max-width:400px;padding:0 16px;box-sizing:border-box;">
     <!-- Filter buttons -->
     <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:14px;">
-      <button id="gvFilterAll" onclick="setGapVizFilter('all')" style="padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid #5580a6;background:#5580a6;color:#ffffff;">All</button>
+      <button id="gvFilterAll" onclick="setGapVizFilter('all')" style="padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid #4da6ff;background:#4da6ff;color:#ffffff;">All</button>
       <button id="gvFilterWoods" onclick="setGapVizFilter('woods')" style="padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid #3d5048;background:transparent;color:#9aab9e;">Woods</button>
       <button id="gvFilterIrons" onclick="setGapVizFilter('irons')" style="padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid #3d5048;background:transparent;color:#9aab9e;">Irons</button>
       <button id="gvFilterWedges" onclick="setGapVizFilter('wedges')" style="padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid #3d5048;background:transparent;color:#9aab9e;">Wedges</button>
@@ -2031,7 +2031,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
     </div>
     <!-- Custom club picker (hidden by default) -->
     <div id="gvCustomPicker" style="display:none;background:#141817;border-radius:12px;padding:12px;margin-bottom:14px;">
-      <div style="font-size:11px;color:#8db3d0;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Select Clubs</div>
+      <div style="font-size:11px;color:#5cc8ff;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Select Clubs</div>
       <div id="gvCustomClubGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;"></div>
     </div>
     <div id="gapVizEmpty" style="display:none;background:#141817;border-radius:12px;padding:24px;text-align:center;color:#232a27;font-size:13px;line-height:1.7;">
@@ -2066,7 +2066,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
           <div style="display:flex;flex-direction:column;gap:10px;">
             <button class="comb-grid-btn comb-green" onclick="combShowModeSelect('putting')" style="min-height:54px;font-size:1rem;border-radius:10px;">Putting</button>
             <button class="comb-grid-btn comb-blue" onclick="combShowShortGameSelect()" style="min-height:54px;font-size:1rem;border-radius:10px;">Short Game</button>
-            <button class="comb-grid-btn" style="background:#a6853a;min-height:54px;font-size:1rem;border-radius:10px;" onclick="combShowModeSelect('wedge')">Wedge Distances</button>
+            <button class="comb-grid-btn" style="background:#e6a817;min-height:54px;font-size:1rem;border-radius:10px;" onclick="combShowModeSelect('wedge')">Wedge Distances</button>
           </div>
         </div><!-- /comb-practice-sub -->
 
@@ -2077,9 +2077,9 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
           </button>
           <div style="font-size:1.1rem;font-weight:800;color:#ffffff;margin-bottom:14px;text-align:center;">Short Game</div>
           <div style="display:flex;flex-direction:column;gap:12px;">
-            <button onclick="combShowModeSelect('chip-prox')" style="background:#1f3048;border:2px solid #345a78;border-radius:12px;padding:16px;text-align:left;color:#ffffff;cursor:pointer;height:auto;max-width:none;width:100%;display:flex;flex-direction:column;gap:6px;box-sizing:border-box;white-space:normal;word-break:break-word;">
+            <button onclick="combShowModeSelect('chip-prox')" style="background:#1a4a8a;border:2px solid #3a8fd4;border-radius:12px;padding:16px;text-align:left;color:#ffffff;cursor:pointer;height:auto;max-width:none;width:100%;display:flex;flex-direction:column;gap:6px;box-sizing:border-box;white-space:normal;word-break:break-word;">
               <div style="font-size:1rem;font-weight:800;">Proximity Based</div>
-              <div style="font-size:0.82rem;color:#8db3d0;line-height:1.4;white-space:normal;word-break:break-word;">Scored on how close you hit it to the hole. Use this option if you're not able to putt out.</div>
+              <div style="font-size:0.82rem;color:#5cc8ff;line-height:1.4;white-space:normal;word-break:break-word;">Scored on how close you hit it to the hole. Use this option if you're not able to putt out.</div>
             </button>
             <button onclick="combShowModeSelect('chip-hole')" style="background:#00402c;border:2px solid #007a52;border-radius:12px;padding:16px;text-align:left;color:#ffffff;cursor:pointer;height:auto;max-width:none;width:100%;display:flex;flex-direction:column;gap:6px;box-sizing:border-box;white-space:normal;word-break:break-word;">
               <div style="font-size:1rem;font-weight:800;">Up & Downs</div>
@@ -2095,9 +2095,9 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
           </button>
           <div id="comb-mode-type-label" style="font-size:1.1rem;font-weight:800;color:#ffffff;margin-bottom:14px;text-align:center;"></div>
           <div style="display:flex;flex-direction:column;gap:12px;">
-            <button onclick="combOpenFromModeSelect('combine')" style="background:#1f3048;border:2px solid #345a78;border-radius:12px;padding:16px;text-align:left;color:#ffffff;cursor:pointer;height:auto;max-width:none;width:100%;display:flex;flex-direction:column;gap:6px;box-sizing:border-box;white-space:normal;word-break:break-word;">
+            <button onclick="combOpenFromModeSelect('combine')" style="background:#1a4a8a;border:2px solid #3a8fd4;border-radius:12px;padding:16px;text-align:left;color:#ffffff;cursor:pointer;height:auto;max-width:none;width:100%;display:flex;flex-direction:column;gap:6px;box-sizing:border-box;white-space:normal;word-break:break-word;">
               <div style="font-size:1rem;font-weight:800;">Combine</div>
-              <div style="font-size:0.82rem;color:#8db3d0;line-height:1.4;white-space:normal;word-break:break-word;">Fixed set of yardages scrambled into a new random order each session. Use this to benchmark and track progress over time.</div>
+              <div style="font-size:0.82rem;color:#5cc8ff;line-height:1.4;white-space:normal;word-break:break-word;">Fixed set of yardages scrambled into a new random order each session. Use this to benchmark and track progress over time.</div>
             </button>
             <button onclick="combOpenFromModeSelect('custom')" style="background:#00402c;border:2px solid #00b87a;border-radius:12px;padding:16px;text-align:left;color:#ffffff;cursor:pointer;height:auto;max-width:none;width:100%;display:flex;flex-direction:column;gap:6px;box-sizing:border-box;white-space:normal;word-break:break-word;">
               <div style="font-size:1rem;font-weight:800;">Custom</div>
@@ -2363,7 +2363,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
   <div style="font-size:12px;color:#232a27;margin-bottom:16px;">Enter your score for each hole</div>
   <div id="simpleHolesList" style="width:100%;max-width:360px;display:flex;flex-direction:column;gap:8px;"></div>
   <div style="width:100%;max-width:360px;margin-top:16px;display:flex;flex-direction:column;gap:8px;">
-    <button onclick="submitSimple()" style="width:100%;height:52px;background:#5580a6;border:none;border-radius:12px;color:#ffffff;font-size:16px;font-weight:800;cursor:pointer;">Submit Round</button>
+    <button onclick="submitSimple()" style="width:100%;height:52px;background:#4da6ff;border:none;border-radius:12px;color:#ffffff;font-size:16px;font-weight:800;cursor:pointer;">Submit Round</button>
     <button onclick="saveSimpleForLater()" style="width:100%;height:44px;background:#d4706e;border:none;border-radius:10px;color:#ffffff;font-size:14px;font-weight:700;cursor:pointer;">Save & Finish Later</button>
   </div>
 </div>
@@ -2571,9 +2571,9 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
   <div style="display:flex;flex-direction:column;gap:8px;width:100%;max-width:320px;">
     <div style="display:flex;gap:8px;">
       <button style="flex:1;background:#00402c;height:44px;font-size:13px;" onclick="exportToExcel()">SAVE EXCEL</button>
-      <button style="flex:1;background:#345a78;height:44px;font-size:13px;" onclick="emailResults()">EMAIL / SHARE</button>
+      <button style="flex:1;background:#3a8fd4;height:44px;font-size:13px;" onclick="emailResults()">EMAIL / SHARE</button>
     </div>
-    <button style="background:#345a78;height:44px;font-size:13px;" onclick="showFullStats()">📊 SEE FULL STATS</button>
+    <button style="background:#3a8fd4;height:44px;font-size:13px;" onclick="showFullStats()">📊 SEE FULL STATS</button>
     <button id="saveToAccountBtn" style="background:#007a52;height:44px;font-size:13px;display:none;" onclick="saveRoundToAccount()">💾 SAVE TO ACCOUNT</button>
     <button id="backToRoundsBtn" style="background:#232a27;height:44px;font-size:13px;display:none;" onclick="goBackFromRound()">← BACK TO ROUND HISTORY</button>
   </div>
@@ -3050,7 +3050,7 @@ function onCourseSearch(val) {
   var html = '';
   for (var k = 0; k < shown.length; k++) {
     var m = shown[k];
-    var badge = m.src === 'custom' ? '<span style="font-size:9px;background:#345a78;color:#ffffff;padding:1px 5px;border-radius:4px;margin-left:6px;">MY COURSE</span>' : '';
+    var badge = m.src === 'custom' ? '<span style="font-size:9px;background:#3a8fd4;color:#ffffff;padding:1px 5px;border-radius:4px;margin-left:6px;">MY COURSE</span>' : '';
     html += '<div onclick="pickCourse(\'' + m.src + '\',' + m.idx + ')" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #1c2120;font-size:13px;color:#ffffff;" onmouseover="this.style.background=\'#2a3530\'" onmouseout="this.style.background=\'transparent\'">';
     html += '<div style="font-weight:600;">' + m.data.dn + badge + '</div>';
     if (m.data.ci) html += '<div style="font-size:11px;color:#5a6b60;">' + m.data.ci + ', ' + m.data.st + '</div>';
@@ -3209,7 +3209,7 @@ function renderMyCoursesPage() {
     if (c.ci) html += '<div style="font-size:11px;color:#5a6b60;margin-top:2px;">' + c.ci + ', ' + c.st + '</div>';
     if (teeInfo) html += '<div style="font-size:11px;color:#232a27;margin-top:2px;">' + teeInfo + '</div>';
     html += '<div style="display:flex;gap:8px;margin-top:10px;">'
-      + '<button onclick="editCustomCourse(\'' + c._id + '\')" style="flex:1;height:34px;border:none;border-radius:8px;background:#345a78;color:#ffffff;font-weight:700;font-size:12px;cursor:pointer;">Edit</button>'
+      + '<button onclick="editCustomCourse(\'' + c._id + '\')" style="flex:1;height:34px;border:none;border-radius:8px;background:#3a8fd4;color:#ffffff;font-weight:700;font-size:12px;cursor:pointer;">Edit</button>'
       + '<button onclick="confirmDeleteCourse(\'' + c._id + '\',this)" style="flex:1;height:34px;border:none;border-radius:8px;background:#2a3530;color:#d4706e;font-weight:700;font-size:12px;cursor:pointer;">Delete</button>'
       + '</div></div>';
   }
@@ -3260,7 +3260,7 @@ function setCCParOnPage(prefix, holeNum, parVal) {
     var btn = document.getElementById(prefix + '_par_' + holeNum + '_' + p);
     if (!btn) return;
     if (p === parVal) {
-      btn.style.background = p === 3 ? '#5580a6' : p === 4 ? '#00a06d' : '#d4b85a';
+      btn.style.background = p === 3 ? '#4da6ff' : p === 4 ? '#00a06d' : '#ffd740';
       btn.style.color = '#000';
     } else {
       btn.style.background = '#1c2120'; btn.style.color = '#9aab9e';
@@ -3394,7 +3394,7 @@ function setCCPar(holeNum, parVal) {
   [3,4,5].forEach(function(p) {
     var btn = document.getElementById('cc_par_' + holeNum + '_' + p);
     if (p === parVal) {
-      btn.style.background = p === 3 ? '#5580a6' : p === 4 ? '#00a06d' : '#d4b85a';
+      btn.style.background = p === 3 ? '#4da6ff' : p === 4 ? '#00a06d' : '#ffd740';
       btn.style.color = '#000';
     } else {
       btn.style.background = '#1c2120'; btn.style.color = '#9aab9e';
@@ -6353,7 +6353,7 @@ _sb.auth.onAuthStateChange((event, session) => {
     showProfileTab('account');
     const pwMsg = document.getElementById('pwMsg');
     if (pwMsg) {
-      pwMsg.style.color = '#8db3d0';
+      pwMsg.style.color = '#5cc8ff';
       pwMsg.textContent = 'Enter and confirm your new password below.';
     }
     return;
@@ -6704,7 +6704,7 @@ async function resumeIncompleteRound(roundId) {
         var parBtns = card.querySelectorAll('button[onclick^="simpleSetPar"]');
         parBtns.forEach(function(b) {
           var match = b.getAttribute('onclick').match(/simpleSetPar\(\d+,(\d+)/);
-          if (match && parseInt(match[1]) === hd.par) { b.style.background = '#5580a6'; b.style.color = '#ffffff'; }
+          if (match && parseInt(match[1]) === hd.par) { b.style.background = '#4da6ff'; b.style.color = '#ffffff'; }
           else { b.style.background = '#2a3530'; b.style.color = '#5a6b60'; }
         });
       }
@@ -7063,8 +7063,8 @@ function filterRoundsList() {
     var d = new Date(r.round_date + 'T12:00:00');
     var dateStr = (d.getMonth()+1) + '/' + d.getDate() + '/' + d.getFullYear();
     var placeStr = (r.round_type === 'Tournament' && r.tournament_place) ? ' — ' + ordinalSuffix(r.tournament_place) + ' Place' : '';
-    var typeTag = r.round_type === 'Tournament' ? '<div style="color:#d4b85a;font-size:11px;font-weight:700;margin-top:2px;">★ Tournament' + placeStr + '</div>' : '';
-    var incompleteTag = incomplete ? '<span style="color:#d4b85a;font-size:10px;font-weight:700;"> ⏸ In Progress</span>' : '';
+    var typeTag = r.round_type === 'Tournament' ? '<div style="color:#ffd740;font-size:11px;font-weight:700;margin-top:2px;">★ Tournament' + placeStr + '</div>' : '';
+    var incompleteTag = incomplete ? '<span style="color:#ffd740;font-size:10px;font-weight:700;"> ⏸ In Progress</span>' : '';
 
     // For incomplete rounds, show holes completed info
     var holesCompleted = 0;
@@ -7082,7 +7082,7 @@ function filterRoundsList() {
       + '<div style="font-size:12px;color:#9aab9e;">' + dateStr + ' · ' + holesInfo + ' · ' + r.player_name + '</div>'
       + '</div>'
       + '<div style="text-align:right;">'
-      + (incomplete ? '<div style="font-size:14px;font-weight:700;color:#d4b85a;">In Progress</div>' : '<div style="font-size:20px;font-weight:800;">' + r.score + '</div>')
+      + (incomplete ? '<div style="font-size:14px;font-weight:700;color:#ffd740;">In Progress</div>' : '<div style="font-size:20px;font-weight:800;">' + r.score + '</div>')
       + (incomplete ? '' : '<div style="font-size:13px;color:' + (r.to_par>0?'#d4706e':r.to_par<0?'#00a06d':'#9aab9e') + '">' + tp + '</div>')
       + '</div></div>'
       + '<div style="display:flex;gap:6px;margin-top:8px;">'
@@ -7090,7 +7090,7 @@ function filterRoundsList() {
         ? '<button onclick="event.stopPropagation();resumeIncompleteRound(\'' + r.id + '\')" style="flex:2;height:34px;font-size:13px;font-weight:700;background:#d4706e;border:none;border-radius:6px;color:#ffffff;cursor:pointer;">▶ Resume Round</button>'
           + '<button onclick="event.stopPropagation();deleteSavedRound(\'' + r.id + '\',this)" style="width:60px;height:34px;font-size:12px;background:#e06060;border:none;border-radius:6px;color:#ffffff;cursor:pointer;">Del</button>'
         : '<button onclick=\"event.stopPropagation();openEditRoundInfo(\'' + r.id + '\', event)\" style=\"flex:1;height:30px;font-size:12px;background:#007a52;border-radius:6px;font-weight:700;margin-right:4px;\">Edit</button>'
-          + '<button onclick="event.stopPropagation();viewSavedRound(\'' + r.id + '\')" style="flex:1;height:30px;font-size:12px;background:#345a78;border-radius:6px;">Stats</button>'
+          + '<button onclick="event.stopPropagation();viewSavedRound(\'' + r.id + '\')" style="flex:1;height:30px;font-size:12px;background:#3a8fd4;border-radius:6px;">Stats</button>'
           + '<button onclick="event.stopPropagation();downloadSavedRound(\'' + r.id + '\',this)" style="width:50px;height:30px;font-size:12px;background:#00402c;border-radius:6px;">📥</button>'
           + '<button onclick="event.stopPropagation();deleteSavedRound(\'' + r.id + '\',this)" style="width:50px;height:30px;font-size:12px;background:#e06060;border-radius:6px;">Del</button>'
       )
@@ -7349,8 +7349,8 @@ function setEntryMode(mode) {
   holeBtn.style.background = off; holeBtn.style.color = offC;
   simpleBtn.style.background = off; simpleBtn.style.color = offC;
   if (mode === 'shot') { shotBtn.style.background = '#007a52'; shotBtn.style.color = '#ffffff'; }
-  else if (mode === 'hole') { holeBtn.style.background = '#345a78'; holeBtn.style.color = '#ffffff'; }
-  else { simpleBtn.style.background = '#5580a6'; simpleBtn.style.color = '#ffffff'; }
+  else if (mode === 'hole') { holeBtn.style.background = '#3a8fd4'; holeBtn.style.color = '#ffffff'; }
+  else { simpleBtn.style.background = '#4da6ff'; simpleBtn.style.color = '#ffffff'; }
 }
 
 function enterScoring() {
@@ -7422,9 +7422,9 @@ function buildHoleCard(holeNum) {
   var yardsPlaceholder = hasCourseData ? '' : 'e.g. 385';
 
   // Pre-select par button colors
-  var p3bg = holePar === 3 ? '#5580a6' : '#2a3530', p3c = holePar === 3 ? '#000' : '#9aab9e';
+  var p3bg = holePar === 3 ? '#4da6ff' : '#2a3530', p3c = holePar === 3 ? '#000' : '#9aab9e';
   var p4bg = holePar === 4 ? '#00a06d' : '#2a3530', p4c = holePar === 4 ? '#000' : '#9aab9e';
-  var p5bg = holePar === 5 ? '#d4b85a' : '#2a3530', p5c = holePar === 5 ? '#000' : '#9aab9e';
+  var p5bg = holePar === 5 ? '#ffd740' : '#2a3530', p5c = holePar === 5 ? '#000' : '#9aab9e';
 
   card.innerHTML = `
     <div style="font-size:14px;font-weight:800;margin-bottom:10px;color:#ffffff;">Hole ${holeNum}${hcpLabel}</div>
@@ -7484,7 +7484,7 @@ function hbhLieChanged(holeNum, shotNum, selectEl) {
   if (!unitEl) return;
   if (lie === 'GREEN') {
     unitEl.textContent = 'ft';
-    unitEl.style.color = '#8db3d0';
+    unitEl.style.color = '#5cc8ff';
     distEl.placeholder = 'Feet';
   } else {
     unitEl.textContent = 'yds';
@@ -7497,7 +7497,7 @@ function hbhSetPar(holeNum, parVal, btn) {
   // Update button styles
   var btns = btn.parentElement.querySelectorAll('button');
   btns.forEach(function(b) { b.style.background = '#1c2120'; b.style.color = '#9aab9e'; });
-  btn.style.background = parVal === 3 ? '#5580a6' : parVal === 4 ? '#00a06d' : '#d4b85a';
+  btn.style.background = parVal === 3 ? '#4da6ff' : parVal === 4 ? '#00a06d' : '#ffd740';
   btn.style.color = '#000';
   btn.dataset.parSelected = parVal;
   // Only update yardage to default if no course data for this hole
@@ -7786,7 +7786,7 @@ function buildSimpleForm() {
     div.dataset.par = holePar;
     div.style.cssText = 'background:#141817;border-radius:12px;padding:10px 14px;border:1px solid #1c2120;';
 
-    var parColors = {3:'#5580a6',4:'#00a06d',5:'#d4b85a'};
+    var parColors = {3:'#4da6ff',4:'#00a06d',5:'#ffd740'};
     var parBtns = [3,4,5].map(function(p) {
       var sel = p === holePar;
       return '<button onclick="simpleSetPar(' + h + ',' + p + ',this)" style="width:32px;height:32px;border-radius:8px;border:none;font-size:13px;font-weight:700;cursor:pointer;background:' + (sel ? parColors[p] : '#2a3530') + ';color:' + (sel ? '#ffffff' : '#5a6b60') + ';">' + p + '</button>';
@@ -7818,7 +7818,7 @@ function simpleToParLabel(score, par) {
   var diff = score - par;
   if (diff === 0) return '<span style="color:#00a06d;">E</span>';
   if (diff > 0) return '<span style="color:#d4706e;">+' + diff + '</span>';
-  return '<span style="color:#5580a6;">' + diff + '</span>';
+  return '<span style="color:#4da6ff;">' + diff + '</span>';
 }
 
 function simpleUpdateToPar(hole) {
@@ -7831,7 +7831,7 @@ function simpleUpdateToPar(hole) {
 function simpleSetPar(hole, p, btn) {
   var card = document.getElementById('simple_hole_' + hole);
   card.dataset.par = p;
-  var parColors = {3:'#5580a6',4:'#00a06d',5:'#d4b85a'};
+  var parColors = {3:'#4da6ff',4:'#00a06d',5:'#ffd740'};
   var btns = card.querySelectorAll('button[onclick^="simpleSetPar"]');
   btns.forEach(function(b) { var bp = parseInt(b.textContent); b.style.background = '#2a3530'; b.style.color = '#5a6b60'; });
   btn.style.background = parColors[p]; btn.style.color = '#ffffff';
@@ -8075,15 +8075,15 @@ function getSubcategoriesForCategory(cat) {
 
 // Category colors for drill cards
 var drillCatColors = {
-  putting:   { bg: '#1f3048', border: '#345a78', tag: '#8db3d0' },
+  putting:   { bg: '#1a4a8a', border: '#3a8fd4', tag: '#5cc8ff' },
   shortgame: { bg: '#00402c', border: '#007a52', tag: '#00b87a' },
-  fullswing: { bg: '#1e1a0e', border: '#a6853a', tag: '#d4b85a' }
+  fullswing: { bg: '#2a2008', border: '#e6a817', tag: '#ffd740' }
 };
 
 function setDrillCategory(cat) {
   // Update tab button styles
   var tabs = { putting: 'drillTabPutting', shortgame: 'drillTabShortgame', fullswing: 'drillTabFullswing' };
-  var activeColors = { putting: '#345a78', shortgame: '#007a52', fullswing: '#d4706e' };
+  var activeColors = { putting: '#3a8fd4', shortgame: '#007a52', fullswing: '#d4706e' };
   Object.keys(tabs).forEach(function(k) {
     var btn = document.getElementById(tabs[k]);
     if (!btn) return;
@@ -8166,7 +8166,7 @@ function showDrillDetail(drillId, cat) {
   }
   if (drill.goal) {
     html += '<div style="background:#1c2120;border-radius:10px;padding:14px;margin-bottom:10px;">';
-    html += '<div style="font-size:12px;font-weight:700;color:#d4b85a;margin-bottom:6px;">GOAL</div>';
+    html += '<div style="font-size:12px;font-weight:700;color:#ffd740;margin-bottom:6px;">GOAL</div>';
     html += '<div style="font-size:13px;color:#9aab9e;line-height:1.5;">' + drill.goal + '</div>';
     html += '</div>';
   }
@@ -8222,8 +8222,8 @@ function setPerfPage(page) {
   document.getElementById('perfPageCombines').style.display = isRounds ? 'none' : '';
   var btnR = document.getElementById('perfTabBtnRounds');
   var btnC = document.getElementById('perfTabBtnCombines');
-  if (btnR) { btnR.style.background = isRounds ? '#345a78' : 'transparent'; btnR.style.color = isRounds ? '#ffffff' : '#232a27'; }
-  if (btnC) { btnC.style.background = isRounds ? 'transparent' : '#345a78'; btnC.style.color = isRounds ? '#232a27' : '#ffffff'; }
+  if (btnR) { btnR.style.background = isRounds ? '#3a8fd4' : 'transparent'; btnR.style.color = isRounds ? '#ffffff' : '#232a27'; }
+  if (btnC) { btnC.style.background = isRounds ? 'transparent' : '#3a8fd4'; btnC.style.color = isRounds ? '#232a27' : '#ffffff'; }
   if (!isRounds && !_perfCombineLoaded) {
     _perfCombineLoaded = true;
     loadPerfCombineData();
@@ -8626,16 +8626,16 @@ function pctStr(makes, att, suffix) {
 function bucketGirColor(girPct) {
   if (girPct === null) return '#5a6b60';
   if (girPct >= 55) return '#00b87a';
-  if (girPct >= 35) return '#d4b85a';
+  if (girPct >= 35) return '#ffd740';
 
   return '#d4706e';
 }
 
 function bucketGirBg(girPct) {
   if (girPct === null) return '#141817';
-  if (girPct >= 55) return '#1e1a0e';
-  if (girPct >= 35) return '#1e1a0e';
-  if (girPct >= 20) return '#2a1a08';
+  if (girPct >= 55) return '#2a2008';
+  if (girPct >= 35) return '#2a2008';
+  if (girPct >= 20) return '#3a2a0a';
   return '#2a1a1a';
 }
 
@@ -8732,7 +8732,7 @@ function renderPerfAnalysis(a) {
           '<div style="font-size:11px;color:#5a6b60;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:2px;">Longest Drive</div>' +
           '<div style="font-size:11px;color:#9aab9e;">' + ldCourse + ldHole + '</div>' +
           '</div>' +
-          '<div style="font-size:22px;font-weight:800;color:#d4b85a;">' + a.longestDrive + ' yds</div>' +
+          '<div style="font-size:22px;font-weight:800;color:#ffd740;">' + a.longestDrive + ' yds</div>' +
           '</div>';
       }
       return '<div style="background:#00402c;border:1px solid #00402c;border-radius:12px;padding:14px;margin-bottom:8px;">' +
@@ -8762,7 +8762,7 @@ function renderPerfAnalysis(a) {
     var girP  = Math.round(100 * b.gir / b.opp);
     var col   = bucketGirColor(girP);
     var bg    = bucketGirBg(girP);
-    var border = girP >= 55 ? '#00402c' : girP >= 35 ? '#1e1a0e' : girP >= 20 ? '#351a1a' : '#351a1a';
+    var border = girP >= 55 ? '#00402c' : girP >= 35 ? '#2a2008' : girP >= 20 ? '#351a1a' : '#351a1a';
     var misses = [{dir:'Short',count:b.missShort},{dir:'Left',count:b.missLeft},{dir:'Right',count:b.missRight},{dir:'Long',count:b.missLong}];
     misses.sort(function(x,y){return y.count-x.count;});
     var topMiss = misses[0].count > 0 ? ' <span style="color:#9aab9e;">·</span> ' + misses[0].dir + ' ' + Math.round(100*misses[0].count/b.opp) + '% of misses' : '';
@@ -8778,7 +8778,7 @@ function renderPerfAnalysis(a) {
   function argRow(label, makes, opp) {
     var p    = opp > 0 ? Math.round(100 * makes / opp) : null;
     var col  = p === null ? '#9aab9e' : p >= 40 ? '#00b87a' : '#d4706e';
-    var bg   = p === null ? '#141817' : p >= 40 ? '#1e1a0e' : '#2a1a1a';
+    var bg   = p === null ? '#141817' : p >= 40 ? '#2a2008' : '#2a1a1a';
     var bord = p === null ? '#1c2120' : p >= 40 ? '#00402c' : '#351a1a';
     var badge = p !== null ? p + '%' : 'N/A';
     var info  = p !== null ? p + '% up & down · ' + opp + ' opp' : 'No data';
@@ -8798,13 +8798,13 @@ function renderPerfAnalysis(a) {
     var col, bg, bord, badge, info;
     if (is3putt) {
       col   = p === null ? '#9aab9e' : p >= 20 ? '#d4706e' : '#00b87a';
-      bg    = p === null ? '#141817' : p >= 20 ? '#2a1a1a' : '#1e1a0e';
+      bg    = p === null ? '#141817' : p >= 20 ? '#2a1a1a' : '#2a2008';
       bord  = p === null ? '#1c2120' : p >= 20 ? '#351a1a' : '#00402c';
       badge = p !== null ? p + '%' : 'N/A';
       info  = p !== null ? p + '% 3-putt rate · ' + att + ' opp' : 'No data';
     } else {
       col   = p === null ? '#9aab9e' : p >= 50 ? '#00b87a' : '#d4706e';
-      bg    = p === null ? '#141817' : p >= 50 ? '#1e1a0e' : '#2a1a1a';
+      bg    = p === null ? '#141817' : p >= 50 ? '#2a2008' : '#2a1a1a';
       bord  = p === null ? '#1c2120' : p >= 50 ? '#00402c' : '#351a1a';
       badge = p !== null ? p + '%' : 'N/A';
       info  = p !== null ? p + '% make rate · ' + makes + '/' + att : 'No data';
@@ -9014,7 +9014,7 @@ function renderCombinePutt(sessions) {
     }
     var isWorst = worst && worst.key === bk;
     var col  = avgSg >= 0 ? '#00b87a' : '#d4706e';
-    var bg   = avgSg >= 0 ? '#1e1a0e' : '#2a1a1a';
+    var bg   = avgSg >= 0 ? '#2a2008' : '#2a1a1a';
     var bord = avgSg >= 0 ? '#00402c' : '#351a1a';
     var info = (isWorst ? '<span style="color:#d4706e;">\u26a0 Needs work</span> \u00b7 ' : '') + rb.count + ' shots' + trendH;
     dHtml += combStatCard(bk + ' ft', col, bg, bord, (avgSg >= 0 ? '+' : '') + avgSg.toFixed(2) + ' SG', info);
@@ -9140,7 +9140,7 @@ function renderCombineWedge(sessions) {
     }
     var isWorst = worst && worst.key === bk;
     var col  = avgSg >= 0 ? '#00b87a' : '#d4706e';
-    var bg   = avgSg >= 0 ? '#1e1a0e' : '#2a1a1a';
+    var bg   = avgSg >= 0 ? '#2a2008' : '#2a1a1a';
     var bord = avgSg >= 0 ? '#00402c' : '#351a1a';
     var info = (isWorst ? '<span style="color:#d4706e;">\u26a0 Needs work</span> \u00b7 ' : '') + rb.count + ' shots \u00b7 ' + Math.round(avgPts) + ' avg score' + trendH;
     dHtml += combStatCard(bk + ' yds', col, bg, bord, (avgSg >= 0 ? '+' : '') + avgSg.toFixed(2) + ' SG', info);
@@ -9275,7 +9275,7 @@ async function submitCoachRequest() {
       .select('id').eq('user_id', currentUser.id).eq('status', 'pending').limit(1);
 
     if (existing && existing.length > 0) {
-      modalMsg.style.color = '#d4b85a';
+      modalMsg.style.color = '#ffd740';
       modalMsg.textContent = '⏳ Request already pending — waiting for admin approval.';
       sendBtn.disabled = false;
       sendBtn.textContent = 'Send Request';
@@ -9444,7 +9444,7 @@ async function loadUserRole() {
       .select('id').eq('user_id', currentUser.id).eq('status', 'pending').limit(1);
     var roleMsg = document.getElementById('roleMsg');
     if (roleMsg && pending && pending.length > 0) {
-      roleMsg.style.color = '#d4b85a';
+      roleMsg.style.color = '#ffd740';
       roleMsg.textContent = '⏳ Coach request pending approval';
     }
   }
@@ -9547,7 +9547,7 @@ function renderStudentsList(data) {
       + '<button onclick="editStudentName(\'' + s.student_id + '\',\'' + (s.student_name||'Student').replace(/'/g,"\\'") + '\')" style="width:32px;height:32px;font-size:14px;background:#232a27;border-radius:6px;padding:0;">✏️</button>'
       + '</div>'
       + '<div style="display:flex;gap:6px;margin-top:8px;">'
-      + '<button onclick="viewStudent(\'' + s.student_id + '\',\'' + (s.student_name||'Student').replace(/'/g,"\\'") + '\',\'' + (s.student_email||'').replace(/'/g,"\\'") + '\')" style="flex:1;height:36px;font-size:13px;background:#345a78;border-radius:6px;">View Profile</button>'
+      + '<button onclick="viewStudent(\'' + s.student_id + '\',\'' + (s.student_name||'Student').replace(/'/g,"\\'") + '\',\'' + (s.student_email||'').replace(/'/g,"\\'") + '\')" style="flex:1;height:36px;font-size:13px;background:#3a8fd4;border-radius:6px;">View Profile</button>'
       + '<button onclick="removeStudent(\'' + s.student_id + '\',this)" style="width:70px;height:36px;font-size:12px;background:#e06060;border-radius:6px;">Remove</button>'
       + '</div>';
     list.appendChild(card);
@@ -9624,7 +9624,7 @@ async function addStudentByCode() {
     .eq('coach_id', currentUser.id)
     .eq('student_id', profile.id);
   
-  if (existing && existing.length > 0) { msg.style.color = '#d4b85a'; msg.textContent = 'Student already added'; return; }
+  if (existing && existing.length > 0) { msg.style.color = '#ffd740'; msg.textContent = 'Student already added'; return; }
   
   // Add the link
   var { error: insertErr } = await _sb.from('coach_students').insert({
@@ -9720,7 +9720,7 @@ function toggleStudentHcpDropdown(e) {
   _hcpOptions.forEach(function(o) {
     var row = document.createElement('div');
     var isActive = o.value === _currentStudentHcp;
-    row.style.cssText = 'padding:7px 10px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:' + (isActive ? '700' : '500') + ';color:' + (isActive ? '#8db3d0' : '#9aab9e') + ';background:' + (isActive ? '#1f3048' : 'transparent') + ';display:flex;align-items:center;gap:8px;white-space:nowrap;';
+    row.style.cssText = 'padding:7px 10px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:' + (isActive ? '700' : '500') + ';color:' + (isActive ? '#5cc8ff' : '#9aab9e') + ';background:' + (isActive ? '#1a4a8a' : 'transparent') + ';display:flex;align-items:center;gap:8px;white-space:nowrap;';
     row.innerHTML = '<span style="width:12px;font-size:10px;">' + (isActive ? '✓' : '') + '</span>' + o.label;
     row.onclick = function(ev) { ev.stopPropagation(); selectStudentHcp(o.value); };
     row.onmouseenter = function() { if (!isActive) this.style.background = '#1c2120'; };
@@ -9778,7 +9778,7 @@ function showStudentTab(tab) {
   [['dashboard', dBtn], ['performance', pBtn], ['rounds', rBtn], ['practice', prBtn], ['notes', nBtn], ['misc', mBtn]].forEach(function(pair) {
     var active = tab === pair[0];
     if (pair[1]) {
-      pair[1].style.background = active ? '#345a78' : '#1c2120';
+      pair[1].style.background = active ? '#3a8fd4' : '#1c2120';
       pair[1].style.color      = active ? '#ffffff' : '#5a6b60';
       pair[1].style.fontWeight = active ? '700' : '600';
     }
@@ -9805,8 +9805,8 @@ function setSvPerfPage(page) {
   document.getElementById('svPerfPageCombines').style.display = isRounds ? 'none' : '';
   var btnR = document.getElementById('svPerfBtnRounds');
   var btnC = document.getElementById('svPerfBtnCombines');
-  if (btnR) { btnR.style.background = isRounds ? '#345a78' : 'transparent'; btnR.style.color = isRounds ? '#ffffff' : '#232a27'; }
-  if (btnC) { btnC.style.background = isRounds ? 'transparent' : '#345a78'; btnC.style.color = isRounds ? '#232a27' : '#ffffff'; }
+  if (btnR) { btnR.style.background = isRounds ? '#3a8fd4' : 'transparent'; btnR.style.color = isRounds ? '#ffffff' : '#232a27'; }
+  if (btnC) { btnC.style.background = isRounds ? 'transparent' : '#3a8fd4'; btnC.style.color = isRounds ? '#232a27' : '#ffffff'; }
   if (!isRounds && !_svPerfCombineLoaded) {
     _svPerfCombineLoaded = true;
     loadSvPerfCombineData();
@@ -10109,7 +10109,7 @@ function filterSvRounds() {
     var d = new Date(r.round_date + 'T12:00:00');
     var dateStr = (d.getMonth()+1) + '/' + d.getDate() + '/' + d.getFullYear();
     var placeStr = (r.round_type === 'Tournament' && r.tournament_place) ? ' — ' + ordinalSuffix(r.tournament_place) + ' Place' : '';
-    var typeTag = r.round_type === 'Tournament' ? '<div style="color:#d4b85a;font-size:11px;font-weight:700;margin-top:2px;">★ Tournament' + placeStr + '</div>' : '';
+    var typeTag = r.round_type === 'Tournament' ? '<div style="color:#ffd740;font-size:11px;font-weight:700;margin-top:2px;">★ Tournament' + placeStr + '</div>' : '';
     var card = document.createElement('div');
     card.style.cssText = 'background:#1c2120;border-radius:10px;padding:12px;margin:6px 0;';
     card.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;">'
@@ -10120,7 +10120,7 @@ function filterSvRounds() {
       + '<div style="font-size:13px;color:' + (r.to_par>0?'#d4706e':r.to_par<0?'#00a06d':'#9aab9e') + '">' + tp + '</div></div></div>'
       + '<div style="display:flex;gap:6px;margin-top:8px;">'
             + '<button onclick=\"event.stopPropagation();openEditRoundInfo(\'' + r.id + '\', event)\" style=\"flex:1;height:30px;font-size:12px;background:#007a52;border-radius:6px;font-weight:700;margin-right:4px;\">Edit</button>'
-+ '<button onclick="viewSavedRound(\'' + r.id + '\')" style="flex:1;height:30px;font-size:12px;background:#345a78;border-radius:6px;">Stats</button>'
++ '<button onclick="viewSavedRound(\'' + r.id + '\')" style="flex:1;height:30px;font-size:12px;background:#3a8fd4;border-radius:6px;">Stats</button>'
       + '<button onclick="deleteStudentRound(\'' + r.id + '\',this)" style="width:60px;height:30px;font-size:12px;background:#e06060;border-radius:6px;">Del</button>'
       + '</div>';
     list.appendChild(card);
@@ -11204,7 +11204,7 @@ function renderDashboard(data, hcp, targetId) {
   html+='<div style="display:flex;gap:0;width:100%;flex-shrink:0;border-radius:10px;overflow:hidden;margin-bottom:12px;">';
   for(var ti=0;ti<tabNames.length;ti++){
     var isActive=ti===0;
-    html+='<button onclick="showDashSub('+ti+')" id="dashTab_'+ti+'" style="flex:1;height:36px;font-size:10px;font-weight:700;background:'+(isActive?'#345a78':'#1c2120')+';border-radius:0;border:none;color:'+(isActive?'#ffffff':'#5a6b60')+';max-width:none;width:auto;padding:0 2px;margin:0;cursor:pointer;">'+tabNames[ti]+'</button>';
+    html+='<button onclick="showDashSub('+ti+')" id="dashTab_'+ti+'" style="flex:1;height:36px;font-size:10px;font-weight:700;background:'+(isActive?'#3a8fd4':'#1c2120')+';border-radius:0;border:none;color:'+(isActive?'#ffffff':'#5a6b60')+';max-width:none;width:auto;padding:0 2px;margin:0;cursor:pointer;">'+tabNames[ti]+'</button>';
   }
   html+='</div>';
   
@@ -11362,7 +11362,7 @@ function showDashSub(idx) {
     var el=document.getElementById('dsub_'+i);
     if(el)el.style.display=i===idx?'block':'none';
     var tab=document.getElementById('dashTab_'+i);
-    if(tab){tab.style.background=i===idx?'#345a78':'#1c2120';tab.style.color=i===idx?'#ffffff':'#5a6b60';}
+    if(tab){tab.style.background=i===idx?'#3a8fd4':'#1c2120';tab.style.color=i===idx?'#ffffff':'#5a6b60';}
   }
   
   setTimeout(function(){
@@ -11926,7 +11926,7 @@ function showFullStats() {
   t0+='<span>'+totPutts+' putts</span>';
   t0+='</div>';
   
-  function scColor(h){var diff=h.score-h.par;return diff<=-2?'#345a78':diff===-1?'#007a52':diff===0?'transparent':diff===1?'#d4706e':'#351a1a';}
+  function scColor(h){var diff=h.score-h.par;return diff<=-2?'#3a8fd4':diff===-1?'#007a52':diff===0?'transparent':diff===1?'#d4706e':'#351a1a';}
   function scSpan(h){return'<span style="background:'+scColor(h)+';padding:1px 4px;border-radius:3px;">'+h.score+'</span>';}
   
   // Front 9
@@ -12108,13 +12108,13 @@ function showFullStats() {
   allHoles.forEach(function(h5, holeIdx){
     var diff=h5.score-h5.par;
     var scoreLabel=diff<=-2?'Eagle':diff===-1?'Birdie':diff===0?'Par':diff===1?'Bogey':diff===2?'Double':'+'+diff;
-    var scoreBg=diff<=-2?'#345a78':diff===-1?'#007a52':diff===0?'#2a3530':diff===1?'#d4706e':'#351a1a';
+    var scoreBg=diff<=-2?'#3a8fd4':diff===-1?'#007a52':diff===0?'#2a3530':diff===1?'#d4706e':'#351a1a';
     t6+='<div style="background:#141817;padding:6px 10px;border-bottom:1px solid #2a3530;margin-bottom:2px;">';
     t6+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">';
     t6+='<span style="font-weight:700;font-size:13px;">Hole '+h5.hole+' \u00b7 Par '+h5.par+' \u00b7 '+h5.yards+' yds</span>';
     t6+='<div style="display:flex;align-items:center;gap:6px;">';
     t6+='<span style="font-size:12px;font-weight:700;background:'+scoreBg+';padding:2px 8px;border-radius:4px;">'+h5.score+' ('+scoreLabel+')</span>';
-    t6+='<button onclick="editHole('+holeIdx+')" style="width:50px;height:24px;font-size:11px;background:#345a78;border:none;border-radius:4px;color:#ffffff;cursor:pointer;">Edit</button>';
+    t6+='<button onclick="editHole('+holeIdx+')" style="width:50px;height:24px;font-size:11px;background:#3a8fd4;border:none;border-radius:4px;color:#ffffff;cursor:pointer;">Edit</button>';
     t6+='</div></div>';
     (h5.shots||[]).forEach(function(s,idx){
       var nextShot=(h5.shots||[])[idx+1];
@@ -12271,7 +12271,7 @@ function sgCalcSetHole(par) {
   _sgCalcPar = par;
   [3,4,5].forEach(function(p) {
     var btn = document.getElementById('sgCalcTab' + p);
-    btn.style.background = p === par ? '#345a78' : '#141817';
+    btn.style.background = p === par ? '#3a8fd4' : '#141817';
     btn.style.color = p === par ? '#ffffff' : '#5a6b60';
   });
   document.getElementById('sgCalcYardage').value = _sgCalcDefaults[par];
@@ -12287,7 +12287,7 @@ function sgCalcReset() {
   document.getElementById('sgCalcResults').innerHTML = '';
   document.getElementById('sgCalcStatExp').textContent = expTee.toFixed(2);
   document.getElementById('sgCalcStatRemain').textContent = '–';
-  document.getElementById('sgCalcStatRemain').style.color = '#8db3d0';
+  document.getElementById('sgCalcStatRemain').style.color = '#5cc8ff';
   document.getElementById('sgCalcStatSg').textContent = '–';
   document.getElementById('sgCalcStatSg').style.color = '#232a27';
   sgCalcDrawHole();
@@ -12354,7 +12354,7 @@ function sgCalcDrawHole() {
     if (!s.holed) {
       var rmidX = (s.x + holeX) / 2;
       var rmidY = (s.y + holeY) / 2;
-      html += '<path d="M' + s.x + ',' + s.y + ' Q' + rmidX + ',' + rmidY + ' ' + holeX + ',' + holeY + '" fill="none" stroke="#8db3d0" stroke-width="1.8" stroke-dasharray="4,4" opacity="0.9"/>';
+      html += '<path d="M' + s.x + ',' + s.y + ' Q' + rmidX + ',' + rmidY + ' ' + holeX + ',' + holeY + '" fill="none" stroke="#5cc8ff" stroke-width="1.8" stroke-dasharray="4,4" opacity="0.9"/>';
 
       // Remaining distance label — blue
       var remainDist = s.lie === 'GREEN' ? s.ydsRemaining + ' ft' : s.ydsRemaining + ' yds';
@@ -12363,7 +12363,7 @@ function sgCalcDrawHole() {
       if (rlabelX > 300) rlabelX = rmidX - 18;
       var ranchor = rlabelX > holeX ? 'start' : 'end';
       html += '<text x="' + rlabelX + '" y="' + (rlabelY + 4) + '" fill="#000" font-size="14" text-anchor="' + ranchor + '" font-weight="800" stroke="#000" stroke-width="3" paint-order="stroke">' + remainDist + '</text>';
-      html += '<text x="' + rlabelX + '" y="' + (rlabelY + 4) + '" fill="#8db3d0" font-size="14" text-anchor="' + ranchor + '" font-weight="800">' + remainDist + '</text>';
+      html += '<text x="' + rlabelX + '" y="' + (rlabelY + 4) + '" fill="#5cc8ff" font-size="14" text-anchor="' + ranchor + '" font-weight="800">' + remainDist + '</text>';
     }
 
     // Ball
@@ -12521,7 +12521,7 @@ function sgCalcTap(e) {
   }
   var sg = expBefore - 1 - expAfter;
   
-  var color = '#8db3d0';
+  var color = '#5cc8ff';
   var distLabel = lie === 'GREEN' ? ydsRemaining + ' ft' : ydsFromTee + ' yds';
 
   // Always replace — single tee shot only
@@ -12543,7 +12543,7 @@ function sgCalcTap(e) {
   var sgCol = sg >= 0 ? '#00b87a' : '#d4706e';
   document.getElementById('sgCalcStatExp').textContent = expBefore.toFixed(2);
   document.getElementById('sgCalcStatRemain').textContent = expAfter.toFixed(2);
-  document.getElementById('sgCalcStatRemain').style.color = '#8db3d0';
+  document.getElementById('sgCalcStatRemain').style.color = '#5cc8ff';
   document.getElementById('sgCalcStatSg').textContent = (sg >= 0 ? '+' : '') + sg.toFixed(2);
   document.getElementById('sgCalcStatSg').style.color = sgCol;
   
@@ -12567,7 +12567,7 @@ function sgCalcRenderResults() {
     + '<div style="font-family:monospace;font-size:11px;color:#5a6b60;line-height:1.8;">'
     + 'Expected from tee: <span style="color:#00b87a;">' + s.expBefore.toFixed(2) + '</span><br>'
     + 'Shot taken: <span style="color:#ffffff;">1</span><br>'
-    + 'Expected remaining: <span style="color:#8db3d0;">' + s.expAfter.toFixed(2) + '</span><br>'
+    + 'Expected remaining: <span style="color:#5cc8ff;">' + s.expAfter.toFixed(2) + '</span><br>'
     + 'SG = ' + s.expBefore.toFixed(2) + ' − 1 − ' + s.expAfter.toFixed(2) + ' = <span style="color:' + sgCol + ';font-weight:700;">' + sgStr + '</span>'
     + '</div></div>';
 }
@@ -12583,7 +12583,7 @@ function showHelpTab(tab) {
   ['start','sg','faq','contact'].forEach(function(t) {
     document.getElementById('helpContent_' + t).style.display = t === tab ? 'block' : 'none';
     var btn = document.getElementById('helpTab_' + t);
-    btn.style.background = t === tab ? '#345a78' : '#141817';
+    btn.style.background = t === tab ? '#3a8fd4' : '#141817';
     btn.style.color = t === tab ? '#ffffff' : '#5a6b60';
   });
   if (tab === 'sg') renderSGExplainer();
@@ -12595,7 +12595,7 @@ function showSgSubTab(sub) {
     if (el) el.style.display = t === sub ? 'block' : 'none';
     var btn = document.getElementById('sgSubTab_' + t);
     if (btn) {
-      btn.style.background = t === sub ? '#345a78' : '#0d0f0e';
+      btn.style.background = t === sub ? '#3a8fd4' : '#0d0f0e';
       btn.style.color = t === sub ? '#ffffff' : '#5a6b60';
     }
   });
@@ -12632,12 +12632,12 @@ function renderSGExplainer() {
     + '<div style="flex:1;background:#0d0f0e;border:1px solid #2a3530;border-radius:10px;padding:12px;text-align:center;">'
     + '<div style="font-size:10px;color:#5a6b60;text-transform:uppercase;letter-spacing:1px;font-weight:700;">Tour Pro</div>'
     + '<div style="font-size:11px;color:#9aab9e;margin-top:4px;">400 yd Par 4</div>'
-    + '<div style="font-size:26px;font-weight:900;color:#8db3d0;margin-top:4px;">3.99</div>'
+    + '<div style="font-size:26px;font-weight:900;color:#5cc8ff;margin-top:4px;">3.99</div>'
     + '<div style="font-size:10px;color:#232a27;">expected strokes</div></div>'
     + '<div style="flex:1;background:#0d0f0e;border:1px solid #2a3530;border-radius:10px;padding:12px;text-align:center;">'
     + '<div style="font-size:10px;color:#5a6b60;text-transform:uppercase;letter-spacing:1px;font-weight:700;">10 Handicap</div>'
     + '<div style="font-size:11px;color:#9aab9e;margin-top:4px;">400 yd Par 4</div>'
-    + '<div style="font-size:26px;font-weight:900;color:#d4b85a;margin-top:4px;">4.73</div>'
+    + '<div style="font-size:26px;font-weight:900;color:#ffd740;margin-top:4px;">4.73</div>'
     + '<div style="font-size:10px;color:#232a27;">expected strokes</div></div>'
     + '</div>'
     
@@ -12648,7 +12648,7 @@ function renderSGExplainer() {
     // ── EXAMPLE 1: TWO PLAYERS ──
     + '<div style="padding:0 16px;">'
     + '<div style="font-size:14px;font-weight:800;color:#ffffff;margin-bottom:4px;">🏌️ Example 1: Comparing Two Drives</div>'
-    + '<div style="font-size:12px;color:#9aab9e;line-height:1.5;margin-bottom:10px;">Both players are <span style="color:#d4b85a;font-weight:700;">10 handicaps</span> on a <span style="color:#ffffff;font-weight:700;">400-yard Par 4</span>.</div>'
+    + '<div style="font-size:12px;color:#9aab9e;line-height:1.5;margin-bottom:10px;">Both players are <span style="color:#ffd740;font-weight:700;">10 handicaps</span> on a <span style="color:#ffffff;font-weight:700;">400-yard Par 4</span>.</div>'
     + '</div>'
     
     // Image - Two players comparison
@@ -12658,11 +12658,11 @@ function renderSGExplainer() {
     
     // Player comparison cards
     + '<div style="padding:8px 16px 0;display:flex;gap:6px;">'
-    + '<div style="flex:1;background:#1f3048;border:1px solid #345a78;border-radius:10px;padding:10px;">'
-    + '<div style="font-size:10px;font-weight:800;color:#8db3d0;text-transform:uppercase;letter-spacing:1px;">Player 1</div>'
+    + '<div style="flex:1;background:#1a4a8a;border:1px solid #3a8fd4;border-radius:10px;padding:10px;">'
+    + '<div style="font-size:10px;font-weight:800;color:#5cc8ff;text-transform:uppercase;letter-spacing:1px;">Player 1</div>'
     + '<div style="font-size:11px;color:#9aab9e;margin-top:4px;">250 yd drive → 150 out</div>'
     + '<div style="font-size:10px;color:#232a27;margin-top:2px;">Expected from 150 yds:</div>'
-    + '<div style="font-size:18px;font-weight:900;color:#8db3d0;">3.18 <span style="font-size:10px;color:#232a27;">shots</span></div>'
+    + '<div style="font-size:18px;font-weight:900;color:#5cc8ff;">3.18 <span style="font-size:10px;color:#232a27;">shots</span></div>'
     + '</div>'
     + '<div style="flex:1;background:#00402c;border:1px solid #007a52;border-radius:10px;padding:10px;">'
     + '<div style="font-size:10px;font-weight:800;color:#00b87a;text-transform:uppercase;letter-spacing:1px;">Player 2</div>'
@@ -12676,7 +12676,7 @@ function renderSGExplainer() {
     + '<div style="background:#0d0f0e;border:1px solid #2a3530;border-radius:10px;padding:12px;">'
     + '<div style="font-size:11px;color:#5a6b60;margin-bottom:6px;">Player 2\'s extra 50 yards is worth:</div>'
     + '<div style="font-family:monospace;font-size:12px;color:#9aab9e;line-height:2;">'
-    + '<span style="color:#5a6b60;">P1 expected remaining:</span> <span style="color:#8db3d0;">3.18</span><br>'
+    + '<span style="color:#5a6b60;">P1 expected remaining:</span> <span style="color:#5cc8ff;">3.18</span><br>'
     + '<span style="color:#5a6b60;">P2 expected remaining:</span> <span style="color:#00b87a;">2.82</span><br>'
     + '<span style="color:#5a6b60;">Difference:</span> 3.18 − 2.82 = <span style="color:#00b87a;font-weight:700;">+0.36 strokes gained</span>'
     + '</div>'
@@ -12686,7 +12686,7 @@ function renderSGExplainer() {
     // ── EXAMPLE 2: FULL HOLE ──
     + '<div style="padding:0 16px;">'
     + '<div style="font-size:14px;font-weight:800;color:#ffffff;margin-bottom:4px;">⛳ Example 2: Full Hole Breakdown</div>'
-    + '<div style="font-size:12px;color:#9aab9e;line-height:1.5;margin-bottom:10px;"><span style="color:#d4b85a;font-weight:700;">10-handicap</span> player on a <span style="color:#ffffff;font-weight:700;">400-yard Par 4</span>. Expected strokes from the tee: <span style="color:#00b87a;font-weight:700;">4.73</span></div>'
+    + '<div style="font-size:12px;color:#9aab9e;line-height:1.5;margin-bottom:10px;"><span style="color:#ffd740;font-weight:700;">10-handicap</span> player on a <span style="color:#ffffff;font-weight:700;">400-yard Par 4</span>. Expected strokes from the tee: <span style="color:#00b87a;font-weight:700;">4.73</span></div>'
     + '</div>'
     
     // Image - Full hole with 3 shots
@@ -12701,9 +12701,9 @@ function renderSGExplainer() {
     
     // Shot 1 card
     + '<div style="padding:0 16px 6px;">'
-    + '<div style="background:#0d0f0e;border-left:3px solid #8db3d0;border-radius:8px;padding:10px 12px;">'
+    + '<div style="background:#0d0f0e;border-left:3px solid #5cc8ff;border-radius:8px;padding:10px 12px;">'
     + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">'
-    + '<div style="font-size:12px;font-weight:800;color:#8db3d0;">① Tee Shot — 250 yd Drive</div>'
+    + '<div style="font-size:12px;font-weight:800;color:#5cc8ff;">① Tee Shot — 250 yd Drive</div>'
     + '<div style="font-size:14px;font-weight:900;color:#d4706e;">−0.18</div></div>'
     + '<div style="font-family:monospace;font-size:11px;color:#5a6b60;line-height:1.8;">'
     + 'Expected from tee (400 yds): <span style="color:#00b87a;">4.73</span><br>'
@@ -12731,9 +12731,9 @@ function renderSGExplainer() {
     
     // Shot 3 card
     + '<div style="padding:0 16px 6px;">'
-    + '<div style="background:#0d0f0e;border-left:3px solid #8db3d0;border-radius:8px;padding:10px 12px;">'
+    + '<div style="background:#0d0f0e;border-left:3px solid #5cc8ff;border-radius:8px;padding:10px 12px;">'
     + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">'
-    + '<div style="font-size:12px;font-weight:800;color:#8db3d0;">③ Putt — 10 ft, Holed!</div>'
+    + '<div style="font-size:12px;font-weight:800;color:#5cc8ff;">③ Putt — 10 ft, Holed!</div>'
     + '<div style="font-size:14px;font-weight:900;color:#00b87a;">+0.85</div></div>'
     + '<div style="font-family:monospace;font-size:11px;color:#5a6b60;line-height:1.8;">'
     + 'Expected from 10 ft: <span style="color:#00b87a;">1.85</span><br>'
@@ -12749,9 +12749,9 @@ function renderSGExplainer() {
     + '<div style="font-size:11px;color:#5a6b60;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:4px;">Hole Total</div>'
     + '<div style="font-size:11px;color:#9aab9e;margin-bottom:6px;">Scored a <span style="color:#ffffff;font-weight:700;">Birdie 3</span> on a Par 4 (expected: 4.73)</div>'
     + '<div style="display:flex;justify-content:center;gap:12px;margin-bottom:8px;">'
-    + '<div><div style="font-size:10px;color:#8db3d0;">OTT</div><div style="font-size:14px;font-weight:800;color:#d4706e;">−0.18</div></div>'
+    + '<div><div style="font-size:10px;color:#5cc8ff;">OTT</div><div style="font-size:14px;font-weight:800;color:#d4706e;">−0.18</div></div>'
     + '<div><div style="font-size:10px;color:#00b87a;">APP</div><div style="font-size:14px;font-weight:800;color:#00b87a;">+0.70</div></div>'
-    + '<div><div style="font-size:10px;color:#8db3d0;">PUTT</div><div style="font-size:14px;font-weight:800;color:#00b87a;">+0.85</div></div>'
+    + '<div><div style="font-size:10px;color:#5cc8ff;">PUTT</div><div style="font-size:14px;font-weight:800;color:#00b87a;">+0.85</div></div>'
     + '</div>'
     + '<div style="border-top:1px solid #2a3530;padding-top:8px;">'
     + '<div style="font-size:22px;font-weight:900;color:#00b87a;">+1.37 SG</div>'
@@ -12763,10 +12763,10 @@ function renderSGExplainer() {
     + '<div style="font-size:14px;font-weight:800;color:#ffffff;margin-bottom:8px;">The 4 Categories</div>'
     + '</div>'
     + '<div style="padding:0 16px 10px;display:grid;grid-template-columns:1fr 1fr;gap:6px;">'
-    + sgCatCard('SG: Off the Tee', 'Tee shots on Par 4s & 5s', '#8db3d0')
+    + sgCatCard('SG: Off the Tee', 'Tee shots on Par 4s & 5s', '#5cc8ff')
     + sgCatCard('SG: Approach', 'Shots into the green', '#00a06d')
-    + sgCatCard('SG: Around Green', 'Chips, pitches & bunker shots', '#d4b85a')
-    + sgCatCard('SG: Putting', 'Everything on the green', '#8db3d0')
+    + sgCatCard('SG: Around Green', 'Chips, pitches & bunker shots', '#ffd740')
+    + sgCatCard('SG: Putting', 'Everything on the green', '#5cc8ff')
     + '</div>'
     
     // Positive vs Negative
@@ -13879,7 +13879,7 @@ function getCombGradeFromCard(c) {
 function gradeColor(g) {
   if (g >= 80) return '#00b87a';
   if (g >= 60) return '#00b87a';
-  if (g >= 40) return '#d4b85a';
+  if (g >= 40) return '#ffd740';
   if (g >= 20) return '#d4706e';
   return '#d4706e';
 }
@@ -14117,7 +14117,7 @@ function renderCombCard(c, canDelete, canEditNote){
   var strokesLine = '';
   
   if(c.combine_type==='Driver' && c.avg_pts!==null && c.avg_pts!==undefined){
-    sgLine='<span style="color:#8db3d0;font-size:15px;font-weight:700;">'+(+c.avg_pts).toFixed(0)+' avg score</span>';
+    sgLine='<span style="color:#5cc8ff;font-size:15px;font-weight:700;">'+(+c.avg_pts).toFixed(0)+' avg score</span>';
   } else if(c.total_sg!==null && c.total_sg!==undefined){
     var s=parseFloat(c.total_sg);
     var col=s>=0?'#00b87a':'#d4706e';
@@ -14142,7 +14142,7 @@ function renderCombCard(c, canDelete, canEditNote){
     scoreStr = sgLine;
   }
   var dateStr=c.combine_date?new Date(c.combine_date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'';
-  var combBadge = c.is_combine ? '<span style="font-size:10px;background:#345a78;color:#ffffff;padding:2px 6px;border-radius:4px;margin-left:6px;font-weight:600;">COMBINE</span>' : '';
+  var combBadge = c.is_combine ? '<span style="font-size:10px;background:#3a8fd4;color:#ffffff;padding:2px 6px;border-radius:4px;margin-left:6px;font-weight:600;">COMBINE</span>' : '';
   var delBtn = canDelete ? '<button class="comb-hist-del" onclick="deleteCombScore(\''+c.id+'\')" title="Delete">🗑 Delete</button>' : '';
   var noteHtml = c.note ? ' • <em style="color:#9aab9e;">'+escapeHtml(c.note)+'</em>' : '';
   var metaStr = c.holes_count + '-hole • vs '+c.handicap+strokesLine+noteHtml;
@@ -14211,7 +14211,7 @@ function toggleCombDetails(id) {
     if (isPut) row += '<td style="padding:3px 4px;">'+distStr+' ft</td><td style="padding:3px 4px;">'+valStr+'</td><td style="padding:3px 4px;">'+sgStr+'</td>';
     else if (isWedge) row += '<td style="padding:3px 4px;">'+distStr+' yds</td><td style="padding:3px 4px;">'+valStr+'</td><td style="padding:3px 4px;">'+sgStr+'</td>';
     else if (isChipProx) row += '<td style="padding:3px 4px;">'+distStr+' yds</td><td style="padding:3px 4px;font-size:10px;">'+lieStr+'</td><td style="padding:3px 4px;">'+valStr+' ft</td><td style="padding:3px 4px;">'+sgStr+'</td>';
-    else if (isDriver) { var scoreVal = (r.d!==''&&r.v!=='') ? (parseFloat(r.d)-parseFloat(r.v)).toFixed(0) : '–'; row += '<td style="padding:3px 4px;">'+distStr+' yds</td><td style="padding:3px 4px;">'+valStr+' yds</td><td style="padding:3px 4px;font-weight:700;color:#8db3d0;">'+scoreVal+'</td>'; }
+    else if (isDriver) { var scoreVal = (r.d!==''&&r.v!=='') ? (parseFloat(r.d)-parseFloat(r.v)).toFixed(0) : '–'; row += '<td style="padding:3px 4px;">'+distStr+' yds</td><td style="padding:3px 4px;">'+valStr+' yds</td><td style="padding:3px 4px;font-weight:700;color:#5cc8ff;">'+scoreVal+'</td>'; }
     else row += '<td style="padding:3px 4px;">'+distStr+' yds</td><td style="padding:3px 4px;font-size:10px;">'+lieStr+'</td><td style="padding:3px 4px;">'+valStr+'</td><td style="padding:3px 4px;">'+sgStr+'</td>';
     row += '</tr>';
     return row;
@@ -14316,7 +14316,7 @@ showProfileTab = function(tab){
   tabs.forEach(function(t,i){
     var btn = document.getElementById(ids[i]);
     if(!btn) return;
-    btn.style.background = t===tab ? '#345a78' : '#1c2120';
+    btn.style.background = t===tab ? '#3a8fd4' : '#1c2120';
     btn.style.color      = t===tab ? '#ffffff' : '#5a6b60';
     btn.style.fontWeight = t===tab ? '700' : '600';
   });
@@ -14332,7 +14332,7 @@ function showStudentCoachingTab(idx) {
   for (var i = 0; i < 3; i++) {
     var btn = document.getElementById('cstTab' + i);
     var pane = document.getElementById('cstTabContent' + i);
-    if (btn)  { btn.style.background = i === idx ? '#345a78' : '#1c2120'; btn.style.color = i === idx ? '#ffffff' : '#5a6b60'; btn.style.fontWeight = i === idx ? '700' : '600'; }
+    if (btn)  { btn.style.background = i === idx ? '#3a8fd4' : '#1c2120'; btn.style.color = i === idx ? '#ffffff' : '#5a6b60'; btn.style.fontWeight = i === idx ? '700' : '600'; }
     if (pane) pane.style.display = i === idx ? (i === 0 ? 'flex' : 'block') : 'none';
   }
   // sync outer wrapper scroll behavior
@@ -14344,7 +14344,7 @@ function showCoachCoachingTab(idx) {
   for (var i = 0; i < 4; i++) {
     var btn = document.getElementById('cctTab' + i);
     var pane = document.getElementById('cctTabContent' + i);
-    if (btn)  { btn.style.background = i === idx ? '#345a78' : '#1c2120'; btn.style.color = i === idx ? '#ffffff' : '#5a6b60'; btn.style.fontWeight = i === idx ? '700' : '600'; }
+    if (btn)  { btn.style.background = i === idx ? '#3a8fd4' : '#1c2120'; btn.style.color = i === idx ? '#ffffff' : '#5a6b60'; btn.style.fontWeight = i === idx ? '700' : '600'; }
     if (pane) pane.style.display = i === idx ? 'block' : 'none';
   }
 }
@@ -14355,11 +14355,11 @@ function setCoachNoteType(type) {
   var gBtn = document.getElementById('coachNoteTypeGeneral');
   var dateRow = document.getElementById('coachNoteLessonDateRow');
   if (type === 'lesson') {
-    lBtn.style.background = '#345a78'; lBtn.style.color = '#ffffff'; lBtn.style.fontWeight = '700';
+    lBtn.style.background = '#3a8fd4'; lBtn.style.color = '#ffffff'; lBtn.style.fontWeight = '700';
     gBtn.style.background = '#1c2120'; gBtn.style.color = '#5a6b60'; gBtn.style.fontWeight = '600';
     dateRow.style.display = 'flex';
   } else {
-    gBtn.style.background = '#345a78'; gBtn.style.color = '#ffffff'; gBtn.style.fontWeight = '700';
+    gBtn.style.background = '#3a8fd4'; gBtn.style.color = '#ffffff'; gBtn.style.fontWeight = '700';
     lBtn.style.background = '#1c2120'; lBtn.style.color = '#5a6b60'; lBtn.style.fontWeight = '600';
     dateRow.style.display = 'none';
     document.getElementById('coachNoteLessonDate').value = '';
@@ -14437,9 +14437,9 @@ async function loadCoachingPageStudentView() {
       coach = coach2;
     }
     if (coach) {
-      var emailPart = coach.email ? ' <a href="mailto:' + escapeHtml(coach.email) + '" style="font-size:12px;color:#8db3d0;text-decoration:none;margin-left:6px;">' + escapeHtml(coach.email) + '</a>' : '';
+      var emailPart = coach.email ? ' <a href="mailto:' + escapeHtml(coach.email) + '" style="font-size:12px;color:#5cc8ff;text-decoration:none;margin-left:6px;">' + escapeHtml(coach.email) + '</a>' : '';
       coachContent.innerHTML = '<div style="display:flex;align-items:center;gap:12px;">'
-        + '<div style="width:40px;height:40px;background:#1f3048;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">👤</div>'
+        + '<div style="width:40px;height:40px;background:#1a4a8a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">👤</div>'
         + '<div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:2px;"><span style="font-weight:700;font-size:15px;">' + escapeHtml(coach.display_name || 'Coach') + '</span>'
         + emailPart + '</div></div>';
     } else {
@@ -14535,13 +14535,13 @@ function renderFeedbackNotes(data) {
     var sentDate = new Date(n.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     var isLesson = !!n.lesson_date || n.note_type === 'lesson';
     var typeBadge = '<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px;background:' 
-      + (isLesson ? '#345a78' : '#00402c') + ';color:' + (isLesson ? '#8db3d0' : '#00b87a') + ';">'
+      + (isLesson ? '#3a8fd4' : '#00402c') + ';color:' + (isLesson ? '#5cc8ff' : '#00b87a') + ';">'
       + (isLesson ? 'Lesson' : 'General') + '</span>';
 
     var lessonLine = '';
     if (n.lesson_date) {
       var ld = new Date(n.lesson_date + 'T12:00:00');
-      lessonLine = '<div style="font-size:11px;color:#8db3d0;font-weight:700;margin-bottom:4px;">📅 Lesson: '
+      lessonLine = '<div style="font-size:11px;color:#5cc8ff;font-weight:700;margin-bottom:4px;">📅 Lesson: '
         + ld.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + '</div>';
     }
 
@@ -14549,12 +14549,12 @@ function renderFeedbackNotes(data) {
     var noteText = escapeHtml(n.note_text);
     if (query.trim()) {
       var re = new RegExp('(' + query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
-      noteText = noteText.replace(re, '<mark style="background:#1f3048;color:#8db3d0;border-radius:3px;padding:0 2px;">$1</mark>');
+      noteText = noteText.replace(re, '<mark style="background:#1a4a8a;color:#5cc8ff;border-radius:3px;padding:0 2px;">$1</mark>');
     }
 
     if (n._kind === 'drill' || n._kind === 'combine') {
       var assignBadgeLabel = n._kind === 'drill' ? 'Drill' : 'Combine';
-      var assignBadge = '<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px;background:#345a78;color:#8db3d0;">' + assignBadgeLabel + '</span>';
+      var assignBadge = '<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px;background:#3a8fd4;color:#5cc8ff;">' + assignBadgeLabel + '</span>';
       var doneStyle = n.completed ? 'opacity:0.55;' : '';
       var noun = n._kind === 'combine' ? escapeHtml(n.note_text || '') + ' combine' : escapeHtml(n.note_text || '');
       var article = n._kind === 'drill' ? 'the' : 'a';
@@ -14566,14 +14566,14 @@ function renderFeedbackNotes(data) {
       }
       return '<div onclick="showStudentCoachingTab(1)" style="' + doneStyle + 'border-bottom:1px solid #1c2120;padding:12px 0;cursor:pointer;">'
         + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;flex-wrap:wrap;gap:4px;">'
-        + '<div style="display:flex;align-items:center;"><div style="font-size:11px;font-weight:700;color:#8db3d0;">' + escapeHtml(n.coach_name || 'Coach') + '</div>' + assignBadge + '</div>'
+        + '<div style="display:flex;align-items:center;"><div style="font-size:11px;font-weight:700;color:#5cc8ff;">' + escapeHtml(n.coach_name || 'Coach') + '</div>' + assignBadge + '</div>'
         + '<div style="font-size:10px;color:#232a27;">' + sentDate + '</div></div>'
-        + '<div style="font-size:13px;color:#8db3d0;line-height:1.6;">' + assignText + dueLine + (n.completed ? ' <span style="font-size:11px;color:#00b87a;">\u2713</span>' : '') + '</div></div>';
+        + '<div style="font-size:13px;color:#5cc8ff;line-height:1.6;">' + assignText + dueLine + (n.completed ? ' <span style="font-size:11px;color:#00b87a;">\u2713</span>' : '') + '</div></div>';
     }
 
     return '<div style="border-bottom:1px solid #1c2120;padding:12px 0;">'
       + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;flex-wrap:wrap;gap:4px;">'
-      + '<div style="display:flex;align-items:center;"><div style="font-size:11px;font-weight:700;color:#8db3d0;">' + escapeHtml(n.coach_name || 'Coach') + '</div>' + typeBadge + '</div>'
+      + '<div style="display:flex;align-items:center;"><div style="font-size:11px;font-weight:700;color:#5cc8ff;">' + escapeHtml(n.coach_name || 'Coach') + '</div>' + typeBadge + '</div>'
       + '<div style="font-size:10px;color:#232a27;">' + sentDate + '</div></div>'
       + lessonLine
       + '<div style="font-size:13px;color:#9aab9e;line-height:1.6;">' + noteText + '</div></div>';
@@ -14596,7 +14596,7 @@ async function loadStudentAssignedDrills() {
   window._assignedDrillsData = data;
   list.innerHTML = data.map(function(d, idx) {
     var dateStr = new Date(d.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    var catColor = d.drill_category === 'putting' ? '#5580a6' : d.drill_category === 'shortgame' ? '#00b87a' : '#d4b85a';
+    var catColor = d.drill_category === 'putting' ? '#4da6ff' : d.drill_category === 'shortgame' ? '#00b87a' : '#ffd740';
     return '<div style="background:#141817;border-radius:10px;padding:12px;margin-bottom:8px;">'
       + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">'
       + '<div onclick="openAssignedDrillDetail(' + idx + ')" style="font-weight:700;font-size:14px;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;">' + escapeHtml(d.drill_name) + '</div>'
@@ -14635,7 +14635,7 @@ async function loadStudentAssignedCombines() {
       var dd = new Date(c.due_date + 'T12:00:00');
       dueStr = ' · Due ' + dd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     }
-    var shotInfo = c.shot_count ? '<div style="font-size:10px;color:#8db3d0;font-weight:700;margin-bottom:4px;">' + c.shot_count + ' shots configured</div>' : '';
+    var shotInfo = c.shot_count ? '<div style="font-size:10px;color:#5cc8ff;font-weight:700;margin-bottom:4px;">' + c.shot_count + ' shots configured</div>' : '';
     var startBtn = c.custom_shots && !c.completed
       ? '<button onclick="startCoachCombine(' + idx + ')" style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;background:#007a52;color:#ffffff;border:none;cursor:pointer;height:auto;max-width:none;width:auto;margin-right:6px;">▶ Start</button>'
       : '';
@@ -14858,11 +14858,11 @@ function filterCoachingRoster() {
     var sname = (s.student_name || 'Student').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
     var semail = (s.student_email || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
     return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #1c2120;">'
-      + '<div style="width:36px;height:36px;border-radius:50%;background:#345a78;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#8db3d0;flex-shrink:0;">' + escapeHtml(initials) + '</div>'
+      + '<div style="width:36px;height:36px;border-radius:50%;background:#3a8fd4;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#5cc8ff;flex-shrink:0;">' + escapeHtml(initials) + '</div>'
       + '<div style="flex:1;min-width:0;">'
       + '<div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(s.student_name || 'Student') + '</div>'
       + '<div style="font-size:11px;color:#232a27;">' + escapeHtml(s.student_email || '') + '</div></div>'
-      + '<button onclick="viewStudent(\'' + sid + '\',\'' + sname + '\',\'' + semail + '\')" style="font-size:11px;font-weight:700;background:#345a78;border-radius:6px;padding:6px 10px;height:auto;max-width:none;width:auto;white-space:nowrap;">View Profile</button>'
+      + '<button onclick="viewStudent(\'' + sid + '\',\'' + sname + '\',\'' + semail + '\')" style="font-size:11px;font-weight:700;background:#3a8fd4;border-radius:6px;padding:6px 10px;height:auto;max-width:none;width:auto;white-space:nowrap;">View Profile</button>'
       + '</div>';
   }).join('');
 }
@@ -14908,7 +14908,7 @@ function filterCoachNoteStudents() {
       item.textContent = s.student_name || 'Student';
       item.dataset.studentId = s.student_id;
       item.dataset.studentName = s.student_name || 'Student';
-      item.addEventListener('mouseover', function(){ this.style.background = '#345a78'; });
+      item.addEventListener('mouseover', function(){ this.style.background = '#3a8fd4'; });
       item.addEventListener('mouseout',  function(){ this.style.background = ''; });
       item.addEventListener('click', function() {
         selectCoachNoteStudent(this.dataset.studentId, this.dataset.studentName);
@@ -14965,19 +14965,19 @@ async function loadCoachActivityFeed() {
     var d = new Date(n.created_at);
     var dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
     var icon = n.type === 'new_round' ? '⛳' : (n.type === 'new_combine' || n.type === 'combine_completed') ? '🎯' : n.type === 'drill_completed' ? '📋' : n.type === 'new_signup' ? '👤' : '📌';
-    var unreadStyle = !n.read ? 'border-left:3px solid #345a78;padding-left:10px;' : 'padding-left:13px;';
+    var unreadStyle = !n.read ? 'border-left:3px solid #3a8fd4;padding-left:10px;' : 'padding-left:13px;';
     var viewBtn = '';
     if (n.student_id) {
       var safeName = escapeHtml(n.student_name || 'Student').replace(/'/g, "\\'");
       viewBtn = '<button onclick="viewStudent(\'' + n.student_id + '\',\'' + safeName + '\',\'\')" '
-        + 'style="margin-top:6px;font-size:11px;font-weight:700;background:#345a78;color:#ffffff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer;height:auto;max-width:none;width:auto;">'
+        + 'style="margin-top:6px;font-size:11px;font-weight:700;background:#3a8fd4;color:#ffffff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer;height:auto;max-width:none;width:auto;">'
         + 'View Profile</button>';
     }
     return '<div style="' + unreadStyle + 'margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #1c2120;">'
       + '<div style="display:flex;align-items:flex-start;gap:8px;">'
       + '<div style="font-size:16px;flex-shrink:0;margin-top:1px;">' + icon + '</div>'
       + '<div style="flex:1;">'
-      + '<div style="font-size:13px;font-weight:700;color:' + (!n.read ? '#8db3d0' : '#9aab9e') + ';">' + escapeHtml(n.title) + '</div>'
+      + '<div style="font-size:13px;font-weight:700;color:' + (!n.read ? '#5cc8ff' : '#9aab9e') + ';">' + escapeHtml(n.title) + '</div>'
       + '<div style="font-size:12px;color:#5a6b60;margin-top:1px;">' + escapeHtml(n.message) + '</div>'
       + '<div style="font-size:10px;color:#232a27;margin-top:3px;">' + dateStr + '</div>'
       + viewBtn
@@ -15016,7 +15016,7 @@ async function coachAddStudentFromCoachingPage() {
   if (profile.id === currentUser.id) { msg.style.color = '#d4706e'; msg.textContent = 'Cannot add yourself'; return; }
 
   var { data: existing } = await _sb.from('coach_students').select('id').eq('coach_id', currentUser.id).eq('student_id', profile.id);
-  if (existing && existing.length > 0) { msg.style.color = '#d4b85a'; msg.textContent = 'Student already added'; return; }
+  if (existing && existing.length > 0) { msg.style.color = '#ffd740'; msg.textContent = 'Student already added'; return; }
 
   var studentName = profile.display_name || 'Student';
   var { error: insertErr } = await _sb.from('coach_students').insert({
@@ -15160,7 +15160,7 @@ function coachCombSetMode(mode) {
   var rangeRow = document.getElementById('coachCombRangeRow');
   
   if (mode === 'combine') {
-    combBtn.style.background = '#1f3048'; combBtn.style.borderColor = '#345a78'; combBtn.style.color = '#ffffff';
+    combBtn.style.background = '#1a4a8a'; combBtn.style.borderColor = '#3a8fd4'; combBtn.style.color = '#ffffff';
     custBtn.style.background = '#1c2120'; custBtn.style.borderColor = '#3d5048'; custBtn.style.color = '#5a6b60';
     desc.textContent = 'Fixed set of yardages, scrambled randomly';
     combOpts.style.display = 'block';
@@ -15401,22 +15401,22 @@ function renderSvNotes(data) {
     var isLesson = !!n.lesson_date || n.note_type === 'lesson';
 
     var typeBadge = '<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px;background:'
-      + (isLesson ? '#345a78' : '#00402c') + ';color:' + (isLesson ? '#8db3d0' : '#00b87a') + ';">'
+      + (isLesson ? '#3a8fd4' : '#00402c') + ';color:' + (isLesson ? '#5cc8ff' : '#00b87a') + ';">'
       + (isLesson ? 'Lesson' : 'General') + '</span>';
 
     var lessonLine = '';
     if (n.lesson_date) {
       var ld = new Date(n.lesson_date + 'T12:00:00');
-      lessonLine = '<div style="font-size:11px;color:#8db3d0;font-weight:700;margin-bottom:4px;">📅 Lesson: '
+      lessonLine = '<div style="font-size:11px;color:#5cc8ff;font-weight:700;margin-bottom:4px;">📅 Lesson: '
         + ld.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + '</div>';
     }
 
     var noteText = escapeHtml(n.note_text);
     // Render bullet points: lines starting with "- " or "• " become styled bullets
-    noteText = noteText.replace(/^[-•]\s+(.*)$/gm, '<div style="display:flex;gap:6px;align-items:flex-start;"><span style="color:#8db3d0;">•</span><span>$1</span></div>');
+    noteText = noteText.replace(/^[-•]\s+(.*)$/gm, '<div style="display:flex;gap:6px;align-items:flex-start;"><span style="color:#5cc8ff;">•</span><span>$1</span></div>');
     if (query.trim()) {
       var re = new RegExp('(' + query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
-      noteText = noteText.replace(re, '<mark style="background:#1f3048;color:#8db3d0;border-radius:3px;padding:0 2px;">$1</mark>');
+      noteText = noteText.replace(re, '<mark style="background:#1a4a8a;color:#5cc8ff;border-radius:3px;padding:0 2px;">$1</mark>');
     }
     // Preserve newlines that aren't already bullet divs
     noteText = noteText.replace(/\n/g, '<br>');
@@ -15425,7 +15425,7 @@ function renderSvNotes(data) {
 
     return '<div id="svNote_' + (n.id || idx) + '" style="border-bottom:1px solid #1c2120;padding:12px 0;">'
       + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;flex-wrap:wrap;gap:4px;">'
-      + '<div style="display:flex;align-items:center;"><div style="font-size:11px;font-weight:700;color:#8db3d0;">'
+      + '<div style="display:flex;align-items:center;"><div style="font-size:11px;font-weight:700;color:#5cc8ff;">'
       + escapeHtml(document.getElementById('studentViewName').textContent || 'Student')
       + '</div>' + typeBadge + '</div>'
       + '<div style="display:flex;align-items:center;gap:8px;">'
@@ -15448,11 +15448,11 @@ function editSvNote(noteId) {
   document.getElementById('svNoteLessonDate').value = note.lesson_date || '';
   document.getElementById('svNoteType').value = note.note_type || 'general';
   var sendBtn = document.getElementById('svNoteSendBtn');
-  if (sendBtn) { sendBtn.textContent = 'Update'; sendBtn.style.background = '#a6853a'; }
+  if (sendBtn) { sendBtn.textContent = 'Update'; sendBtn.style.background = '#e6a817'; }
   var cancelBtn = document.getElementById('svNoteCancelBtn');
   if (cancelBtn) cancelBtn.style.display = '';
   var msg = document.getElementById('svNoteMsg');
-  msg.style.color = '#d4b85a'; msg.textContent = 'Editing note';
+  msg.style.color = '#ffd740'; msg.textContent = 'Editing note';
   document.getElementById('svNoteText').focus();
 }
 
@@ -15461,7 +15461,7 @@ function cancelSvNoteEdit() {
   document.getElementById('svNoteText').value = '';
   document.getElementById('svNoteLessonDate').value = '';
   var sendBtn = document.getElementById('svNoteSendBtn');
-  if (sendBtn) { sendBtn.textContent = 'Send'; sendBtn.style.background = '#345a78'; }
+  if (sendBtn) { sendBtn.textContent = 'Send'; sendBtn.style.background = '#3a8fd4'; }
   var cancelBtn = document.getElementById('svNoteCancelBtn');
   if (cancelBtn) cancelBtn.style.display = 'none';
   document.getElementById('svNoteMsg').textContent = '';
@@ -15490,7 +15490,7 @@ async function sendSvNote() {
     msg.style.color = '#00b87a'; msg.textContent = '✓ Updated!';
     _editingSvNoteId = null;
     var sendBtn = document.getElementById('svNoteSendBtn');
-    if (sendBtn) { sendBtn.textContent = 'Send'; sendBtn.style.background = '#345a78'; }
+    if (sendBtn) { sendBtn.textContent = 'Send'; sendBtn.style.background = '#3a8fd4'; }
     var cancelBtn = document.getElementById('svNoteCancelBtn');
     if (cancelBtn) cancelBtn.style.display = 'none';
     document.getElementById('svNoteText').value = '';
@@ -15563,7 +15563,7 @@ function setPracticeHubTab(tab) {
   Object.keys(tabs).forEach(function(k) {
     var btn = document.getElementById(tabs[k]);
     if (btn) {
-      btn.style.background = k === tab ? '#345a78' : '#1c2120';
+      btn.style.background = k === tab ? '#3a8fd4' : '#1c2120';
       btn.style.color      = k === tab ? '#ffffff' : '#5a6b60';
     }
   });
@@ -15809,7 +15809,7 @@ function draw() {
   var tipY = cy - Math.sin(approachAngle)*outerR;
   ctx.save();
   ctx.setLineDash([]);
-  ctx.strokeStyle = '#d4b85a';
+  ctx.strokeStyle = '#ffd740';
   ctx.lineWidth = lineWidth;
   ctx.lineJoin = 'round'; ctx.lineCap = 'round';
   ctx.beginPath();
@@ -15823,7 +15823,7 @@ function draw() {
   ctx.beginPath();
   ctx.moveTo(0,0); ctx.lineTo(-AS,-AS*0.5); ctx.lineTo(-AS,AS*0.5);
   ctx.closePath();
-  ctx.fillStyle = '#d4b85a'; ctx.fill();
+  ctx.fillStyle = '#ffd740'; ctx.fill();
   ctx.restore();
   ctx.restore();
   if (overshootInches > 0) {
@@ -15834,7 +15834,7 @@ function draw() {
     var extEndY = exitY + Math.sin(approachAngle) * extPx;
     ctx.save();
     ctx.setLineDash([4, 4]);
-    ctx.strokeStyle = '#d4b85a';
+    ctx.strokeStyle = '#ffd740';
     ctx.lineWidth = Math.max(1, lineWidth*0.8);
     ctx.lineCap = 'round';
     ctx.beginPath();
@@ -15864,12 +15864,12 @@ function draw() {
   if (holeEdgeIntersection) {
     var edgeDotR = drawDotR * 0.8;
     ctx.beginPath(); ctx.arc(holeEdgeIntersection.x, holeEdgeIntersection.y, edgeDotR, 0, Math.PI*2);
-    ctx.fillStyle='#5580a6'; ctx.fill();
+    ctx.fillStyle='#4da6ff'; ctx.fill();
     ctx.strokeStyle='white'; ctx.lineWidth=Math.max(1, edgeDotR*0.4); ctx.stroke();
   } else {
     var passDotR = drawDotR * 0.9;
     ctx.beginPath(); ctx.arc(nx, ny, passDotR, 0, Math.PI*2);
-    ctx.fillStyle='#5580a6';
+    ctx.fillStyle='#4da6ff';
     ctx.fill();
     ctx.strokeStyle='rgba(255, 255, 255, 0.9)';
     ctx.lineWidth=1.5; ctx.stroke();
@@ -15920,7 +15920,7 @@ function draw() {
   var aimIsMobile = W < 500;
   var aimTextScale = aimIsMobile ? 2.0 : 1.0;
   ctx.font = 'bold ' + Math.round(W * 0.035 * aimTextScale) + 'px Barlow Condensed';
-  ctx.fillStyle = '#8db3d0';
+  ctx.fillStyle = '#5cc8ff';
   ctx.shadowColor = 'rgba(0,0,0,0.8)';
   ctx.shadowBlur = 4;
   ctx.fillText(aimDotText, aim.x + Math.max(drawDotR, 10) + 6, aim.y);
@@ -15943,7 +15943,7 @@ function draw() {
   ctx.fillStyle = '#ffffff';
   ctx.fillText(angleLabel, ball.x + labelOffX, aboveBallY);
   ctx.font = 'bold ' + distFontSize + 'px Barlow Condensed';
-  ctx.fillStyle = '#8db3d0';
+  ctx.fillStyle = '#5cc8ff';
   ctx.fillText(distLabel, ball.x + labelOffX, aboveBallY - lineGap);
   ctx.shadowBlur = 0;
 }
@@ -16069,8 +16069,8 @@ function setPracticePlanSubTab(sub) {
 
   var newBtn = document.getElementById('ppSubNew');
   var hisBtn = document.getElementById('ppSubHistory');
-  if (newBtn) { newBtn.style.background = sub === 'new' ? '#345a78' : '#1c2120'; newBtn.style.color = sub === 'new' ? '#ffffff' : '#5a6b60'; }
-  if (hisBtn) { hisBtn.style.background = sub === 'history' ? '#345a78' : '#1c2120'; hisBtn.style.color = sub === 'history' ? '#ffffff' : '#5a6b60'; }
+  if (newBtn) { newBtn.style.background = sub === 'new' ? '#3a8fd4' : '#1c2120'; newBtn.style.color = sub === 'new' ? '#ffffff' : '#5a6b60'; }
+  if (hisBtn) { hisBtn.style.background = sub === 'history' ? '#3a8fd4' : '#1c2120'; hisBtn.style.color = sub === 'history' ? '#ffffff' : '#5a6b60'; }
 
   if (sub === 'history') loadPracticeHistory();
 }
@@ -16257,8 +16257,8 @@ async function loadPracticeHistory() {
     if (comb) {
       var sg = comb.total_sg != null ? (comb.total_sg >= 0 ? '+' : '') + comb.total_sg.toFixed(1) : '';
       var grade = comb.grade_100 != null ? Math.round(comb.grade_100) : '';
-      html += '<div style="background:#1f3048;border-radius:8px;padding:8px 10px;margin-bottom:8px;font-size:12px;">';
-      html += '<span style="color:#8db3d0;font-weight:700;">' + comb.combine_type + (comb.is_combine ? ' Combine' : ' Practice') + '</span>';
+      html += '<div style="background:#1a4a8a;border-radius:8px;padding:8px 10px;margin-bottom:8px;font-size:12px;">';
+      html += '<span style="color:#5cc8ff;font-weight:700;">' + comb.combine_type + (comb.is_combine ? ' Combine' : ' Practice') + '</span>';
       if (sg) html += ' <span style="color:' + (comb.total_sg <= 0 ? '#00b87a' : '#d4706e') + ';">' + sg + ' SG</span>';
       if (grade) html += ' <span style="color:#5a6b60;">Grade: ' + grade + '</span>';
       html += '</div>';
@@ -16274,7 +16274,7 @@ async function loadPracticeHistory() {
     }
 
     html += '<div style="display:flex;justify-content:flex-end;gap:12px;margin-top:6px;">';
-    html += '<button onclick="editPracticeSession(\'' + s.id + '\')" style="background:transparent;border:none;color:#8db3d0;font-size:11px;font-weight:700;cursor:pointer;padding:0;height:auto;max-width:none;width:auto;">Edit</button>';
+    html += '<button onclick="editPracticeSession(\'' + s.id + '\')" style="background:transparent;border:none;color:#5cc8ff;font-size:11px;font-weight:700;cursor:pointer;padding:0;height:auto;max-width:none;width:auto;">Edit</button>';
     html += '<button onclick="deletePracticeSession(\'' + s.id + '\')" style="background:transparent;border:none;color:#232a27;font-size:11px;cursor:pointer;padding:0;height:auto;max-width:none;width:auto;">Delete</button>';
     html += '</div>';
     html += '</div>';
@@ -16330,14 +16330,14 @@ function showSvPracticeSubTab(tab) {
   if (tab === 'combines') {
     if (combinesEl) combinesEl.style.display = 'block';
     if (practiceEl) practiceEl.style.display = 'none';
-    if (btnC) { btnC.style.background = '#345a78'; btnC.style.color = '#ffffff'; }
+    if (btnC) { btnC.style.background = '#3a8fd4'; btnC.style.color = '#ffffff'; }
     if (btnP) { btnP.style.background = '#0d0f0e'; btnP.style.color = '#5a6b60'; }
     loadStudentCombines();
   } else {
     if (combinesEl) combinesEl.style.display = 'none';
     if (practiceEl) practiceEl.style.display = 'block';
     if (btnC) { btnC.style.background = '#0d0f0e'; btnC.style.color = '#5a6b60'; }
-    if (btnP) { btnP.style.background = '#345a78'; btnP.style.color = '#ffffff'; }
+    if (btnP) { btnP.style.background = '#3a8fd4'; btnP.style.color = '#ffffff'; }
     loadStudentPracticeSessions();
   }
 }
@@ -16350,14 +16350,14 @@ function showSvMiscSubTab(tab) {
   if (tab === 'bag') {
     if (bagEl) bagEl.style.display = 'block';
     if (schedEl) schedEl.style.display = 'none';
-    if (btnB) { btnB.style.background = '#345a78'; btnB.style.color = '#ffffff'; }
+    if (btnB) { btnB.style.background = '#3a8fd4'; btnB.style.color = '#ffffff'; }
     if (btnS) { btnS.style.background = '#0d0f0e'; btnS.style.color = '#5a6b60'; }
     loadStudentBag();
   } else {
     if (bagEl) bagEl.style.display = 'none';
     if (schedEl) schedEl.style.display = 'block';
     if (btnB) { btnB.style.background = '#0d0f0e'; btnB.style.color = '#5a6b60'; }
-    if (btnS) { btnS.style.background = '#345a78'; btnS.style.color = '#ffffff'; }
+    if (btnS) { btnS.style.background = '#3a8fd4'; btnS.style.color = '#ffffff'; }
     loadStudentSchedule();
   }
 }
@@ -16395,7 +16395,7 @@ async function loadStudentSchedule() {
     return '<div style="background:#141817;border-radius:10px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;">' +
       '<div>' +
         '<div style="font-size:14px;font-weight:700;color:#9aab9e;">' + (e.course || 'TBD') + '</div>' +
-        (e.tournament ? '<div style="font-size:12px;color:#8db3d0;margin-top:2px;">' + e.tournament + '</div>' : '') +
+        (e.tournament ? '<div style="font-size:12px;color:#5cc8ff;margin-top:2px;">' + e.tournament + '</div>' : '') +
         '<div style="font-size:11px;color:#5a6b60;margin-top:2px;">📅 ' + dateStr + '</div>' +
       '</div>' +
       '<button onclick="removeSvScheduleEntry(' + idx + ')" style="width:28px;height:28px;background:#2a1a1a;border:1px solid #351a1a;border-radius:8px;color:#d4706e;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;flex-shrink:0;">×</button>' +
@@ -16605,8 +16605,8 @@ async function loadStudentPracticeSessions() {
     if (comb) {
       var sg = comb.total_sg != null ? (comb.total_sg >= 0 ? '+' : '') + comb.total_sg.toFixed(1) : '';
       var grade = comb.grade_100 != null ? Math.round(comb.grade_100) : '';
-      html += '<div style="background:#1f3048;border-radius:8px;padding:8px 10px;margin-bottom:8px;font-size:12px;">';
-      html += '<span style="color:#8db3d0;font-weight:700;">' + comb.combine_type + (comb.is_combine ? ' Combine' : ' Practice') + '</span>';
+      html += '<div style="background:#1a4a8a;border-radius:8px;padding:8px 10px;margin-bottom:8px;font-size:12px;">';
+      html += '<span style="color:#5cc8ff;font-weight:700;">' + comb.combine_type + (comb.is_combine ? ' Combine' : ' Practice') + '</span>';
       if (sg) html += ' <span style="color:' + (comb.total_sg <= 0 ? '#00b87a' : '#d4706e') + ';">' + sg + ' SG</span>';
       if (grade) html += ' <span style="color:#5a6b60;">Grade: ' + grade + '</span>';
       html += '</div>';
@@ -16936,7 +16936,7 @@ function renderBagClubs() {
         var avg = entry && entry.avg != null ? entry.avg : '—';
         return '<div style="display:flex;flex-direction:column;align-items:center;">' +
           '<span style="font-size:10px;color:#9aab9e;font-weight:700;line-height:1;">' + label + '</span>' +
-          '<span style="font-size:12px;color:#8db3d0;font-weight:800;line-height:1.3;">' + avg + '</span>' +
+          '<span style="font-size:12px;color:#5cc8ff;font-weight:800;line-height:1.3;">' + avg + '</span>' +
         '</div>';
       }).join('');
       return '<div onclick="openClubDetail(\'' + safe + '\')" style="grid-column:span 3;background:#141817;border-radius:10px;padding:8px 10px;cursor:pointer;border:1px solid #1c2120;display:flex;align-items:center;gap:10px;">' +
@@ -17023,7 +17023,7 @@ function openClubDetail(name) {
       var entry = wgClubData['sw' + si];
       var avg = entry && entry.avg != null ? entry.avg : '';
       html += '<div style="text-align:center;background:#1c2120;border-radius:8px;padding:8px 4px;"><div style="font-size:11px;color:#9aab9e;font-weight:700;">' + label + '</div>';
-      html += '<input type="number" inputmode="numeric" value="' + avg + '" placeholder="—" min="0" max="400" onchange="updateWgAvg(\'' + safe + '\',' + si + ',this.value);openClubDetail(\'' + safe + '\')" style="width:100%;height:28px;font-size:14px;font-weight:800;text-align:center;background:transparent;border:1px solid #3d5048;border-radius:6px;color:#8db3d0;box-sizing:border-box;">';
+      html += '<input type="number" inputmode="numeric" value="' + avg + '" placeholder="—" min="0" max="400" onchange="updateWgAvg(\'' + safe + '\',' + si + ',this.value);openClubDetail(\'' + safe + '\')" style="width:100%;height:28px;font-size:14px;font-weight:800;text-align:center;background:transparent;border:1px solid #3d5048;border-radius:6px;color:#5cc8ff;box-sizing:border-box;">';
       html += '</div>';
     });
     html += '</div></div>';
@@ -17185,11 +17185,11 @@ var _GV_WEDGES = ['48','PW','GW','AW','SW','50','52','54','56','58','60','62','L
 // Segment colors: bottom (smallest partial) → top (full-only extra)
 // Purple gradient bottom-up, top segment is a muted slate to show "extra" distance
 var _GV_SEG_COLORS = [
-  '#345a78',  // deep violet — smallest partial
-  '#5580a6',  // purple
-  '#5580a6',  // medium purple
-  '#8db3d0',  // soft purple
-  '#345a78'   // slate — full-only extra on top
+  '#3a8fd4',  // deep violet — smallest partial
+  '#4da6ff',  // purple
+  '#4da6ff',  // medium purple
+  '#5cc8ff',  // soft purple
+  '#3a8fd4'   // slate — full-only extra on top
 ];
 
 function gvClubCategory(name) {
@@ -17214,9 +17214,9 @@ function setGapVizFilter(filter) {
     var btn = document.getElementById('gvFilter' + id);
     if (!btn) return;
     var active = id.toLowerCase() === filter;
-    btn.style.background = active ? '#5580a6' : 'transparent';
+    btn.style.background = active ? '#4da6ff' : 'transparent';
     btn.style.color = active ? '#ffffff' : '#9aab9e';
-    btn.style.borderColor = active ? '#5580a6' : '#3d5048';
+    btn.style.borderColor = active ? '#4da6ff' : '#3d5048';
   });
   document.getElementById('gvCustomPicker').style.display = filter === 'custom' ? '' : 'none';
   renderGapVisualizerChart();
@@ -17238,7 +17238,7 @@ function gvToggleCustomClub(name) {
   _gapVizCustomClubs[name] = !_gapVizCustomClubs[name];
   var btn = document.getElementById('gvCust_' + name);
   if (btn) {
-    btn.style.background = _gapVizCustomClubs[name] ? '#5580a6' : 'transparent';
+    btn.style.background = _gapVizCustomClubs[name] ? '#4da6ff' : 'transparent';
     btn.style.color = _gapVizCustomClubs[name] ? '#ffffff' : '#9aab9e';
   }
   renderGapVisualizerChart();
@@ -17371,15 +17371,15 @@ function renderGapVisualizerChart() {
     '1/2': '#007a52',
     '50%': '#007a52',
     'Hips': '#007a52',
-    '¾': '#5580a6',      // blue
-    '3/4': '#5580a6',
-    '75%': '#5580a6',
-    'Ribs': '#5580a6',
-    'Shldr': '#5580a6',
-    'Ears': '#5580a6',
+    '¾': '#4da6ff',      // blue
+    '3/4': '#4da6ff',
+    '75%': '#4da6ff',
+    'Ribs': '#4da6ff',
+    'Shldr': '#4da6ff',
+    'Ears': '#4da6ff',
     'Full': '#ffffff'    // white
   };
-  var _GV_SEG_COLOR_DEFAULT = ['#007a52', '#5580a6', '#ffffff'];
+  var _GV_SEG_COLOR_DEFAULT = ['#007a52', '#4da6ff', '#ffffff'];
 
   function _gvSwingColor(label) {
     return _GV_SWING_COLORS[label] || _GV_SEG_COLOR_DEFAULT[0];
@@ -17682,7 +17682,7 @@ function renderGapVisualizerChart() {
         ctx2.font = 'bold 11px sans-serif';
         ctx2.textAlign = 'center';
         ctx2.textBaseline = 'bottom';
-        ctx2.fillStyle = gap <= 5 ? '#d4706e' : gap >= 20 ? '#d4b85a' : '#ffffff';
+        ctx2.fillStyle = gap <= 5 ? '#d4706e' : gap >= 20 ? '#ffd740' : '#ffffff';
         ctx2.fillText(gap + 'y', midX, labelY);
       }
       ctx2.restore();
@@ -17767,7 +17767,7 @@ function setBagTab(tab) {
   Object.keys(tabs).forEach(function(key) {
     var btn = document.getElementById(tabs[key]);
     var cont = document.getElementById(contents[key]);
-    if (btn) { btn.style.background = key === tab ? '#345a78' : 'transparent'; btn.style.color = key === tab ? '#ffffff' : '#5a6b60'; }
+    if (btn) { btn.style.background = key === tab ? '#3a8fd4' : 'transparent'; btn.style.color = key === tab ? '#ffffff' : '#5a6b60'; }
     if (cont) { cont.style.display = key === tab ? 'flex' : 'none'; }
   });
   if (tab === 'myBag') renderBagClubs();
@@ -17866,7 +17866,7 @@ function fyRenderShotCountBtns() {
   container.innerHTML = counts.map(function(n) {
     var active = n === _fyShotCount;
     return '<button onclick="fyPickShotCount(' + n + ')" style="width:52px;height:44px;font-size:16px;font-weight:800;border-radius:10px;border:2px solid ' +
-      (active ? '#5580a6' : '#3d5048') + ';background:' + (active ? '#5580a6' : '#1c2120') + ';color:' +
+      (active ? '#4da6ff' : '#3d5048') + ';background:' + (active ? '#4da6ff' : '#1c2120') + ';color:' +
       (active ? '#ffffff' : '#9aab9e') + ';cursor:pointer;">' + n + '</button>';
   }).join('');
   container.innerHTML += '<button onclick="fyGoToStep3()" style="width:100%;height:42px;margin-top:8px;background:#007a52;border:none;border-radius:10px;color:#00b87a;font-size:14px;font-weight:700;cursor:pointer;">Enter Shots →</button>';
@@ -18094,8 +18094,8 @@ function renderSpeedTab() {
   } else {
     if (summary) summary.style.display = 'block';
     var metrics = [
-      { key: 'avgClubSpeed', label: 'Club Spd', color: '#d4b85a' },
-      { key: 'avgBallSpeed', label: 'Ball Spd', color: '#8db3d0' },
+      { key: 'avgClubSpeed', label: 'Club Spd', color: '#ffd740' },
+      { key: 'avgBallSpeed', label: 'Ball Spd', color: '#5cc8ff' },
       { key: 'avgCarry',     label: 'Carry',    color: '#ffffff' },
       { key: 'avgTotal',     label: 'Total',    color: '#ffffff' }
     ];
@@ -18129,8 +18129,8 @@ function renderSpeedTab() {
         '</div>' +
       '</div>' +
       '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;">' +
-        spStatCell('Club Spd', s.avgClubSpeed, '#d4b85a') +
-        spStatCell('Ball Spd', s.avgBallSpeed, '#8db3d0') +
+        spStatCell('Club Spd', s.avgClubSpeed, '#ffd740') +
+        spStatCell('Ball Spd', s.avgBallSpeed, '#5cc8ff') +
         spStatCell('Carry',    s.avgCarry,     '#ffffff') +
         spStatCell('Total',    s.avgTotal,     '#ffffff') +
       '</div>' +
@@ -18231,7 +18231,7 @@ function spRenderShotCountBtns() {
   container.innerHTML = counts.map(function(n) {
     var active = n === _spShotCount;
     return '<button onclick="spPickShotCount(' + n + ')" style="width:52px;height:44px;font-size:16px;font-weight:800;border-radius:10px;border:2px solid ' +
-      (active ? '#5580a6' : '#3d5048') + ';background:' + (active ? '#5580a6' : '#1c2120') + ';color:' +
+      (active ? '#4da6ff' : '#3d5048') + ';background:' + (active ? '#4da6ff' : '#1c2120') + ';color:' +
       (active ? '#ffffff' : '#9aab9e') + ';cursor:pointer;">' + n + '</button>';
   }).join('') +
   '<button onclick="spGoToStep3()" style="width:100%;height:42px;margin-top:8px;background:#007a52;border:none;border-radius:10px;color:#00b87a;font-size:14px;font-weight:700;cursor:pointer;">Enter Swings →</button>';
@@ -18255,13 +18255,13 @@ function spRenderShotInputs() {
   var container = document.getElementById('spShotInputs');
   if (!container) return;
   var s1 = 'height:34px;font-size:12px;font-weight:700;text-align:center;background:#1c2120;border:1px solid #2a3530;border-radius:8px;color:#ffffff;width:100%;box-sizing:border-box;';
-  var s2 = s1.replace('#1c2120','#1e1a0e').replace('#2a3530','#a6853a');
+  var s2 = s1.replace('#1c2120','#2a2008').replace('#2a3530','#e6a817');
   var html = '';
   for (var i = 0; i < _spShotCount; i++) {
     html += '<div style="display:grid;grid-template-columns:20px 1fr 1fr 1fr 1fr;gap:4px;align-items:center;">' +
       '<div style="font-size:10px;color:#232a27;font-weight:700;text-align:center;">' + (i + 1) + '</div>' +
-      '<input type="number" id="spClubSpd_' + i + '" placeholder="—" min="0" max="200" style="' + s2 + 'color:#d4b85a;">' +
-      '<input type="number" id="spBallSpd_' + i + '" placeholder="—" min="0" max="250" style="' + s2 + 'color:#8db3d0;">' +
+      '<input type="number" id="spClubSpd_' + i + '" placeholder="—" min="0" max="200" style="' + s2 + 'color:#ffd740;">' +
+      '<input type="number" id="spBallSpd_' + i + '" placeholder="—" min="0" max="250" style="' + s2 + 'color:#5cc8ff;">' +
       '<input type="number" id="spCarry_'   + i + '" placeholder="—" min="0" max="400" style="' + s1 + '">' +
       '<input type="number" id="spTotal_'   + i + '" placeholder="—" min="0" max="450" style="' + s1 + '">' +
       '</div>';
@@ -18324,7 +18324,7 @@ var WG_WEDGE_DEGREE = ['48','50','52','54','56','58','60','62'];
 var WG_WEDGE_LIST   = WG_WEDGE_NAMED.concat(WG_WEDGE_DEGREE);
 
 // Global wedge club color palette & helper
-var _WG_CLUB_PALETTE = ['#007a52', '#5580a6', '#d4b85a', '#8db3d0', '#d4706e', '#00b87a'];
+var _WG_CLUB_PALETTE = ['#007a52', '#4da6ff', '#ffd740', '#5cc8ff', '#d4706e', '#00b87a'];
 function getWedgeClubColor(clubName) {
   // Assign color based on position among user's bag wedges (sorted by loft)
   var clubs = sortBagClubs(getBagClubs());
@@ -18334,7 +18334,7 @@ function getWedgeClubColor(clubName) {
     if (isW && wedges.indexOf(c.name) === -1) wedges.push(c.name);
   });
   var idx = wedges.indexOf(clubName);
-  if (idx === -1) return '#8db3d0'; // fallback
+  if (idx === -1) return '#5cc8ff'; // fallback
   return _WG_CLUB_PALETTE[idx % _WG_CLUB_PALETTE.length];
 }
 var _wgSelectedClubs = [];
@@ -18385,7 +18385,7 @@ function renderWgTab() {
   // Editable rows
   s.clubs.forEach(function(club) {
     var clubData = s.results[club] || {};
-    cells += '<div style="font-size:13px;font-weight:800;color:#8db3d0;padding:4px 3px;display:flex;align-items:center;">' + club + '</div>';
+    cells += '<div style="font-size:13px;font-weight:800;color:#5cc8ff;padding:4px 3px;display:flex;align-items:center;">' + club + '</div>';
     swingLabels.forEach(function(l, i) {
       var entry = clubData['sw' + i];
       var avg = entry && entry.avg != null ? entry.avg : '';
@@ -18403,7 +18403,7 @@ function renderWgTab() {
     var active = s.swingType === t;
     return '<button onclick="wgChangeSwingType(\'' + t + '\')" style="' +
       'padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid ' +
-      (active ? '#5580a6' : '#2a3530') + ';background:' + (active ? '#5580a6' : '#1c2120') +
+      (active ? '#4da6ff' : '#2a3530') + ';background:' + (active ? '#4da6ff' : '#1c2120') +
       ';color:' + (active ? '#ffffff' : '#5a6b60') + ';">' + lbl + '</button>';
   }).join('');
 
@@ -18537,8 +18537,8 @@ function wgRenderClubGrid() {
     var sel   = _wgSelectedClubs.indexOf(w) >= 0;
     return '<button onclick="wgToggleClub(\'' + w + '\')" style="' +
       'flex:1;min-width:0;height:36px;font-size:12px;font-weight:700;border-radius:8px;cursor:pointer;' +
-      'background:' + (sel ? '#5580a6' : '#1c2120') + ';' +
-      'border:1px solid ' + (sel ? '#5580a6' : inBag ? '#232a27' : '#1c2120') + ';' +
+      'background:' + (sel ? '#4da6ff' : '#1c2120') + ';' +
+      'border:1px solid ' + (sel ? '#4da6ff' : inBag ? '#232a27' : '#1c2120') + ';' +
       'color:' + (sel ? '#ffffff' : inBag ? '#ffffff' : '#3d5048') + ';">' + w + '</button>';
   }
   grid.innerHTML =
@@ -18596,8 +18596,8 @@ function wgUpdateTypeButtons() {
   ['percent','fraction','body'].forEach(function(t) {
     var btn = document.getElementById('wgTypeBtn' + t.charAt(0).toUpperCase() + t.slice(1));
     if (!btn) return;
-    btn.style.background   = _wgSwingType === t ? '#5580a6' : '#1c2120';
-    btn.style.borderColor  = _wgSwingType === t ? '#5580a6' : '#3d5048';
+    btn.style.background   = _wgSwingType === t ? '#4da6ff' : '#1c2120';
+    btn.style.borderColor  = _wgSwingType === t ? '#4da6ff' : '#3d5048';
     btn.style.color        = _wgSwingType === t ? '#ffffff'    : '#5a6b60';
   });
   var preview = document.getElementById('wgSwingPreview');
@@ -18647,7 +18647,7 @@ function wgRenderInputs() {
       '</div>';
     }).join('');
     return '<div style="background:#141817;border-radius:12px;padding:12px;">' +
-      '<div style="font-size:14px;font-weight:800;color:#8db3d0;margin-bottom:8px;">' + club + '</div>' +
+      '<div style="font-size:14px;font-weight:800;color:#5cc8ff;margin-bottom:8px;">' + club + '</div>' +
       '<div style="display:flex;flex-direction:column;gap:6px;">' + blocks + '</div>' +
     '</div>';
   }).join('');
