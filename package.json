@@ -1,5 +1,6 @@
 {
   "name": "golf-tracker",
+  "version": "5.0.0",
   "private": true,
   "scripts": {
     "start": "npx serve -l 3000 ."
