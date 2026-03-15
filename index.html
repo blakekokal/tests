@@ -15947,7 +15947,7 @@ function boOptimizeLaunch(ballSpeed, loft, attackAngle) {
       if (metric > bestMetric) { best = r; bestLaunch = la; bestSpin = sr; }
     }
   }
-  return { launch: bestLaunch, spin: bestSpin, carry: best.carry, total: best.total, apex: best.apex, landAngle: best.landAngle, hangTime: best.hangTime };
+  return { launch: bestLaunch, spin: bestSpin, carry: best.carry, total: best.total, apex: best.apex, landAngle: best.landAngle, hangTime: best.hangTime, dynLoft: dynLoft };
 }
 
 function boCalculate() {
@@ -15969,7 +15969,7 @@ function boCalculate() {
     '</div>' +
     '<div class="bo-results-grid" style="margin-top:5px;">' +
     '<div class="bo-result-card"><div class="bo-result-label">APEX</div><div class="bo-result-value">' + r.apex + '<span class="bo-result-unit">ft</span></div></div>' +
-    '<div class="bo-result-card"><div class="bo-result-label">LAND\u2220</div><div class="bo-result-value">' + r.landAngle + '<span class="bo-result-unit">\u00B0</span></div></div>' +
+    '<div class="bo-result-card"><div class="bo-result-label">DYN LOFT</div><div class="bo-result-value">' + r.dynLoft.toFixed(1) + '<span class="bo-result-unit">\u00B0</span></div></div>' +
     '<div class="bo-result-card"><div class="bo-result-label">HANG</div><div class="bo-result-value">' + r.hangTime + '<span class="bo-result-unit">s</span></div></div>' +
     '<div class="bo-result-card"><div class="bo-result-label">BALL SPD</div><div class="bo-result-value">' + Math.round(ballSpeed) + '<span class="bo-result-unit">mph</span></div></div>' +
     '</div>';
