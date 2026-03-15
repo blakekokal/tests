@@ -258,46 +258,6 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
       <div id="hcpSaveMsg" style="font-size:11px;color:#00b87a;min-height:12px;"></div>
     </div>
 
-    <!-- HANDICAP INDEX -->
-    <div style="margin-top:6px;width:100%;border-top:1px solid #333333;padding-top:8px;display:flex;flex-direction:column;align-items:center;gap:4px;">
-      <div style="font-size:12px;color:#606060;">Handicap Index</div>
-      <div id="handicapIndexDisplay" style="font-size:28px;font-weight:800;color:#00b87a;padding:4px 0;">--</div>
-      <div id="handicapIndexInfo" style="font-size:11px;color:#2e2e2e;text-align:center;max-width:260px;line-height:1.4;"></div>
-      <div id="handicapTrendContainer" style="width:100%;max-width:280px;margin-top:4px;">
-        <div id="handicapTrendChart" style="display:flex;align-items:flex-end;gap:2px;height:50px;width:100%;justify-content:center;"></div>
-      </div>
-    </div>
-
-    <!-- GOALS -->
-    <div style="margin-top:6px;width:100%;border-top:1px solid #333333;padding-top:8px;display:flex;flex-direction:column;align-items:center;gap:4px;">
-      <div style="font-size:12px;color:#606060;">My Goals</div>
-      <div id="goalsContainer" style="width:100%;max-width:300px;"></div>
-      <div id="goalsList" style="width:100%;max-width:300px;"></div>
-      <button onclick="toggleAddGoal()" id="addGoalBtn" style="background:#007a52;font-size:12px;height:34px;width:100%;max-width:300px;">+ Add Goal</button>
-      <div id="addGoalForm" style="display:none;width:100%;max-width:300px;background:#222222;border-radius:10px;padding:12px;margin-top:4px;">
-        <select id="goalCategory" style="width:100%;height:36px;background:#282828;color:#ffffff;border:1px solid #3d3d3d;border-radius:8px;font-size:12px;padding:0 8px;margin-bottom:6px;">
-          <option value="handicap">Handicap Index</option>
-          <option value="scoring_avg">Scoring Average (18-hole)</option>
-          <option value="fairways">Fairway % Hit</option>
-          <option value="gir">GIR %</option>
-          <option value="putts">Putts Per Round</option>
-          <option value="sg_total">SG: Total</option>
-          <option value="sg_ott">SG: Off The Tee</option>
-          <option value="sg_app">SG: Approach</option>
-          <option value="sg_arg">SG: Around Green</option>
-          <option value="sg_putt">SG: Putting</option>
-          <option value="custom">Custom Goal</option>
-        </select>
-        <input id="goalTarget" type="text" placeholder="Target value (e.g. 10.0)" style="width:100%;height:36px;box-sizing:border-box;margin-bottom:6px;">
-        <input id="goalDeadline" type="date" style="width:100%;height:36px;box-sizing:border-box;margin-bottom:6px;background:#282828;color:#ffffff;border:1px solid #3d3d3d;border-radius:8px;padding:0 8px;">
-        <input id="goalNote" type="text" placeholder="Note (optional)" style="width:100%;height:36px;box-sizing:border-box;margin-bottom:6px;">
-        <div style="display:flex;gap:6px;">
-          <button onclick="saveGoal()" style="flex:1;height:34px;background:#2d7abc;font-size:12px;font-weight:700;border:none;border-radius:8px;color:#ffffff;cursor:pointer;">Save</button>
-          <button onclick="toggleAddGoal()" style="flex:1;height:34px;background:#333333;font-size:12px;font-weight:700;border:none;border-radius:8px;color:#9a9a9a;cursor:pointer;">Cancel</button>
-        </div>
-        <div id="goalFormMsg" style="font-size:11px;min-height:14px;text-align:center;margin-top:4px;"></div>
-      </div>
-    </div>
 
     <!-- PASSWORD -->
     <div style="margin-top:6px;width:100%;border-top:1px solid #333333;padding-top:8px;display:flex;flex-direction:column;align-items:center;gap:4px;">
@@ -19311,52 +19271,6 @@ async function syncGoalsFromProfile(userId) {
   return getGoals(userId);
 }
 
-function toggleAddGoal() {
-  var form = document.getElementById('addGoalForm');
-  var btn = document.getElementById('addGoalBtn');
-  if (form.style.display === 'none') {
-    form.style.display = 'block';
-    btn.style.display = 'none';
-    document.getElementById('goalFormMsg').textContent = '';
-    // Default deadline to 3 months from now
-    var d = new Date();
-    d.setMonth(d.getMonth() + 3);
-    document.getElementById('goalDeadline').value = d.toISOString().split('T')[0];
-  } else {
-    form.style.display = 'none';
-    btn.style.display = '';
-  }
-}
-
-function saveGoal() {
-  var cat = document.getElementById('goalCategory').value;
-  var target = document.getElementById('goalTarget').value.trim();
-  var deadline = document.getElementById('goalDeadline').value;
-  var note = document.getElementById('goalNote').value.trim();
-  var msg = document.getElementById('goalFormMsg');
-
-  if (!target) { msg.style.color = '#d4706e'; msg.textContent = 'Enter a target value.'; return; }
-
-  var goals = getGoals();
-  goals.push({
-    id: Date.now().toString(),
-    category: cat,
-    target: target,
-    deadline: deadline || null,
-    note: note || null,
-    created: new Date().toISOString().split('T')[0],
-    completed: false
-  });
-  saveGoals(goals);
-
-  // Reset form
-  document.getElementById('goalTarget').value = '';
-  document.getElementById('goalNote').value = '';
-  document.getElementById('addGoalForm').style.display = 'none';
-  document.getElementById('addGoalBtn').style.display = '';
-
-  renderGoals();
-}
 
 function deleteGoal(goalId) {
   var goals = getGoals().filter(function(g) { return g.id !== goalId; });
@@ -19417,34 +19331,11 @@ function renderGoals(targetEl, goals, readOnly) {
 /* ── Load handicap + goals on profile Account tab ── */
 var _origLoadProfileInfo;
 (function() {
-  // Hook into profile loading
-  var origGoToSettings = goToSettings;
-  goToSettings = function() {
-    origGoToSettings();
-    setTimeout(function() {
-      loadHandicapIndex();
-      syncGoalsFromProfile().then(function() { renderGoals(); });
-    }, 100);
-  };
-
   var origGoToDashboard_hc = goToDashboard;
   goToDashboard = function() {
     origGoToDashboard_hc();
-    // Load handicap silently for dashboard view
   };
 })();
-
-// Also load on showProfileTab('account')
-var _origShowProfileTabHC = showProfileTab;
-showProfileTab = function(tab) {
-  _origShowProfileTabHC(tab);
-  if (tab === 'account') {
-    setTimeout(function() {
-      loadHandicapIndex();
-      syncGoalsFromProfile().then(function() { renderGoals(); });
-    }, 200);
-  }
-};
 
 /* ── Student Viewer: Load Goals & Handicap ── */
 /* ── Coaching Section: Student Goals & Handicap Tab ── */
