@@ -995,7 +995,137 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
   <button class="back-btn-top" onclick="toggleLearnDistanceOptimizer()"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
   <div style="width:100%;max-width:420px;margin:0 auto;">
     <div style="font-size:20px;font-weight:800;margin-bottom:12px;text-align:center;">Distance Optimizer</div>
-    <div id="learnDistanceOptimizerContainer" style="width:100%;"></div>
+    <div id="learnDistanceOptimizerContainer" style="width:100%;">
+<style>
+#bagOptApp * { margin: 0; padding: 0; box-sizing: border-box; }
+#bagOptApp { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 0; }
+#bagOptApp .bo-header { background: #2a2a2a; padding: 12px; text-align: center; color: white; border-bottom: 2px solid #333; border-radius: 12px 12px 0 0; }
+#bagOptApp .bo-header h2 { font-size: 1.3em; margin:0; }
+#bagOptApp .bo-content { padding: 10px; }
+#bagOptApp .bo-control-group { margin-bottom: 12px; }
+#bagOptApp .bo-label { display: block; font-weight: 600; color: #e0e0e0; margin-bottom: 6px; font-size: 0.9em; }
+#bagOptApp select, #bagOptApp input[type="number"] { width: 100%; padding: 9px; border: 2px solid #333; border-radius: 10px; font-size: 16px; transition: all 0.3s; background: #2a2a2a; color: #ffffff; font-family: inherit; }
+#bagOptApp select:focus, #bagOptApp input[type="number"]:focus { outline: none; border-color: #ffffff; box-shadow: 0 0 0 3px rgba(255,255,255,0.2); }
+#bagOptApp input[type="number"] { font-weight: 600; }
+#bagOptApp .bo-input-hint { font-size: 0.72em; color: #888; margin-top: 2px; }
+#bagOptApp .bo-input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+#bagOptApp .bo-input-column { display: flex; flex-direction: column; }
+#bagOptApp .bo-btn-group { display: grid; gap: 6px; margin-bottom: 6px; }
+#bagOptApp .bo-mode-buttons { grid-template-columns: 1fr 1fr 1fr; }
+#bagOptApp .bo-toggle-btn { padding: 9px; background: #2a2a2a; color: #999; border: 2px solid #333; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s; text-align: center; font-family: inherit; }
+#bagOptApp .bo-toggle-btn:hover { border-color: #555; color: #ccc; }
+#bagOptApp .bo-toggle-btn.bo-active { background: #ffffff; color: #000000; border-color: #ffffff; }
+#bagOptApp .bo-slider-container { position: relative; padding: 5px 0; }
+#bagOptApp .bo-current-value-display { font-weight: 700; color: #ffffff; font-size: 1.05em; text-align: center; position: absolute; left: 0; right: 0; top: 0; }
+#bagOptApp .bo-slider-header { position: relative; margin-bottom: 8px; height: 18px; }
+#bagOptApp .bo-slider-label { font-weight: 600; color: #e0e0e0; font-size: 0.9em; margin: 0; position: relative; z-index: 1; }
+#bagOptApp .bo-value-display { display: flex; justify-content: space-between; margin-top: 4px; font-size: 0.8em; color: #999; }
+#bagOptApp input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; background: #333; border-radius: 5px; outline: none; padding: 0; }
+#bagOptApp input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; background: #ffffff; border-radius: 50%; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: transform 0.2s; }
+#bagOptApp input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+#bagOptApp .bo-results { background: #2a2a2a; border-radius: 12px; padding: 10px; margin-bottom: 12px; border: 1px solid #333; }
+#bagOptApp .bo-results h3 { color: #ffffff; margin: 0 0 8px 0; font-size: 1.05em; text-align: center; text-transform: capitalize; }
+#bagOptApp .bo-results-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+#bagOptApp .bo-result-card { background: #1a1a1a; padding: 8px 4px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); text-align: center; border: 1px solid #333; }
+#bagOptApp .bo-result-label { font-size: 0.65em; color: #999; margin-bottom: 2px; }
+#bagOptApp .bo-result-value { font-size: 1.2em; font-weight: 700; color: #ffffff; line-height: 1; }
+#bagOptApp .bo-result-unit { font-size: 0.55em; color: #888; margin-left: 1px; }
+#bagOptApp .bo-distance-highlight { background: #ffffff; color: #000000; }
+#bagOptApp .bo-distance-highlight .bo-result-label { color: #666; }
+#bagOptApp .bo-distance-highlight .bo-result-value { color: #000000; font-size: 1.4em; }
+#bagOptApp .bo-distance-highlight .bo-result-unit { color: #666; }
+</style>
+<div id="bagOptApp">
+  <div class="bo-header">
+    <h2>Bag Optimizer <span style="font-size:0.5em;font-weight:normal;opacity:0.7;">v2.5</span></h2>
+  </div>
+  <div class="bo-content">
+    <div class="bo-results" id="bo_results">
+      <h3>Optimal Results</h3>
+      <div style="color:#888;text-align:center;font-size:0.85em;">Adjust settings to see results</div>
+    </div>
+    <div class="bo-control-group">
+      <label class="bo-label" for="bo_clubSelect">Club Selection</label>
+      <select id="bo_clubSelect" onchange="boOnClubChange()">
+        <optgroup label="Woods">
+          <option value="driver" selected>Driver</option>
+          <option value="3w">3 Wood</option>
+          <option value="4w">4 Wood</option>
+          <option value="5w">5 Wood</option>
+        </optgroup>
+        <optgroup label="Irons">
+          <option value="2i">2 Iron</option>
+          <option value="3i">3 Iron</option>
+          <option value="4i">4 Iron</option>
+          <option value="5i">5 Iron</option>
+          <option value="6i">6 Iron</option>
+          <option value="7i">7 Iron</option>
+          <option value="8i">8 Iron</option>
+          <option value="9i">9 Iron</option>
+        </optgroup>
+        <optgroup label="Wedges">
+          <option value="pw">PW (46°)</option>
+          <option value="48">48°</option>
+          <option value="50">50°</option>
+          <option value="52">52°</option>
+          <option value="54">54°</option>
+          <option value="56">56°</option>
+          <option value="58">58°</option>
+          <option value="60">60°</option>
+        </optgroup>
+      </select>
+    </div>
+    <div class="bo-control-group">
+      <label class="bo-label">Optimization Mode</label>
+      <div class="bo-btn-group bo-mode-buttons">
+        <button id="bo_modeBtn1" class="bo-toggle-btn bo-mode-btn bo-active" data-mode="carry" onclick="boSetOptimizeMode(this.getAttribute('data-mode'))">Carry</button>
+        <button id="bo_modeBtn2" class="bo-toggle-btn bo-mode-btn" data-mode="total" onclick="boSetOptimizeMode(this.getAttribute('data-mode'))">Total</button>
+        <button id="bo_modeBtn3" class="bo-toggle-btn bo-mode-btn" data-mode="both" onclick="boSetOptimizeMode(this.getAttribute('data-mode'))">Carry+Total</button>
+      </div>
+    </div>
+    <div class="bo-control-group">
+      <div class="bo-input-row">
+        <div class="bo-input-column">
+          <label class="bo-label" for="bo_ballSpeed">Ball Speed (mph)</label>
+          <input type="number" id="bo_ballSpeed" min="40" max="220" step="1" oninput="boOnBallSpeedManualInput()">
+          <div class="bo-input-hint">Auto-calculated</div>
+        </div>
+        <div class="bo-input-column">
+          <label class="bo-label" for="bo_smashFactor">Smash Factor</label>
+          <input type="number" id="bo_smashFactor" min="1.0" max="1.53" step="0.01" oninput="boOnSmashFactorManualInput()">
+          <div class="bo-input-hint">Auto-calculated</div>
+        </div>
+      </div>
+    </div>
+    <div class="bo-control-group">
+      <div class="bo-slider-container">
+        <div class="bo-slider-header">
+          <div class="bo-slider-label">Club Speed</div>
+          <div class="bo-current-value-display" id="bo_clubSpeedValue">100 mph</div>
+        </div>
+        <input type="range" id="bo_clubSpeed" min="60" max="140" step="1" value="100" oninput="boOnClubSpeedOrAttackAngleChange()">
+        <div class="bo-value-display">
+          <span id="bo_speedMinDisplay">60 mph</span>
+          <span id="bo_speedMaxDisplay">140 mph</span>
+        </div>
+      </div>
+    </div>
+    <div class="bo-control-group">
+      <div class="bo-slider-container">
+        <div class="bo-slider-header">
+          <div class="bo-slider-label">Attack Angle</div>
+          <div class="bo-current-value-display" id="bo_attackAngleValue">0°</div>
+        </div>
+        <input type="range" id="bo_attackAngle" min="-10" max="10" step="0.5" value="0" oninput="boOnClubSpeedOrAttackAngleChange()">
+        <div class="bo-value-display">
+          <span>-10°</span>
+          <span>+10°</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    </div>
   </div>
 </div>
 
@@ -15612,7 +15742,173 @@ function toggleLearnDistanceOptimizer() {
   if (!page) return;
   var isOpen = page.style.display === 'block';
   page.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen && !window._boInited) { boInit(); window._boInited = true; }
 }
+
+// --- Bag Optimizer Engine ---
+var _boOptMode = 'carry';
+var _boManualBallSpeed = false;
+var _boManualSmash = false;
+
+var BO_CLUBS = {
+  driver: { name:'Driver', loft:10.5, smash:1.49, aaDefault:3, aaMin:-3, aaMax:7, speedMin:85, speedMax:140 },
+  '3w':   { name:'3 Wood', loft:15, smash:1.46, aaDefault:0, aaMin:-5, aaMax:3, speedMin:80, speedMax:130 },
+  '4w':   { name:'4 Wood', loft:17, smash:1.44, aaDefault:-0.5, aaMin:-5, aaMax:2, speedMin:78, speedMax:125 },
+  '5w':   { name:'5 Wood', loft:19, smash:1.43, aaDefault:-1, aaMin:-6, aaMax:2, speedMin:75, speedMax:120 },
+  '2i':   { name:'2 Iron', loft:18, smash:1.40, aaDefault:-1.5, aaMin:-6, aaMax:1, speedMin:75, speedMax:120 },
+  '3i':   { name:'3 Iron', loft:21, smash:1.38, aaDefault:-2, aaMin:-7, aaMax:0, speedMin:72, speedMax:115 },
+  '4i':   { name:'4 Iron', loft:24, smash:1.36, aaDefault:-2.5, aaMin:-7, aaMax:0, speedMin:70, speedMax:112 },
+  '5i':   { name:'5 Iron', loft:27, smash:1.34, aaDefault:-3, aaMin:-8, aaMax:0, speedMin:68, speedMax:108 },
+  '6i':   { name:'6 Iron', loft:30, smash:1.32, aaDefault:-3.5, aaMin:-8, aaMax:0, speedMin:65, speedMax:105 },
+  '7i':   { name:'7 Iron', loft:34, smash:1.30, aaDefault:-4, aaMin:-9, aaMax:0, speedMin:62, speedMax:100 },
+  '8i':   { name:'8 Iron', loft:38, smash:1.28, aaDefault:-4.5, aaMin:-9, aaMax:0, speedMin:60, speedMax:97 },
+  '9i':   { name:'9 Iron', loft:42, smash:1.26, aaDefault:-5, aaMin:-10, aaMax:0, speedMin:58, speedMax:94 },
+  pw:     { name:'PW', loft:46, smash:1.24, aaDefault:-5, aaMin:-10, aaMax:0, speedMin:55, speedMax:90 },
+  '48':   { name:'48', loft:48, smash:1.22, aaDefault:-5, aaMin:-10, aaMax:0, speedMin:50, speedMax:85 },
+  '50':   { name:'50', loft:50, smash:1.20, aaDefault:-5, aaMin:-10, aaMax:0, speedMin:48, speedMax:82 },
+  '52':   { name:'52', loft:52, smash:1.18, aaDefault:-5.5, aaMin:-10, aaMax:0, speedMin:45, speedMax:80 },
+  '54':   { name:'54', loft:54, smash:1.16, aaDefault:-5.5, aaMin:-10, aaMax:0, speedMin:42, speedMax:78 },
+  '56':   { name:'56', loft:56, smash:1.14, aaDefault:-6, aaMin:-10, aaMax:0, speedMin:40, speedMax:75 },
+  '58':   { name:'58', loft:58, smash:1.12, aaDefault:-6, aaMin:-10, aaMax:0, speedMin:38, speedMax:72 },
+  '60':   { name:'60', loft:60, smash:1.10, aaDefault:-6, aaMin:-10, aaMax:0, speedMin:35, speedMax:70 }
+};
+
+function boInit() {
+  boOnClubChange();
+}
+
+function boGetClub() {
+  return BO_CLUBS[document.getElementById('bo_clubSelect').value] || BO_CLUBS.driver;
+}
+
+function boOnClubChange() {
+  var club = boGetClub();
+  var speedSlider = document.getElementById('bo_clubSpeed');
+  speedSlider.min = club.speedMin;
+  speedSlider.max = club.speedMax;
+  var mid = Math.round((club.speedMin + club.speedMax) / 2);
+  speedSlider.value = mid;
+  document.getElementById('bo_speedMinDisplay').textContent = club.speedMin + ' mph';
+  document.getElementById('bo_speedMaxDisplay').textContent = club.speedMax + ' mph';
+  var aaSlider = document.getElementById('bo_attackAngle');
+  aaSlider.min = club.aaMin;
+  aaSlider.max = club.aaMax;
+  aaSlider.value = club.aaDefault;
+  _boManualBallSpeed = false;
+  _boManualSmash = false;
+  boOnClubSpeedOrAttackAngleChange();
+}
+
+function boSetOptimizeMode(mode) {
+  _boOptMode = mode;
+  document.querySelectorAll('.bo-mode-btn').forEach(function(b) {
+    b.classList.toggle('bo-active', b.getAttribute('data-mode') === mode);
+  });
+  boCalculate();
+}
+
+function boOnClubSpeedOrAttackAngleChange() {
+  var cs = parseFloat(document.getElementById('bo_clubSpeed').value);
+  document.getElementById('bo_clubSpeedValue').textContent = cs + ' mph';
+  var aa = parseFloat(document.getElementById('bo_attackAngle').value);
+  document.getElementById('bo_attackAngleValue').innerHTML = (aa >= 0 ? '+' : '') + aa + '\u00B0';
+  if (!_boManualSmash) {
+    var club = boGetClub();
+    document.getElementById('bo_smashFactor').value = club.smash.toFixed(2);
+  }
+  if (!_boManualBallSpeed) {
+    var sf = parseFloat(document.getElementById('bo_smashFactor').value) || 1.45;
+    document.getElementById('bo_ballSpeed').value = Math.round(cs * sf);
+  }
+  boCalculate();
+}
+
+function boOnBallSpeedManualInput() {
+  _boManualBallSpeed = true;
+  var bs = parseFloat(document.getElementById('bo_ballSpeed').value);
+  var cs = parseFloat(document.getElementById('bo_clubSpeed').value);
+  if (bs && cs) document.getElementById('bo_smashFactor').value = (bs / cs).toFixed(2);
+  boCalculate();
+}
+
+function boOnSmashFactorManualInput() {
+  _boManualSmash = true;
+  _boManualBallSpeed = false;
+  var sf = parseFloat(document.getElementById('bo_smashFactor').value);
+  var cs = parseFloat(document.getElementById('bo_clubSpeed').value);
+  if (sf && cs) document.getElementById('bo_ballSpeed').value = Math.round(cs * sf);
+  boCalculate();
+}
+
+function boCalcTrajectory(ballSpeed, launchAngle, spinRate) {
+  var g = 32.174, mass = 0.1012, area = 0.001432, rho = 0.0765, Cd = 0.225, dt = 0.005;
+  var vx = ballSpeed * 1.467 * Math.cos(launchAngle * Math.PI / 180);
+  var vy = ballSpeed * 1.467 * Math.sin(launchAngle * Math.PI / 180);
+  var x = 0, y = 0, maxH = 0, t = 0;
+  var spinFactor = Math.min(spinRate / 2500, 2.5);
+  var Cl = 0.15 + 0.04 * spinFactor;
+  for (var i = 0; i < 20000; i++) {
+    var v = Math.sqrt(vx * vx + vy * vy);
+    if (v < 1) break;
+    var drag = 0.5 * rho * area * Cd * v;
+    var lift = 0.5 * rho * area * Cl * v;
+    var ax = -drag * vx / mass;
+    var ay = (-g) + (lift * vx / (v * mass)) - (drag * vy / mass);
+    vx += ax * dt; vy += ay * dt; x += vx * dt; y += vy * dt;
+    if (y > maxH) maxH = y;
+    t += dt;
+    if (y < 0 && i > 10) break;
+  }
+  var carry = x / 3;
+  var landAngle = Math.abs(Math.atan2(-vy, vx) * 180 / Math.PI);
+  var rollFactor = Math.max(0, 1 - landAngle / 70) * (1 - Math.min(spinRate / 10000, 0.8));
+  var rollout = carry * rollFactor * 0.15;
+  return { carry: Math.round(carry), total: Math.round(carry + rollout), apex: Math.round(maxH), landAngle: Math.round(landAngle), hangTime: t.toFixed(1) };
+}
+
+function boOptimizeLaunch(ballSpeed, loft, attackAngle) {
+  var dynLoft = loft + attackAngle * 0.7;
+  var best = { carry: 0, total: 0 };
+  var bestLaunch = dynLoft * 0.75, bestSpin = 2500;
+  var launchMin = Math.max(1, dynLoft * 0.5), launchMax = Math.min(45, dynLoft * 1.1);
+  var spinMin = loft <= 15 ? 1500 : loft <= 30 ? 3000 : 5000;
+  var spinMax = loft <= 15 ? 4000 : loft <= 30 ? 8000 : 12000;
+  for (var la = launchMin; la <= launchMax; la += 0.5) {
+    for (var sr = spinMin; sr <= spinMax; sr += 200) {
+      var r = boCalcTrajectory(ballSpeed, la, sr);
+      var metric = _boOptMode === 'total' ? r.total : _boOptMode === 'both' ? (r.carry + r.total) / 2 : r.carry;
+      var bestMetric = _boOptMode === 'total' ? best.total : _boOptMode === 'both' ? (best.carry + best.total) / 2 : best.carry;
+      if (metric > bestMetric) { best = r; bestLaunch = la; bestSpin = sr; }
+    }
+  }
+  return { launch: bestLaunch, spin: bestSpin, carry: best.carry, total: best.total, apex: best.apex, landAngle: best.landAngle, hangTime: best.hangTime };
+}
+
+function boCalculate() {
+  var ballSpeed = parseFloat(document.getElementById('bo_ballSpeed').value);
+  var club = boGetClub();
+  var aa = parseFloat(document.getElementById('bo_attackAngle').value);
+  if (!ballSpeed || isNaN(ballSpeed)) return;
+  var r = boOptimizeLaunch(ballSpeed, club.loft, aa);
+  var el = document.getElementById('bo_results');
+  var modeLabel = _boOptMode === 'both' ? 'carry + total' : _boOptMode;
+  var carryHL = _boOptMode === 'carry' || _boOptMode === 'both' ? ' bo-distance-highlight' : '';
+  var totalHL = _boOptMode === 'total' || _boOptMode === 'both' ? ' bo-distance-highlight' : '';
+  el.innerHTML = '<h3>Optimal for ' + modeLabel + '</h3>' +
+    '<div class="bo-results-grid">' +
+    '<div class="bo-result-card' + carryHL + '"><div class="bo-result-label">CARRY</div><div class="bo-result-value">' + r.carry + '<span class="bo-result-unit">yd</span></div></div>' +
+    '<div class="bo-result-card' + totalHL + '"><div class="bo-result-label">TOTAL</div><div class="bo-result-value">' + r.total + '<span class="bo-result-unit">yd</span></div></div>' +
+    '<div class="bo-result-card"><div class="bo-result-label">LAUNCH</div><div class="bo-result-value">' + r.launch.toFixed(1) + '<span class="bo-result-unit">\u00B0</span></div></div>' +
+    '<div class="bo-result-card"><div class="bo-result-label">SPIN</div><div class="bo-result-value">' + r.spin + '<span class="bo-result-unit">rpm</span></div></div>' +
+    '</div>' +
+    '<div class="bo-results-grid" style="margin-top:5px;">' +
+    '<div class="bo-result-card"><div class="bo-result-label">APEX</div><div class="bo-result-value">' + r.apex + '<span class="bo-result-unit">ft</span></div></div>' +
+    '<div class="bo-result-card"><div class="bo-result-label">LAND\u2220</div><div class="bo-result-value">' + r.landAngle + '<span class="bo-result-unit">\u00B0</span></div></div>' +
+    '<div class="bo-result-card"><div class="bo-result-label">HANG</div><div class="bo-result-value">' + r.hangTime + '<span class="bo-result-unit">s</span></div></div>' +
+    '<div class="bo-result-card"><div class="bo-result-label">BALL SPD</div><div class="bo-result-value">' + Math.round(ballSpeed) + '<span class="bo-result-unit">mph</span></div></div>' +
+    '</div>';
+}
+// --- End Bag Optimizer Engine ---
 
 // === PUTT BREAK VISUALIZER ===
 var _pbvInited = false;

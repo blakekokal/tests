@@ -1,0 +1,248 @@
+<!-- BAG OPTIMIZER - embedded in Distance Optimizer page -->
+<style>
+#bagOptApp * { margin: 0; padding: 0; box-sizing: border-box; }
+#bagOptApp {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 0;
+}
+#bagOptApp .bo-header {
+    background: #2a2a2a;
+    padding: 12px;
+    text-align: center;
+    color: white;
+    border-bottom: 2px solid #333;
+    border-radius: 12px 12px 0 0;
+}
+#bagOptApp .bo-header h2 { font-size: 1.3em; margin:0; }
+#bagOptApp .bo-content { padding: 10px; }
+#bagOptApp .bo-control-group { margin-bottom: 12px; }
+#bagOptApp .bo-label {
+    display: block;
+    font-weight: 600;
+    color: #e0e0e0;
+    margin-bottom: 6px;
+    font-size: 0.9em;
+}
+#bagOptApp select, #bagOptApp input[type="number"] {
+    width: 100%;
+    padding: 9px;
+    border: 2px solid #333;
+    border-radius: 10px;
+    font-size: 16px;
+    transition: all 0.3s;
+    background: #2a2a2a;
+    color: #ffffff;
+    font-family: inherit;
+}
+#bagOptApp select:focus, #bagOptApp input[type="number"]:focus {
+    outline: none;
+    border-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.2);
+}
+#bagOptApp input[type="number"] { font-weight: 600; }
+#bagOptApp .bo-input-hint { font-size: 0.72em; color: #888; margin-top: 2px; }
+#bagOptApp .bo-input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+#bagOptApp .bo-input-column { display: flex; flex-direction: column; }
+#bagOptApp .bo-btn-group { display: grid; gap: 6px; margin-bottom: 6px; }
+#bagOptApp .bo-mode-buttons { grid-template-columns: 1fr 1fr 1fr; }
+#bagOptApp .bo-toggle-btn {
+    padding: 9px;
+    background: #2a2a2a;
+    color: #999;
+    border: 2px solid #333;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+    font-family: inherit;
+}
+#bagOptApp .bo-toggle-btn:hover { border-color: #555; color: #ccc; }
+#bagOptApp .bo-toggle-btn.bo-active {
+    background: #ffffff;
+    color: #000000;
+    border-color: #ffffff;
+}
+#bagOptApp .bo-slider-container { position: relative; padding: 5px 0; }
+#bagOptApp .bo-current-value-display {
+    font-weight: 700;
+    color: #ffffff;
+    font-size: 1.05em;
+    text-align: center;
+    position: absolute;
+    left: 0; right: 0; top: 0;
+}
+#bagOptApp .bo-slider-header {
+    position: relative;
+    margin-bottom: 8px;
+    height: 18px;
+}
+#bagOptApp .bo-slider-label {
+    font-weight: 600;
+    color: #e0e0e0;
+    font-size: 0.9em;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+}
+#bagOptApp .bo-value-display {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    font-size: 0.8em;
+    color: #999;
+}
+#bagOptApp input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    background: #333;
+    border-radius: 5px;
+    outline: none;
+    padding: 0;
+}
+#bagOptApp input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    background: #ffffff;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    transition: transform 0.2s;
+}
+#bagOptApp input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+#bagOptApp .bo-results {
+    background: #2a2a2a;
+    border-radius: 12px;
+    padding: 10px;
+    margin-bottom: 12px;
+    border: 1px solid #333;
+}
+#bagOptApp .bo-results h3 {
+    color: #ffffff;
+    margin: 0 0 8px 0;
+    font-size: 1.05em;
+    text-align: center;
+    text-transform: capitalize;
+}
+#bagOptApp .bo-results-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+}
+#bagOptApp .bo-result-card {
+    background: #1a1a1a;
+    padding: 8px 4px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    text-align: center;
+    border: 1px solid #333;
+}
+#bagOptApp .bo-result-label { font-size: 0.65em; color: #999; margin-bottom: 2px; }
+#bagOptApp .bo-result-value {
+    font-size: 1.2em;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1;
+}
+#bagOptApp .bo-result-unit { font-size: 0.55em; color: #888; margin-left: 1px; }
+#bagOptApp .bo-distance-highlight { background: #ffffff; color: #000000; }
+#bagOptApp .bo-distance-highlight .bo-result-label { color: #666; }
+#bagOptApp .bo-distance-highlight .bo-result-value { color: #000000; font-size: 1.4em; }
+#bagOptApp .bo-distance-highlight .bo-result-unit { color: #666; }
+</style>
+
+<div id="bagOptApp">
+  <div class="bo-header">
+    <h2>Bag Optimizer <span style="font-size:0.5em;font-weight:normal;opacity:0.7;">v2.5</span></h2>
+  </div>
+  <div class="bo-content">
+    <div class="bo-results" id="bo_results">
+      <h3>Optimal Results</h3>
+      <div style="color:#888;text-align:center;font-size:0.85em;">Adjust settings to see results</div>
+    </div>
+    <div class="bo-control-group">
+      <label class="bo-label" for="bo_clubSelect">Club Selection</label>
+      <select id="bo_clubSelect" onchange="boOnClubChange()">
+        <optgroup label="Woods">
+          <option value="driver" selected>Driver</option>
+          <option value="3w">3 Wood</option>
+          <option value="4w">4 Wood</option>
+          <option value="5w">5 Wood</option>
+        </optgroup>
+        <optgroup label="Irons">
+          <option value="2i">2 Iron</option>
+          <option value="3i">3 Iron</option>
+          <option value="4i">4 Iron</option>
+          <option value="5i">5 Iron</option>
+          <option value="6i">6 Iron</option>
+          <option value="7i">7 Iron</option>
+          <option value="8i">8 Iron</option>
+          <option value="9i">9 Iron</option>
+        </optgroup>
+        <optgroup label="Wedges">
+          <option value="pw">PW (46&deg;)</option>
+          <option value="48">48&deg;</option>
+          <option value="50">50&deg;</option>
+          <option value="52">52&deg;</option>
+          <option value="54">54&deg;</option>
+          <option value="56">56&deg;</option>
+          <option value="58">58&deg;</option>
+          <option value="60">60&deg;</option>
+        </optgroup>
+      </select>
+    </div>
+    <div class="bo-control-group">
+      <label class="bo-label">Optimization Mode</label>
+      <div class="bo-btn-group bo-mode-buttons">
+        <button id="bo_modeBtn1" class="bo-toggle-btn bo-mode-btn bo-active" data-mode="carry" onclick="boSetOptimizeMode(this.getAttribute('data-mode'))">Carry</button>
+        <button id="bo_modeBtn2" class="bo-toggle-btn bo-mode-btn" data-mode="total" onclick="boSetOptimizeMode(this.getAttribute('data-mode'))">Total</button>
+        <button id="bo_modeBtn3" class="bo-toggle-btn bo-mode-btn" data-mode="both" onclick="boSetOptimizeMode(this.getAttribute('data-mode'))">Carry+Total</button>
+      </div>
+    </div>
+    <div class="bo-control-group">
+      <div class="bo-input-row">
+        <div class="bo-input-column">
+          <label class="bo-label" for="bo_ballSpeed">Ball Speed (mph)</label>
+          <input type="number" id="bo_ballSpeed" min="40" max="220" step="1" oninput="boOnBallSpeedManualInput()">
+          <div class="bo-input-hint">Auto-calculated</div>
+        </div>
+        <div class="bo-input-column">
+          <label class="bo-label" for="bo_smashFactor">Smash Factor</label>
+          <input type="number" id="bo_smashFactor" min="1.0" max="1.53" step="0.01" oninput="boOnSmashFactorManualInput()">
+          <div class="bo-input-hint">Auto-calculated</div>
+        </div>
+      </div>
+    </div>
+    <div class="bo-control-group">
+      <div class="bo-slider-container">
+        <div class="bo-slider-header">
+          <div class="bo-slider-label">Club Speed</div>
+          <div class="bo-current-value-display" id="bo_clubSpeedValue">100 mph</div>
+        </div>
+        <input type="range" id="bo_clubSpeed" min="60" max="140" step="1" value="100" oninput="boOnClubSpeedOrAttackAngleChange()">
+        <div class="bo-value-display">
+          <span id="bo_speedMinDisplay">60 mph</span>
+          <span id="bo_speedMaxDisplay">140 mph</span>
+        </div>
+      </div>
+    </div>
+    <div class="bo-control-group">
+      <div class="bo-slider-container">
+        <div class="bo-slider-header">
+          <div class="bo-slider-label">Attack Angle</div>
+          <div class="bo-current-value-display" id="bo_attackAngleValue">0&deg;</div>
+        </div>
+        <input type="range" id="bo_attackAngle" min="-10" max="10" step="0.5" value="0" oninput="boOnClubSpeedOrAttackAngleChange()">
+        <div class="bo-value-display">
+          <span>-10&deg;</span>
+          <span>+10&deg;</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
