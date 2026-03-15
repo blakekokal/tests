@@ -258,6 +258,47 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
       <div id="hcpSaveMsg" style="font-size:11px;color:#00b87a;min-height:12px;"></div>
     </div>
 
+    <!-- HANDICAP INDEX -->
+    <div style="margin-top:6px;width:100%;border-top:1px solid #333333;padding-top:8px;display:flex;flex-direction:column;align-items:center;gap:4px;">
+      <div style="font-size:12px;color:#606060;">Handicap Index</div>
+      <div id="handicapIndexDisplay" style="font-size:28px;font-weight:800;color:#00b87a;padding:4px 0;">--</div>
+      <div id="handicapIndexInfo" style="font-size:11px;color:#2e2e2e;text-align:center;max-width:260px;line-height:1.4;"></div>
+      <div id="handicapTrendContainer" style="width:100%;max-width:280px;margin-top:4px;">
+        <div id="handicapTrendChart" style="display:flex;align-items:flex-end;gap:2px;height:50px;width:100%;justify-content:center;"></div>
+      </div>
+    </div>
+
+    <!-- GOALS -->
+    <div style="margin-top:6px;width:100%;border-top:1px solid #333333;padding-top:8px;display:flex;flex-direction:column;align-items:center;gap:4px;">
+      <div style="font-size:12px;color:#606060;">My Goals</div>
+      <div id="goalsContainer" style="width:100%;max-width:300px;"></div>
+      <div id="goalsList" style="width:100%;max-width:300px;"></div>
+      <button onclick="toggleAddGoal()" id="addGoalBtn" style="background:#007a52;font-size:12px;height:34px;width:100%;max-width:300px;">+ Add Goal</button>
+      <div id="addGoalForm" style="display:none;width:100%;max-width:300px;background:#222222;border-radius:10px;padding:12px;margin-top:4px;">
+        <select id="goalCategory" style="width:100%;height:36px;background:#282828;color:#ffffff;border:1px solid #3d3d3d;border-radius:8px;font-size:12px;padding:0 8px;margin-bottom:6px;">
+          <option value="handicap">Handicap Index</option>
+          <option value="scoring_avg">Scoring Average (18-hole)</option>
+          <option value="fairways">Fairway % Hit</option>
+          <option value="gir">GIR %</option>
+          <option value="putts">Putts Per Round</option>
+          <option value="sg_total">SG: Total</option>
+          <option value="sg_ott">SG: Off The Tee</option>
+          <option value="sg_app">SG: Approach</option>
+          <option value="sg_arg">SG: Around Green</option>
+          <option value="sg_putt">SG: Putting</option>
+          <option value="custom">Custom Goal</option>
+        </select>
+        <input id="goalTarget" type="text" placeholder="Target value (e.g. 10.0)" style="width:100%;height:36px;box-sizing:border-box;margin-bottom:6px;">
+        <input id="goalDeadline" type="date" style="width:100%;height:36px;box-sizing:border-box;margin-bottom:6px;background:#282828;color:#ffffff;border:1px solid #3d3d3d;border-radius:8px;padding:0 8px;">
+        <input id="goalNote" type="text" placeholder="Note (optional)" style="width:100%;height:36px;box-sizing:border-box;margin-bottom:6px;">
+        <div style="display:flex;gap:6px;">
+          <button onclick="saveGoal()" style="flex:1;height:34px;background:#2d7abc;font-size:12px;font-weight:700;border:none;border-radius:8px;color:#ffffff;cursor:pointer;">Save</button>
+          <button onclick="toggleAddGoal()" style="flex:1;height:34px;background:#333333;font-size:12px;font-weight:700;border:none;border-radius:8px;color:#9a9a9a;cursor:pointer;">Cancel</button>
+        </div>
+        <div id="goalFormMsg" style="font-size:11px;min-height:14px;text-align:center;margin-top:4px;"></div>
+      </div>
+    </div>
+
     <!-- PASSWORD -->
     <div style="margin-top:6px;width:100%;border-top:1px solid #333333;padding-top:8px;display:flex;flex-direction:column;align-items:center;gap:4px;">
       <div style="font-size:12px;color:#606060;">Change Password</div>
@@ -1775,10 +1816,22 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
 
     <!-- Student Misc Tab (Bag + Schedule) -->
     <div id="svMiscTab" style="width:100%;max-width:360px;display:none;">
-      <!-- Toggle: Bag / Schedule -->
+      <!-- Toggle: Bag / Goals / Schedule -->
       <div style="display:flex;gap:0;margin-bottom:12px;background:#1e1e1e;border-radius:10px;overflow:hidden;border:1px solid #333333;">
-        <button id="svMiscToggleBag" onclick="showSvMiscSubTab('bag')" style="flex:1;height:38px;font-size:13px;font-weight:700;background:#2d7abc;border:none;color:#ffffff;cursor:pointer;">Student's Bag</button>
-        <button id="svMiscToggleSchedule" onclick="showSvMiscSubTab('schedule')" style="flex:1;height:38px;font-size:13px;font-weight:700;background:#1e1e1e;border:none;color:#606060;cursor:pointer;">Schedule</button>
+        <button id="svMiscToggleBag" onclick="showSvMiscSubTab('bag')" style="flex:1;height:38px;font-size:11px;font-weight:700;background:#2d7abc;border:none;color:#ffffff;cursor:pointer;">Bag</button>
+        <button id="svMiscToggleGoals" onclick="showSvMiscSubTab('goals')" style="flex:1;height:38px;font-size:11px;font-weight:700;background:#1e1e1e;border:none;color:#606060;cursor:pointer;">Goals</button>
+        <button id="svMiscToggleSchedule" onclick="showSvMiscSubTab('schedule')" style="flex:1;height:38px;font-size:11px;font-weight:700;background:#1e1e1e;border:none;color:#606060;cursor:pointer;">Schedule</button>
+      </div>
+
+      <!-- Student Goals sub-tab -->
+      <div id="svGoalsSubContent" style="display:none;">
+        <div style="background:#222222;border-radius:12px;padding:14px;margin-bottom:10px;">
+          <div style="font-size:14px;font-weight:800;text-align:center;margin-bottom:4px;">Handicap Index</div>
+          <div id="svHandicapDisplay" style="font-size:28px;font-weight:800;color:#00b87a;text-align:center;padding:4px 0;">--</div>
+          <div id="svHandicapInfo" style="font-size:11px;color:#2e2e2e;text-align:center;line-height:1.4;"></div>
+        </div>
+        <div style="font-size:14px;font-weight:800;text-align:center;margin-bottom:8px;">Student Goals</div>
+        <div id="svGoalsList" style="width:100%;"></div>
       </div>
 
       <!-- Student Bag sub-tab -->
@@ -11393,6 +11446,13 @@ function renderDashboard(data, hcp, targetId) {
   html+='<div style="background:#222222; border-radius:12px; padding:10px; margin-bottom:12px; display:flex; justify-content:center; align-items:center;">'
      + '<canvas id="scoringRadarDash" style="display:block; margin:0 auto;"></canvas>'
      + '</div>';
+  // Inline handicap calculation from the data we already have
+  var hcpResult = calcHandicapIndex(data);
+  var hcpDisplay = hcpResult.index !== null ? hcpResult.index.toFixed(1) : '--';
+  var hcpColor = hcpResult.index === null ? '#606060' : hcpResult.index <= 5 ? '#00b87a' : hcpResult.index <= 15 ? '#f0c830' : '#d4706e';
+  html+=hdr('HANDICAP INDEX');
+  html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #282828;"><span style="color:#9a9a9a;">Handicap Index</span><span style="font-size:22px;font-weight:800;color:'+hcpColor+';">'+hcpDisplay+'</span></div>';
+  html+=row('Calculation',hcpResult.msg);
   html+=hdr('SCORING AVERAGES');
   html+=row('Avg 18-Hole Score',avg18,avg18tp!==null?'<span style="color:'+ftpC(avg18tp)+'">'+ftp(avg18tp)+'</span>':'');
   html+=row('Avg 9-Hole Score',avg9,avg9tp!==null?'<span style="color:'+ftpC(avg9tp)+'">'+ftp(avg9tp)+'</span>':'');
@@ -16675,19 +16735,26 @@ function showSvPracticeSubTab(tab) {
 
 function showSvMiscSubTab(tab) {
   var bagEl = document.getElementById('svBagSubContent');
+  var goalsEl = document.getElementById('svGoalsSubContent');
   var schedEl = document.getElementById('svScheduleSubContent');
   var btnB = document.getElementById('svMiscToggleBag');
+  var btnG = document.getElementById('svMiscToggleGoals');
   var btnS = document.getElementById('svMiscToggleSchedule');
+  var allBtns = [btnB, btnG, btnS];
+  var allEls = [bagEl, goalsEl, schedEl];
+  // Hide all
+  allEls.forEach(function(el) { if (el) el.style.display = 'none'; });
+  allBtns.forEach(function(b) { if (b) { b.style.background = '#1e1e1e'; b.style.color = '#606060'; } });
   if (tab === 'bag') {
     if (bagEl) bagEl.style.display = 'block';
-    if (schedEl) schedEl.style.display = 'none';
     if (btnB) { btnB.style.background = '#2d7abc'; btnB.style.color = '#ffffff'; }
-    if (btnS) { btnS.style.background = '#1e1e1e'; btnS.style.color = '#606060'; }
     loadStudentBag();
+  } else if (tab === 'goals') {
+    if (goalsEl) goalsEl.style.display = 'block';
+    if (btnG) { btnG.style.background = '#2d7abc'; btnG.style.color = '#ffffff'; }
+    loadStudentGoalsAndHandicap();
   } else {
-    if (bagEl) bagEl.style.display = 'none';
     if (schedEl) schedEl.style.display = 'block';
-    if (btnB) { btnB.style.background = '#1e1e1e'; btnB.style.color = '#606060'; }
     if (btnS) { btnS.style.background = '#2d7abc'; btnS.style.color = '#ffffff'; }
     loadStudentSchedule();
   }
@@ -19041,6 +19108,319 @@ function wgSaveSession() {
   msg.style.color = '#00b87a';
   msg.textContent = 'Session saved!';
   setTimeout(function() { wgCancelEntry(); }, 1200);
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   HANDICAP INDEX CALCULATION (USGA/WHS simplified)
+   ══════════════════════════════════════════════════════════════ */
+
+function calcHandicapDifferential(score, rating, slope) {
+  // Standard formula: (Score - Rating) * 113 / Slope
+  if (!rating || !slope) return null;
+  return Math.round(((score - rating) * 113 / slope) * 10) / 10;
+}
+
+function calcHandicapIndex(rounds) {
+  // Get 18-hole rounds with scores, sorted by date desc
+  var eligible = rounds.filter(function(r) {
+    var holes = r.round_data && r.round_data.allHoles ? r.round_data.allHoles.length : r.holes;
+    return holes >= 14 && r.score > 0;
+  });
+
+  if (eligible.length < 3) return { index: null, differentials: [], msg: 'Need at least 3 rounds (have ' + eligible.length + ')' };
+
+  // Calculate differentials
+  var diffs = eligible.slice(0, 20).map(function(r) {
+    var rd = r.round_data || {};
+    var tee = rd._selectedTee;
+    var rating = tee ? tee.rm : null;
+    var slope = tee ? tee.sm : null;
+    var diff = calcHandicapDifferential(r.score, rating, slope);
+    // Fallback: use par-based estimate if no rating/slope
+    if (diff === null) {
+      // Approximate: rating ~ par, slope ~ 113 (standard)
+      diff = Math.round((r.score - r.par) * 10) / 10;
+    }
+    return { diff: diff, date: r.round_date, course: r.course_name, score: r.score };
+  });
+
+  // How many best differentials to use based on USGA table
+  var n = diffs.length;
+  var useCount;
+  if (n <= 3) useCount = 1;
+  else if (n <= 5) useCount = 1;
+  else if (n <= 6) useCount = 2;
+  else if (n <= 8) useCount = 2;
+  else if (n <= 11) useCount = 3;
+  else if (n <= 14) useCount = 4;
+  else if (n <= 16) useCount = 5;
+  else if (n <= 18) useCount = 6;
+  else if (n <= 19) useCount = 7;
+  else useCount = 8;
+
+  // Sort differentials ascending to pick best
+  var sorted = diffs.slice().sort(function(a, b) { return a.diff - b.diff; });
+  var best = sorted.slice(0, useCount);
+  var avg = best.reduce(function(s, d) { return s + d.diff; }, 0) / useCount;
+
+  // Apply adjustment for small sample
+  var adjustment = 0;
+  if (n <= 3) adjustment = -2;
+  else if (n <= 5) adjustment = -1;
+  else if (n <= 6) adjustment = -0.5;
+
+  var index = Math.round((avg + adjustment) * 10) / 10;
+  if (index < 0) index = 0; // Floor at 0
+
+  return { index: index, differentials: diffs, useCount: useCount, best: best, msg: 'Best ' + useCount + ' of ' + n + ' rounds' };
+}
+
+async function loadHandicapIndex(userId, displayId, infoId, trendId) {
+  var displayEl = document.getElementById(displayId || 'handicapIndexDisplay');
+  var infoEl = document.getElementById(infoId || 'handicapIndexInfo');
+  var trendEl = document.getElementById(trendId || 'handicapTrendChart');
+
+  if (!displayEl) return null;
+  displayEl.textContent = '--';
+  if (infoEl) infoEl.textContent = 'Loading...';
+  if (trendEl) trendEl.innerHTML = '';
+
+  var resp = await _sb.from('rounds').select('*')
+    .eq('user_id', userId || activeUserId())
+    .order('round_date', { ascending: false })
+    .limit(20);
+
+  if (resp.error || !resp.data || resp.data.length === 0) {
+    if (infoEl) infoEl.textContent = 'No rounds to calculate handicap.';
+    return null;
+  }
+
+  var result = calcHandicapIndex(resp.data);
+  if (result.index === null) {
+    displayEl.textContent = '--';
+    if (infoEl) infoEl.textContent = result.msg;
+    return null;
+  }
+
+  displayEl.textContent = result.index.toFixed(1);
+  displayEl.style.color = result.index <= 5 ? '#00b87a' : result.index <= 15 ? '#f0c830' : '#d4706e';
+  if (infoEl) infoEl.textContent = result.msg;
+
+  // Mini trend chart
+  if (trendEl && result.differentials.length > 1) {
+    var vals = result.differentials.slice().reverse();
+    var max = Math.max.apply(null, vals.map(function(d) { return d.diff; }));
+    var min = Math.min.apply(null, vals.map(function(d) { return d.diff; }));
+    var range = max - min || 1;
+    trendEl.innerHTML = vals.map(function(d) {
+      var h = Math.max(6, Math.round(((d.diff - min) / range) * 40 + 10));
+      var isBest = result.best.some(function(b) { return b.date === d.date && b.score === d.score; });
+      return '<div title="' + d.course + ': ' + d.diff + '" style="width:' + Math.max(6, Math.floor(260 / vals.length)) + 'px;height:' + h + 'px;background:' + (isBest ? '#00b87a' : '#3d3d3d') + ';border-radius:2px;cursor:help;"></div>';
+    }).join('');
+  }
+
+  return result;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   GOAL SETTING & TRACKING
+   ══════════════════════════════════════════════════════════════ */
+
+var GOAL_LABELS = {
+  handicap: 'Handicap Index',
+  scoring_avg: 'Scoring Avg (18)',
+  fairways: 'Fairway %',
+  gir: 'GIR %',
+  putts: 'Putts/Round',
+  sg_total: 'SG: Total',
+  sg_ott: 'SG: OTT',
+  sg_app: 'SG: Approach',
+  sg_arg: 'SG: ARG',
+  sg_putt: 'SG: Putting',
+  custom: 'Custom'
+};
+
+function getGoals(userId) {
+  var key = 'golf_goals_' + (userId || activeUserId());
+  try { return JSON.parse(localStorage.getItem(key)) || []; } catch(e) { return []; }
+}
+
+function saveGoals(goals, userId) {
+  var key = 'golf_goals_' + (userId || activeUserId());
+  localStorage.setItem(key, JSON.stringify(goals));
+  // Also save to profiles for cross-device sync
+  _sb.from('profiles').update({ goals: goals }).eq('id', userId || activeUserId()).then(function(){}).catch(function(){});
+}
+
+async function syncGoalsFromProfile(userId) {
+  try {
+    var { data } = await _sb.from('profiles').select('goals').eq('id', userId || activeUserId()).single();
+    if (data && data.goals && Array.isArray(data.goals)) {
+      var key = 'golf_goals_' + (userId || activeUserId());
+      localStorage.setItem(key, JSON.stringify(data.goals));
+      return data.goals;
+    }
+  } catch(e) { /* goals column may not exist yet */ }
+  return getGoals(userId);
+}
+
+function toggleAddGoal() {
+  var form = document.getElementById('addGoalForm');
+  var btn = document.getElementById('addGoalBtn');
+  if (form.style.display === 'none') {
+    form.style.display = 'block';
+    btn.style.display = 'none';
+    document.getElementById('goalFormMsg').textContent = '';
+    // Default deadline to 3 months from now
+    var d = new Date();
+    d.setMonth(d.getMonth() + 3);
+    document.getElementById('goalDeadline').value = d.toISOString().split('T')[0];
+  } else {
+    form.style.display = 'none';
+    btn.style.display = '';
+  }
+}
+
+function saveGoal() {
+  var cat = document.getElementById('goalCategory').value;
+  var target = document.getElementById('goalTarget').value.trim();
+  var deadline = document.getElementById('goalDeadline').value;
+  var note = document.getElementById('goalNote').value.trim();
+  var msg = document.getElementById('goalFormMsg');
+
+  if (!target) { msg.style.color = '#d4706e'; msg.textContent = 'Enter a target value.'; return; }
+
+  var goals = getGoals();
+  goals.push({
+    id: Date.now().toString(),
+    category: cat,
+    target: target,
+    deadline: deadline || null,
+    note: note || null,
+    created: new Date().toISOString().split('T')[0],
+    completed: false
+  });
+  saveGoals(goals);
+
+  // Reset form
+  document.getElementById('goalTarget').value = '';
+  document.getElementById('goalNote').value = '';
+  document.getElementById('addGoalForm').style.display = 'none';
+  document.getElementById('addGoalBtn').style.display = '';
+
+  renderGoals();
+}
+
+function deleteGoal(goalId) {
+  var goals = getGoals().filter(function(g) { return g.id !== goalId; });
+  saveGoals(goals);
+  renderGoals();
+}
+
+function toggleGoalComplete(goalId) {
+  var goals = getGoals();
+  var goal = goals.find(function(g) { return g.id === goalId; });
+  if (goal) goal.completed = !goal.completed;
+  saveGoals(goals);
+  renderGoals();
+}
+
+function renderGoals(targetEl, goals, readOnly) {
+  var container = targetEl || document.getElementById('goalsList');
+  if (!container) return;
+  var list = goals || getGoals();
+
+  if (list.length === 0) {
+    container.innerHTML = '<div style="text-align:center;color:#2e2e2e;font-size:12px;padding:8px;">No goals set yet.</div>';
+    return;
+  }
+
+  container.innerHTML = list.map(function(g) {
+    var label = GOAL_LABELS[g.category] || g.category;
+    var deadlineStr = '';
+    if (g.deadline) {
+      var dl = new Date(g.deadline + 'T12:00:00');
+      var now = new Date();
+      var daysLeft = Math.ceil((dl - now) / (1000*60*60*24));
+      if (daysLeft < 0) deadlineStr = '<span style="color:#d4706e;">Overdue by ' + Math.abs(daysLeft) + 'd</span>';
+      else if (daysLeft <= 7) deadlineStr = '<span style="color:#f0c830;">' + daysLeft + 'd left</span>';
+      else deadlineStr = '<span style="color:#606060;">' + (dl.getMonth()+1) + '/' + dl.getDate() + '/' + dl.getFullYear() + '</span>';
+    }
+    var completedStyle = g.completed ? 'opacity:0.5;text-decoration:line-through;' : '';
+    var checkIcon = g.completed ? '✅' : '⬜';
+    var actions = readOnly ? '' : '<div style="display:flex;gap:4px;margin-top:4px;">'
+      + '<button onclick="toggleGoalComplete(\'' + g.id + '\')" style="background:transparent;border:none;color:#44b8f0;font-size:11px;cursor:pointer;padding:0;height:auto;text-decoration:underline;">' + (g.completed ? 'Undo' : 'Complete') + '</button>'
+      + '<button onclick="deleteGoal(\'' + g.id + '\')" style="background:transparent;border:none;color:#d4706e;font-size:11px;cursor:pointer;padding:0;height:auto;text-decoration:underline;">Delete</button>'
+      + '</div>';
+
+    return '<div style="background:#222222;border-radius:10px;padding:10px 12px;margin-bottom:6px;' + completedStyle + '">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;">'
+      + '<div style="font-size:13px;font-weight:700;">' + checkIcon + ' ' + label + '</div>'
+      + '<div style="font-size:15px;font-weight:800;color:#44b8f0;">' + g.target + '</div>'
+      + '</div>'
+      + (g.note ? '<div style="font-size:11px;color:#9a9a9a;margin-top:2px;">' + g.note + '</div>' : '')
+      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">'
+      + '<div style="font-size:10px;">' + deadlineStr + '</div>'
+      + '</div>'
+      + actions
+      + '</div>';
+  }).join('');
+}
+
+/* ── Load handicap + goals on profile Account tab ── */
+var _origLoadProfileInfo;
+(function() {
+  // Hook into profile loading
+  var origGoToSettings = goToSettings;
+  goToSettings = function() {
+    origGoToSettings();
+    setTimeout(function() {
+      loadHandicapIndex();
+      syncGoalsFromProfile().then(function() { renderGoals(); });
+    }, 100);
+  };
+
+  var origGoToDashboard_hc = goToDashboard;
+  goToDashboard = function() {
+    origGoToDashboard_hc();
+    // Load handicap silently for dashboard view
+  };
+})();
+
+// Also load on showProfileTab('account')
+var _origShowProfileTabHC = showProfileTab;
+showProfileTab = function(tab) {
+  _origShowProfileTabHC(tab);
+  if (tab === 'account') {
+    setTimeout(function() {
+      loadHandicapIndex();
+      syncGoalsFromProfile().then(function() { renderGoals(); });
+    }, 200);
+  }
+};
+
+/* ── Student Viewer: Load Goals & Handicap ── */
+async function loadStudentGoalsAndHandicap() {
+  if (!_currentStudentId) return;
+
+  // Load handicap
+  loadHandicapIndex(_currentStudentId, 'svHandicapDisplay', 'svHandicapInfo', null);
+
+  // Load goals from profile
+  try {
+    var { data } = await _sb.from('profiles').select('goals').eq('id', _currentStudentId).single();
+    var goals = (data && data.goals && Array.isArray(data.goals)) ? data.goals : [];
+    var container = document.getElementById('svGoalsList');
+    if (goals.length === 0) {
+      container.innerHTML = '<div style="text-align:center;color:#2e2e2e;font-size:13px;padding:20px;">This student hasn\'t set any goals yet.</div>';
+    } else {
+      renderGoals(container, goals, true);
+    }
+  } catch(e) {
+    var container = document.getElementById('svGoalsList');
+    if (container) container.innerHTML = '<div style="text-align:center;color:#2e2e2e;font-size:12px;padding:12px;">Unable to load goals.</div>';
+  }
 }
 
 
