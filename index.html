@@ -1330,9 +1330,10 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
 
     <!-- Tab bar -->
     <div style="display:flex;gap:0;width:100%;flex-shrink:0;border-radius:10px;overflow:hidden;">
-      <button id="cstTab0" onclick="showStudentCoachingTab(0)" style="flex:1;height:38px;font-size:12px;font-weight:700;background:#2d7abc;border-radius:0;border:none;color:#ffffff;max-width:none;width:auto;padding:0;margin:0;">Feedback</button>
-      <button id="cstTab1" onclick="showStudentCoachingTab(1)" style="flex:1;height:38px;font-size:12px;font-weight:700;background:#282828;border-radius:0;border:none;color:#606060;max-width:none;width:auto;padding:0;margin:0;">Drills &amp; Combines</button>
-      <button id="cstTab2" onclick="showStudentCoachingTab(2)" style="flex:1;height:38px;font-size:12px;font-weight:700;background:#282828;border-radius:0;border:none;color:#606060;max-width:none;width:auto;padding:0;margin:0;">Info</button>
+      <button id="cstTab0" onclick="showStudentCoachingTab(0)" style="flex:1;height:38px;font-size:11px;font-weight:700;background:#2d7abc;border-radius:0;border:none;color:#ffffff;max-width:none;width:auto;padding:0;margin:0;">Feedback</button>
+      <button id="cstTab1" onclick="showStudentCoachingTab(1)" style="flex:1;height:38px;font-size:11px;font-weight:700;background:#282828;border-radius:0;border:none;color:#606060;max-width:none;width:auto;padding:0;margin:0;">Drills</button>
+      <button id="cstTab2" onclick="showStudentCoachingTab(2)" style="flex:1;height:38px;font-size:11px;font-weight:700;background:#282828;border-radius:0;border:none;color:#606060;max-width:none;width:auto;padding:0;margin:0;">Goals</button>
+      <button id="cstTab3" onclick="showStudentCoachingTab(3)" style="flex:1;height:38px;font-size:11px;font-weight:700;background:#282828;border-radius:0;border:none;color:#606060;max-width:none;width:auto;padding:0;margin:0;">Info</button>
     </div>
 
     <!-- Tab content -->
@@ -1379,8 +1380,48 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
         </div>
       </div>
 
-      <!-- TAB 2: Info -->
+      <!-- TAB 2: Goals & Handicap -->
       <div id="cstTabContent2" style="display:none;height:100%;overflow-y:auto;padding:14px 0 80px;">
+        <!-- Handicap Index Card -->
+        <div style="background:#222222;border-radius:14px;padding:16px 18px;margin-bottom:14px;text-align:center;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#606060;margin-bottom:6px;">My Handicap Index</div>
+          <div id="cstHandicapDisplay" style="font-size:32px;font-weight:800;color:#00b87a;padding:2px 0;">--</div>
+          <div id="cstHandicapInfo" style="font-size:11px;color:#2e2e2e;line-height:1.4;"></div>
+          <div id="cstHandicapTrend" style="display:flex;align-items:flex-end;gap:2px;height:50px;justify-content:center;margin-top:8px;"></div>
+        </div>
+        <!-- My Goals -->
+        <div style="background:#222222;border-radius:14px;padding:16px 18px;margin-bottom:14px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#606060;margin-bottom:10px;">My Goals</div>
+          <div id="cstGoalsList"></div>
+          <button onclick="toggleCstAddGoal()" id="cstAddGoalBtn" style="background:#007a52;font-size:12px;height:34px;width:100%;max-width:none;margin-top:8px;">+ Add Goal</button>
+          <div id="cstAddGoalForm" style="display:none;margin-top:8px;">
+            <select id="cstGoalCategory" style="width:100%;height:36px;background:#282828;color:#ffffff;border:1px solid #3d3d3d;border-radius:8px;font-size:12px;padding:0 8px;margin-bottom:6px;">
+              <option value="handicap">Handicap Index</option>
+              <option value="scoring_avg">Scoring Average (18-hole)</option>
+              <option value="fairways">Fairway % Hit</option>
+              <option value="gir">GIR %</option>
+              <option value="putts">Putts Per Round</option>
+              <option value="sg_total">SG: Total</option>
+              <option value="sg_ott">SG: Off The Tee</option>
+              <option value="sg_app">SG: Approach</option>
+              <option value="sg_arg">SG: Around Green</option>
+              <option value="sg_putt">SG: Putting</option>
+              <option value="custom">Custom Goal</option>
+            </select>
+            <input id="cstGoalTarget" type="text" placeholder="Target value (e.g. 10.0)" style="width:100%;height:36px;box-sizing:border-box;margin-bottom:6px;">
+            <input id="cstGoalDeadline" type="date" style="width:100%;height:36px;box-sizing:border-box;margin-bottom:6px;background:#282828;color:#ffffff;border:1px solid #3d3d3d;border-radius:8px;padding:0 8px;">
+            <input id="cstGoalNote" type="text" placeholder="Note (optional)" style="width:100%;height:36px;box-sizing:border-box;margin-bottom:6px;">
+            <div style="display:flex;gap:6px;">
+              <button onclick="saveCstGoal()" style="flex:1;height:34px;background:#2d7abc;font-size:12px;font-weight:700;border:none;border-radius:8px;color:#ffffff;cursor:pointer;">Save</button>
+              <button onclick="toggleCstAddGoal()" style="flex:1;height:34px;background:#333333;font-size:12px;font-weight:700;border:none;border-radius:8px;color:#9a9a9a;cursor:pointer;">Cancel</button>
+            </div>
+            <div id="cstGoalFormMsg" style="font-size:11px;min-height:14px;text-align:center;margin-top:4px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: Info -->
+      <div id="cstTabContent3" style="display:none;height:100%;overflow-y:auto;padding:14px 0 80px;">
         <!-- Invite Code -->
         <div style="background:linear-gradient(135deg,#1a4a8a,#1a4a8a);border-radius:14px;padding:18px 20px;margin-bottom:14px;">
           <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.55);margin-bottom:6px;">Your Invite Code</div>
@@ -14546,7 +14587,7 @@ showProfileTab = function(tab){
 // =============================================
 
 function showStudentCoachingTab(idx) {
-  for (var i = 0; i < 3; i++) {
+  for (var i = 0; i < 4; i++) {
     var btn = document.getElementById('cstTab' + i);
     var pane = document.getElementById('cstTabContent' + i);
     if (btn)  { btn.style.background = i === idx ? '#2d7abc' : '#282828'; btn.style.color = i === idx ? '#ffffff' : '#606060'; btn.style.fontWeight = i === idx ? '700' : '600'; }
@@ -14555,6 +14596,8 @@ function showStudentCoachingTab(idx) {
   // sync outer wrapper scroll behavior
   var wrap = document.getElementById('cstTabContentWrap');
   if (wrap) wrap.style.overflowY = idx === 0 ? 'hidden' : 'auto';
+  // Load goals & handicap when Goals tab is opened
+  if (idx === 2) loadCstGoalsAndHandicap();
 }
 
 function showCoachCoachingTab(idx) {
@@ -15044,6 +15087,8 @@ async function loadCoachingPageCoachView() {
   populateCoachStudentSelects(students || []);
   loadCoachActivityFeed();
   populateCoachDrillList();
+  // Load handicap badges for each student
+  loadRosterHandicaps(students || []);
 }
 
 function renderCoachingStudentRoster(students) {
@@ -15077,9 +15122,10 @@ function filterCoachingRoster() {
     return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #282828;">'
       + '<div style="width:36px;height:36px;border-radius:50%;background:#2d7abc;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#44b8f0;flex-shrink:0;">' + escapeHtml(initials) + '</div>'
       + '<div style="flex:1;min-width:0;">'
-      + '<div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(s.student_name || 'Student') + '</div>'
+      + '<div style="display:flex;align-items:center;gap:6px;"><span style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(s.student_name || 'Student') + '</span>'
+      + '<span id="rosterHcp_' + sid + '" style="font-size:10px;font-weight:700;background:#1a4a8a;color:#44b8f0;padding:1px 6px;border-radius:10px;white-space:nowrap;"></span></div>'
       + '<div style="font-size:11px;color:#2e2e2e;">' + escapeHtml(s.student_email || '') + '</div></div>'
-      + '<button onclick="viewStudent(\'' + sid + '\',\'' + sname + '\',\'' + semail + '\')" style="font-size:11px;font-weight:700;background:#2d7abc;border-radius:6px;padding:6px 10px;height:auto;max-width:none;width:auto;white-space:nowrap;">View Profile</button>'
+      + '<button onclick="viewStudent(\'' + sid + '\',\'' + sname + '\',\'' + semail + '\')" style="font-size:11px;font-weight:700;background:#2d7abc;border-radius:6px;padding:6px 10px;height:auto;max-width:none;width:auto;white-space:nowrap;">View</button>'
       + '</div>';
   }).join('');
 }
@@ -19399,6 +19445,81 @@ showProfileTab = function(tab) {
     }, 200);
   }
 };
+
+/* ── Student Viewer: Load Goals & Handicap ── */
+/* ── Coaching Section: Student Goals & Handicap Tab ── */
+function toggleCstAddGoal() {
+  var form = document.getElementById('cstAddGoalForm');
+  var btn = document.getElementById('cstAddGoalBtn');
+  if (form.style.display === 'none') {
+    form.style.display = 'block';
+    btn.style.display = 'none';
+    document.getElementById('cstGoalFormMsg').textContent = '';
+    var d = new Date(); d.setMonth(d.getMonth() + 3);
+    document.getElementById('cstGoalDeadline').value = d.toISOString().split('T')[0];
+  } else {
+    form.style.display = 'none';
+    btn.style.display = '';
+  }
+}
+
+function saveCstGoal() {
+  var cat = document.getElementById('cstGoalCategory').value;
+  var target = document.getElementById('cstGoalTarget').value.trim();
+  var deadline = document.getElementById('cstGoalDeadline').value;
+  var note = document.getElementById('cstGoalNote').value.trim();
+  var msg = document.getElementById('cstGoalFormMsg');
+
+  if (!target) { msg.style.color = '#d4706e'; msg.textContent = 'Enter a target value.'; return; }
+
+  var goals = getGoals();
+  goals.push({
+    id: Date.now().toString(),
+    category: cat,
+    target: target,
+    deadline: deadline || null,
+    note: note || null,
+    created: new Date().toISOString().split('T')[0],
+    completed: false
+  });
+  saveGoals(goals);
+
+  document.getElementById('cstGoalTarget').value = '';
+  document.getElementById('cstGoalNote').value = '';
+  document.getElementById('cstAddGoalForm').style.display = 'none';
+  document.getElementById('cstAddGoalBtn').style.display = '';
+
+  renderGoals(document.getElementById('cstGoalsList'));
+}
+
+async function loadCstGoalsAndHandicap() {
+  if (!currentUser) return;
+  loadHandicapIndex(activeUserId(), 'cstHandicapDisplay', 'cstHandicapInfo', 'cstHandicapTrend');
+  await syncGoalsFromProfile();
+  renderGoals(document.getElementById('cstGoalsList'));
+}
+
+/* ── Coach Roster: Handicap badges ── */
+async function loadRosterHandicaps(students) {
+  if (!students || students.length === 0) return;
+  students.forEach(async function(s) {
+    try {
+      var resp = await _sb.from('rounds').select('score, par, holes, round_data')
+        .eq('user_id', s.student_id)
+        .order('round_date', { ascending: false })
+        .limit(20);
+      if (resp.data && resp.data.length >= 3) {
+        var result = calcHandicapIndex(resp.data);
+        var badge = document.getElementById('rosterHcp_' + s.student_id);
+        if (badge && result.index !== null) {
+          badge.textContent = 'HCP ' + result.index.toFixed(1);
+          badge.style.color = result.index <= 5 ? '#00b87a' : result.index <= 15 ? '#f0c830' : '#d4706e';
+          badge.style.background = result.index <= 5 ? '#0a3020' : result.index <= 15 ? '#3a3010' : '#3a1515';
+        }
+      }
+    } catch(e) { /* ignore per-student errors */ }
+  });
+}
 
 /* ── Student Viewer: Load Goals & Handicap ── */
 async function loadStudentGoalsAndHandicap() {
