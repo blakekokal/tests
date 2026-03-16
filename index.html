@@ -1133,7 +1133,13 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
 <div id="learnSGCalcPage" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;background:#1e1e1e;overflow-y:auto;padding:50px 16px 30px;box-sizing:border-box;">
   <button class="back-btn-top" onclick="toggleLearnSGCalc()"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
   <div style="width:100%;max-width:420px;margin:0 auto;">
-    <div style="font-size:20px;font-weight:800;margin-bottom:12px;text-align:center;">Strokes Gained Calculator</div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;">
+      <div style="font-size:20px;font-weight:800;text-align:center;">Strokes Gained Calculator</div>
+      <button onclick="toggleLearnSGExplainer()" style="width:28px;height:28px;min-width:28px;max-width:28px;background:#222222;border:none;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;padding:0;">❓</button>
+    </div>
+    <div id="learnSGExplainerWrap" style="display:none;margin-bottom:14px;">
+      <div id="learnSGExplainerGraphic" style="background:#222222;border-radius:14px;overflow:hidden;"></div>
+    </div>
     <div id="learnSGCalcContainer" style="width:100%;"></div>
   </div>
 </div>
@@ -16485,6 +16491,25 @@ function toggleLearnSGCalc() {
     var sel = document.getElementById('sgCalcHcp');
     if (sel) sel.value = hcpVal;
     sgCalcReset();
+  }
+}
+
+function toggleLearnSGExplainer() {
+  var wrap = document.getElementById('learnSGExplainerWrap');
+  if (!wrap) return;
+  var isVisible = wrap.style.display !== 'none';
+  wrap.style.display = isVisible ? 'none' : 'block';
+  if (!isVisible) {
+    var el = document.getElementById('learnSGExplainerGraphic');
+    if (el && !el.getAttribute('data-rendered')) {
+      el.setAttribute('data-rendered', '1');
+      // Reuse the same SG explainer content
+      var src = document.getElementById('sgExplainerGraphic');
+      if (src) {
+        renderSGExplainer();
+        el.innerHTML = src.innerHTML;
+      }
+    }
   }
 }
 
