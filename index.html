@@ -590,12 +590,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
 
     <button onclick="goToPracticeHub()" style="display:flex;align-items:center;gap:13px;height:auto;padding:13px 15px;font-size:15px;font-weight:700;background:#d49a10;border-radius:13px;text-align:left;border:none;">
       <span style="font-size:20px;width:28px;text-align:center;flex-shrink:0;">🏌️</span>
-      <div><div style="font-size:0.97rem;font-weight:700;line-height:1;">Practice Hub</div><div style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:3px;">Combines · Drills · Practice</div></div>
-    </button>
-
-    <button onclick="goToLearningHub()" style="display:flex;align-items:center;gap:13px;height:auto;padding:13px 15px;font-size:15px;font-weight:700;background:#6a3fbf;border-radius:13px;text-align:left;border:none;">
-      <span style="font-size:20px;width:28px;text-align:center;flex-shrink:0;">📚</span>
-      <div><div style="font-size:0.97rem;font-weight:700;line-height:1;">Learning Hub</div><div style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:3px;">SG Calculator · Putt Break · Distance Optimizer</div></div>
+      <div><div style="font-size:0.97rem;font-weight:700;line-height:1;">Practice and Learning</div><div style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:3px;">Combines · Drills · Practice · Learn</div></div>
     </button>
 
     <button onclick="goToCoaching()" id="homeCoachingBtn" style="display:flex;align-items:center;gap:13px;height:auto;padding:13px 15px;font-size:15px;font-weight:700;background:#00402c;border-radius:13px;text-align:left;border:none;">
@@ -846,47 +841,20 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
   </div>
 </div>
 
-<!-- PRACTICE HUB PAGE -->
-<!-- LEARNING HUB PAGE -->
-<div id="learningHubPage" class="page" style="justify-content:flex-start;padding:0;overflow:hidden;">
-  <div style="flex-shrink:0;width:100%;padding:30px 16px 0;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;position:relative;">
-    <button class="back-btn-top" onclick="show('homePage')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
-    <div style="font-size:22px;font-weight:800;margin-bottom:6px;">Learning Hub</div>
-    <div style="font-size:13px;color:#2e2e2e;margin-bottom:14px;">Tools & Calculators</div>
-  </div>
-  <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;width:100%;display:flex;flex-direction:column;align-items:center;padding:14px 16px 80px;">
-    <div style="width:100%;max-width:360px;">
-      <div style="display:flex;flex-direction:column;gap:10px;align-items:center;">
-        <button onclick="toggleLearnSGCalc()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
-          <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">📊</span>
-          <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Strokes Gained Calculator</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Calculate SG for any shot</div></div>
-        </button>
-        <button onclick="toggleLearnPBV()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
-          <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🟢</span>
-          <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Putting Break Calculator</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Visualize putt break & aim point</div></div>
-        </button>
-        <button onclick="toggleLearnDistanceOptimizer()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
-          <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">📏</span>
-          <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Distance Optimizer</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Optimize distances for your game</div></div>
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <div id="practiceHubPage" class="page" style="justify-content:flex-start;padding:0;overflow:hidden;">
 
   <!-- Fixed header -->
   <div style="flex-shrink:0;width:100%;padding:30px 16px 0;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;position:relative;">
     <button class="back-btn-top" onclick="show('homePage')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
-    <div style="font-size:22px;font-weight:800;margin-bottom:6px;">Practice Hub</div>
-    <div style="font-size:13px;color:#2e2e2e;margin-bottom:14px;">Combines, Drills &amp; Practice</div>
+    <div style="font-size:22px;font-weight:800;margin-bottom:6px;">Practice and Learning</div>
+    <div style="font-size:13px;color:#2e2e2e;margin-bottom:14px;">Combines, Drills, Practice &amp; Learn</div>
 
-    <!-- 3-tab bar -->
+    <!-- 4-tab bar -->
     <div style="display:flex;gap:0;width:100%;max-width:360px;margin-bottom:0;border-radius:10px;overflow:hidden;">
       <button onclick="setPracticeHubTab('combines')" id="phTabCombines" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#2d7abc;border:none;color:#ffffff;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Combines</button>
       <button onclick="setPracticeHubTab('drills')" id="phTabDrills" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#282828;border:none;color:#606060;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Drills</button>
       <button onclick="setPracticeHubTab('plan')" id="phTabPlan" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#282828;border:none;color:#606060;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Practice</button>
+      <button onclick="setPracticeHubTab('learn')" id="phTabLearn" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#282828;border:none;color:#606060;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Learn</button>
     </div>
   </div>
 
@@ -997,6 +965,24 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
       <!-- HISTORY SUB-TAB -->
       <div id="ppHistory" style="display:none;">
         <div id="ppHistoryList" style="font-size:13px;color:#2e2e2e;text-align:center;padding:12px 0;">Loading...</div>
+      </div>
+    </div>
+
+    <!-- LEARN TAB -->
+    <div id="phLearnContent" style="display:none;">
+      <div style="display:flex;flex-direction:column;gap:10px;align-items:center;">
+        <button onclick="toggleLearnSGCalc()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
+          <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">📊</span>
+          <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Strokes Gained Calculator</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Calculate SG for any shot</div></div>
+        </button>
+        <button onclick="toggleLearnPBV()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
+          <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🟢</span>
+          <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Putting Break Calculator</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Visualize putt break &amp; aim point</div></div>
+        </button>
+        <button onclick="toggleLearnDistanceOptimizer()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
+          <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">📏</span>
+          <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Distance Optimizer</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Optimize distances for your game</div></div>
+        </button>
       </div>
     </div>
 
@@ -15793,8 +15779,9 @@ function setPracticeHubTab(tab) {
   document.getElementById('phCombinesContent').style.display = tab === 'combines' ? '' : 'none';
   document.getElementById('phDrillsContent').style.display   = tab === 'drills'   ? '' : 'none';
   document.getElementById('phPlanContent').style.display     = tab === 'plan'     ? '' : 'none';
+  document.getElementById('phLearnContent').style.display    = tab === 'learn'    ? '' : 'none';
 
-  var tabs = { combines: 'phTabCombines', drills: 'phTabDrills', plan: 'phTabPlan' };
+  var tabs = { combines: 'phTabCombines', drills: 'phTabDrills', plan: 'phTabPlan', learn: 'phTabLearn' };
   Object.keys(tabs).forEach(function(k) {
     var btn = document.getElementById(tabs[k]);
     if (btn) {
@@ -15809,10 +15796,8 @@ function setPracticeHubTab(tab) {
     initPracticeSessionForm();
     loadPracticePlanCombineOptions();
   }
-}
-
-function goToLearningHub() {
-  show('learningHubPage');
+  // When leaving Learn tab, return SG calc to its original home
+  if (tab !== 'learn') returnSGCalcToHelp();
 }
 
 
