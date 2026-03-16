@@ -928,15 +928,8 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
       </div>
     </div>
 
-    <!-- DRILLS TAB -->
-    <div id="phDrillsContent" style="display:none;">
-      <div style="display:flex;flex-direction:column;gap:10px;align-items:center;">
-        <button onclick="goToDrills()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#2a2008;border-radius:12px;text-align:left;">
-          <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🎯</span>
-          <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Drills Library</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Skill-building drills &amp; exercises</div></div>
-        </button>
-      </div>
-    </div>
+    <!-- DRILLS TAB (navigates directly to drills page via setPracticeHubTab) -->
+    <div id="phDrillsContent" style="display:none;"></div>
 
     <!-- MY PRACTICE PLAN TAB -->
     <div id="phPlanContent" style="display:none;">
@@ -15813,6 +15806,7 @@ async function checkCoachingStudentNotifications() {
 var _currentPHTab = 'combines';
 
 function setPracticeHubTab(tab) {
+  if (tab === 'drills') { goToDrills(); return; }
   _currentPHTab = tab;
   document.getElementById('phCombinesContent').style.display = tab === 'combines' ? '' : 'none';
   document.getElementById('phDrillsContent').style.display   = tab === 'drills'   ? '' : 'none';
