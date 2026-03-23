@@ -1204,11 +1204,23 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
     <div style="margin-top:16px;">
       <div style="background:#282828;border-radius:12px;padding:18px 16px;text-align:center;">
         <div style="font-size:12px;color:rgba(255,255,255,0.5);font-weight:600;margin-bottom:8px;">AVG PROXIMITY</div>
-        <!-- Tappable feet display -->
-        <div id="proxFtDisplay" onclick="proxEditFt()" style="font-size:42px;font-weight:800;color:#ffffff;line-height:1.1;cursor:pointer;">—</div>
-        <!-- Hidden input for editing -->
-        <div id="proxFtInputWrap" style="display:none;justify-content:center;">
-          <input type="number" id="proxFtInput" min="0" max="500" inputmode="numeric" style="width:120px;padding:8px;border:2px solid #2d7abc;border-radius:10px;background:#1e1e1e;color:#fff;font-size:36px;font-weight:800;text-align:center;box-sizing:border-box;outline:none;font-family:inherit;" onblur="proxConfirmFt()" onkeydown="if(event.key==='Enter'){this.blur();}">
+        <!-- 3-column: lose .5 | breakeven (tappable) | gain .5 -->
+        <div style="display:flex;align-items:center;justify-content:center;gap:0;">
+          <div style="flex:1;text-align:center;">
+            <div id="proxLoseHalfFt" style="font-size:20px;font-weight:700;color:#ff5252;line-height:1.1;">—</div>
+            <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;">-0.5 SG</div>
+          </div>
+          <div style="flex:1.4;text-align:center;">
+            <div id="proxFtDisplay" onclick="proxEditFt()" style="font-size:42px;font-weight:800;color:#ffffff;line-height:1.1;cursor:pointer;">—</div>
+            <!-- Hidden input for editing -->
+            <div id="proxFtInputWrap" style="display:none;justify-content:center;">
+              <input type="number" id="proxFtInput" min="0" max="500" inputmode="numeric" style="width:120px;padding:8px;border:2px solid #2d7abc;border-radius:10px;background:#1e1e1e;color:#fff;font-size:36px;font-weight:800;text-align:center;box-sizing:border-box;outline:none;font-family:inherit;" onblur="proxConfirmFt()" onkeydown="if(event.key==='Enter'){this.blur();}">
+            </div>
+          </div>
+          <div style="flex:1;text-align:center;">
+            <div id="proxGainHalfFt" style="font-size:20px;font-weight:700;color:#00c853;line-height:1.1;">—</div>
+            <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;">+0.5 SG</div>
+          </div>
         </div>
         <div id="proxFtHint" style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:6px;">Enter yardage above</div>
 
@@ -15949,13 +15961,39 @@ function proxSetLie(lie) {
   proxCalc();
 }
 
+// Binary search: find feet where SG = sgTarget for given expBefore/hcp
+function proxFindFtForSG(expBefore, sgTarget, hcp) {
+  // SG = expBefore - getExpectedPutts(ft) - 1
+  // We want: expBefore - getExpectedPutts(ft) - 1 = sgTarget
+  // So: getExpectedPutts(ft) = expBefore - 1 - sgTarget
+  var puttTarget = expBefore - 1 - sgTarget;
+  if (puttTarget <= 1) return 1; // basically holed it
+  var lo = 0, hi = 300, mid;
+  var table = sgPuttingData[hcp] || sgPuttingData['pro'];
+  var base110 = table[110] || 2.48;
+  if (puttTarget >= base110 + (300 - 110) * 0.004) {
+    return Math.round(110 + (puttTarget - base110) / 0.004);
+  }
+  for (var i = 0; i < 60; i++) {
+    mid = (lo + hi) / 2;
+    if (getExpectedPutts(mid, hcp) < puttTarget) lo = mid;
+    else hi = mid;
+  }
+  var ft = Math.round((lo + hi) / 2);
+  return ft < 1 ? 1 : ft;
+}
+
 function proxCalc() {
   var yardEl = document.getElementById('proxYardage');
   var displayEl = document.getElementById('proxFtDisplay');
   var hintEl = document.getElementById('proxFtHint');
+  var loseEl = document.getElementById('proxLoseHalfFt');
+  var gainEl = document.getElementById('proxGainHalfFt');
   var yards = parseInt(yardEl.value);
   if (!yards || yards < 10 || yards > 600) {
     displayEl.textContent = '—';
+    loseEl.textContent = '—';
+    gainEl.textContent = '—';
     hintEl.textContent = 'Enter yardage above';
     window._proxExpBefore = null;
     window._proxBreakFt = null;
@@ -15964,23 +16002,13 @@ function proxCalc() {
   }
 
   var expBefore = getExpectedStrokes(yards, _proxLie, _proxHcp);
-  var target = expBefore - 1;
 
-  // Binary search for the breakeven distance in feet
-  var lo = 0, hi = 200, mid, breakFt;
-  if (target >= getExpectedPutts(200, _proxHcp)) {
-    var table = sgPuttingData[_proxHcp] || sgPuttingData['pro'];
-    var base110 = table[110] || 2.48;
-    breakFt = Math.round(110 + (target - base110) / 0.004);
-    if (breakFt < 0) breakFt = 200;
-  } else {
-    for (var i = 0; i < 60; i++) {
-      mid = (lo + hi) / 2;
-      if (getExpectedPutts(mid, _proxHcp) < target) lo = mid;
-      else hi = mid;
-    }
-    breakFt = Math.round((lo + hi) / 2);
-  }
+  // Breakeven (SG = 0)
+  var breakFt = proxFindFtForSG(expBefore, 0, _proxHcp);
+  // Lose 0.5 (SG = -0.5) — farther from pin
+  var loseFt = proxFindFtForSG(expBefore, -0.5, _proxHcp);
+  // Gain 0.5 (SG = +0.5) — closer to pin
+  var gainFt = proxFindFtForSG(expBefore, 0.5, _proxHcp);
 
   if (breakFt <= 0) breakFt = 1;
   window._proxExpBefore = expBefore;
@@ -15988,6 +16016,8 @@ function proxCalc() {
   window._proxCurrentFt = breakFt;
 
   displayEl.textContent = breakFt + ' ft';
+  loseEl.textContent = loseFt + ' ft';
+  gainEl.textContent = gainFt + ' ft';
   hintEl.textContent = 'Tap to change';
 
   // Show SG = 0 at breakeven
