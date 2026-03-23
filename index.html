@@ -1217,7 +1217,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
         <div style="font-size:12px;color:rgba(255,255,255,0.5);font-weight:600;margin-bottom:8px;">AVG PROXIMITY</div>
         <div id="proxFtDisplay" onclick="proxEditFt()" style="font-size:42px;font-weight:800;color:#ffffff;line-height:1.1;cursor:pointer;">—</div>
         <div id="proxFtInputWrap" style="display:none;justify-content:center;">
-          <input type="number" id="proxFtInput" min="0" max="500" inputmode="numeric" pattern="[0-9]*" style="width:100%;padding:8px;border:2px solid #2d7abc;border-radius:10px;background:#1e1e1e;color:#fff;font-size:36px;font-weight:800;text-align:center;box-sizing:border-box;outline:none;font-family:inherit;" onfocus="this.select()" onblur="proxConfirmFt()" onkeydown="if(event.key==='Enter'){this.blur();}">
+          <input type="number" id="proxFtInput" min="0" max="500" step="0.1" inputmode="decimal" pattern="[0-9]*\.?[0-9]*" style="width:100%;padding:8px;border:2px solid #2d7abc;border-radius:10px;background:#1e1e1e;color:#fff;font-size:36px;font-weight:800;text-align:center;box-sizing:border-box;outline:none;font-family:inherit;" onfocus="this.select()" onblur="proxConfirmFt()" onkeydown="if(event.key==='Enter'){this.blur();}">
         </div>
         <div id="proxFtHint" style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:6px;">Enter yardage above</div>
         <div id="proxSGResultWrap" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.1);">
@@ -15976,14 +15976,14 @@ function proxFindFtForSG(expBefore, sgTarget, hcp) {
   var table = sgPuttingData[hcp] || sgPuttingData['pro'];
   var base110 = table[110] || 2.48;
   if (puttTarget >= base110 + (300 - 110) * 0.004) {
-    return Math.round(110 + (puttTarget - base110) / 0.004);
+    return Math.round((110 + (puttTarget - base110) / 0.004) * 10) / 10;
   }
   for (var i = 0; i < 60; i++) {
     mid = (lo + hi) / 2;
     if (getExpectedPutts(mid, hcp) < puttTarget) lo = mid;
     else hi = mid;
   }
-  var ft = Math.round((lo + hi) / 2);
+  var ft = Math.round((lo + hi) / 2 * 10) / 10;
   return ft < 1 ? 1 : ft;
 }
 
@@ -16019,9 +16019,9 @@ function proxCalc() {
   window._proxBreakFt = breakFt;
   window._proxCurrentFt = breakFt;
 
-  displayEl.textContent = breakFt + ' ft';
-  loseEl.textContent = loseFt + ' ft';
-  gainEl.textContent = gainFt + ' ft';
+  displayEl.textContent = breakFt.toFixed(1) + ' ft';
+  loseEl.textContent = loseFt.toFixed(1) + ' ft';
+  gainEl.textContent = gainFt.toFixed(1) + ' ft';
   hintEl.textContent = 'Tap to change';
 
   // Show SG = 0 at breakeven
@@ -16047,13 +16047,14 @@ function proxConfirmFt() {
   wrapEl.style.display = 'none';
   displayEl.style.display = 'block';
 
-  var ft = parseInt(inputEl.value);
+  var ft = parseFloat(inputEl.value);
   if (isNaN(ft) || ft < 0 || !window._proxExpBefore) {
     // Revert to breakeven
     ft = window._proxBreakFt || 0;
   }
+  ft = Math.round(ft * 10) / 10;
   window._proxCurrentFt = ft;
-  displayEl.textContent = ft + ' ft';
+  displayEl.textContent = ft.toFixed(1) + ' ft';
   proxShowSG(ft);
 }
 
