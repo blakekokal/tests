@@ -1203,36 +1203,36 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
     <!-- Results - always visible, 3 in a row -->
     <div style="margin-top:16px;display:flex;gap:8px;">
       <!-- Lose 0.25 -->
-      <div style="flex:1;background:#282828;border-radius:12px;padding:18px 10px;text-align:center;">
+      <div style="flex:1 1 0;min-width:0;background:#282828;border-radius:12px;padding:18px 6px;text-align:center;overflow:hidden;">
         <div style="font-size:12px;color:rgba(255,255,255,0.5);font-weight:600;margin-bottom:8px;">LOSE 0.25</div>
-        <div id="proxLoseHalfFt" style="font-size:42px;font-weight:800;color:#ffffff;line-height:1.1;white-space:nowrap;">—</div>
+        <div id="proxLoseHalfFt" style="font-size:32px;font-weight:800;color:#ffffff;line-height:1.1;white-space:nowrap;">—</div>
         <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.1);">
-          <div style="font-size:12px;color:rgba(255,255,255,0.5);font-weight:600;margin-bottom:4px;">STROKES GAINED</div>
-          <div style="font-size:36px;font-weight:800;color:#ff5252;line-height:1.1;">-0.25</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.5);font-weight:600;margin-bottom:4px;">STROKES GAINED</div>
+          <div style="font-size:28px;font-weight:800;color:#ff5252;line-height:1.1;white-space:nowrap;">-0.25</div>
         </div>
       </div>
 
       <!-- Avg Proximity (center, tappable) -->
-      <div style="flex:1;background:#282828;border-radius:12px;padding:18px 10px;text-align:center;">
+      <div style="flex:1 1 0;min-width:0;background:#282828;border-radius:12px;padding:18px 6px;text-align:center;overflow:hidden;">
         <div style="font-size:12px;color:rgba(255,255,255,0.5);font-weight:600;margin-bottom:8px;">AVG PROXIMITY</div>
-        <div id="proxFtDisplay" onclick="proxEditFt()" style="font-size:42px;font-weight:800;color:#ffffff;line-height:1.1;cursor:pointer;white-space:nowrap;">—</div>
+        <div id="proxFtDisplay" onclick="proxEditFt()" style="font-size:32px;font-weight:800;color:#ffffff;line-height:1.1;cursor:pointer;white-space:nowrap;">—</div>
         <div id="proxFtInputWrap" style="display:none;justify-content:center;">
-          <input type="number" id="proxFtInput" min="0" max="500" step="0.5" inputmode="decimal" pattern="[0-9]*\.?[0-9]*" style="width:100%;padding:8px;border:2px solid #2d7abc;border-radius:10px;background:#1e1e1e;color:#fff;font-size:36px;font-weight:800;text-align:center;box-sizing:border-box;outline:none;font-family:inherit;" onfocus="this.select()" onblur="proxConfirmFt()" onkeydown="if(event.key==='Enter'){this.blur();}">
+          <input type="number" id="proxFtInput" min="0" max="500" step="0.5" inputmode="decimal" pattern="[0-9]*\.?[0-9]*" style="width:100%;padding:8px;border:2px solid #2d7abc;border-radius:10px;background:#1e1e1e;color:#fff;font-size:28px;font-weight:800;text-align:center;box-sizing:border-box;outline:none;font-family:inherit;" onfocus="this.select()" onblur="proxConfirmFt()" onkeydown="if(event.key==='Enter'){this.blur();}">
         </div>
         <div id="proxFtHint" style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:6px;">Enter yardage above</div>
         <div id="proxSGResultWrap" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.1);">
-          <div style="font-size:12px;color:rgba(255,255,255,0.5);font-weight:600;margin-bottom:4px;">STROKES GAINED</div>
-          <div id="proxSGValue" style="font-size:36px;font-weight:800;line-height:1.1;"></div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.5);font-weight:600;margin-bottom:4px;">STROKES GAINED</div>
+          <div id="proxSGValue" style="font-size:28px;font-weight:800;line-height:1.1;white-space:nowrap;"></div>
         </div>
       </div>
 
       <!-- Gain 0.25 -->
-      <div style="flex:1;background:#282828;border-radius:12px;padding:18px 10px;text-align:center;">
+      <div style="flex:1 1 0;min-width:0;background:#282828;border-radius:12px;padding:18px 6px;text-align:center;overflow:hidden;">
         <div style="font-size:12px;color:rgba(255,255,255,0.5);font-weight:600;margin-bottom:8px;">GAIN 0.25</div>
-        <div id="proxGainHalfFt" style="font-size:42px;font-weight:800;color:#ffffff;line-height:1.1;white-space:nowrap;">—</div>
+        <div id="proxGainHalfFt" style="font-size:32px;font-weight:800;color:#ffffff;line-height:1.1;white-space:nowrap;">—</div>
         <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.1);">
-          <div style="font-size:12px;color:rgba(255,255,255,0.5);font-weight:600;margin-bottom:4px;">STROKES GAINED</div>
-          <div style="font-size:36px;font-weight:800;color:#00c853;line-height:1.1;">+0.25</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.5);font-weight:600;margin-bottom:4px;">STROKES GAINED</div>
+          <div style="font-size:28px;font-weight:800;color:#00c853;line-height:1.1;white-space:nowrap;">+0.25</div>
         </div>
       </div>
     </div>
