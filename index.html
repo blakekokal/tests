@@ -16071,12 +16071,12 @@ function proxShowSG(ft) {
   var sgStr = (sg >= 0 ? '+' : '') + sg.toFixed(2);
   valEl.textContent = sgStr;
 
-  if (sg > 0.01) {
+  if (sg > 0.05) {
     valEl.style.color = '#00c853';
-  } else if (sg < -0.01) {
+  } else if (sg < -0.05) {
     valEl.style.color = '#ff5252';
   } else {
-    valEl.style.color = '#f0c830';
+    valEl.style.color = '#ffffff';
   }
 }
 
