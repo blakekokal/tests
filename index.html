@@ -1168,9 +1168,9 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
     <div style="display:flex;flex-direction:column;gap:12px;">
 
       <!-- Handicap -->
-      <div style="background:#282828;border-radius:12px;padding:14px 16px;">
+      <div style="background:#282828;border-radius:12px;padding:14px 16px;text-align:center;">
         <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:8px;font-weight:600;">HANDICAP</div>
-        <div id="proxHcpBtns" style="display:flex;flex-wrap:wrap;gap:6px;">
+        <div id="proxHcpBtns" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;">
           <button onclick="proxSetHcp('0')" class="prox-hcp-btn" data-hcp="0" style="flex:1;min-width:40px;padding:8px 0;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;background:#333;color:rgba(255,255,255,0.5);">0</button>
           <button onclick="proxSetHcp('5')" class="prox-hcp-btn" data-hcp="5" style="flex:1;min-width:40px;padding:8px 0;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;background:#333;color:rgba(255,255,255,0.5);">5</button>
           <button onclick="proxSetHcp('10')" class="prox-hcp-btn" data-hcp="10" style="flex:1;min-width:40px;padding:8px 0;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;background:#2d7abc;color:#fff;">10</button>
@@ -1182,9 +1182,9 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
       </div>
 
       <!-- Lie -->
-      <div style="background:#282828;border-radius:12px;padding:14px 16px;">
+      <div style="background:#282828;border-radius:12px;padding:14px 16px;text-align:center;">
         <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:8px;font-weight:600;">LIE</div>
-        <div id="proxLieBtns" style="display:flex;flex-wrap:wrap;gap:6px;">
+        <div id="proxLieBtns" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;">
           <button onclick="proxSetLie('TEE')" class="prox-lie-btn" data-lie="TEE" style="flex:1;min-width:65px;padding:8px 0;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;background:#333;color:rgba(255,255,255,0.5);">Tee</button>
           <button onclick="proxSetLie('FAIRWAY')" class="prox-lie-btn" data-lie="FAIRWAY" style="flex:1;min-width:65px;padding:8px 0;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;background:#2d7abc;color:#fff;">Fairway</button>
           <button onclick="proxSetLie('ROUGH')" class="prox-lie-btn" data-lie="ROUGH" style="flex:1;min-width:65px;padding:8px 0;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;background:#333;color:rgba(255,255,255,0.5);">Rough</button>
@@ -1194,7 +1194,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
       </div>
 
       <!-- Yardage -->
-      <div style="background:#282828;border-radius:12px;padding:14px 16px;">
+      <div style="background:#282828;border-radius:12px;padding:14px 16px;text-align:center;">
         <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:8px;font-weight:600;">YARDAGE TO PIN</div>
         <input type="number" id="proxYardage" placeholder="150" min="10" max="600" inputmode="numeric" oninput="proxCalc()" style="width:100%;padding:10px 14px;border:2px solid #444;border-radius:10px;background:#1e1e1e;color:#fff;font-size:18px;font-weight:700;text-align:center;box-sizing:border-box;outline:none;font-family:inherit;" onfocus="this.style.borderColor='#2d7abc'" onblur="this.style.borderColor='#444'">
       </div>
@@ -1207,7 +1207,9 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
         <!-- Tappable feet display -->
         <div id="proxFtDisplay" onclick="proxEditFt()" style="font-size:42px;font-weight:800;color:#ffffff;line-height:1.1;cursor:pointer;">—</div>
         <!-- Hidden input for editing -->
-        <input type="number" id="proxFtInput" min="0" max="500" inputmode="numeric" style="display:none;width:120px;padding:8px;border:2px solid #2d7abc;border-radius:10px;background:#1e1e1e;color:#fff;font-size:36px;font-weight:800;text-align:center;box-sizing:border-box;outline:none;font-family:inherit;margin:0 auto;" onblur="proxConfirmFt()" onkeydown="if(event.key==='Enter'){this.blur();}">
+        <div id="proxFtInputWrap" style="display:none;justify-content:center;">
+          <input type="number" id="proxFtInput" min="0" max="500" inputmode="numeric" style="width:120px;padding:8px;border:2px solid #2d7abc;border-radius:10px;background:#1e1e1e;color:#fff;font-size:36px;font-weight:800;text-align:center;box-sizing:border-box;outline:none;font-family:inherit;" onblur="proxConfirmFt()" onkeydown="if(event.key==='Enter'){this.blur();}">
+        </div>
         <div id="proxFtHint" style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:6px;">Enter yardage above</div>
 
         <!-- SG Result inline below -->
@@ -15995,9 +15997,10 @@ function proxCalc() {
 function proxEditFt() {
   if (!window._proxExpBefore) return;
   var displayEl = document.getElementById('proxFtDisplay');
+  var wrapEl = document.getElementById('proxFtInputWrap');
   var inputEl = document.getElementById('proxFtInput');
   displayEl.style.display = 'none';
-  inputEl.style.display = 'block';
+  wrapEl.style.display = 'flex';
   inputEl.value = window._proxCurrentFt || '';
   inputEl.focus();
   inputEl.select();
@@ -16005,8 +16008,9 @@ function proxEditFt() {
 
 function proxConfirmFt() {
   var displayEl = document.getElementById('proxFtDisplay');
+  var wrapEl = document.getElementById('proxFtInputWrap');
   var inputEl = document.getElementById('proxFtInput');
-  inputEl.style.display = 'none';
+  wrapEl.style.display = 'none';
   displayEl.style.display = 'block';
 
   var ft = parseInt(inputEl.value);
