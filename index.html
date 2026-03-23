@@ -16075,6 +16075,7 @@ function proxShowSG(ft) {
   sgWrap.style.display = 'block';
   var valEl = document.getElementById('proxSGValue');
 
+  if (Math.abs(sg) < 0.015) sg = 0;
   var sgStr = (sg >= 0 ? '+' : '') + sg.toFixed(2);
   valEl.textContent = sgStr;
 
