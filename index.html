@@ -1200,36 +1200,33 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
       </div>
     </div>
 
-    <!-- Results - always visible -->
-    <div style="margin-top:16px;">
-      <div style="background:#282828;border-radius:12px;padding:18px 16px;text-align:center;">
-        <div style="font-size:12px;color:rgba(255,255,255,0.5);font-weight:600;margin-bottom:8px;">AVG PROXIMITY</div>
-        <!-- 3-column: lose .5 | breakeven (tappable) | gain .5 -->
-        <div style="display:flex;align-items:center;justify-content:center;gap:0;">
-          <div style="flex:1;text-align:center;">
-            <div id="proxLoseHalfFt" style="font-size:20px;font-weight:700;color:#ff5252;line-height:1.1;">—</div>
-            <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;">-0.5 SG</div>
-          </div>
-          <div style="flex:1.4;text-align:center;">
-            <div id="proxFtDisplay" onclick="proxEditFt()" style="font-size:42px;font-weight:800;color:#ffffff;line-height:1.1;cursor:pointer;">—</div>
-            <!-- Hidden input for editing -->
-            <div id="proxFtInputWrap" style="display:none;justify-content:center;">
-              <input type="number" id="proxFtInput" min="0" max="500" inputmode="numeric" style="width:120px;padding:8px;border:2px solid #2d7abc;border-radius:10px;background:#1e1e1e;color:#fff;font-size:36px;font-weight:800;text-align:center;box-sizing:border-box;outline:none;font-family:inherit;" onblur="proxConfirmFt()" onkeydown="if(event.key==='Enter'){this.blur();}">
-            </div>
-          </div>
-          <div style="flex:1;text-align:center;">
-            <div id="proxGainHalfFt" style="font-size:20px;font-weight:700;color:#00c853;line-height:1.1;">—</div>
-            <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;">+0.5 SG</div>
-          </div>
-        </div>
-        <div id="proxFtHint" style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:6px;">Enter yardage above</div>
+    <!-- Results - always visible, 3 columns -->
+    <div style="margin-top:16px;display:flex;gap:8px;">
+      <!-- Lose 0.5 -->
+      <div style="flex:1;background:#282828;border-radius:12px;padding:14px 8px;text-align:center;">
+        <div style="font-size:12px;color:rgba(255,255,255,0.5);font-weight:600;margin-bottom:8px;">LOSE 0.5</div>
+        <div id="proxLoseHalfFt" style="font-size:24px;font-weight:800;color:#ffffff;line-height:1.1;">—</div>
+        <div id="proxLoseHalfSG" style="font-size:13px;font-weight:700;color:#ff5252;margin-top:6px;">-0.5</div>
+      </div>
 
-        <!-- SG Result inline below -->
-        <div id="proxSGResultWrap" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.1);">
-          <div style="font-size:12px;color:rgba(255,255,255,0.5);font-weight:600;margin-bottom:4px;">STROKES GAINED</div>
-          <div id="proxSGValue" style="font-size:36px;font-weight:800;line-height:1.1;"></div>
-          <div id="proxSGLabel" style="font-size:13px;margin-top:4px;font-weight:600;"></div>
+      <!-- Avg Proximity (center, tappable) -->
+      <div style="flex:1.3;background:#282828;border-radius:12px;padding:14px 8px;text-align:center;">
+        <div style="font-size:12px;color:rgba(255,255,255,0.5);font-weight:600;margin-bottom:8px;">AVG PROXIMITY</div>
+        <div id="proxFtDisplay" onclick="proxEditFt()" style="font-size:32px;font-weight:800;color:#ffffff;line-height:1.1;cursor:pointer;">—</div>
+        <div id="proxFtInputWrap" style="display:none;justify-content:center;">
+          <input type="number" id="proxFtInput" min="0" max="500" inputmode="numeric" style="width:90px;padding:6px;border:2px solid #2d7abc;border-radius:10px;background:#1e1e1e;color:#fff;font-size:28px;font-weight:800;text-align:center;box-sizing:border-box;outline:none;font-family:inherit;" onblur="proxConfirmFt()" onkeydown="if(event.key==='Enter'){this.blur();}">
         </div>
+        <div id="proxFtHint" style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:6px;">Enter yardage</div>
+        <div id="proxSGResultWrap" style="display:none;margin-top:6px;">
+          <div id="proxSGValue" style="font-size:13px;font-weight:700;line-height:1.1;"></div>
+        </div>
+      </div>
+
+      <!-- Gain 0.5 -->
+      <div style="flex:1;background:#282828;border-radius:12px;padding:14px 8px;text-align:center;">
+        <div style="font-size:12px;color:rgba(255,255,255,0.5);font-weight:600;margin-bottom:8px;">GAIN 0.5</div>
+        <div id="proxGainHalfFt" style="font-size:24px;font-weight:800;color:#ffffff;line-height:1.1;">—</div>
+        <div id="proxGainHalfSG" style="font-size:13px;font-weight:700;color:#00c853;margin-top:6px;">+0.5</div>
       </div>
     </div>
 
@@ -16063,23 +16060,16 @@ function proxShowSG(ft) {
 
   sgWrap.style.display = 'block';
   var valEl = document.getElementById('proxSGValue');
-  var labelEl = document.getElementById('proxSGLabel');
 
   var sgStr = (sg >= 0 ? '+' : '') + sg.toFixed(2);
   valEl.textContent = sgStr;
 
   if (sg > 0.01) {
     valEl.style.color = '#00c853';
-    labelEl.textContent = 'Gained strokes';
-    labelEl.style.color = '#00c853';
   } else if (sg < -0.01) {
     valEl.style.color = '#ff5252';
-    labelEl.textContent = 'Lost strokes';
-    labelEl.style.color = '#ff5252';
   } else {
     valEl.style.color = '#f0c830';
-    labelEl.textContent = 'Broke even';
-    labelEl.style.color = '#f0c830';
   }
 }
 
