@@ -1200,14 +1200,13 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
       </div>
     </div>
 
-    <!-- Results -->
-    <div id="proxResultWrap" style="display:none;margin-top:16px;">
+    <!-- Results - always visible -->
+    <div style="margin-top:16px;">
       <!-- Breakeven proximity -->
       <div style="background:#282828;border-radius:12px;padding:18px 16px;text-align:center;">
-        <div style="font-size:12px;color:rgba(255,255,255,0.5);font-weight:600;margin-bottom:4px;">TO GAIN STROKES, HIT IT INSIDE</div>
-        <div id="proxBreakevenFt" style="font-size:42px;font-weight:800;color:#2d7abc;line-height:1.1;"></div>
-        <div style="font-size:12px;color:rgba(255,255,255,0.35);margin-top:2px;">from the pin</div>
-        <div id="proxExpectedInfo" style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:10px;"></div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.5);font-weight:600;margin-bottom:8px;">TO GAIN STROKES, HIT IT INSIDE</div>
+        <div id="proxBreakevenFt" style="font-size:42px;font-weight:800;color:#ffffff;line-height:1.1;">—</div>
+        <div id="proxExpectedInfo" style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:10px;">Enter yardage above</div>
       </div>
 
       <!-- Actual proximity input -->
@@ -15957,23 +15956,23 @@ function proxSetLie(lie) {
 
 function proxCalc() {
   var yardEl = document.getElementById('proxYardage');
-  var wrap = document.getElementById('proxResultWrap');
+  var bfEl = document.getElementById('proxBreakevenFt');
+  var infoEl = document.getElementById('proxExpectedInfo');
   var yards = parseInt(yardEl.value);
-  if (!yards || yards < 10 || yards > 600) { wrap.style.display = 'none'; return; }
+  if (!yards || yards < 10 || yards > 600) {
+    bfEl.textContent = '—';
+    infoEl.textContent = 'Enter yardage above';
+    window._proxExpBefore = null;
+    proxCalcSG();
+    return;
+  }
 
   var expBefore = getExpectedStrokes(yards, _proxLie, _proxHcp);
-  // After hitting the shot (1 stroke used), remaining expected strokes budget = expBefore - 1
-  // We need getExpectedPutts(feet, hcp) = expBefore - 1 for SG = 0
   var target = expBefore - 1;
 
   // Binary search for the breakeven distance in feet
   var lo = 0, hi = 200, mid, breakFt;
-  // If target <= 1 (already inside tap-in range), breakeven is huge
   if (target >= getExpectedPutts(200, _proxHcp)) {
-    // Even 200 ft wouldn't lose strokes — extrapolate
-    // getExpectedPutts extrapolates: table[maxD] + (d - maxD)*0.004
-    // Solve: target = getExpectedPutts(ft)
-    // For large ft: target = baseAt110 + (ft - 110)*0.004
     var table = sgPuttingData[_proxHcp] || sgPuttingData['pro'];
     var base110 = table[110] || 2.48;
     breakFt = Math.round(110 + (target - base110) / 0.004);
@@ -15987,17 +15986,10 @@ function proxCalc() {
     breakFt = Math.round((lo + hi) / 2);
   }
 
-  // Show result
-  wrap.style.display = 'block';
-  var bfEl = document.getElementById('proxBreakevenFt');
   if (breakFt <= 0) breakFt = 1;
-  bfEl.textContent = breakFt + (breakFt === 1 ? ' foot' : ' feet');
+  bfEl.textContent = 'Avg proximity ' + breakFt + ' ft';
+  infoEl.textContent = yards + ' yds from ' + _proxLie.toLowerCase() + '  |  Exp. strokes: ' + expBefore.toFixed(2);
 
-  var infoEl = document.getElementById('proxExpectedInfo');
-  infoEl.textContent = 'Expected strokes from ' + yards + ' yds (' + _proxLie.toLowerCase() + '): ' + expBefore.toFixed(2) +
-    '  |  Putt exp. at ' + breakFt + ' ft: ' + getExpectedPutts(breakFt, _proxHcp).toFixed(2);
-
-  // Store for SG calc
   window._proxExpBefore = expBefore;
   proxCalcSG();
 }
