@@ -1202,26 +1202,19 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
 
     <!-- Results - always visible -->
     <div style="margin-top:16px;">
-      <!-- Breakeven proximity -->
       <div style="background:#282828;border-radius:12px;padding:18px 16px;text-align:center;">
-        <div style="font-size:12px;color:rgba(255,255,255,0.5);font-weight:600;margin-bottom:8px;">TO GAIN STROKES, HIT IT INSIDE</div>
-        <div id="proxBreakevenFt" style="font-size:42px;font-weight:800;color:#ffffff;line-height:1.1;">—</div>
-        <div id="proxExpectedInfo" style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:10px;">Enter yardage above</div>
-      </div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.5);font-weight:600;margin-bottom:8px;">AVG PROXIMITY</div>
+        <!-- Tappable feet display -->
+        <div id="proxFtDisplay" onclick="proxEditFt()" style="font-size:42px;font-weight:800;color:#ffffff;line-height:1.1;cursor:pointer;">—</div>
+        <!-- Hidden input for editing -->
+        <input type="number" id="proxFtInput" min="0" max="500" inputmode="numeric" style="display:none;width:120px;padding:8px;border:2px solid #2d7abc;border-radius:10px;background:#1e1e1e;color:#fff;font-size:36px;font-weight:800;text-align:center;box-sizing:border-box;outline:none;font-family:inherit;margin:0 auto;" onblur="proxConfirmFt()" onkeydown="if(event.key==='Enter'){this.blur();}">
+        <div id="proxFtHint" style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:6px;">Enter yardage above</div>
 
-      <!-- Actual proximity input -->
-      <div style="background:#282828;border-radius:12px;padding:14px 16px;margin-top:12px;">
-        <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:8px;font-weight:600;">HOW CLOSE DID YOU HIT IT? (feet)</div>
-        <input type="number" id="proxActual" placeholder="e.g. 18" min="0" max="500" inputmode="numeric" oninput="proxCalcSG()" style="width:100%;padding:10px 14px;border:2px solid #444;border-radius:10px;background:#1e1e1e;color:#fff;font-size:18px;font-weight:700;text-align:center;box-sizing:border-box;outline:none;font-family:inherit;" onfocus="this.style.borderColor='#2d7abc'" onblur="this.style.borderColor='#444'">
-      </div>
-
-      <!-- SG Result -->
-      <div id="proxSGResultWrap" style="display:none;margin-top:12px;">
-        <div style="background:#282828;border-radius:12px;padding:18px 16px;text-align:center;">
-          <div style="font-size:12px;color:rgba(255,255,255,0.5);font-weight:600;margin-bottom:4px;">STROKES GAINED ON THIS SHOT</div>
-          <div id="proxSGValue" style="font-size:42px;font-weight:800;line-height:1.1;"></div>
-          <div id="proxSGLabel" style="font-size:13px;margin-top:6px;font-weight:600;"></div>
-          <div id="proxSGDetail" style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:8px;"></div>
+        <!-- SG Result inline below -->
+        <div id="proxSGResultWrap" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.1);">
+          <div style="font-size:12px;color:rgba(255,255,255,0.5);font-weight:600;margin-bottom:4px;">STROKES GAINED</div>
+          <div id="proxSGValue" style="font-size:36px;font-weight:800;line-height:1.1;"></div>
+          <div id="proxSGLabel" style="font-size:13px;margin-top:4px;font-weight:600;"></div>
         </div>
       </div>
     </div>
@@ -15956,14 +15949,15 @@ function proxSetLie(lie) {
 
 function proxCalc() {
   var yardEl = document.getElementById('proxYardage');
-  var bfEl = document.getElementById('proxBreakevenFt');
-  var infoEl = document.getElementById('proxExpectedInfo');
+  var displayEl = document.getElementById('proxFtDisplay');
+  var hintEl = document.getElementById('proxFtHint');
   var yards = parseInt(yardEl.value);
   if (!yards || yards < 10 || yards > 600) {
-    bfEl.textContent = '—';
-    infoEl.textContent = 'Enter yardage above';
+    displayEl.textContent = '—';
+    hintEl.textContent = 'Enter yardage above';
     window._proxExpBefore = null;
-    proxCalcSG();
+    window._proxBreakFt = null;
+    document.getElementById('proxSGResultWrap').style.display = 'none';
     return;
   }
 
@@ -15987,53 +15981,72 @@ function proxCalc() {
   }
 
   if (breakFt <= 0) breakFt = 1;
-  bfEl.textContent = 'Avg proximity ' + breakFt + ' ft';
-  infoEl.textContent = yards + ' yds from ' + _proxLie.toLowerCase() + '  |  Exp. strokes: ' + expBefore.toFixed(2);
-
   window._proxExpBefore = expBefore;
-  proxCalcSG();
+  window._proxBreakFt = breakFt;
+  window._proxCurrentFt = breakFt;
+
+  displayEl.textContent = breakFt + ' ft';
+  hintEl.textContent = 'Tap to change';
+
+  // Show SG = 0 at breakeven
+  proxShowSG(breakFt);
 }
 
-function proxCalcSG() {
-  var actualEl = document.getElementById('proxActual');
+function proxEditFt() {
+  if (!window._proxExpBefore) return;
+  var displayEl = document.getElementById('proxFtDisplay');
+  var inputEl = document.getElementById('proxFtInput');
+  displayEl.style.display = 'none';
+  inputEl.style.display = 'block';
+  inputEl.value = window._proxCurrentFt || '';
+  inputEl.focus();
+  inputEl.select();
+}
+
+function proxConfirmFt() {
+  var displayEl = document.getElementById('proxFtDisplay');
+  var inputEl = document.getElementById('proxFtInput');
+  inputEl.style.display = 'none';
+  displayEl.style.display = 'block';
+
+  var ft = parseInt(inputEl.value);
+  if (isNaN(ft) || ft < 0 || !window._proxExpBefore) {
+    // Revert to breakeven
+    ft = window._proxBreakFt || 0;
+  }
+  window._proxCurrentFt = ft;
+  displayEl.textContent = ft + ' ft';
+  proxShowSG(ft);
+}
+
+function proxShowSG(ft) {
   var sgWrap = document.getElementById('proxSGResultWrap');
-  var ft = parseFloat(actualEl.value);
-  if (!actualEl.value || isNaN(ft) || ft < 0) { sgWrap.style.display = 'none'; return; }
   if (!window._proxExpBefore) { sgWrap.style.display = 'none'; return; }
 
   var expBefore = window._proxExpBefore;
-  var expAfter;
-  if (ft <= 0) {
-    expAfter = 0; // holed it
-  } else {
-    expAfter = getExpectedPutts(ft, _proxHcp);
-  }
+  var expAfter = ft <= 0 ? 0 : getExpectedPutts(ft, _proxHcp);
   var sg = expBefore - expAfter - 1;
 
   sgWrap.style.display = 'block';
   var valEl = document.getElementById('proxSGValue');
   var labelEl = document.getElementById('proxSGLabel');
-  var detailEl = document.getElementById('proxSGDetail');
 
   var sgStr = (sg >= 0 ? '+' : '') + sg.toFixed(2);
   valEl.textContent = sgStr;
 
   if (sg > 0.01) {
     valEl.style.color = '#00c853';
-    labelEl.textContent = 'You gained strokes!';
+    labelEl.textContent = 'Gained strokes';
     labelEl.style.color = '#00c853';
   } else if (sg < -0.01) {
     valEl.style.color = '#ff5252';
-    labelEl.textContent = 'You lost strokes';
+    labelEl.textContent = 'Lost strokes';
     labelEl.style.color = '#ff5252';
   } else {
     valEl.style.color = '#f0c830';
     labelEl.textContent = 'Broke even';
     labelEl.style.color = '#f0c830';
   }
-
-  detailEl.textContent = 'Exp. before: ' + expBefore.toFixed(2) +
-    '  →  1 shot  →  Exp. after (putt from ' + (ft <= 0 ? 'holed' : ft + ' ft') + '): ' + expAfter.toFixed(2);
 }
 
 // --- Bag Optimizer Engine ---
