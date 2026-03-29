@@ -896,13 +896,25 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
     <!-- COMBINES TAB -->
     <div id="phCombinesContent">
       <div style="display:flex;flex-direction:column;gap:10px;align-items:center;">
-        <button onclick="goToCombines()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
-          <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🏌️</span>
-          <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Short Game Combines</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Structured practice sessions</div></div>
+        <button onclick="goToAutoCombine()" id="phAutoCombineBtn" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:linear-gradient(135deg,#1a4a8a,#007a52);border-radius:12px;text-align:left;">
+          <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🎯</span>
+          <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Auto Combine</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;" id="phAutoDesc">Picks your weakest area from last round</div></div>
         </button>
-        <button onclick="goToDriverCombinePicker()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border:2px solid #2d7abc;border-radius:12px;text-align:left;">
+        <button onclick="goToPuttingCombine()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
+          <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🏌️</span>
+          <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Putting</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Speed &amp; accuracy on the greens</div></div>
+        </button>
+        <button onclick="goToCombines()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
+          <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">⛳</span>
+          <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Short Game</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Chipping &amp; pitching around the green</div></div>
+        </button>
+        <button onclick="goToWedgeCombine()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
+          <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🎯</span>
+          <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Wedge Distances</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Dial in carry distances 40-125 yds</div></div>
+        </button>
+        <button onclick="goToDriverCombinePicker()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
           <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🏌️‍♂️</span>
-          <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Driver Combine</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Track drive distance &amp; accuracy</div></div>
+          <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Driver</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Track drive distance &amp; accuracy</div></div>
         </button>
       </div>
       <!-- Combine History -->
@@ -13798,13 +13810,15 @@ function combGenUnique(n,min,max,gap){
 var _combPendingType = null;
 var _combFromShortGame = false;
 var _combFromDriverTab = false;
+var _combFromPracticeHub = false;
 
 function combHeaderBack() {
   var trackerVisible = document.getElementById('comb-tracker-view').style.display !== 'none';
   var modeSelectVisible = document.getElementById('comb-mode-select').style.display !== 'none';
   var shortGameVisible = document.getElementById('comb-shortgame-select').style.display !== 'none';
-  if (_combFromDriverTab && (trackerVisible || modeSelectVisible)) {
+  if ((_combFromDriverTab || _combFromPracticeHub) && (trackerVisible || modeSelectVisible)) {
     _combFromDriverTab = false;
+    _combFromPracticeHub = false;
     combGoHome();
     show('practiceHubPage');
     setPracticeHubTab('combines');
@@ -14644,6 +14658,24 @@ function goToCombines(){
   combShowHomeTab('practice');
 }
 
+function goToPuttingCombine(){
+  _combSaveForStudent = null;
+  _combFromPracticeHub = true;
+  var banner = document.getElementById('combStudentBanner');
+  if (banner) banner.style.display = 'none';
+  show('combinesPage');
+  combShowModeSelect('putting');
+}
+
+function goToWedgeCombine(){
+  _combSaveForStudent = null;
+  _combFromPracticeHub = true;
+  var banner = document.getElementById('combStudentBanner');
+  if (banner) banner.style.display = 'none';
+  show('combinesPage');
+  combShowModeSelect('wedge');
+}
+
 function goToDriverCombinePicker(){
   _combSaveForStudent = null;
   _combFromDriverTab = true;
@@ -14651,6 +14683,41 @@ function goToDriverCombinePicker(){
   if (banner) banner.style.display = 'none';
   show('combinesPage');
   combShowModeSelect('driver');
+}
+
+async function goToAutoCombine(){
+  // Look at last round's SG categories to find the weakest area
+  if(!currentUser){ goToPuttingCombine(); return; }
+  try {
+    var resp = await _sb.from('rounds')
+      .select('round_data')
+      .eq('user_id', activeUserId())
+      .order('round_date',{ascending:false})
+      .limit(1);
+    if(resp.error || !resp.data || !resp.data.length){ goToPuttingCombine(); return; }
+    var rd = resp.data[0].round_data;
+    if(!rd || !rd.allHoles || !rd.allHoles.length){ goToPuttingCombine(); return; }
+    // Sum SG by category
+    var sgP=0, sgOTT=0, sgAPP=0, sgARG=0;
+    rd.allHoles.forEach(function(h){
+      sgP   += h.sgPutting || 0;
+      sgOTT += h.sgOTT    || 0;
+      sgAPP += h.sgAPP    || 0;
+      sgARG += h.sgARG    || 0;
+    });
+    // Map categories to combine types (lowest SG = weakest)
+    var cats = [
+      {sg:sgP,   name:'Putting',     go:goToPuttingCombine},
+      {sg:sgARG, name:'Short Game',   go:goToCombines},
+      {sg:sgAPP, name:'Wedge Distances', go:goToWedgeCombine},
+      {sg:sgOTT, name:'Driver',       go:goToDriverCombinePicker}
+    ];
+    cats.sort(function(a,b){ return a.sg - b.sg; });
+    var weakest = cats[0];
+    var desc = document.getElementById('phAutoDesc');
+    if(desc) desc.textContent = 'Weakest: ' + weakest.name + ' (' + weakest.sg.toFixed(1) + ' SG)';
+    weakest.go();
+  } catch(e){ goToPuttingCombine(); }
 }
 
 function combShowHomeTab(tab){
