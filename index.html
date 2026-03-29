@@ -13769,6 +13769,21 @@ function combFmt(v){
   return v>0 ? '<span class="comb-pos">+'+v.toFixed(2)+'</span>' : '<span class="comb-neg">'+v.toFixed(2)+'</span>';
 }
 
+function combGenPuttBreaks(n){
+  var slopes=['Uphill','Flat','Downhill'];
+  var dirs=['Straight','L to R','R to L'];
+  var combos=[];
+  for(var s=0;s<slopes.length;s++)
+    for(var d=0;d<dirs.length;d++)
+      combos.push(dirs[d]==='Straight'?slopes[s]:slopes[s]+', '+dirs[d]);
+  var result=[], pool=[];
+  for(var i=0;i<n;i++){
+    if(!pool.length) pool=combos.slice().sort(function(){return Math.random()-.5;});
+    result.push(pool.pop());
+  }
+  return result;
+}
+
 function combGenUnique(n,min,max,gap){
   var res=[],pool=Array.from({length:max-min+1},(_,i)=>i+min);
   for(var i=0;i<n;i++){
@@ -13952,7 +13967,7 @@ function combSetup(){
 
   // Build header
   var h = '<tr><th class="comb-hnum">#</th>';
-  if(combCurType==='putting')       h+='<th>Dist ft</th><th>Putts</th><th>Exp</th><th>SG</th>';
+  if(combCurType==='putting')       h+='<th>Dist ft</th><th>Break</th><th>Putts</th><th>Exp</th><th>SG</th>';
   else if(combCurType==='wedge')    h+='<th>Target</th><th>Carry</th><th>Prox ft</th><th class="comb-wsg">Exp S</th><th class="comb-wsg">Exp P</th><th class="comb-wsg">Total</th><th id="comb-w-last">SG</th>';
   else if(combCurType==='chip-prox') h+='<th class="comb-col-dist">Dist yd</th><th class="comb-col-lie">Lie</th><th class="comb-col-score">Prox ft</th><th>Exp S</th><th>Exp P</th><th>Total</th><th>SG</th>';
   else if(combCurType==='driver')   h+='<th>Drive yds</th><th>Offline yds</th><th>Score</th>';
@@ -14006,6 +14021,9 @@ function combSetup(){
     wD = combGenUnique(holes, +document.getElementById('comb-w-min').value, +document.getElementById('comb-w-max').value, 5);
   }
 
+  // Generate putt breaks
+  var pBreaks = combCurType==='putting' ? combGenPuttBreaks(holes) : [];
+
   // Build rows
   var rows='';
   for(var i=1;i<=holes;i++){
@@ -14015,9 +14033,11 @@ function combSetup(){
     if(combCurType==='putting'){
       var pd = isCombine ? pD[i-1] : '';
       combState[i].d = pd;
+      combState[i].brk = pBreaks[i-1];
       r += isCombine
         ? '<td class="comb-ro">'+pd+'</td>'
         : '<td class="comb-tap"><input type="number" inputmode="numeric" pattern="[0-9]*" placeholder="–" onchange="combUpd('+i+',\'d\',+this.value)"></td>';
+      r += '<td class="comb-ro" style="font-size:.78em;white-space:nowrap;">'+pBreaks[i-1]+'</td>';
       r += '<td><div class="comb-putt-grp" id="cpg-'+i+'"><button class="comb-pbtn" onclick="combSetPutts('+i+',1)">1</button><button class="comb-pbtn" onclick="combSetPutts('+i+',2)">2</button><button class="comb-pbtn" onclick="combSetPutts('+i+',3)">3</button></div></td>';
       r += '<td class="comb-ro" id="ce1-'+i+'">–</td><td class="comb-ro" id="csg-'+i+'">–</td>';
 
