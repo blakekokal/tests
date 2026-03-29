@@ -13833,7 +13833,7 @@ function combHeaderBack() {
   var trackerVisible = document.getElementById('comb-tracker-view').style.display !== 'none';
   var modeSelectVisible = document.getElementById('comb-mode-select').style.display !== 'none';
   var shortGameVisible = document.getElementById('comb-shortgame-select').style.display !== 'none';
-  if ((_combFromDriverTab || _combFromPracticeHub) && (trackerVisible || modeSelectVisible)) {
+  if ((_combFromDriverTab || _combFromPracticeHub) && (trackerVisible || modeSelectVisible || shortGameVisible)) {
     _combFromDriverTab = false;
     _combFromPracticeHub = false;
     combGoHome();
@@ -14669,10 +14669,16 @@ async function saveCombNote(id, userId) {
 function goToCombines(){
   // Clear any coach-for-student state
   _combSaveForStudent = null;
+  _combFromPracticeHub = true;
   var banner = document.getElementById('combStudentBanner');
   if (banner) banner.style.display = 'none';
   show('combinesPage');
-  combShowHomeTab('practice');
+  // Go directly to short game select (Proximity / Up & Downs)
+  document.getElementById('comb-home-view').style.display = '';
+  document.getElementById('comb-tracker-view').style.display = 'none';
+  document.getElementById('comb-mode-select').style.display = 'none';
+  document.getElementById('comb-practice-sub').style.display = 'none';
+  document.getElementById('comb-shortgame-select').style.display = '';
 }
 
 function goToPuttingCombine(){
