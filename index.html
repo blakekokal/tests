@@ -940,8 +940,17 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
       </div>
     </div>
 
-    <!-- DRILLS TAB (navigates directly to drills page via setPracticeHubTab) -->
-    <div id="phDrillsContent" style="display:none;"></div>
+    <!-- DRILLS TAB -->
+    <div id="phDrillsContent" style="display:none;">
+      <div style="font-size:22px;font-weight:800;margin-bottom:12px;text-align:center;">Drills Library</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <button id="phDrillTabPutting"   onclick="setDrillCategory('putting')"   style="flex:1;height:44px;font-size:14px;font-weight:700;border:none;border-radius:10px;cursor:pointer;background:#2d7abc;color:#ffffff;min-width:0;max-width:none;width:auto;">Putting</button>
+        <button id="phDrillTabShortgame" onclick="setDrillCategory('shortgame')" style="flex:1;height:44px;font-size:14px;font-weight:700;border:none;border-radius:10px;cursor:pointer;background:#282828;color:#606060;min-width:0;max-width:none;width:auto;">Short Game</button>
+        <button id="phDrillTabFullswing" onclick="setDrillCategory('fullswing')" style="flex:1;height:44px;font-size:14px;font-weight:700;border:none;border-radius:10px;cursor:pointer;background:#282828;color:#606060;min-width:0;max-width:none;width:auto;">Full Swing</button>
+      </div>
+      <select id="phDrillSubcategory" onchange="filterDrillsBySubcategory(this.value)" style="width:100%;height:44px;background:#333333;color:#ffffff;border-radius:10px;border:none;text-align:center;text-align-last:center;font-size:14px;appearance:none;-webkit-appearance:none;padding:0 10px;margin-bottom:10px;box-sizing:border-box;"></select>
+      <div id="phDrillContent" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
+    </div>
 
     <!-- MY PRACTICE PLAN TAB -->
     <div id="phPlanContent" style="display:none;">
@@ -7669,6 +7678,7 @@ function goToSettings() {
 }
 
 function goToDrills() {
+  _drillsOnPracticeHub = false;
   show('drillsPage');
   setDrillCategory('putting');
 }
@@ -8403,6 +8413,7 @@ var drillsData = {
 
 var _currentDrillCategory = 'putting';
 var _currentSubcategoryFilter = null;
+var _drillsOnPracticeHub = false;
 
 function getSubcategoriesForCategory(cat) {
   var drills = drillsData[cat] || [];
@@ -8423,8 +8434,9 @@ var drillCatColors = {
 };
 
 function setDrillCategory(cat) {
-  // Update tab button styles
-  var tabs = { putting: 'drillTabPutting', shortgame: 'drillTabShortgame', fullswing: 'drillTabFullswing' };
+  // Update tab button styles for both standalone and practice hub versions
+  var prefix = _drillsOnPracticeHub ? 'phDrillTab' : 'drillTab';
+  var tabs = { putting: prefix+'Putting', shortgame: prefix+'Shortgame', fullswing: prefix+'Fullswing' };
   var activeColors = { putting: '#2d7abc', shortgame: '#007a52', fullswing: '#d4706e' };
   Object.keys(tabs).forEach(function(k) {
     var btn = document.getElementById(tabs[k]);
@@ -8443,17 +8455,18 @@ function setDrillCategory(cat) {
 function showDrillCategory(cat) {
   _currentDrillCategory = cat;
   _currentSubcategoryFilter = null;
-  
+
   // Show subcategory dropdown
   var subs = getSubcategoriesForCategory(cat);
-  var subSelect = document.getElementById('drillSubcategory');
-  
+  var subId = _drillsOnPracticeHub ? 'phDrillSubcategory' : 'drillSubcategory';
+  var subSelect = document.getElementById(subId);
+
   var subHtml = '<option value="">All</option>';
   subs.filter(function(s){ return s !== 'All'; }).forEach(function(sub) {
     subHtml += '<option value="' + sub + '">' + sub + '</option>';
   });
   subSelect.innerHTML = subHtml;
-  
+
   renderDrillsList(cat, null);
 }
 
@@ -8464,7 +8477,8 @@ function filterDrillsBySubcategory(sub) {
 
 function renderDrillsList(cat, subFilter) {
   var drills = drillsData[cat] || [];
-  var content = document.getElementById('drillContent');
+  var contentId = _drillsOnPracticeHub ? 'phDrillContent' : 'drillContent';
+  var content = document.getElementById(contentId);
   var colors = drillCatColors[cat] || { bg: '#282828', border: '#3d3d3d', tag: '#606060' };
   
   // Filter by subcategory if set
@@ -8495,9 +8509,9 @@ function showDrillDetail(drillId, cat) {
   var drills = drillsData[cat] || [];
   var drill = drills.find(function(d) { return d.id === drillId; });
   if (!drill) return;
-  
+
   var tags = (drill.subcategories || []).join(' · ');
-  
+
   var html = '<div style="font-size:18px;font-weight:800;margin-bottom:4px;text-align:center;">' + drill.title + '</div>';
   html += '<div style="font-size:11px;color:#606060;text-align:center;margin-bottom:12px;">' + tags + '</div>';
   if (drill.description) {
@@ -8515,7 +8529,10 @@ function showDrillDetail(drillId, cat) {
   if (drill.image) {
     html += '<img src="' + drill.image + '" alt="' + drill.title + '" style="width:100%;border-radius:12px;display:block;margin:4px 0 0;">';
   }
-  
+
+  if (_drillsOnPracticeHub) {
+    _drillDetailBackTarget = 'practiceHubPage';
+  }
   document.getElementById('drillDetailContent').innerHTML = html;
   show('drillDetailPage');
 }
@@ -15082,7 +15099,12 @@ async function loadStudentAssignedCombines() {
 }
 
 var _drillDetailBackTarget = 'drillsPage';
-function drillDetailBack() { show(_drillDetailBackTarget); _drillDetailBackTarget = 'drillsPage'; }
+function drillDetailBack() {
+  var target = _drillDetailBackTarget;
+  _drillDetailBackTarget = 'drillsPage';
+  show(target);
+  if (target === 'practiceHubPage') setPracticeHubTab('drills');
+}
 
 function openAssignedDrillDetail(idx) {
   var drill = window._assignedDrillsData && window._assignedDrillsData[idx];
@@ -15982,7 +16004,6 @@ async function checkCoachingStudentNotifications() {
 var _currentPHTab = 'combines';
 
 function setPracticeHubTab(tab) {
-  if (tab === 'drills') { goToDrills(); return; }
   _currentPHTab = tab;
   document.getElementById('phCombinesContent').style.display = tab === 'combines' ? '' : 'none';
   document.getElementById('phDrillsContent').style.display   = tab === 'drills'   ? '' : 'none';
@@ -15999,6 +16020,7 @@ function setPracticeHubTab(tab) {
   });
 
   if (tab === 'combines') loadPHCombineHistory();
+  if (tab === 'drills') { _drillsOnPracticeHub = true; setDrillCategory('putting'); }
   if (tab === 'plan') {
     setPracticePlanSubTab('new');
     initPracticeSessionForm();
