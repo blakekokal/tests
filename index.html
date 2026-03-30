@@ -1292,15 +1292,19 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
 .dg-tab { padding:8px 4px;background:#2a2a2a;color:#999;border:2px solid #333;border-radius:10px;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.3s;text-align:center;font-family:inherit; }
 .dg-tab:hover { border-color:#555;color:#ccc; }
 .dg-tab-active { background:#ffffff;color:#000;border-color:#ffffff; }
-.dg-table { width:100%;border-collapse:collapse;font-size:13px; }
-.dg-table th { background:#2a2a2a;color:#999;font-size:11px;font-weight:600;text-transform:uppercase;padding:8px 6px;text-align:left;border-bottom:2px solid #333; }
-.dg-table th:not(:first-child) { text-align:center; }
-.dg-table td { padding:8px 6px;border-bottom:1px solid #2a2a2a;color:#fff; }
-.dg-table td:not(:first-child) { text-align:center;font-weight:600; }
+.dg-table-wrap { width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:10px;border:1px solid #333; }
+.dg-table { width:100%;border-collapse:collapse;font-size:12px;min-width:600px; }
+.dg-table.dg-table-simple { min-width:0; }
+.dg-table th { background:#2a2a2a;color:#999;font-size:10px;font-weight:600;text-transform:uppercase;padding:8px 5px;text-align:center;border-bottom:2px solid #333;white-space:nowrap;position:sticky;top:0; }
+.dg-table th:first-child { text-align:left;position:sticky;left:0;z-index:2;background:#2a2a2a; }
+.dg-table td { padding:7px 5px;border-bottom:1px solid #2a2a2a;color:#fff;text-align:center; }
+.dg-table td:first-child { text-align:left;position:sticky;left:0;background:#1e1e1e;z-index:1; }
+.dg-table tr:nth-child(even) td:first-child { background:#232323; }
+.dg-table td:not(:first-child) { font-weight:600; }
 .dg-table tr:nth-child(even) { background:#232323; }
 .dg-table .dg-club-name { font-weight:600;white-space:nowrap; }
 .dg-section-header { background:#1a4a8a !important; }
-.dg-section-header td { color:#fff;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:0.5px; }
+.dg-section-header td { color:#fff;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;background:#1a4a8a !important; }
 .dg-stat-box { background:#2a2a2a;border-radius:10px;padding:12px;margin-bottom:14px;display:flex;justify-content:space-around;text-align:center;border:1px solid #333; }
 .dg-stat-label { font-size:10px;color:#999;text-transform:uppercase;margin-bottom:3px; }
 .dg-stat-value { font-size:1.3rem;font-weight:700;color:#fff; }
@@ -16324,42 +16328,32 @@ function toggleLearnProximityCalc() {
 var _dgCurrentTab = 'pga';
 
 var DG_PGA_DATA = [
-  {section:'Woods'},
-  {club:'Driver',carry:275,total:296},
-  {club:'3 Wood',carry:243,total:264},
-  {club:'5 Wood',carry:230,total:250},
-  {section:'Irons'},
-  {club:'3 Iron',carry:212,total:229},
-  {club:'4 Iron',carry:203,total:220},
-  {club:'5 Iron',carry:194,total:210},
-  {club:'6 Iron',carry:183,total:199},
-  {club:'7 Iron',carry:172,total:187},
-  {club:'8 Iron',carry:160,total:174},
-  {club:'9 Iron',carry:148,total:161},
-  {section:'Wedges'},
-  {club:'PW',carry:136,total:148},
-  {club:'Gap Wedge',carry:124,total:135},
-  {club:'Sand Wedge',carry:107,total:115},
-  {club:'Lob Wedge',carry:92,total:98}
+  {club:'Driver',carry:282,clubSpeed:115,ballSpeed:171,smash:1.49,attackAngle:'-0.9',launch:'10.4',spin:2545,maxHeight:35,landAngle:'39'},
+  {club:'3 Wood',carry:249,clubSpeed:110,ballSpeed:162,smash:1.47,attackAngle:'-2.3',launch:'9.3',spin:3663,maxHeight:32,landAngle:'44'},
+  {club:'5 Wood',carry:236,clubSpeed:106,ballSpeed:156,smash:1.47,attackAngle:'-2.5',launch:'9.7',spin:4322,maxHeight:33,landAngle:'48'},
+  {club:'Hybrid',carry:231,clubSpeed:102,ballSpeed:149,smash:1.46,attackAngle:'-2.4',launch:'10.2',spin:4587,maxHeight:31,landAngle:'49'},
+  {club:'3 Iron',carry:218,clubSpeed:100,ballSpeed:145,smash:1.45,attackAngle:'-2.5',launch:'10.3',spin:4404,maxHeight:30,landAngle:'48'},
+  {club:'4 Iron',carry:209,clubSpeed:98,ballSpeed:140,smash:1.43,attackAngle:'-2.9',launch:'10.8',spin:4782,maxHeight:31,landAngle:'49'},
+  {club:'5 Iron',carry:199,clubSpeed:96,ballSpeed:135,smash:1.41,attackAngle:'-3.4',launch:'11.9',spin:5280,maxHeight:33,landAngle:'50'},
+  {club:'6 Iron',carry:188,clubSpeed:94,ballSpeed:130,smash:1.38,attackAngle:'-3.7',launch:'14.0',spin:6204,maxHeight:32,landAngle:'50'},
+  {club:'7 Iron',carry:176,clubSpeed:92,ballSpeed:123,smash:1.34,attackAngle:'-3.9',launch:'16.1',spin:7124,maxHeight:34,landAngle:'52'},
+  {club:'8 Iron',carry:164,clubSpeed:89,ballSpeed:118,smash:1.33,attackAngle:'-4.2',launch:'17.8',spin:8078,maxHeight:33,landAngle:'52'},
+  {club:'9 Iron',carry:152,clubSpeed:87,ballSpeed:112,smash:1.29,attackAngle:'-4.3',launch:'20.0',spin:8793,maxHeight:32,landAngle:'53'},
+  {club:'PW',carry:142,clubSpeed:84,ballSpeed:104,smash:1.24,attackAngle:'-4.7',launch:'23.7',spin:9316,maxHeight:32,landAngle:'52'}
 ];
 
 var DG_LPGA_DATA = [
-  {section:'Woods'},
-  {club:'Driver',carry:218,total:237},
-  {club:'3 Wood',carry:195,total:213},
-  {club:'5 Wood',carry:185,total:202},
-  {section:'Irons'},
-  {club:'4 Iron',carry:169,total:184},
-  {club:'5 Iron',carry:161,total:175},
-  {club:'6 Iron',carry:152,total:166},
-  {club:'7 Iron',carry:141,total:154},
-  {club:'8 Iron',carry:130,total:142},
-  {club:'9 Iron',carry:119,total:130},
-  {section:'Wedges'},
-  {club:'PW',carry:108,total:118},
-  {club:'Gap Wedge',carry:97,total:106},
-  {club:'Sand Wedge',carry:82,total:89},
-  {club:'Lob Wedge',carry:67,total:72}
+  {club:'Driver',carry:223,clubSpeed:96,ballSpeed:143,smash:1.49,attackAngle:'+2.8',launch:'12.6',spin:2506,maxHeight:26,landAngle:'36'},
+  {club:'3 Wood',carry:200,clubSpeed:92,ballSpeed:135,smash:1.47,attackAngle:'-0.8',launch:'11.6',spin:2595,maxHeight:25,landAngle:'38'},
+  {club:'5 Wood',carry:189,clubSpeed:90,ballSpeed:130,smash:1.44,attackAngle:'-1.6',launch:'12.3',spin:4320,maxHeight:25,landAngle:'43'},
+  {club:'Hybrid',carry:178,clubSpeed:87,ballSpeed:125,smash:1.44,attackAngle:'-1.9',launch:'13.9',spin:4504,maxHeight:25,landAngle:'45'},
+  {club:'4 Iron',carry:175,clubSpeed:82,ballSpeed:118,smash:1.44,attackAngle:'-1.7',launch:'13.9',spin:4608,maxHeight:25,landAngle:'43'},
+  {club:'5 Iron',carry:166,clubSpeed:81,ballSpeed:114,smash:1.41,attackAngle:'-2.0',launch:'15.6',spin:4966,maxHeight:25,landAngle:'45'},
+  {club:'6 Iron',carry:155,clubSpeed:80,ballSpeed:111,smash:1.39,attackAngle:'-2.3',launch:'16.7',spin:5904,maxHeight:25,landAngle:'46'},
+  {club:'7 Iron',carry:143,clubSpeed:78,ballSpeed:106,smash:1.36,attackAngle:'-2.5',launch:'18.5',spin:6630,maxHeight:26,landAngle:'47'},
+  {club:'8 Iron',carry:133,clubSpeed:76,ballSpeed:102,smash:1.34,attackAngle:'-2.8',launch:'20.8',spin:7413,maxHeight:27,landAngle:'47'},
+  {club:'9 Iron',carry:123,clubSpeed:74,ballSpeed:95,smash:1.28,attackAngle:'-3.2',launch:'23.5',spin:7605,maxHeight:27,landAngle:'48'},
+  {club:'PW',carry:111,clubSpeed:72,ballSpeed:88,smash:1.22,attackAngle:'-3.2',launch:'25.2',spin:8465,maxHeight:27,landAngle:'48'}
 ];
 
 var DG_HANDICAP_DATA = {
@@ -16444,8 +16438,8 @@ function dgRenderCurrentTab() {
   else if (_dgCurrentTab === 'speed') dgRenderSpeed();
 }
 
-function dgBuildTable(data) {
-  var html = '<table class="dg-table"><thead><tr><th>Club</th><th>Carry</th><th>Total</th></tr></thead><tbody>';
+function dgBuildSimpleTable(data) {
+  var html = '<div class="dg-table-wrap"><table class="dg-table dg-table-simple"><thead><tr><th>Club</th><th>Carry</th><th>Total</th></tr></thead><tbody>';
   data.forEach(function(row) {
     if (row.section) {
       html += '<tr class="dg-section-header"><td colspan="3">' + row.section + '</td></tr>';
@@ -16453,12 +16447,36 @@ function dgBuildTable(data) {
       html += '<tr><td class="dg-club-name">' + row.club + '</td><td>' + row.carry + '</td><td>' + row.total + '</td></tr>';
     }
   });
-  html += '</tbody></table>';
+  html += '</tbody></table></div>';
+  return html;
+}
+
+function dgBuildTourTable(data) {
+  var html = '<div class="dg-table-wrap"><table class="dg-table"><thead><tr>';
+  html += '<th>Club</th><th>Carry</th><th>Club Spd</th><th>Ball Spd</th><th>Smash</th><th>Attack</th><th>Launch</th><th>Spin</th><th>Height</th><th>Land</th>';
+  html += '</tr></thead><tbody>';
+  data.forEach(function(row) {
+    html += '<tr>';
+    html += '<td class="dg-club-name">' + row.club + '</td>';
+    html += '<td style="font-weight:700;color:#4fc3f7;">' + row.carry + '</td>';
+    html += '<td>' + row.clubSpeed + '</td>';
+    html += '<td>' + row.ballSpeed + '</td>';
+    html += '<td>' + row.smash + '</td>';
+    html += '<td>' + row.attackAngle + '\u00B0</td>';
+    html += '<td>' + row.launch + '\u00B0</td>';
+    html += '<td>' + row.spin.toLocaleString() + '</td>';
+    html += '<td>' + row.maxHeight + ' yd</td>';
+    html += '<td>' + row.landAngle + '\u00B0</td>';
+    html += '</tr>';
+  });
+  html += '</tbody></table></div>';
   return html;
 }
 
 function dgRenderTourTable(containerId, data, title) {
-  document.getElementById(containerId).innerHTML = dgBuildTable(data);
+  var html = '<p style="text-align:center;font-size:11px;color:rgba(255,255,255,0.35);margin:0 0 8px;">Swipe to see all stats \u2192</p>';
+  html += dgBuildTourTable(data);
+  document.getElementById(containerId).innerHTML = html;
 }
 
 function dgRenderHandicap() {
@@ -16469,7 +16487,7 @@ function dgRenderHandicap() {
   html += '<div><div class="dg-stat-label">Avg Driver Distance</div><div class="dg-stat-value">' + d.driverDist + ' <span style="font-size:0.6em;color:#999;">yds</span></div></div>';
   html += '<div><div class="dg-stat-label">Driver Club Speed</div><div class="dg-stat-value">' + d.clubSpeed + ' <span style="font-size:0.6em;color:#999;">mph</span></div></div>';
   html += '</div>';
-  html += dgBuildTable(d.clubs);
+  html += dgBuildSimpleTable(d.clubs);
   document.getElementById('dgHandicapTable').innerHTML = html;
 }
 
@@ -16512,7 +16530,7 @@ function dgRenderSpeed() {
     html += '<div><div class="dg-stat-label">Est. Driver Total</div><div class="dg-stat-value">' + driverRow.total + ' <span style="font-size:0.6em;color:#999;">yds</span></div></div>';
   }
   html += '</div>';
-  html += dgBuildTable(rows);
+  html += dgBuildSimpleTable(rows);
   document.getElementById('dgSpeedTable').innerHTML = html;
 }
 
