@@ -1052,6 +1052,10 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
           <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🎯</span>
           <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Proximity Calculator</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">How close to gain strokes from any yardage</div></div>
         </button>
+        <button onclick="toggleDistanceGuide()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
+          <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🏌️</span>
+          <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">How Far Should I Hit It?</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Tour averages &amp; distance by speed or handicap</div></div>
+        </button>
       </div>
     </div>
 
@@ -1278,6 +1282,79 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
           <div style="font-size:28px;font-weight:800;color:#00c853;line-height:1.1;white-space:nowrap;">+0.25</div>
         </div>
       </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- DISTANCE GUIDE STYLES -->
+<style>
+.dg-tab { padding:8px 4px;background:#2a2a2a;color:#999;border:2px solid #333;border-radius:10px;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.3s;text-align:center;font-family:inherit; }
+.dg-tab:hover { border-color:#555;color:#ccc; }
+.dg-tab-active { background:#ffffff;color:#000;border-color:#ffffff; }
+.dg-table { width:100%;border-collapse:collapse;font-size:13px; }
+.dg-table th { background:#2a2a2a;color:#999;font-size:11px;font-weight:600;text-transform:uppercase;padding:8px 6px;text-align:left;border-bottom:2px solid #333; }
+.dg-table th:not(:first-child) { text-align:center; }
+.dg-table td { padding:8px 6px;border-bottom:1px solid #2a2a2a;color:#fff; }
+.dg-table td:not(:first-child) { text-align:center;font-weight:600; }
+.dg-table tr:nth-child(even) { background:#232323; }
+.dg-table .dg-club-name { font-weight:600;white-space:nowrap; }
+.dg-section-header { background:#1a4a8a !important; }
+.dg-section-header td { color:#fff;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:0.5px; }
+.dg-stat-box { background:#2a2a2a;border-radius:10px;padding:12px;margin-bottom:14px;display:flex;justify-content:space-around;text-align:center;border:1px solid #333; }
+.dg-stat-label { font-size:10px;color:#999;text-transform:uppercase;margin-bottom:3px; }
+.dg-stat-value { font-size:1.3rem;font-weight:700;color:#fff; }
+</style>
+
+<!-- DISTANCE GUIDE FULL SCREEN -->
+<div id="distanceGuidePage" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;background:#1e1e1e;overflow-y:auto;padding:50px 16px 30px;box-sizing:border-box;">
+  <button class="back-btn-top" onclick="toggleDistanceGuide()"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <div style="width:100%;max-width:420px;margin:0 auto;">
+    <div style="font-size:20px;font-weight:800;text-align:center;margin-bottom:4px;">How Far Should I Hit It?</div>
+    <p style="text-align:center;font-size:12px;color:rgba(255,255,255,0.4);margin:0 0 14px;">Average distances by tour, handicap, or club speed</p>
+
+    <!-- Mode Tabs -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;margin-bottom:16px;">
+      <button id="dgTab_pga" class="dg-tab dg-tab-active" onclick="dgSetTab('pga')">PGA Tour</button>
+      <button id="dgTab_lpga" class="dg-tab" onclick="dgSetTab('lpga')">LPGA</button>
+      <button id="dgTab_handicap" class="dg-tab" onclick="dgSetTab('handicap')">Handicap</button>
+      <button id="dgTab_speed" class="dg-tab" onclick="dgSetTab('speed')">Driver Speed</button>
+    </div>
+
+    <!-- PGA Tour Content -->
+    <div id="dgContent_pga">
+      <div id="dgPgaTable"></div>
+    </div>
+
+    <!-- LPGA Content -->
+    <div id="dgContent_lpga" style="display:none;">
+      <div id="dgLpgaTable"></div>
+    </div>
+
+    <!-- Handicap Content -->
+    <div id="dgContent_handicap" style="display:none;">
+      <div style="margin-bottom:12px;">
+        <label style="font-size:13px;font-weight:600;color:#e0e0e0;display:block;margin-bottom:6px;">Select Handicap</label>
+        <select id="dgHandicapSelect" onchange="dgRenderHandicap()" style="width:100%;padding:10px;border:2px solid #333;border-radius:10px;font-size:16px;background:#2a2a2a;color:#fff;font-family:inherit;">
+          <option value="scratch">Scratch (0)</option>
+          <option value="5">5 Handicap</option>
+          <option value="10" selected>10 Handicap</option>
+          <option value="15">15 Handicap</option>
+          <option value="20">20 Handicap</option>
+          <option value="25">25 Handicap</option>
+          <option value="30">30 Handicap</option>
+        </select>
+      </div>
+      <div id="dgHandicapTable"></div>
+    </div>
+
+    <!-- Driver Speed Content -->
+    <div id="dgContent_speed" style="display:none;">
+      <div style="margin-bottom:12px;">
+        <label style="font-size:13px;font-weight:600;color:#e0e0e0;display:block;margin-bottom:6px;">Your Driver Club Speed (mph)</label>
+        <input type="number" id="dgDriverSpeed" min="60" max="140" step="1" value="100" oninput="dgRenderSpeed()" style="width:100%;padding:10px;border:2px solid #333;border-radius:10px;font-size:16px;background:#2a2a2a;color:#fff;font-weight:600;font-family:inherit;box-sizing:border-box;">
+      </div>
+      <div id="dgSpeedTable"></div>
     </div>
 
   </div>
@@ -16241,6 +16318,202 @@ function toggleLearnProximityCalc() {
   if (!page) return;
   var isOpen = page.style.display === 'block';
   page.style.display = isOpen ? 'none' : 'block';
+}
+
+// --- Distance Guide ("How Far Should I Hit It?") ---
+var _dgCurrentTab = 'pga';
+
+var DG_PGA_DATA = [
+  {section:'Woods'},
+  {club:'Driver',carry:275,total:296},
+  {club:'3 Wood',carry:243,total:264},
+  {club:'5 Wood',carry:230,total:250},
+  {section:'Irons'},
+  {club:'3 Iron',carry:212,total:229},
+  {club:'4 Iron',carry:203,total:220},
+  {club:'5 Iron',carry:194,total:210},
+  {club:'6 Iron',carry:183,total:199},
+  {club:'7 Iron',carry:172,total:187},
+  {club:'8 Iron',carry:160,total:174},
+  {club:'9 Iron',carry:148,total:161},
+  {section:'Wedges'},
+  {club:'PW',carry:136,total:148},
+  {club:'Gap Wedge',carry:124,total:135},
+  {club:'Sand Wedge',carry:107,total:115},
+  {club:'Lob Wedge',carry:92,total:98}
+];
+
+var DG_LPGA_DATA = [
+  {section:'Woods'},
+  {club:'Driver',carry:218,total:237},
+  {club:'3 Wood',carry:195,total:213},
+  {club:'5 Wood',carry:185,total:202},
+  {section:'Irons'},
+  {club:'4 Iron',carry:169,total:184},
+  {club:'5 Iron',carry:161,total:175},
+  {club:'6 Iron',carry:152,total:166},
+  {club:'7 Iron',carry:141,total:154},
+  {club:'8 Iron',carry:130,total:142},
+  {club:'9 Iron',carry:119,total:130},
+  {section:'Wedges'},
+  {club:'PW',carry:108,total:118},
+  {club:'Gap Wedge',carry:97,total:106},
+  {club:'Sand Wedge',carry:82,total:89},
+  {club:'Lob Wedge',carry:67,total:72}
+];
+
+var DG_HANDICAP_DATA = {
+  scratch:{driverDist:251,clubSpeed:113,clubs:[
+    {section:'Woods'},{club:'Driver',carry:238,total:251},{club:'3 Wood',carry:215,total:228},{club:'5 Wood',carry:200,total:213},
+    {section:'Irons'},{club:'4 Iron',carry:181,total:193},{club:'5 Iron',carry:172,total:184},{club:'6 Iron',carry:163,total:174},{club:'7 Iron',carry:153,total:163},{club:'8 Iron',carry:142,total:151},{club:'9 Iron',carry:131,total:140},
+    {section:'Wedges'},{club:'PW',carry:120,total:128},{club:'GW',carry:108,total:115},{club:'SW',carry:93,total:99},{club:'LW',carry:78,total:83}
+  ]},
+  '5':{driverDist:232,clubSpeed:108,clubs:[
+    {section:'Woods'},{club:'Driver',carry:219,total:232},{club:'3 Wood',carry:199,total:212},{club:'5 Wood',carry:185,total:198},
+    {section:'Irons'},{club:'4 Iron',carry:168,total:179},{club:'5 Iron',carry:160,total:170},{club:'6 Iron',carry:151,total:161},{club:'7 Iron',carry:142,total:151},{club:'8 Iron',carry:132,total:140},{club:'9 Iron',carry:121,total:129},
+    {section:'Wedges'},{club:'PW',carry:111,total:118},{club:'GW',carry:100,total:106},{club:'SW',carry:86,total:91},{club:'LW',carry:72,total:76}
+  ]},
+  '10':{driverDist:215,clubSpeed:103,clubs:[
+    {section:'Woods'},{club:'Driver',carry:202,total:215},{club:'3 Wood',carry:184,total:197},{club:'5 Wood',carry:171,total:184},
+    {section:'Irons'},{club:'5 Iron',carry:149,total:159},{club:'6 Iron',carry:140,total:150},{club:'7 Iron',carry:131,total:140},{club:'8 Iron',carry:122,total:130},{club:'9 Iron',carry:113,total:120},
+    {section:'Wedges'},{club:'PW',carry:103,total:110},{club:'GW',carry:93,total:99},{club:'SW',carry:80,total:85},{club:'LW',carry:67,total:71}
+  ]},
+  '15':{driverDist:199,clubSpeed:98,clubs:[
+    {section:'Woods'},{club:'Driver',carry:186,total:199},{club:'3 Wood',carry:169,total:182},{club:'5 Wood',carry:158,total:171},
+    {section:'Irons'},{club:'5 Iron',carry:138,total:148},{club:'6 Iron',carry:130,total:139},{club:'7 Iron',carry:122,total:130},{club:'8 Iron',carry:113,total:121},{club:'9 Iron',carry:104,total:111},
+    {section:'Wedges'},{club:'PW',carry:95,total:102},{club:'GW',carry:86,total:92},{club:'SW',carry:74,total:79},{club:'LW',carry:62,total:66}
+  ]},
+  '20':{driverDist:184,clubSpeed:93,clubs:[
+    {section:'Woods'},{club:'Driver',carry:171,total:184},{club:'3 Wood',carry:155,total:168},{club:'5 Wood',carry:145,total:158},
+    {section:'Irons'},{club:'5 Iron',carry:127,total:137},{club:'6 Iron',carry:120,total:129},{club:'7 Iron',carry:112,total:121},{club:'8 Iron',carry:104,total:112},{club:'9 Iron',carry:96,total:103},
+    {section:'Wedges'},{club:'PW',carry:88,total:94},{club:'GW',carry:79,total:85},{club:'SW',carry:68,total:73},{club:'LW',carry:57,total:61}
+  ]},
+  '25':{driverDist:170,clubSpeed:88,clubs:[
+    {section:'Woods'},{club:'Driver',carry:157,total:170},{club:'3 Wood',carry:142,total:155},{club:'5 Wood',carry:133,total:146},
+    {section:'Irons'},{club:'6 Iron',carry:111,total:120},{club:'7 Iron',carry:104,total:112},{club:'8 Iron',carry:96,total:104},{club:'9 Iron',carry:88,total:95},
+    {section:'Wedges'},{club:'PW',carry:81,total:87},{club:'GW',carry:73,total:78},{club:'SW',carry:63,total:67},{club:'LW',carry:52,total:56}
+  ]},
+  '30':{driverDist:157,clubSpeed:83,clubs:[
+    {section:'Woods'},{club:'Driver',carry:144,total:157},{club:'3 Wood',carry:130,total:143},{club:'5 Wood',carry:122,total:135},
+    {section:'Irons'},{club:'7 Iron',carry:96,total:104},{club:'8 Iron',carry:89,total:96},{club:'9 Iron',carry:81,total:88},
+    {section:'Wedges'},{club:'PW',carry:74,total:80},{club:'GW',carry:67,total:72},{club:'SW',carry:57,total:62},{club:'LW',carry:48,total:52}
+  ]}
+};
+
+// Speed ratios relative to driver speed (based on BO_META defaults)
+var DG_SPEED_RATIOS = {
+  driver:{key:'driver',label:'Driver',ratio:1.0,aa:0},
+  '3w':{key:'3w',label:'3 Wood',ratio:0.95,aa:-1},
+  '5w':{key:'5w',label:'5 Wood',ratio:0.90,aa:-2},
+  '4i':{key:'4i',label:'4 Iron',ratio:0.86,aa:-3},
+  '5i':{key:'5i',label:'5 Iron',ratio:0.85,aa:-3},
+  '6i':{key:'6i',label:'6 Iron',ratio:0.83,aa:-3},
+  '7i':{key:'7i',label:'7 Iron',ratio:0.82,aa:-3.5},
+  '8i':{key:'8i',label:'8 Iron',ratio:0.80,aa:-4},
+  '9i':{key:'9i',label:'9 Iron',ratio:0.78,aa:-4},
+  pw:{key:'pw',label:'PW',ratio:0.75,aa:-4.5},
+  '50':{key:'50',label:'50\u00B0',ratio:0.72,aa:-5},
+  '52':{key:'52',label:'52\u00B0',ratio:0.70,aa:-5},
+  '54':{key:'54',label:'54\u00B0',ratio:0.68,aa:-5},
+  '56':{key:'56',label:'56\u00B0',ratio:0.66,aa:-5},
+  '58':{key:'58',label:'58\u00B0',ratio:0.64,aa:-5},
+  '60':{key:'60',label:'60\u00B0',ratio:0.62,aa:-5}
+};
+
+function toggleDistanceGuide() {
+  var page = document.getElementById('distanceGuidePage');
+  if (!page) return;
+  var isOpen = page.style.display === 'block';
+  page.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen) dgRenderCurrentTab();
+}
+
+function dgSetTab(tab) {
+  _dgCurrentTab = tab;
+  ['pga','lpga','handicap','speed'].forEach(function(t) {
+    document.getElementById('dgTab_' + t).classList.toggle('dg-tab-active', t === tab);
+    document.getElementById('dgContent_' + t).style.display = t === tab ? 'block' : 'none';
+  });
+  dgRenderCurrentTab();
+}
+
+function dgRenderCurrentTab() {
+  if (_dgCurrentTab === 'pga') dgRenderTourTable('dgPgaTable', DG_PGA_DATA, 'PGA Tour Averages');
+  else if (_dgCurrentTab === 'lpga') dgRenderTourTable('dgLpgaTable', DG_LPGA_DATA, 'LPGA Tour Averages');
+  else if (_dgCurrentTab === 'handicap') dgRenderHandicap();
+  else if (_dgCurrentTab === 'speed') dgRenderSpeed();
+}
+
+function dgBuildTable(data) {
+  var html = '<table class="dg-table"><thead><tr><th>Club</th><th>Carry</th><th>Total</th></tr></thead><tbody>';
+  data.forEach(function(row) {
+    if (row.section) {
+      html += '<tr class="dg-section-header"><td colspan="3">' + row.section + '</td></tr>';
+    } else {
+      html += '<tr><td class="dg-club-name">' + row.club + '</td><td>' + row.carry + '</td><td>' + row.total + '</td></tr>';
+    }
+  });
+  html += '</tbody></table>';
+  return html;
+}
+
+function dgRenderTourTable(containerId, data, title) {
+  document.getElementById(containerId).innerHTML = dgBuildTable(data);
+}
+
+function dgRenderHandicap() {
+  var hcp = document.getElementById('dgHandicapSelect').value;
+  var d = DG_HANDICAP_DATA[hcp];
+  if (!d) return;
+  var html = '<div class="dg-stat-box">';
+  html += '<div><div class="dg-stat-label">Avg Driver Distance</div><div class="dg-stat-value">' + d.driverDist + ' <span style="font-size:0.6em;color:#999;">yds</span></div></div>';
+  html += '<div><div class="dg-stat-label">Driver Club Speed</div><div class="dg-stat-value">' + d.clubSpeed + ' <span style="font-size:0.6em;color:#999;">mph</span></div></div>';
+  html += '</div>';
+  html += dgBuildTable(d.clubs);
+  document.getElementById('dgHandicapTable').innerHTML = html;
+}
+
+function dgRenderSpeed() {
+  var driverSpeed = parseFloat(document.getElementById('dgDriverSpeed').value);
+  if (isNaN(driverSpeed) || driverSpeed < 60 || driverSpeed > 140) {
+    document.getElementById('dgSpeedTable').innerHTML = '<div style="color:#999;text-align:center;padding:20px;">Enter a driver club speed between 60-140 mph</div>';
+    return;
+  }
+  var clubs = [
+    {key:'driver',section:'Woods'},
+    {key:'driver'},{key:'3w'},{key:'5w'},
+    {key:'4i',section:'Irons'},
+    {key:'4i'},{key:'5i'},{key:'6i'},{key:'7i'},{key:'8i'},{key:'9i'},
+    {key:'pw',section:'Wedges'},
+    {key:'pw'},{key:'50'},{key:'52'},{key:'54'},{key:'56'},{key:'58'},{key:'60'}
+  ];
+  var rows = [];
+  clubs.forEach(function(c) {
+    if (c.section) { rows.push({section:c.section}); return; }
+    var info = DG_SPEED_RATIOS[c.key];
+    if (!info) return;
+    var clubSpeed = Math.round(driverSpeed * info.ratio);
+    var cdata = BO_DATA[info.key];
+    if (!cdata) return;
+    var carryResult = boGetInterpolatedData(clubSpeed, info.aa, cdata.carry);
+    var totalResult;
+    if (cdata.total) {
+      totalResult = boGetInterpolatedData(clubSpeed, info.aa, cdata.total);
+    } else {
+      totalResult = carryResult;
+    }
+    rows.push({club:info.label,carry:Math.round(carryResult.carry),total:Math.round(totalResult.total)});
+  });
+  var html = '<div class="dg-stat-box">';
+  html += '<div><div class="dg-stat-label">Driver Club Speed</div><div class="dg-stat-value">' + driverSpeed + ' <span style="font-size:0.6em;color:#999;">mph</span></div></div>';
+  var driverRow = rows.find(function(r){ return r.club === 'Driver'; });
+  if (driverRow) {
+    html += '<div><div class="dg-stat-label">Est. Driver Carry</div><div class="dg-stat-value">' + driverRow.carry + ' <span style="font-size:0.6em;color:#999;">yds</span></div></div>';
+    html += '<div><div class="dg-stat-label">Est. Driver Total</div><div class="dg-stat-value">' + driverRow.total + ' <span style="font-size:0.6em;color:#999;">yds</span></div></div>';
+  }
+  html += '</div>';
+  html += dgBuildTable(rows);
+  document.getElementById('dgSpeedTable').innerHTML = html;
 }
 
 function openLearningLibrary() {
