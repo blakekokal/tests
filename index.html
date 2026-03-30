@@ -577,9 +577,18 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
   <div style="width:100%;max-width:320px;display:flex;flex-direction:column;gap:7px;">
 
     <!-- Help & Settings above brand -->
-    <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+    <div style="display:flex;justify-content:space-between;margin-bottom:12px;">
       <button onclick="show('helpPage')" style="width:38px;height:38px;min-width:38px;max-width:38px;background:#222222;border:none;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;padding:0;">❓</button>
       <button onclick="goToSettings()" style="width:38px;height:38px;min-width:38px;max-width:38px;background:#222222;border:none;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;padding:0;">⚙️</button>
+    </div>
+
+    <!-- Search bar -->
+    <div style="position:relative;margin-bottom:12px;">
+      <input id="homeSearchInput" type="text" placeholder="Search pages... (e.g. combines, putting stats)" autocomplete="off"
+        style="width:100%;padding:10px 14px 10px 36px;font-size:14px;font-weight:600;background:#1a1a1a;border:1px solid #333;border-radius:11px;color:#fff;outline:none;box-sizing:border-box;font-family:inherit;"
+        oninput="onSearchInput()" onkeydown="onSearchKeydown(event)" onfocus="onSearchInput()" onblur="setTimeout(()=>document.getElementById('searchResults').style.display='none',150)">
+      <svg style="position:absolute;left:11px;top:50%;transform:translateY(-50%);width:16px;height:16px;pointer-events:none;" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <div id="searchResults" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:#1e1e1e;border:1px solid #333;border-radius:11px;overflow:hidden;z-index:100;max-height:260px;overflow-y:auto;"></div>
     </div>
 
     <!-- Centered brand -->
@@ -3178,6 +3187,73 @@ function show(id){
   var scoringPages = ['parPage','shotPage','liePage','distancePage','puttPage','penaltyPage','obPenaltyPage','recoveryPage','missedGreenPage'];
   if(scoringPages.indexOf(id) === -1) { var sb=document.getElementById('scoreBar'); if(sb) sb.style.display='none'; }
   updatePersistentBack(id);
+}
+
+// ── Search bar logic ──
+var _searchEntries = [
+  { label:'Enter New Round', keywords:['new round','enter round','track shots','round entry'], action:function(){goToNewRound();} },
+  { label:'Round History', keywords:['round history','past rounds','old rounds'], action:function(){goToRoundHistory();} },
+  { label:'Stats Dashboard', keywords:['stats','dashboard','analytics','trends','statistics'], action:function(){goToDashboard();} },
+  { label:'Performance Analysis', keywords:['performance','analysis','misses','miss analysis','strokes gained','sg'], action:function(){show('performanceAnalysisPage');} },
+  { label:'My Bag', keywords:['my bag','clubs','club distances','yardages','bag'], action:function(){show('myBagPage');} },
+  { label:'Gap Visualizer', keywords:['gap','visualizer','distance gaps','gap visualizer'], action:function(){show('gapVisualizerPage');} },
+  { label:'Practice Hub', keywords:['practice','practice hub','drills','drill'], action:function(){goToPracticeHub();} },
+  { label:'Combines', keywords:['combines','combine','auto combine','putting combine','short game combine','wedge combine','driver combine'], action:function(){_currentPHTab='combines';show('practiceHubPage');} },
+  { label:'Drills', keywords:['drills','drill'], action:function(){_currentPHTab='drills';show('practiceHubPage');} },
+  { label:'Custom Practice', keywords:['custom practice','practice session','practice log'], action:function(){_currentPHTab='practice';show('practiceHubPage');} },
+  { label:'Learn', keywords:['learn','learning','library','educational'], action:function(){_currentPHTab='learn';show('practiceHubPage');} },
+  { label:'Distance Optimizer', keywords:['distance optimizer','driver optimizer','driver','optimize distance','swing speed'], action:function(){show('learnDistanceOptimizerPage');} },
+  { label:'Proximity Calculator', keywords:['proximity','proximity calculator','approach distance'], action:function(){show('learnProximityCalcPage');} },
+  { label:'Strokes Gained Calculator', keywords:['strokes gained calculator','sg calculator','sg calc'], action:function(){show('learnSGCalcPage');} },
+  { label:'PBV Calculator', keywords:['pbv','point based value','pbv calculator'], action:function(){show('learnPBVPage');} },
+  { label:'Coaching', keywords:['coaching','coach','student','students','connect coach'], action:function(){goToCoaching();} },
+  { label:'Putting Stats', keywords:['putting','putting stats','putt','putts','putt stats'], action:function(){show('puttPage');} },
+  { label:'Distance Stats', keywords:['distance','distance stats','driving distance'], action:function(){show('distancePage');} },
+  { label:'My Courses', keywords:['courses','my courses','course list','golf courses'], action:function(){show('myCoursesPage');} },
+  { label:'Help / FAQ', keywords:['help','faq','support','contact','question'], action:function(){show('helpPage');} },
+  { label:'Settings / Profile', keywords:['settings','profile','account','preferences'], action:function(){goToSettings();} },
+  { label:"What's New", keywords:["what's new",'whats new','release notes','changelog','updates','new features'], action:function(){show('whatsNewPage');} }
+];
+
+function onSearchInput(){
+  var input=document.getElementById('homeSearchInput');
+  var box=document.getElementById('searchResults');
+  var q=input.value.trim().toLowerCase();
+  if(!q){ box.style.display='none'; return; }
+  var matches=_searchEntries.filter(function(e){
+    if(e.label.toLowerCase().indexOf(q)!==-1) return true;
+    return e.keywords.some(function(k){ return k.indexOf(q)!==-1; });
+  });
+  if(!matches.length){ box.style.display='none'; return; }
+  box.innerHTML=matches.map(function(m,i){
+    return '<div class="search-result-item" data-idx="'+i+'" onmousedown="execSearch('+i+',\''+q+'\')" style="padding:10px 14px;font-size:14px;font-weight:600;color:#ddd;cursor:pointer;border-bottom:1px solid #2a2a2a;">'+m.label+'</div>';
+  }).join('');
+  box.style.display='block';
+  box._matches=matches;
+}
+
+function onSearchKeydown(e){
+  if(e.key==='Enter'){
+    var box=document.getElementById('searchResults');
+    if(box._matches&&box._matches.length){
+      box._matches[0].action();
+      document.getElementById('homeSearchInput').value='';
+      box.style.display='none';
+    }
+  }
+  if(e.key==='Escape'){
+    document.getElementById('homeSearchInput').value='';
+    document.getElementById('searchResults').style.display='none';
+  }
+}
+
+function execSearch(idx,q){
+  var box=document.getElementById('searchResults');
+  if(box._matches&&box._matches[idx]){
+    box._matches[idx].action();
+    document.getElementById('homeSearchInput').value='';
+    box.style.display='none';
+  }
 }
 
 // Persistent bottom back button logic
