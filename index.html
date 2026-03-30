@@ -1466,7 +1466,8 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
       <button id="cstTab0" onclick="showStudentCoachingTab(0)" style="flex:1;height:38px;font-size:11px;font-weight:700;background:#2d7abc;border-radius:0;border:none;color:#ffffff;max-width:none;width:auto;padding:0;margin:0;">Feedback</button>
       <button id="cstTab1" onclick="showStudentCoachingTab(1)" style="flex:1;height:38px;font-size:11px;font-weight:700;background:#282828;border-radius:0;border:none;color:#606060;max-width:none;width:auto;padding:0;margin:0;">Drills</button>
       <button id="cstTab2" onclick="showStudentCoachingTab(2)" style="flex:1;height:38px;font-size:11px;font-weight:700;background:#282828;border-radius:0;border:none;color:#606060;max-width:none;width:auto;padding:0;margin:0;">Goals</button>
-      <button id="cstTab3" onclick="showStudentCoachingTab(3)" style="flex:1;height:38px;font-size:11px;font-weight:700;background:#282828;border-radius:0;border:none;color:#606060;max-width:none;width:auto;padding:0;margin:0;">Info</button>
+      <button id="cstTab3" onclick="showStudentCoachingTab(3)" style="flex:1;height:38px;font-size:11px;font-weight:700;background:#282828;border-radius:0;border:none;color:#606060;max-width:none;width:auto;padding:0;margin:0;">Messages</button>
+      <button id="cstTab4" onclick="showStudentCoachingTab(4)" style="flex:1;height:38px;font-size:11px;font-weight:700;background:#282828;border-radius:0;border:none;color:#606060;max-width:none;width:auto;padding:0;margin:0;">Info</button>
     </div>
 
     <!-- Tab content -->
@@ -1553,8 +1554,22 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
         </div>
       </div>
 
-      <!-- TAB 3: Info -->
-      <div id="cstTabContent3" style="display:none;height:100%;overflow-y:auto;padding:14px 0 80px;">
+      <!-- TAB 3: Messages -->
+      <div id="cstTabContent3" style="display:none;height:100%;display:flex;flex-direction:column;margin:-14px -16px -40px;">
+        <div id="cstMessagesList" style="flex:1;overflow-y:auto;padding:14px 16px 10px;">
+          <div style="text-align:center;color:#2e2e2e;font-size:13px;padding:20px 0;">No messages yet.</div>
+        </div>
+        <div style="flex-shrink:0;padding:8px 16px 20px;background:#1e1e1e;border-top:1px solid #282828;">
+          <div id="cstMsgStatus" style="font-size:11px;min-height:14px;text-align:center;margin-bottom:4px;"></div>
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="cstMsgInput" placeholder="Message your coach..." onkeydown="if(event.key==='Enter')sendStudentMessage()" style="flex:1;height:40px;box-sizing:border-box;font-size:14px;">
+            <button onclick="sendStudentMessage()" style="background:#2d7abc;border:none;border-radius:8px;color:#ffffff;font-size:13px;font-weight:700;padding:0 16px;cursor:pointer;height:40px;max-width:none;width:auto;">Send</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: Info -->
+      <div id="cstTabContent4" style="display:none;height:100%;overflow-y:auto;padding:14px 0 80px;">
         <!-- Invite Code -->
         <div style="background:linear-gradient(135deg,#1a4a8a,#1a4a8a);border-radius:14px;padding:18px 20px;margin-bottom:14px;">
           <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.55);margin-bottom:6px;">Your Invite Code</div>
@@ -1584,9 +1599,10 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
     <!-- Tab bar -->
     <div style="display:flex;gap:0;width:100%;flex-shrink:0;border-radius:10px;overflow:hidden;">
       <button id="cctTab0" onclick="showCoachCoachingTab(0)" style="flex:1;height:38px;font-size:11px;font-weight:700;background:#2d7abc;border-radius:0;border:none;color:#ffffff;max-width:none;width:auto;padding:0;margin:0;">Home</button>
-      <button id="cctTab1" onclick="showCoachCoachingTab(1)" style="flex:1;height:38px;font-size:11px;font-weight:700;background:#282828;border-radius:0;border:none;color:#606060;max-width:none;width:auto;padding:0;margin:0;">Lesson Notes</button>
+      <button id="cctTab1" onclick="showCoachCoachingTab(1)" style="flex:1;height:38px;font-size:11px;font-weight:700;background:#282828;border-radius:0;border:none;color:#606060;max-width:none;width:auto;padding:0;margin:0;">Notes</button>
       <button id="cctTab2" onclick="showCoachCoachingTab(2)" style="flex:1;height:38px;font-size:11px;font-weight:700;background:#282828;border-radius:0;border:none;color:#606060;max-width:none;width:auto;padding:0;margin:0;">Assign</button>
-      <button id="cctTab3" onclick="showCoachCoachingTab(3)" style="flex:1;height:38px;font-size:11px;font-weight:700;background:#282828;border-radius:0;border:none;color:#606060;max-width:none;width:auto;padding:0;margin:0;">Students</button>
+      <button id="cctTab3" onclick="showCoachCoachingTab(3)" style="flex:1;height:38px;font-size:11px;font-weight:700;background:#282828;border-radius:0;border:none;color:#606060;max-width:none;width:auto;padding:0;margin:0;">Messages</button>
+      <button id="cctTab4" onclick="showCoachCoachingTab(4)" style="flex:1;height:38px;font-size:11px;font-weight:700;background:#282828;border-radius:0;border:none;color:#606060;max-width:none;width:auto;padding:0;margin:0;">Students</button>
     </div>
 
     <!-- Tab content -->
@@ -1763,8 +1779,25 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
         </div>
       </div>
 
-      <!-- TAB 3: Student List -->
+      <!-- TAB 3: Messages -->
       <div id="cctTabContent3" style="display:none;">
+        <div style="margin-bottom:10px;">
+          <select id="coachMsgStudentSelect" onchange="loadCoachMessages()" style="width:100%;height:40px;background:#282828;color:#ffffff;border:1px solid #3d3d3d;border-radius:8px;font-size:13px;padding:0 10px;">
+            <option value="">Select a student...</option>
+          </select>
+        </div>
+        <div id="cctMessagesList" style="min-height:100px;max-height:400px;overflow-y:auto;margin-bottom:10px;">
+          <div style="text-align:center;color:#2e2e2e;font-size:13px;padding:20px 0;">Select a student to view messages.</div>
+        </div>
+        <div id="cctMsgStatus" style="font-size:11px;min-height:14px;text-align:center;margin-bottom:4px;"></div>
+        <div id="cctMsgInputWrap" style="display:none;gap:8px;">
+          <input type="text" id="cctMsgInput" placeholder="Message student..." onkeydown="if(event.key==='Enter')sendCoachMessage()" style="flex:1;height:40px;box-sizing:border-box;font-size:14px;">
+          <button onclick="sendCoachMessage()" style="background:#2d7abc;border:none;border-radius:8px;color:#ffffff;font-size:13px;font-weight:700;padding:0 16px;cursor:pointer;height:40px;max-width:none;width:auto;">Send</button>
+        </div>
+      </div>
+
+      <!-- TAB 4: Student List -->
+      <div id="cctTabContent4" style="display:none;">
         <!-- Add student -->
         <div style="background:#222222;border-radius:14px;padding:14px 16px;margin-bottom:12px;">
           <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#606060;margin-bottom:10px;">Add Student by Invite Code</div>
@@ -14806,26 +14839,29 @@ showProfileTab = function(tab){
 // =============================================
 
 function showStudentCoachingTab(idx) {
-  for (var i = 0; i < 4; i++) {
+  for (var i = 0; i < 5; i++) {
     var btn = document.getElementById('cstTab' + i);
     var pane = document.getElementById('cstTabContent' + i);
     if (btn)  { btn.style.background = i === idx ? '#2d7abc' : '#282828'; btn.style.color = i === idx ? '#ffffff' : '#606060'; btn.style.fontWeight = i === idx ? '700' : '600'; }
-    if (pane) pane.style.display = i === idx ? (i === 0 ? 'flex' : 'block') : 'none';
+    if (pane) pane.style.display = i === idx ? (i === 0 || i === 3 ? 'flex' : 'block') : 'none';
   }
   // sync outer wrapper scroll behavior
   var wrap = document.getElementById('cstTabContentWrap');
-  if (wrap) wrap.style.overflowY = idx === 0 ? 'hidden' : 'auto';
+  if (wrap) wrap.style.overflowY = (idx === 0 || idx === 3) ? 'hidden' : 'auto';
   // Load goals & handicap when Goals tab is opened
   if (idx === 2) loadCstGoalsAndHandicap();
+  // Load messages when Messages tab is opened
+  if (idx === 3) loadStudentMessages();
 }
 
 function showCoachCoachingTab(idx) {
-  for (var i = 0; i < 4; i++) {
+  for (var i = 0; i < 5; i++) {
     var btn = document.getElementById('cctTab' + i);
     var pane = document.getElementById('cctTabContent' + i);
     if (btn)  { btn.style.background = i === idx ? '#2d7abc' : '#282828'; btn.style.color = i === idx ? '#ffffff' : '#606060'; btn.style.fontWeight = i === idx ? '700' : '600'; }
     if (pane) pane.style.display = i === idx ? 'block' : 'none';
   }
+  if (idx === 3) loadCoachMessages();
 }
 
 function setCoachNoteType(type) {
@@ -15357,7 +15393,7 @@ function filterCoachingRoster() {
 function populateCoachStudentSelects(students) {
   window._coachStudentsForSearch = students || [];
 
-  var selIds = ['coachDrillStudentSelect', 'coachCombStudentSelect'];
+  var selIds = ['coachDrillStudentSelect', 'coachCombStudentSelect', 'coachMsgStudentSelect'];
   selIds.forEach(function(id) {
     var sel = document.getElementById(id);
     if (!sel) return;
@@ -15553,6 +15589,115 @@ async function sendCoachNote() {
   var { data: notes } = await _sb.from('coach_notes').select('id').eq('coach_id', currentUser.id);
   document.getElementById('coachStatNotes').textContent = (notes ? notes.length : 0);
   setTimeout(function(){ msg.textContent = ''; }, 3000);
+}
+
+/* ── Direct Messages (coach <-> student) ── */
+var _dmCoachId = null; // cached coach ID for student view
+
+function _renderMessages(msgs, container, myId) {
+  if (!msgs || !msgs.length) {
+    container.innerHTML = '<div style="text-align:center;color:#2e2e2e;font-size:13px;padding:20px 0;">No messages yet. Start the conversation!</div>';
+    return;
+  }
+  var html = '';
+  msgs.forEach(function(m) {
+    var isMe = m.sender_id === myId;
+    html += '<div style="display:flex;justify-content:' + (isMe ? 'flex-end' : 'flex-start') + ';margin-bottom:8px;">';
+    html += '<div style="max-width:80%;background:' + (isMe ? '#2d7abc' : '#282828') + ';border-radius:12px;padding:10px 14px;">';
+    html += '<div style="font-size:13px;color:#ffffff;line-height:1.4;word-break:break-word;">' + (m.message_text || '').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>';
+    var d = new Date(m.created_at);
+    var timeStr = (d.getMonth()+1) + '/' + d.getDate() + ' ' + d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+    html += '<div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:4px;">' + (m.sender_name || '') + ' · ' + timeStr + '</div>';
+    html += '</div></div>';
+  });
+  container.innerHTML = html;
+  container.scrollTop = container.scrollHeight;
+}
+
+async function loadStudentMessages() {
+  if (!currentUser) return;
+  var list = document.getElementById('cstMessagesList');
+  // Find coach ID
+  if (!_dmCoachId) {
+    var { data: p } = await _sb.from('profiles').select('coach_id').eq('id', currentUser.id).single();
+    if (!p || !p.coach_id) {
+      list.innerHTML = '<div style="text-align:center;color:#2e2e2e;font-size:13px;padding:20px 0;">Connect with a coach to send messages.</div>';
+      return;
+    }
+    _dmCoachId = p.coach_id;
+  }
+  var { data: msgs } = await _sb.from('coach_messages')
+    .select('*')
+    .or('and(sender_id.eq.' + currentUser.id + ',receiver_id.eq.' + _dmCoachId + '),and(sender_id.eq.' + _dmCoachId + ',receiver_id.eq.' + currentUser.id + ')')
+    .order('created_at', { ascending: true })
+    .limit(100);
+  _renderMessages(msgs || [], list, currentUser.id);
+  // Mark unread as read
+  await _sb.from('coach_messages').update({ read: true }).eq('receiver_id', currentUser.id).eq('sender_id', _dmCoachId).eq('read', false);
+}
+
+async function sendStudentMessage() {
+  var input = document.getElementById('cstMsgInput');
+  var text = (input.value || '').trim();
+  var status = document.getElementById('cstMsgStatus');
+  if (!text) return;
+  if (!_dmCoachId) { status.style.color = '#d4706e'; status.textContent = 'No coach connected'; return; }
+  input.value = '';
+  var { data: p } = await _sb.from('profiles').select('display_name').eq('id', currentUser.id).single();
+  var name = (p && p.display_name) || 'Student';
+  var { error } = await _sb.from('coach_messages').insert({
+    sender_id: currentUser.id, receiver_id: _dmCoachId, message_text: text,
+    sender_name: name, read: false, created_at: new Date().toISOString()
+  });
+  if (error) { status.style.color = '#d4706e'; status.textContent = 'Error sending'; return; }
+  await _sb.from('notifications').insert({
+    user_id: _dmCoachId, type: 'student_message', title: 'Message from ' + name,
+    message: text.length > 70 ? text.slice(0,70) + '…' : text, read: false, created_at: new Date().toISOString()
+  });
+  loadStudentMessages();
+}
+
+async function loadCoachMessages() {
+  var sel = document.getElementById('coachMsgStudentSelect');
+  var studentId = sel ? sel.value : '';
+  var list = document.getElementById('cctMessagesList');
+  var inputWrap = document.getElementById('cctMsgInputWrap');
+  if (!studentId) {
+    list.innerHTML = '<div style="text-align:center;color:#2e2e2e;font-size:13px;padding:20px 0;">Select a student to view messages.</div>';
+    if (inputWrap) inputWrap.style.display = 'none';
+    return;
+  }
+  if (inputWrap) inputWrap.style.display = 'flex';
+  var { data: msgs } = await _sb.from('coach_messages')
+    .select('*')
+    .or('and(sender_id.eq.' + currentUser.id + ',receiver_id.eq.' + studentId + '),and(sender_id.eq.' + studentId + ',receiver_id.eq.' + currentUser.id + ')')
+    .order('created_at', { ascending: true })
+    .limit(100);
+  _renderMessages(msgs || [], list, currentUser.id);
+  // Mark unread as read
+  await _sb.from('coach_messages').update({ read: true }).eq('receiver_id', currentUser.id).eq('sender_id', studentId).eq('read', false);
+}
+
+async function sendCoachMessage() {
+  var studentId = document.getElementById('coachMsgStudentSelect').value;
+  var input = document.getElementById('cctMsgInput');
+  var text = (input.value || '').trim();
+  var status = document.getElementById('cctMsgStatus');
+  if (!studentId) { status.style.color = '#d4706e'; status.textContent = 'Select a student'; return; }
+  if (!text) return;
+  input.value = '';
+  var { data: p } = await _sb.from('profiles').select('display_name').eq('id', currentUser.id).single();
+  var name = (p && p.display_name) || 'Coach';
+  var { error } = await _sb.from('coach_messages').insert({
+    sender_id: currentUser.id, receiver_id: studentId, message_text: text,
+    sender_name: name, read: false, created_at: new Date().toISOString()
+  });
+  if (error) { status.style.color = '#d4706e'; status.textContent = 'Error sending'; return; }
+  await _sb.from('notifications').insert({
+    user_id: studentId, type: 'coach_message', title: 'Message from ' + name,
+    message: text.length > 70 ? text.slice(0,70) + '…' : text, read: false, created_at: new Date().toISOString()
+  });
+  loadCoachMessages();
 }
 
 function populateCoachDrillList() {
