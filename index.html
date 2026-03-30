@@ -652,6 +652,117 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
   <button onclick="exitStudentView()" style="background:rgba(255,255,255,0.2);color:#ffffff;font-size:10px;font-weight:700;border:1px solid rgba(255,255,255,0.4);border-radius:10px;padding:2px 8px;cursor:pointer;height:auto;max-width:none;width:auto;">Exit</button>
 </div>
 
+<!-- GUIDE TO GOLF PAGE -->
+<div id="guideToGolfPage" class="page" style="justify-content:flex-start;padding-top:20px;overflow-y:auto;padding-bottom:80px;align-items:center;">
+  <button class="back-btn-top" onclick="show('practiceHubPage')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <div style="font-size:22px;font-weight:800;margin-bottom:4px;">Guide to Golf</div>
+  <div style="font-size:13px;color:#888;margin-bottom:16px;">How to hit every shot</div>
+
+  <div style="width:100%;max-width:360px;display:flex;flex-direction:column;gap:14px;">
+
+    <!-- Driver -->
+    <div style="background:#222;border-radius:14px;overflow:hidden;">
+      <img src="https://lh3.googleusercontent.com/sitesv/APaQ0SRIQYISbFAIcbNaYD9H3Lyhy8N96NP5RRX2q1tV79XzJ-UsSxpxXkWx8KPcXa1bPC1p675MtCz6tisJQx7heESOxUTVHGrU7tn2UaJlcy55msyaHXsCgcpIXsoaieWPXMnxU7FV5SMPdhtIjX61O92OjbugQQ7DOvCy2K-idN_0KicmYifCOtkwOQmtS5d3Nkqkxlfx5hApWuqwcdWBKE0oc2Z8GbT3UzbuFjo=w1280" alt="Driver stance" style="width:100%;display:block;border-radius:14px 14px 0 0;">
+      <div style="padding:14px 16px;">
+        <div style="font-size:17px;font-weight:800;margin-bottom:8px;">Driver</div>
+        <ul style="margin:0;padding-left:18px;font-size:13px;color:#bbb;line-height:2;">
+          <li>Feet wide</li>
+          <li>Ball by front foot</li>
+          <li>Tall tee</li>
+          <li>Shoulders up</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Hybrid / 3 Wood -->
+    <div style="background:#222;border-radius:14px;overflow:hidden;">
+      <img src="https://lh3.googleusercontent.com/sitesv/APaQ0SSlzxe1ZkAQFMoPwx7a2hsJ14qmu95s6ouidrhGGPeFk3lakIWozxBBnngq0sN6O58bz8PJsNz68h4ouDCjBWtxXOz8pKditU_Ewbwg2x7FgD3BAxv2S4HhjgiEDntGacgfCxAtOpE7dUk3fM5P1nspByJPlG1e-AS7UOjjCCi3F9olICzO9bA_hZkl6fr_UzinsL2NLifuv_G8xZmQr-7uVMFyN-IJji2E=w1280" alt="Hybrid/3Wood stance" style="width:100%;display:block;border-radius:14px 14px 0 0;">
+      <div style="padding:14px 16px;">
+        <div style="font-size:17px;font-weight:800;margin-bottom:8px;">Hybrid / 3 Wood</div>
+        <ul style="margin:0;padding-left:18px;font-size:13px;color:#bbb;line-height:2;">
+          <li>Feet slightly wider than shoulder width</li>
+          <li>Ball slightly forward in stance</li>
+          <li>Shoulders level</li>
+          <li>55-65% of weight on back foot</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Irons -->
+    <div style="background:#222;border-radius:14px;overflow:hidden;">
+      <img src="https://lh3.googleusercontent.com/sitesv/APaQ0SSSafVu6pyn9CtjE6MCwlqPIoUlbor4rsToLB8w_qPy40arVW_DzAOFUO4WmMmwzpnLgvG7eJUNSKWGlbsrX3myrbTV0oGOufhGungQJikKiFO_dTRcQnIbhLxflEAIn2mqepcA8DMfzcPNTajR0IrRR0mXw58avsULIYvS-uRWFEkHdb3-dun82JAAf9WGadxmZU8g9SIg7gDw1YfwRuqDnmQlwFn_QeupMqg=w1280" alt="Irons stance" style="width:100%;display:block;border-radius:14px 14px 0 0;">
+      <div style="padding:14px 16px;">
+        <div style="font-size:17px;font-weight:800;margin-bottom:8px;">Irons</div>
+        <ul style="margin:0;padding-left:18px;font-size:13px;color:#bbb;line-height:2;">
+          <li>Feet shoulder width</li>
+          <li>Ball in middle of stance</li>
+          <li>Shoulders level</li>
+          <li>50/50 weight on each foot</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Chipping (Low) -->
+    <div style="background:#222;border-radius:14px;overflow:hidden;">
+      <img src="https://lh3.googleusercontent.com/sitesv/APaQ0STiquwMUrI8swVnJjsZAyR3CNWXbbTFGaloKaBtGrMbDayuXszg5bXFF6GUjDi3Kh5iQE2FbrYkffIuPVvXtlht46QXHefD4ur3dg5c2LkB3tIKuRZNaa9ap9oRTUwhyYZa-Trp5q2kVltJ431dO0_Ffkx9NIfIAFHy7OdYgEyNSmjzK4RijsdFndo9X67CsiV8k9BQAGUJ1SXy692rZ7JAbDgRjlHfYQtZ=w1280" alt="Low chip stance" style="width:100%;display:block;border-radius:14px 14px 0 0;">
+      <div style="padding:14px 16px;">
+        <div style="font-size:17px;font-weight:800;margin-bottom:8px;">Chipping (Low)</div>
+        <ul style="margin:0;padding-left:18px;font-size:13px;color:#bbb;line-height:2;">
+          <li>Use PW or SW</li>
+          <li>70-80% of weight on front foot</li>
+          <li>Feet closer together</li>
+          <li>Ball in back of stance</li>
+          <li>Putting motion, no wrists</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Chipping (High) -->
+    <div style="background:#222;border-radius:14px;overflow:hidden;">
+      <img src="https://lh3.googleusercontent.com/sitesv/APaQ0SS8CLkEWl7AKcDzVO_5yFgF_rAKOF0PSfuLe-yEvDZJk6DUoLZm7y7vnBc6k4QVSPomKBVtW8VU0S_zwF1-L22TrnB04frfTTfIgglnjVYqBLGNQfZ9LfNbmzA6RnJZ2MJKcQN2gVfHLIxK1PedKbKmHGFofUTOzjp2HB_KGfrW1QGNcV_0R_Z7_Ca0XRD0NFt-7XgqLTZnLvBseBU2-RWzlchEk-RPzbpIgpU=w1280" alt="High chip stance" style="width:100%;display:block;border-radius:14px 14px 0 0;">
+      <div style="padding:14px 16px;">
+        <div style="font-size:17px;font-weight:800;margin-bottom:8px;">Chipping (High)</div>
+        <ul style="margin:0;padding-left:18px;font-size:13px;color:#bbb;line-height:2;">
+          <li>Use SW</li>
+          <li>70-80% of weight on front foot</li>
+          <li>Feet closer together</li>
+          <li>Ball in front of stance</li>
+          <li>Putting motion, no wrists</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Bunker / Sand -->
+    <div style="background:#222;border-radius:14px;overflow:hidden;">
+      <img src="https://lh3.googleusercontent.com/sitesv/APaQ0SQrqmzOjd-3aSmwHpP9uFiRovqAxRbe_GyURl2VqM5RINn_oFS-95mSwHrBq_8M-9O8fCpY60AFND55zzOm2Bs9byZArW7xLj36xLcXXe-pfIeRl9Aws7-FZxTQsrwYayCEWFyJ2UBQwIWSSm7w-NwnRnMedR9NpkiuF7DlL1fWRzVWJblQ79gm3UNKcby3OYuLpCxjRHxQgHjSVjLIIuin6w14Xkemsw=w1280" alt="Bunker shot stance" style="width:100%;display:block;border-radius:14px 14px 0 0;">
+      <div style="padding:14px 16px;">
+        <div style="font-size:17px;font-weight:800;margin-bottom:8px;">Bunker / Sand</div>
+        <ul style="margin:0;padding-left:18px;font-size:13px;color:#bbb;line-height:2;">
+          <li>Use SW</li>
+          <li>Feet shoulder width</li>
+          <li>Ball in front of stance</li>
+          <li>70-80% weight on front foot</li>
+          <li>Big swing, hitting sand 1 inch behind ball</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Putting -->
+    <div style="background:#222;border-radius:14px;overflow:hidden;">
+      <img src="https://lh3.googleusercontent.com/sitesv/APaQ0SRlfRyfWIZrDSnLIuxViVrMdPARpebxXiCvAMvDQn6BasIERfCXMGoiZdielgP_UhyNUHHooSIYo3uDKmg-afYdgCW5x7U7yRlNPDHxGq7qqxYGT3vjvfhKunecI5Ftm5FG3gmWFZ7GbLuynIbpSmToZcridjh3TB5GKiRDUtSa1NST7ThbR-OG9NLdxnT9TGPYgmU9p_uKzZuhGmjSSkpkBkI0815qChg1hFI=w1280" alt="Putting stance" style="width:100%;display:block;border-radius:14px 14px 0 0;">
+      <div style="padding:14px 16px;">
+        <div style="font-size:17px;font-weight:800;margin-bottom:8px;">Putting</div>
+        <ul style="margin:0;padding-left:18px;font-size:13px;color:#bbb;line-height:2;">
+          <li>Feet around shoulder width</li>
+          <li>Ball in middle/front of stance</li>
+          <li>No wrists, rock back and shoulders back and forth</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <!-- STUDENT PICKER PAGE (Coach selects which student to view as) -->
 <div id="studentPickerPage" class="page" style="justify-content:flex-start;padding-top:20px;overflow-y:auto;padding-bottom:80px;align-items:center;">
   <button class="back-btn-top" onclick="show('homePage')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
@@ -1064,6 +1175,10 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
         <button onclick="toggleDistanceGuide()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
           <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🏌️</span>
           <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">How Far Should I Hit It?</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Tour averages &amp; distance by speed or handicap</div></div>
+        </button>
+        <button onclick="show('guideToGolfPage')" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
+          <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">⛳</span>
+          <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Guide to Golf</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">How to hit every shot with photos &amp; tips</div></div>
         </button>
       </div>
     </div>
@@ -3212,6 +3327,7 @@ var _searchEntries = [
   { label:'My Courses', keywords:['courses','my courses','course list','golf courses'], action:function(){show('myCoursesPage');} },
   { label:'Help / FAQ', keywords:['help','faq','support','contact','question'], action:function(){show('helpPage');} },
   { label:'Settings / Profile', keywords:['settings','profile','account','preferences'], action:function(){goToSettings();} },
+  { label:'Guide to Golf', keywords:['guide to golf','guide','how to hit','shot guide','driver setup','chipping','bunker','sand shot','iron setup'], action:function(){show('guideToGolfPage');} },
   { label:"What's New", keywords:["what's new",'whats new','release notes','changelog','updates','new features'], action:function(){show('whatsNewPage');} }
 ];
 
@@ -3277,6 +3393,7 @@ var _backTargetMap = {
   'authPage': 'homePage',
   'combinesPage': 'practiceHubPage',
   'whatsNewPage': 'homePage',
+  'guideToGolfPage': 'practiceHubPage',
   'myCoursesPage': 'roundPage',
   'editCoursePage': 'myCoursesPage'
 };
