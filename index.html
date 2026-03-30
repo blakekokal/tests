@@ -15487,7 +15487,7 @@ async function loadCoachActivityFeed() {
   el.innerHTML = data.map(function(n) {
     var d = new Date(n.created_at);
     var dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-    var icon = n.type === 'new_round' ? '⛳' : (n.type === 'new_combine' || n.type === 'combine_completed') ? '🎯' : n.type === 'drill_completed' ? '📋' : n.type === 'new_signup' ? '👤' : '📌';
+    var icon = n.type === 'new_round' ? '⛳' : (n.type === 'new_combine' || n.type === 'combine_completed') ? '🎯' : n.type === 'drill_completed' ? '📋' : n.type === 'new_signup' ? '👤' : n.type === 'student_message' ? '💬' : '📌';
     var unreadStyle = !n.read ? 'border-left:3px solid #2d7abc;padding-left:10px;' : 'padding-left:13px;';
     var viewBtn = '';
     if (n.student_id) {
@@ -15495,6 +15495,11 @@ async function loadCoachActivityFeed() {
       viewBtn = '<button onclick="viewStudent(\'' + n.student_id + '\',\'' + safeName + '\',\'\')" '
         + 'style="margin-top:6px;font-size:11px;font-weight:700;background:#2d7abc;color:#ffffff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer;height:auto;max-width:none;width:auto;">'
         + 'View Profile</button>';
+    }
+    if (n.type === 'student_message' && n.student_id) {
+      viewBtn += ' <button onclick="openChatWithStudent(\'' + n.student_id + '\')" '
+        + 'style="margin-top:6px;font-size:11px;font-weight:700;background:#00b87a;color:#ffffff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer;height:auto;max-width:none;width:auto;">'
+        + 'Open Chat</button>';
     }
     return '<div style="' + unreadStyle + 'margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #282828;">'
       + '<div style="display:flex;align-items:flex-start;gap:8px;">'
@@ -15506,6 +15511,15 @@ async function loadCoachActivityFeed() {
       + viewBtn
       + '</div></div></div>';
   }).join('');
+}
+
+function openChatWithStudent(studentId) {
+  var sel = document.getElementById('coachMsgStudentSelect');
+  if (sel) {
+    sel.value = studentId;
+  }
+  showCoachCoachingTab(3);
+  loadCoachMessages();
 }
 
 async function markCoachNotificationsRead() {
@@ -15652,7 +15666,8 @@ async function sendStudentMessage() {
   if (error) { status.style.color = '#d4706e'; status.textContent = 'Error sending'; return; }
   await _sb.from('notifications').insert({
     user_id: _dmCoachId, type: 'student_message', title: 'Message from ' + name,
-    message: text.length > 70 ? text.slice(0,70) + '…' : text, read: false, created_at: new Date().toISOString()
+    message: text.length > 70 ? text.slice(0,70) + '…' : text, read: false, created_at: new Date().toISOString(),
+    student_id: currentUser.id, student_name: name
   });
   loadStudentMessages();
 }
