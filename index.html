@@ -1448,11 +1448,12 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
     <p style="text-align:center;font-size:12px;color:rgba(255,255,255,0.4);margin:0 0 14px;">Average distances by tour, handicap, or club speed</p>
 
     <!-- Mode Tabs -->
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;margin-bottom:16px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:5px;margin-bottom:16px;">
       <button id="dgTab_pga" class="dg-tab dg-tab-active" onclick="dgSetTab('pga')">PGA Tour</button>
       <button id="dgTab_lpga" class="dg-tab" onclick="dgSetTab('lpga')">LPGA</button>
       <button id="dgTab_handicap" class="dg-tab" onclick="dgSetTab('handicap')">Handicap</button>
-      <button id="dgTab_speed" class="dg-tab" onclick="dgSetTab('speed')">Driver Speed</button>
+      <button id="dgTab_speed" class="dg-tab" onclick="dgSetTab('speed')">Speed</button>
+      <button id="dgTab_profile" class="dg-tab" onclick="dgSetTab('profile')">Age</button>
     </div>
 
     <!-- PGA Tour Content -->
@@ -1489,6 +1490,32 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
         <input type="number" id="dgDriverSpeed" min="60" max="140" step="1" value="100" oninput="dgRenderSpeed()" style="width:100%;padding:10px;border:2px solid #333;border-radius:10px;font-size:16px;background:#2a2a2a;color:#fff;font-weight:600;font-family:inherit;box-sizing:border-box;">
       </div>
       <div id="dgSpeedTable"></div>
+    </div>
+
+    <!-- Age / Gender Content -->
+    <div id="dgContent_profile" style="display:none;">
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <div style="flex:1;">
+          <label style="font-size:13px;font-weight:600;color:#e0e0e0;display:block;margin-bottom:6px;">Age</label>
+          <select id="dgProfileAge" onchange="dgRenderProfile()" style="width:100%;padding:10px;border:2px solid #333;border-radius:10px;font-size:16px;background:#2a2a2a;color:#fff;font-family:inherit;">
+            <option value="20">20 - 29</option>
+            <option value="30" selected>30 - 39</option>
+            <option value="40">40 - 49</option>
+            <option value="50">50 - 59</option>
+            <option value="60">60 - 69</option>
+            <option value="70">70+</option>
+          </select>
+        </div>
+        <div style="flex:1;">
+          <label style="font-size:13px;font-weight:600;color:#e0e0e0;display:block;margin-bottom:6px;">Gender</label>
+          <select id="dgProfileGender" onchange="dgRenderProfile()" style="width:100%;padding:10px;border:2px solid #333;border-radius:10px;font-size:16px;background:#2a2a2a;color:#fff;font-family:inherit;">
+            <option value="male" selected>Male</option>
+            <option value="female">Female</option>
+          </select>
+        </div>
+      </div>
+      <div id="dgProfileTable"></div>
+      <p style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin:12px 0 0;">Sources: Arccos (20M+ drives), deWiz Golf, Trackman</p>
     </div>
 
   </div>
@@ -16572,41 +16599,42 @@ var DG_LPGA_DATA = [
   {club:'PW',carry:111,clubSpeed:72,ballSpeed:88,smash:1.22,attackAngle:'-3.2',launch:'25.2',spin:8465,maxHeight:27,landAngle:'48'}
 ];
 
+// Handicap data: swing speeds from deWiz Golf, distances from Arccos/Shot Scope aggregates
 var DG_HANDICAP_DATA = {
-  scratch:{driverDist:251,clubSpeed:113,clubs:[
-    {section:'Woods'},{club:'Driver',carry:238,total:251},{club:'3 Wood',carry:215,total:228},{club:'5 Wood',carry:200,total:213},
-    {section:'Irons'},{club:'4 Iron',carry:181,total:193},{club:'5 Iron',carry:172,total:184},{club:'6 Iron',carry:163,total:174},{club:'7 Iron',carry:153,total:163},{club:'8 Iron',carry:142,total:151},{club:'9 Iron',carry:131,total:140},
-    {section:'Wedges'},{club:'PW',carry:120,total:128},{club:'GW',carry:108,total:115},{club:'SW',carry:93,total:99},{club:'LW',carry:78,total:83}
+  scratch:{driverDist:255,clubSpeed:108,clubs:[
+    {section:'Woods'},{club:'Driver',carry:240,total:255},{club:'3 Wood',carry:218,total:232},{club:'5 Wood',carry:203,total:217},
+    {section:'Irons'},{club:'4 Iron',carry:184,total:196},{club:'5 Iron',carry:174,total:186},{club:'6 Iron',carry:164,total:176},{club:'7 Iron',carry:154,total:165},{club:'8 Iron',carry:143,total:153},{club:'9 Iron',carry:132,total:141},
+    {section:'Wedges'},{club:'PW',carry:121,total:129},{club:'GW',carry:109,total:116},{club:'SW',carry:94,total:100},{club:'LW',carry:79,total:84}
   ]},
-  '5':{driverDist:232,clubSpeed:108,clubs:[
-    {section:'Woods'},{club:'Driver',carry:219,total:232},{club:'3 Wood',carry:199,total:212},{club:'5 Wood',carry:185,total:198},
-    {section:'Irons'},{club:'4 Iron',carry:168,total:179},{club:'5 Iron',carry:160,total:170},{club:'6 Iron',carry:151,total:161},{club:'7 Iron',carry:142,total:151},{club:'8 Iron',carry:132,total:140},{club:'9 Iron',carry:121,total:129},
-    {section:'Wedges'},{club:'PW',carry:111,total:118},{club:'GW',carry:100,total:106},{club:'SW',carry:86,total:91},{club:'LW',carry:72,total:76}
+  '5':{driverDist:242,clubSpeed:102,clubs:[
+    {section:'Woods'},{club:'Driver',carry:227,total:242},{club:'3 Wood',carry:206,total:220},{club:'5 Wood',carry:192,total:205},
+    {section:'Irons'},{club:'4 Iron',carry:174,total:185},{club:'5 Iron',carry:165,total:176},{club:'6 Iron',carry:155,total:166},{club:'7 Iron',carry:146,total:156},{club:'8 Iron',carry:135,total:144},{club:'9 Iron',carry:125,total:133},
+    {section:'Wedges'},{club:'PW',carry:114,total:122},{club:'GW',carry:103,total:110},{club:'SW',carry:89,total:95},{club:'LW',carry:74,total:79}
   ]},
-  '10':{driverDist:215,clubSpeed:103,clubs:[
-    {section:'Woods'},{club:'Driver',carry:202,total:215},{club:'3 Wood',carry:184,total:197},{club:'5 Wood',carry:171,total:184},
-    {section:'Irons'},{club:'5 Iron',carry:149,total:159},{club:'6 Iron',carry:140,total:150},{club:'7 Iron',carry:131,total:140},{club:'8 Iron',carry:122,total:130},{club:'9 Iron',carry:113,total:120},
-    {section:'Wedges'},{club:'PW',carry:103,total:110},{club:'GW',carry:93,total:99},{club:'SW',carry:80,total:85},{club:'LW',carry:67,total:71}
+  '10':{driverDist:228,clubSpeed:96,clubs:[
+    {section:'Woods'},{club:'Driver',carry:213,total:228},{club:'3 Wood',carry:194,total:207},{club:'5 Wood',carry:180,total:193},
+    {section:'Irons'},{club:'5 Iron',carry:155,total:166},{club:'6 Iron',carry:146,total:156},{club:'7 Iron',carry:137,total:147},{club:'8 Iron',carry:127,total:136},{club:'9 Iron',carry:117,total:125},
+    {section:'Wedges'},{club:'PW',carry:107,total:114},{club:'GW',carry:97,total:103},{club:'SW',carry:83,total:89},{club:'LW',carry:70,total:75}
   ]},
-  '15':{driverDist:199,clubSpeed:98,clubs:[
-    {section:'Woods'},{club:'Driver',carry:186,total:199},{club:'3 Wood',carry:169,total:182},{club:'5 Wood',carry:158,total:171},
-    {section:'Irons'},{club:'5 Iron',carry:138,total:148},{club:'6 Iron',carry:130,total:139},{club:'7 Iron',carry:122,total:130},{club:'8 Iron',carry:113,total:121},{club:'9 Iron',carry:104,total:111},
+  '15':{driverDist:215,clubSpeed:93,clubs:[
+    {section:'Woods'},{club:'Driver',carry:200,total:215},{club:'3 Wood',carry:182,total:196},{club:'5 Wood',carry:170,total:183},
+    {section:'Irons'},{club:'5 Iron',carry:146,total:156},{club:'6 Iron',carry:138,total:148},{club:'7 Iron',carry:129,total:138},{club:'8 Iron',carry:120,total:128},{club:'9 Iron',carry:110,total:118},
+    {section:'Wedges'},{club:'PW',carry:101,total:108},{club:'GW',carry:91,total:97},{club:'SW',carry:78,total:84},{club:'LW',carry:66,total:70}
+  ]},
+  '20':{driverDist:203,clubSpeed:92,clubs:[
+    {section:'Woods'},{club:'Driver',carry:188,total:203},{club:'3 Wood',carry:171,total:185},{club:'5 Wood',carry:160,total:173},
+    {section:'Irons'},{club:'5 Iron',carry:138,total:148},{club:'6 Iron',carry:130,total:139},{club:'7 Iron',carry:122,total:131},{club:'8 Iron',carry:113,total:121},{club:'9 Iron',carry:104,total:111},
     {section:'Wedges'},{club:'PW',carry:95,total:102},{club:'GW',carry:86,total:92},{club:'SW',carry:74,total:79},{club:'LW',carry:62,total:66}
   ]},
-  '20':{driverDist:184,clubSpeed:93,clubs:[
-    {section:'Woods'},{club:'Driver',carry:171,total:184},{club:'3 Wood',carry:155,total:168},{club:'5 Wood',carry:145,total:158},
-    {section:'Irons'},{club:'5 Iron',carry:127,total:137},{club:'6 Iron',carry:120,total:129},{club:'7 Iron',carry:112,total:121},{club:'8 Iron',carry:104,total:112},{club:'9 Iron',carry:96,total:103},
-    {section:'Wedges'},{club:'PW',carry:88,total:94},{club:'GW',carry:79,total:85},{club:'SW',carry:68,total:73},{club:'LW',carry:57,total:61}
+  '25':{driverDist:190,clubSpeed:88,clubs:[
+    {section:'Woods'},{club:'Driver',carry:175,total:190},{club:'3 Wood',carry:159,total:173},{club:'5 Wood',carry:149,total:163},
+    {section:'Irons'},{club:'6 Iron',carry:122,total:132},{club:'7 Iron',carry:114,total:123},{club:'8 Iron',carry:106,total:114},{club:'9 Iron',carry:97,total:105},
+    {section:'Wedges'},{club:'PW',carry:89,total:96},{club:'GW',carry:80,total:86},{club:'SW',carry:69,total:74},{club:'LW',carry:58,total:62}
   ]},
-  '25':{driverDist:170,clubSpeed:88,clubs:[
-    {section:'Woods'},{club:'Driver',carry:157,total:170},{club:'3 Wood',carry:142,total:155},{club:'5 Wood',carry:133,total:146},
-    {section:'Irons'},{club:'6 Iron',carry:111,total:120},{club:'7 Iron',carry:104,total:112},{club:'8 Iron',carry:96,total:104},{club:'9 Iron',carry:88,total:95},
-    {section:'Wedges'},{club:'PW',carry:81,total:87},{club:'GW',carry:73,total:78},{club:'SW',carry:63,total:67},{club:'LW',carry:52,total:56}
-  ]},
-  '30':{driverDist:157,clubSpeed:83,clubs:[
-    {section:'Woods'},{club:'Driver',carry:144,total:157},{club:'3 Wood',carry:130,total:143},{club:'5 Wood',carry:122,total:135},
-    {section:'Irons'},{club:'7 Iron',carry:96,total:104},{club:'8 Iron',carry:89,total:96},{club:'9 Iron',carry:81,total:88},
-    {section:'Wedges'},{club:'PW',carry:74,total:80},{club:'GW',carry:67,total:72},{club:'SW',carry:57,total:62},{club:'LW',carry:48,total:52}
+  '30':{driverDist:177,clubSpeed:84,clubs:[
+    {section:'Woods'},{club:'Driver',carry:162,total:177},{club:'3 Wood',carry:147,total:161},{club:'5 Wood',carry:138,total:151},
+    {section:'Irons'},{club:'7 Iron',carry:106,total:115},{club:'8 Iron',carry:98,total:106},{club:'9 Iron',carry:90,total:97},
+    {section:'Wedges'},{club:'PW',carry:83,total:89},{club:'GW',carry:75,total:80},{club:'SW',carry:64,total:69},{club:'LW',carry:54,total:58}
   ]}
 };
 
@@ -16640,7 +16668,7 @@ function toggleDistanceGuide() {
 
 function dgSetTab(tab) {
   _dgCurrentTab = tab;
-  ['pga','lpga','handicap','speed'].forEach(function(t) {
+  ['pga','lpga','handicap','speed','profile'].forEach(function(t) {
     document.getElementById('dgTab_' + t).classList.toggle('dg-tab-active', t === tab);
     document.getElementById('dgContent_' + t).style.display = t === tab ? 'block' : 'none';
   });
@@ -16652,6 +16680,7 @@ function dgRenderCurrentTab() {
   else if (_dgCurrentTab === 'lpga') dgRenderTourTable('dgLpgaTable', DG_LPGA_DATA, 'LPGA Tour Averages');
   else if (_dgCurrentTab === 'handicap') dgRenderHandicap();
   else if (_dgCurrentTab === 'speed') dgRenderSpeed();
+  else if (_dgCurrentTab === 'profile') dgRenderProfile();
 }
 
 function dgBuildSimpleTable(data) {
@@ -16748,6 +16777,69 @@ function dgRenderSpeed() {
   html += '</div>';
   html += dgBuildSimpleTable(rows);
   document.getElementById('dgSpeedTable').innerHTML = html;
+}
+
+// Age/Gender profile data
+// Male: Arccos (20M+ drives) for total distance, deWiz Golf for swing speeds, club ratios derived from Trackman
+// Female: Trackman LPGA scaled by age, deWiz Golf female swing speeds
+var DG_PROFILE_DATA = {
+  male: {
+    '20': {driverSpeed:104,driverTotal:240,driverCarry:225},
+    '30': {driverSpeed:101,driverTotal:234,driverCarry:219},
+    '40': {driverSpeed:97,driverTotal:226,driverCarry:211},
+    '50': {driverSpeed:93,driverTotal:215,driverCarry:201},
+    '60': {driverSpeed:88,driverTotal:205,driverCarry:191},
+    '70': {driverSpeed:82,driverTotal:190,driverCarry:177}
+  },
+  female: {
+    '20': {driverSpeed:83,driverTotal:186,driverCarry:172},
+    '30': {driverSpeed:81,driverTotal:181,driverCarry:167},
+    '40': {driverSpeed:78,driverTotal:174,driverCarry:161},
+    '50': {driverSpeed:74,driverTotal:163,driverCarry:150},
+    '60': {driverSpeed:69,driverTotal:149,driverCarry:137},
+    '70': {driverSpeed:64,driverTotal:135,driverCarry:124}
+  }
+};
+
+function dgRenderProfile() {
+  var age = document.getElementById('dgProfileAge').value;
+  var gender = document.getElementById('dgProfileGender').value;
+  var p = DG_PROFILE_DATA[gender] && DG_PROFILE_DATA[gender][age];
+  if (!p) return;
+  var driverSpeed = p.driverSpeed;
+
+  // Build club table using speed ratios (same as Driver Speed tab)
+  var clubList = [
+    {key:'driver',section:'Woods'},
+    {key:'driver'},{key:'3w'},{key:'5w'},
+    {key:'4i',section:'Irons'},
+    {key:'4i'},{key:'5i'},{key:'6i'},{key:'7i'},{key:'8i'},{key:'9i'},
+    {key:'pw',section:'Wedges'},
+    {key:'pw'},{key:'50'},{key:'52'},{key:'54'},{key:'56'},{key:'58'},{key:'60'}
+  ];
+  var rows = [];
+  clubList.forEach(function(c) {
+    if (c.section) { rows.push({section:c.section}); return; }
+    var info = DG_SPEED_RATIOS[c.key];
+    if (!info) return;
+    var clubSpeed = Math.round(driverSpeed * info.ratio);
+    var cdata = BO_DATA[info.key];
+    if (!cdata) return;
+    var carryResult = boGetInterpolatedData(clubSpeed, info.aa, cdata.carry);
+    var totalResult = cdata.total ? boGetInterpolatedData(clubSpeed, info.aa, cdata.total) : carryResult;
+    rows.push({club:info.label,carry:Math.round(carryResult.carry),total:Math.round(totalResult.total)});
+  });
+
+  var ageLabel = age === '70' ? '70+' : age + '-' + (parseInt(age)+9);
+  var genderLabel = gender === 'male' ? 'Male' : 'Female';
+  var html = '<div style="text-align:center;font-size:13px;font-weight:700;color:#e0e0e0;margin-bottom:10px;">' + genderLabel + ', Age ' + ageLabel + '</div>';
+  html += '<div class="dg-stat-box">';
+  html += '<div><div class="dg-stat-label">Avg Driver Speed</div><div class="dg-stat-value">' + driverSpeed + ' <span style="font-size:0.6em;color:#999;">mph</span></div></div>';
+  html += '<div><div class="dg-stat-label">Avg Driver Carry</div><div class="dg-stat-value">' + p.driverCarry + ' <span style="font-size:0.6em;color:#999;">yds</span></div></div>';
+  html += '<div><div class="dg-stat-label">Avg Driver Total</div><div class="dg-stat-value">' + p.driverTotal + ' <span style="font-size:0.6em;color:#999;">yds</span></div></div>';
+  html += '</div>';
+  html += dgBuildSimpleTable(rows);
+  document.getElementById('dgProfileTable').innerHTML = html;
 }
 
 function openLearningLibrary() {
