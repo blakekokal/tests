@@ -17060,51 +17060,45 @@ function ppRenderPlan(sg) {
   ];
 
   // Convert SG to "need" weight: more negative = more weight
-  // Use absolute value of negative SG, with a minimum floor so no category gets 0%
   var weights = cats.map(function(c) {
-    var need = Math.max(0.05, -c.sg); // floor of 0.05 so even positive SG areas get some time
-    return { key: c.key, need: need };
+    return Math.max(0.05, -c.sg);
   });
-  var totalNeed = weights.reduce(function(s, w) { return s + w.need; }, 0);
+  var totalNeed = weights.reduce(function(s, w) { return s + w; }, 0);
 
-  // Add warm-up: 5 mins or 10% of time, whichever is less
-  var warmupMins = Math.min(5, Math.round(_ppTime * 0.1));
+  // Warm-up: 5 mins (or all of it if very short session)
+  var warmupMins = Math.min(5, _ppTime);
   var practiceMins = _ppTime - warmupMins;
 
   // Minimum per category: 10 mins normally, 5 mins if total time is 30 or less
   var minPerCat = _ppTime <= 30 ? 5 : 10;
+  var minTotal = minPerCat * 4;
 
-  cats.forEach(function(c, i) {
-    var pct = weights[i].need / totalNeed;
-    c.mins = Math.max(minPerCat, Math.round(pct * practiceMins / 5) * 5); // round to nearest 5 mins
-  });
-
-  // Adjust so category mins sum exactly to practiceMins
-  var sumMins = cats.reduce(function(s, c) { return s + c.mins; }, 0);
-  var maxIter = 50;
-  while (sumMins !== practiceMins && maxIter-- > 0) {
-    cats.sort(function(a, b) { return a.sg - b.sg; }); // worst SG first
-    if (sumMins < practiceMins) {
-      cats[0].mins += 5;
-      sumMins += 5;
-    } else {
-      // Remove from best SG category (last), but don't go below minimum
-      var removed = false;
-      for (var ri = cats.length - 1; ri >= 0; ri--) {
-        if (cats[ri].mins > minPerCat) { cats[ri].mins -= 5; sumMins -= 5; removed = true; break; }
-      }
-      if (!removed) break; // all at minimum, can't reduce further
+  // If not enough time for all minimums, distribute evenly
+  if (practiceMins <= minTotal) {
+    var each = Math.floor(practiceMins / 4);
+    cats.forEach(function(c) { c.mins = each; });
+    // Give remainder to worst category
+    var remainder = practiceMins - each * 4;
+    cats.sort(function(a, b) { return a.sg - b.sg; });
+    if (remainder > 0) cats[0].mins += remainder;
+  } else {
+    // Distribute: give everyone the minimum, then split the rest by need
+    var extraMins = practiceMins - minTotal;
+    cats.forEach(function(c, i) {
+      var pct = weights[i] / totalNeed;
+      c.mins = minPerCat + Math.round(pct * extraMins);
+    });
+    // Fix rounding so sum === practiceMins
+    var sumMins = cats.reduce(function(s, c) { return s + c.mins; }, 0);
+    var diff = practiceMins - sumMins;
+    if (diff !== 0) {
+      // Add/subtract from weakest category
+      cats.sort(function(a, b) { return a.sg - b.sg; });
+      cats[0].mins += diff;
     }
   }
-  // Final correction: if still off, force the difference onto the weakest category
-  sumMins = cats.reduce(function(s, c) { return s + c.mins; }, 0);
-  if (sumMins !== practiceMins) {
-    cats.sort(function(a, b) { return a.sg - b.sg; });
-    cats[0].mins += (practiceMins - sumMins);
-    if (cats[0].mins < minPerCat) cats[0].mins = minPerCat;
-  }
 
-  // Recalc pcts from final mins (use _ppTime so warm-up is included)
+  // Recalc pcts from final mins
   cats.forEach(function(c) { c.pct = Math.round(c.mins / _ppTime * 100); });
   cats.sort(function(a, b) { return a.sg - b.sg; }); // worst first
 
