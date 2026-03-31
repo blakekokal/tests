@@ -17065,9 +17065,8 @@ function ppRenderPlan(sg) {
   });
   var totalNeed = weights.reduce(function(s, w) { return s + w; }, 0);
 
-  // Warm-up: 5 mins (or all of it if very short session)
-  var warmupMins = Math.min(5, _ppTime);
-  var practiceMins = _ppTime - warmupMins;
+  // All time goes to categories (no warm-up slice in chart)
+  var practiceMins = _ppTime;
 
   // Minimum per category: 10 mins normally, 5 mins if total time is 30 or less
   var minPerCat = _ppTime <= 30 ? 5 : 10;
@@ -17077,22 +17076,18 @@ function ppRenderPlan(sg) {
   if (practiceMins <= minTotal) {
     var each = Math.floor(practiceMins / 4);
     cats.forEach(function(c) { c.mins = each; });
-    // Give remainder to worst category
     var remainder = practiceMins - each * 4;
     cats.sort(function(a, b) { return a.sg - b.sg; });
     if (remainder > 0) cats[0].mins += remainder;
   } else {
-    // Distribute: give everyone the minimum, then split the rest by need
     var extraMins = practiceMins - minTotal;
     cats.forEach(function(c, i) {
       var pct = weights[i] / totalNeed;
       c.mins = minPerCat + Math.round(pct * extraMins);
     });
-    // Fix rounding so sum === practiceMins
     var sumMins = cats.reduce(function(s, c) { return s + c.mins; }, 0);
     var diff = practiceMins - sumMins;
     if (diff !== 0) {
-      // Add/subtract from weakest category
       cats.sort(function(a, b) { return a.sg - b.sg; });
       cats[0].mins += diff;
     }
@@ -17103,18 +17098,10 @@ function ppRenderPlan(sg) {
   cats.sort(function(a, b) { return a.sg - b.sg; }); // worst first
 
   // Draw pie chart
-  ppDrawPie(cats, warmupMins);
+  ppDrawPie(cats);
 
   // Build breakdown cards
   var html = '';
-  // Warm-up card
-  html += '<div style="background:#222;border-radius:12px;padding:14px 16px;border-left:4px solid #888;">';
-  html += '<div style="display:flex;justify-content:space-between;align-items:center;">';
-  html += '<div style="font-size:14px;font-weight:700;color:#fff;">🔥 Warm-up</div>';
-  html += '<div style="font-size:13px;font-weight:700;color:#888;">' + warmupMins + ' min</div>';
-  html += '</div>';
-  html += '<div style="font-size:12px;color:#999;margin-top:6px;">Dynamic stretching, easy swings, tempo focus</div>';
-  html += '</div>';
 
   cats.forEach(function(c) {
     var drills = ppGetDrills(c.key, c.mins, c.sg);
@@ -17139,7 +17126,7 @@ function ppRenderPlan(sg) {
   document.getElementById('ppBreakdownList').innerHTML = html;
 }
 
-function ppDrawPie(cats, warmupMins) {
+function ppDrawPie(cats) {
   var canvas = document.getElementById('ppPieChart');
   var ctx = canvas.getContext('2d');
   var dpr = window.devicePixelRatio || 1;
@@ -17149,25 +17136,13 @@ function ppDrawPie(cats, warmupMins) {
   ctx.clearRect(0, 0, 280, 280);
 
   var cx = 140, cy = 140, r = 110, ir = 60;
-  var total = _ppTime; // use exact total so pie fills 100%
+  var startAngle = -Math.PI / 2;
+  var endAngle = startAngle + Math.PI * 2;
+  var angle = startAngle;
 
-  var angle = -Math.PI / 2;
-  // Warm-up slice
-  var warmSlice = (warmupMins / total) * Math.PI * 2;
-  ctx.beginPath();
-  ctx.moveTo(cx + ir * Math.cos(angle), cy + ir * Math.sin(angle));
-  ctx.arc(cx, cy, r, angle, angle + warmSlice);
-  ctx.arc(cx, cy, ir, angle + warmSlice, angle, true);
-  ctx.closePath();
-  ctx.fillStyle = '#555';
-  ctx.fill();
-  angle += warmSlice;
-
-  // Category slices — last slice always closes to the start angle to prevent gaps
-  var endAngle = -Math.PI / 2 + Math.PI * 2; // full circle end
   cats.forEach(function(c, idx) {
     var isLast = idx === cats.length - 1;
-    var sliceEnd = isLast ? endAngle : angle + (c.mins / total) * Math.PI * 2;
+    var sliceEnd = isLast ? endAngle : angle + (c.mins / _ppTime) * Math.PI * 2;
     ctx.beginPath();
     ctx.moveTo(cx + ir * Math.cos(angle), cy + ir * Math.sin(angle));
     ctx.arc(cx, cy, r, angle, sliceEnd);
