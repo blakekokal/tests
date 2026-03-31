@@ -17105,27 +17105,52 @@ function ppRenderPlan(sg) {
   // Build breakdown cards
   var html = '';
 
-  cats.forEach(function(c) {
+  cats.forEach(function(c, ci) {
     var drills = ppGetDrills(c.key, c.mins, c.sg);
-    html += '<div onclick="this.querySelector(\'.pp-drill-detail\').style.display=this.querySelector(\'.pp-drill-detail\').style.display===\'none\'?\'\':\'none\'" style="background:#222;border-radius:12px;padding:14px 16px;cursor:pointer;border-left:4px solid ' + c.color + ';">';
-    html += '<div style="display:flex;justify-content:space-between;align-items:center;">';
+    html += '<div style="background:#222;border-radius:12px;padding:14px 16px;border-left:4px solid ' + c.color + ';">';
+    html += '<div onclick="this.parentElement.querySelector(\'.pp-drill-detail\').style.display=this.parentElement.querySelector(\'.pp-drill-detail\').style.display===\'none\'?\'\':\'none\'" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;">';
     html += '<div style="font-size:14px;font-weight:700;color:#fff;">' + c.label + '</div>';
     html += '<div style="display:flex;align-items:center;gap:8px;">';
     html += '<span style="font-size:11px;font-weight:600;color:' + (c.sg < 0 ? '#ff5252' : '#00c853') + ';">' + (c.sg >= 0 ? '+' : '') + c.sg.toFixed(1) + ' SG</span>';
     html += '<span style="font-size:13px;font-weight:700;color:' + c.color + ';">' + c.mins + ' min</span>';
     html += '</div></div>';
     html += '<div class="pp-drill-detail" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid #333;">';
-    drills.forEach(function(d) {
-      html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:6px 0;">';
-      html += '<div style="font-size:13px;color:#ccc;flex:1;">' + d.name + '</div>';
+    drills.forEach(function(d, di) {
+      var uid = 'ppDrill_' + ci + '_' + di;
+      html += '<div style="display:flex;align-items:center;gap:10px;padding:6px 0;">';
+      html += '<div id="' + uid + '" onclick="ppToggleDrill(this,event)" style="width:24px;height:24px;min-width:24px;border-radius:50%;border:2px solid #555;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;"></div>';
+      html += '<div style="flex:1;"><div style="font-size:13px;color:#ccc;">' + d.name + '</div>';
+      if (d.detail) html += '<div style="font-size:11px;color:#666;margin-top:2px;">' + d.detail + '</div>';
+      html += '</div>';
       html += '<div style="font-size:12px;font-weight:700;color:#888;white-space:nowrap;margin-left:8px;">' + d.mins + ' min</div>';
       html += '</div>';
-      if (d.detail) html += '<div style="font-size:11px;color:#666;margin:-2px 0 4px;">' + d.detail + '</div>';
     });
     html += '</div></div>';
   });
 
   document.getElementById('ppBreakdownList').innerHTML = html;
+}
+
+function ppToggleDrill(el, e) {
+  e.stopPropagation();
+  var done = el.getAttribute('data-done') === '1';
+  if (done) {
+    el.setAttribute('data-done', '0');
+    el.style.background = 'transparent';
+    el.style.borderColor = '#555';
+    el.innerHTML = '';
+    // Un-strike the text
+    var textEl = el.nextElementSibling;
+    if (textEl) { textEl.style.opacity = '1'; textEl.style.textDecoration = 'none'; }
+  } else {
+    el.setAttribute('data-done', '1');
+    el.style.background = '#00c853';
+    el.style.borderColor = '#00c853';
+    el.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+    // Strike-through the text
+    var textEl = el.nextElementSibling;
+    if (textEl) { textEl.style.opacity = '0.5'; textEl.style.textDecoration = 'line-through'; }
+  }
 }
 
 function ppDrawPie(cats, total) {
