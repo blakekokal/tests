@@ -17109,7 +17109,7 @@ function ppRenderPlan(sg) {
     var drills = ppGetDrills(c.key, c.mins, c.sg);
     html += '<div onclick="this.querySelector(\'.pp-drill-detail\').style.display=this.querySelector(\'.pp-drill-detail\').style.display===\'none\'?\'\':\'none\'" style="background:#222;border-radius:12px;padding:14px 16px;cursor:pointer;border-left:4px solid ' + c.color + ';">';
     html += '<div style="display:flex;justify-content:space-between;align-items:center;">';
-    html += '<div style="font-size:14px;font-weight:700;color:#fff;">' + c.icon + ' ' + c.label + '</div>';
+    html += '<div style="font-size:14px;font-weight:700;color:#fff;">' + c.label + '</div>';
     html += '<div style="display:flex;align-items:center;gap:8px;">';
     html += '<span style="font-size:11px;font-weight:600;color:' + (c.sg < 0 ? '#ff5252' : '#00c853') + ';">' + (c.sg >= 0 ? '+' : '') + c.sg.toFixed(1) + ' SG</span>';
     html += '<span style="font-size:13px;font-weight:700;color:' + c.color + ';">' + c.mins + ' min</span>';
@@ -17152,16 +17152,21 @@ function ppDrawPie(cats, total) {
     ctx.closePath();
     ctx.fillStyle = c.color;
     ctx.fill();
-    // Label
+    // Label: category name + time on the slice
     var mid = (angle + sliceEnd) / 2;
     var lr = (r + ir) / 2 + 5;
     var lx = cx + lr * Math.cos(mid);
     var ly = cy + lr * Math.sin(mid);
-    if (c.pct >= 8) {
-      ctx.fillStyle = '#fff';
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    if (c.pct >= 15) {
+      ctx.font = 'bold 11px sans-serif';
+      ctx.fillText(c.label, lx, ly - 7);
       ctx.font = 'bold 13px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
+      ctx.fillText(c.mins + ' min', lx, ly + 8);
+    } else if (c.pct >= 8) {
+      ctx.font = 'bold 10px sans-serif';
       ctx.fillText(c.mins + 'm', lx, ly);
     }
     angle = sliceEnd;
