@@ -17071,21 +17071,31 @@ function ppRenderPlan(sg) {
   var warmupMins = Math.min(5, Math.round(_ppTime * 0.1));
   var practiceMins = _ppTime - warmupMins;
 
+  // Minimum per category: 10 mins normally, 5 mins if total time is 30 or less
+  var minPerCat = _ppTime <= 30 ? 5 : 10;
+
   cats.forEach(function(c, i) {
     var pct = weights[i].need / totalNeed;
-    c.pct = Math.round(pct * 100);
-    c.mins = Math.max(5, Math.round(pct * practiceMins / 5) * 5); // round to nearest 5 mins, min 5
+    c.mins = Math.max(minPerCat, Math.round(pct * practiceMins / 5) * 5); // round to nearest 5 mins
   });
 
-  // Adjust so mins sum to practiceMins
+  // Adjust so category mins sum exactly to practiceMins
   var sumMins = cats.reduce(function(s, c) { return s + c.mins; }, 0);
-  if (sumMins !== practiceMins) {
-    // Add/subtract from the category with highest need
-    cats.sort(function(a, b) { return a.sg - b.sg; });
-    cats[0].mins += (practiceMins - sumMins);
-    if (cats[0].mins < 5) cats[0].mins = 5;
+  while (sumMins !== practiceMins) {
+    cats.sort(function(a, b) { return a.sg - b.sg; }); // worst SG first
+    if (sumMins < practiceMins) {
+      cats[0].mins += 5;
+      sumMins += 5;
+    } else {
+      // Remove from best SG category (last), but don't go below minimum
+      for (var ri = cats.length - 1; ri >= 0; ri--) {
+        if (cats[ri].mins > minPerCat) { cats[ri].mins -= 5; sumMins -= 5; break; }
+      }
+      if (sumMins > practiceMins && cats.every(function(c){ return c.mins <= minPerCat; })) break; // safety
+    }
   }
-  // Recalc pcts from final mins
+
+  // Recalc pcts from final mins (use _ppTime so warm-up is included)
   cats.forEach(function(c) { c.pct = Math.round(c.mins / _ppTime * 100); });
   cats.sort(function(a, b) { return a.sg - b.sg; }); // worst first
 
@@ -17136,8 +17146,7 @@ function ppDrawPie(cats, warmupMins) {
   ctx.clearRect(0, 0, 280, 280);
 
   var cx = 140, cy = 140, r = 110, ir = 60;
-  var total = warmupMins;
-  cats.forEach(function(c) { total += c.mins; });
+  var total = _ppTime; // use exact total so pie fills 100%
 
   var angle = -Math.PI / 2;
   // Warm-up slice
