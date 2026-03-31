@@ -1096,24 +1096,78 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
 
     <!-- MY PRACTICE PLAN TAB -->
     <div id="phPlanContent" style="display:none;">
-      <!-- Sub-tabs: New Session / History -->
-      <div style="display:flex;gap:0;border-radius:10px;overflow:hidden;margin-bottom:14px;">
-        <button onclick="setPracticePlanSubTab('new')" id="ppSubNew" style="flex:1;height:36px;font-size:13px;font-weight:700;background:#2d7abc;border:none;color:#ffffff;cursor:pointer;max-width:none;">New Session</button>
-        <button onclick="setPracticePlanSubTab('history')" id="ppSubHistory" style="flex:1;height:36px;font-size:13px;font-weight:700;background:#282828;border:none;color:#606060;cursor:pointer;max-width:none;">History</button>
+
+      <!-- Landing: choose practice mode -->
+      <div id="ppLanding">
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <button onclick="ppShowTourPractice()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:linear-gradient(135deg,#1a4a8a,#007a52);border-radius:12px;text-align:left;">
+            <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🏆</span>
+            <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Tour Practice</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Follow a PGA Tour-style practice structure</div></div>
+          </button>
+          <button onclick="ppShowRecommended()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
+            <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">📊</span>
+            <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Recommended Practice</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Based on your strokes gained weaknesses</div></div>
+          </button>
+          <button onclick="ppShowTimed()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
+            <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">⏱️</span>
+            <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Timed Practice</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Only have 30 mins? Get a focused plan</div></div>
+          </button>
+        </div>
+        <!-- Log / History link -->
+        <div style="margin-top:16px;display:flex;gap:0;border-radius:10px;overflow:hidden;">
+          <button onclick="ppShowLogSession()" id="ppSubNew" style="flex:1;height:36px;font-size:13px;font-weight:700;background:#282828;border:none;color:#606060;cursor:pointer;max-width:none;">Log Session</button>
+          <button onclick="ppShowHistory()" id="ppSubHistory" style="flex:1;height:36px;font-size:13px;font-weight:700;background:#282828;border:none;color:#606060;cursor:pointer;max-width:none;">History</button>
+        </div>
       </div>
 
-      <!-- NEW SESSION SUB-TAB -->
-      <div id="ppNewSession">
+      <!-- TOUR PRACTICE VIEW -->
+      <div id="ppTourView" style="display:none;">
+        <button onclick="ppBackToLanding()" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:#2d7abc;font-size:13px;font-weight:700;cursor:pointer;padding:0;margin-bottom:14px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg> Back</button>
+        <div style="font-size:18px;font-weight:800;text-align:center;margin-bottom:4px;">Tour Practice Routine</div>
+        <p style="text-align:center;font-size:11px;color:rgba(255,255,255,0.4);margin:0 0 14px;">Typical PGA Tour practice structure</p>
+        <div id="ppTourContent"></div>
+      </div>
+
+      <!-- RECOMMENDED / TIMED PRACTICE VIEW -->
+      <div id="ppRecommendedView" style="display:none;">
+        <button onclick="ppBackToLanding()" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:#2d7abc;font-size:13px;font-weight:700;cursor:pointer;padding:0;margin-bottom:14px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg> Back</button>
+        <div id="ppRecTitle" style="font-size:18px;font-weight:800;text-align:center;margin-bottom:4px;">Recommended Practice</div>
+        <p id="ppRecSubtitle" style="text-align:center;font-size:11px;color:rgba(255,255,255,0.4);margin:0 0 14px;">Based on your last 5 rounds</p>
+        <!-- Time input -->
+        <div id="ppTimeInputWrap" style="background:#222;border-radius:12px;padding:16px;margin-bottom:14px;text-align:center;">
+          <div style="font-size:12px;color:#9a9a9a;margin-bottom:8px;font-weight:600;">How much time do you have?</div>
+          <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:10px;">
+            <button onclick="ppSetTime(30)" class="pp-time-btn" style="padding:10px 16px;border:2px solid #333;border-radius:10px;background:#2a2a2a;color:#999;font-size:14px;font-weight:700;cursor:pointer;">30 min</button>
+            <button onclick="ppSetTime(45)" class="pp-time-btn" style="padding:10px 16px;border:2px solid #333;border-radius:10px;background:#2a2a2a;color:#999;font-size:14px;font-weight:700;cursor:pointer;">45 min</button>
+            <button onclick="ppSetTime(60)" class="pp-time-btn pp-time-active" style="padding:10px 16px;border:2px solid #2d7abc;border-radius:10px;background:#2d7abc;color:#fff;font-size:14px;font-weight:700;cursor:pointer;">60 min</button>
+            <button onclick="ppSetTime(90)" class="pp-time-btn" style="padding:10px 16px;border:2px solid #333;border-radius:10px;background:#2a2a2a;color:#999;font-size:14px;font-weight:700;cursor:pointer;">90 min</button>
+            <button onclick="ppSetTime(120)" class="pp-time-btn" style="padding:10px 16px;border:2px solid #333;border-radius:10px;background:#2a2a2a;color:#999;font-size:14px;font-weight:700;cursor:pointer;">2 hrs</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;justify-content:center;">
+            <span style="font-size:12px;color:#606060;">Custom:</span>
+            <input type="number" id="ppCustomTime" min="10" max="300" value="60" style="width:70px;height:36px;background:#1e1e1e;color:#fff;border:2px solid #333;border-radius:8px;text-align:center;font-size:15px;font-weight:700;font-family:inherit;" oninput="ppSetTime(parseInt(this.value))">
+            <span style="font-size:12px;color:#606060;">min</span>
+          </div>
+        </div>
+        <!-- Pie chart + breakdown -->
+        <div id="ppRecLoading" style="display:none;text-align:center;color:#606060;padding:20px;">Loading your round data...</div>
+        <div id="ppRecNoData" style="display:none;text-align:center;color:#606060;padding:20px;">Play a few rounds first so we can analyze your game and build a plan.</div>
+        <div id="ppRecResults" style="display:none;">
+          <canvas id="ppPieChart" width="280" height="280" style="display:block;margin:0 auto 16px;max-width:280px;"></canvas>
+          <div id="ppBreakdownList" style="display:flex;flex-direction:column;gap:8px;"></div>
+        </div>
+      </div>
+
+      <!-- LOG SESSION VIEW (moved from old New Session) -->
+      <div id="ppLogView" style="display:none;">
+        <button onclick="ppBackToLanding()" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:#2d7abc;font-size:13px;font-weight:700;cursor:pointer;padding:0;margin-bottom:14px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg> Back</button>
+        <div id="ppNewSession">
         <div style="background:#222222;border-radius:12px;padding:16px;margin-bottom:12px;">
           <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#606060;margin-bottom:10px;">Session Details</div>
-
-          <!-- Date -->
           <div style="margin-bottom:10px;">
             <label style="font-size:12px;color:#9a9a9a;display:block;margin-bottom:4px;">Date</label>
             <input type="date" id="ppSessionDate" style="width:100%;height:40px;background:#282828;color:#ffffff;border:1px solid #3d3d3d;border-radius:8px;padding:0 10px;font-size:14px;box-sizing:border-box;">
           </div>
-
-          <!-- Combine (optional) -->
           <div style="margin-bottom:10px;">
             <label style="font-size:12px;color:#9a9a9a;display:block;margin-bottom:4px;">Combine Completed (optional)</label>
             <select id="ppSessionCombine" style="width:100%;height:40px;background:#282828;color:#ffffff;border:1px solid #3d3d3d;border-radius:8px;padding:0 10px;font-size:13px;box-sizing:border-box;">
@@ -1122,37 +1176,33 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
             <div style="font-size:10px;color:#2e2e2e;margin-top:3px;">Select if you completed a combine during this session</div>
           </div>
         </div>
-
-        <!-- Practice Notes with Time -->
         <div style="background:#222222;border-radius:12px;padding:16px;margin-bottom:12px;">
           <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#606060;margin-bottom:10px;">Practice Notes</div>
           <div style="font-size:11px;color:#2e2e2e;margin-bottom:10px;">Add what you practiced and how long (in minutes)</div>
-
           <div id="ppNotesList"></div>
-
-          <!-- Add note row -->
           <div style="display:flex;gap:6px;margin-top:8px;">
             <input type="text" id="ppNoteInput" placeholder="e.g. Short putting 5-25ft" style="flex:1;height:38px;background:#282828;color:#ffffff;border:1px solid #3d3d3d;border-radius:8px;padding:0 10px;font-size:13px;box-sizing:border-box;">
             <input type="number" id="ppNoteMinutes" placeholder="mins" min="1" style="width:60px;height:38px;background:#282828;color:#ffffff;border:1px solid #3d3d3d;border-radius:8px;padding:0 8px;font-size:13px;box-sizing:border-box;text-align:center;">
             <button onclick="addPracticeNote()" style="width:38px;height:38px;background:#007a52;border:none;border-radius:8px;color:#ffffff;font-size:18px;font-weight:700;cursor:pointer;padding:0;">+</button>
           </div>
-
-          <!-- Total time -->
           <div style="margin-top:12px;padding-top:10px;border-top:1px solid #333333;display:flex;justify-content:space-between;align-items:center;">
             <span style="font-size:13px;font-weight:700;color:#9a9a9a;">Total Session Time</span>
             <span id="ppTotalTime" style="font-size:16px;font-weight:800;color:#00b87a;">0 min</span>
           </div>
         </div>
-
-        <!-- Save button -->
         <button id="ppSaveBtn" onclick="savePracticeSession()" style="width:100%;height:46px;background:#007a52;border:none;border-radius:10px;color:#ffffff;font-size:15px;font-weight:700;cursor:pointer;max-width:none;">Save Practice Session</button>
         <div id="ppSaveMsg" style="font-size:12px;text-align:center;min-height:18px;margin-top:6px;"></div>
+        </div>
       </div>
 
-      <!-- HISTORY SUB-TAB -->
-      <div id="ppHistory" style="display:none;">
-        <div id="ppHistoryList" style="font-size:13px;color:#2e2e2e;text-align:center;padding:12px 0;">Loading...</div>
+      <!-- HISTORY VIEW -->
+      <div id="ppHistoryView" style="display:none;">
+        <button onclick="ppBackToLanding()" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:#2d7abc;font-size:13px;font-weight:700;cursor:pointer;padding:0;margin-bottom:14px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg> Back</button>
+        <div id="ppHistory">
+          <div id="ppHistoryList" style="font-size:13px;color:#2e2e2e;text-align:center;padding:12px 0;">Loading...</div>
+        </div>
       </div>
+
     </div>
 
     <!-- LEARN TAB -->
@@ -16542,9 +16592,7 @@ function setPracticeHubTab(tab) {
   if (tab === 'combines') loadPHCombineHistory();
   if (tab === 'drills') { _drillsOnPracticeHub = true; setDrillCategory('putting'); }
   if (tab === 'plan') {
-    setPracticePlanSubTab('new');
-    initPracticeSessionForm();
-    loadPracticePlanCombineOptions();
+    ppBackToLanding();
   }
   // When leaving Learn tab, return SG calc to its original home
   if (tab !== 'learn') returnSGCalcToHelp();
@@ -16840,6 +16888,410 @@ function dgRenderProfile() {
   html += '</div>';
   html += dgBuildSimpleTable(rows);
   document.getElementById('dgProfileTable').innerHTML = html;
+}
+
+// ── Practice Plan: Tour / Recommended / Timed ──
+var _ppTime = 60;
+var _ppMode = 'recommended'; // 'recommended' or 'timed'
+var _ppSGData = null;
+
+function ppHideAllViews() {
+  ['ppLanding','ppTourView','ppRecommendedView','ppLogView','ppHistoryView'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+}
+
+function ppBackToLanding() {
+  ppHideAllViews();
+  document.getElementById('ppLanding').style.display = '';
+}
+
+function ppShowTourPractice() {
+  ppHideAllViews();
+  document.getElementById('ppTourView').style.display = '';
+  ppRenderTourRoutine();
+}
+
+function ppShowRecommended() {
+  _ppMode = 'recommended';
+  ppHideAllViews();
+  document.getElementById('ppRecommendedView').style.display = '';
+  document.getElementById('ppRecTitle').textContent = 'Recommended Practice';
+  document.getElementById('ppRecSubtitle').textContent = 'Based on your last 5 rounds';
+  document.getElementById('ppTimeInputWrap').style.display = 'none';
+  _ppTime = 60;
+  ppLoadAndRender();
+}
+
+function ppShowTimed() {
+  _ppMode = 'timed';
+  ppHideAllViews();
+  document.getElementById('ppRecommendedView').style.display = '';
+  document.getElementById('ppRecTitle').textContent = 'Timed Practice';
+  document.getElementById('ppRecSubtitle').textContent = 'Focused plan for your available time';
+  document.getElementById('ppTimeInputWrap').style.display = '';
+  _ppTime = 60;
+  ppLoadAndRender();
+}
+
+function ppShowLogSession() {
+  ppHideAllViews();
+  document.getElementById('ppLogView').style.display = '';
+  initPracticeSessionForm();
+  loadPracticePlanCombineOptions();
+}
+
+function ppShowHistory() {
+  ppHideAllViews();
+  document.getElementById('ppHistoryView').style.display = '';
+  loadPracticeHistory();
+}
+
+function ppSetTime(mins) {
+  if (!mins || mins < 10) mins = 10;
+  if (mins > 300) mins = 300;
+  _ppTime = mins;
+  document.getElementById('ppCustomTime').value = mins;
+  document.querySelectorAll('.pp-time-btn').forEach(function(b) {
+    var bMins = parseInt(b.textContent);
+    if (b.textContent.indexOf('hr') !== -1) bMins = parseFloat(b.textContent) * 60;
+    var isActive = bMins === mins;
+    b.style.background = isActive ? '#2d7abc' : '#2a2a2a';
+    b.style.color = isActive ? '#fff' : '#999';
+    b.style.borderColor = isActive ? '#2d7abc' : '#333';
+  });
+  if (_ppSGData) ppRenderPlan(_ppSGData);
+}
+
+async function ppLoadAndRender() {
+  var loading = document.getElementById('ppRecLoading');
+  var noData = document.getElementById('ppRecNoData');
+  var results = document.getElementById('ppRecResults');
+  loading.style.display = 'block';
+  noData.style.display = 'none';
+  results.style.display = 'none';
+
+  if (!currentUser) {
+    loading.style.display = 'none';
+    noData.style.display = 'block';
+    noData.textContent = 'Log in to get personalized practice recommendations.';
+    return;
+  }
+
+  var resp = await _sb.from('rounds').select('*').eq('user_id', activeUserId()).order('round_date', { ascending: false }).limit(5);
+  var data = resp.data;
+  loading.style.display = 'none';
+
+  if (!data || data.length === 0) {
+    noData.style.display = 'block';
+    return;
+  }
+
+  // Aggregate SG across recent rounds
+  var sg = { ott:0, app:0, arg:0, putt:0, holes:0 };
+  var hcp = (document.getElementById('playerHandicap') || {}).value || '10';
+  data.forEach(function(r) {
+    var rd = r.round_data || {};
+    var holes = rd.allHoles || [];
+    if (rd.entryMode === 'simple' || holes.length === 0) return;
+    holes.forEach(function(h) {
+      var shots = h.shots || [];
+      var hOTT=0, hAPP=0, hARG=0, hPutt=0;
+      shots.forEach(function(s, idx) {
+        if (!s.lie || s.lie === 'PENALTY') return;
+        var db = s.distanceBefore||0, da = s.distanceAfter||0;
+        var isTeePar45 = s.shotNum===1 && (h.par===4||h.par===5);
+        var isTeePar3 = s.shotNum===1 && h.par===3;
+        var expBefore, expAfter, sgVal;
+        if (s.isPutt) {
+          expBefore = getExpectedPutts(db, hcp);
+          expAfter = da > 0 ? getExpectedPutts(da, hcp) : 0;
+          sgVal = expBefore - expAfter - 1;
+          hPutt += sgVal;
+        } else if (isTeePar45) {
+          expBefore = getExpectedStrokes(db, 'TEE', hcp);
+          expAfter = s.lie === 'GREEN' ? getExpectedPutts(da, hcp) : getExpectedStrokes(da, s.lie, hcp);
+          sgVal = expBefore - expAfter - 1;
+          hOTT += sgVal;
+        } else if (isTeePar3 || (!s.isPutt && !isTeePar45)) {
+          var prevLie = idx > 0 ? shots[idx-1].lie : 'FAIRWAY';
+          if (s.shotNum === 1) prevLie = 'TEE';
+          expBefore = s.shotNum === 1 ? getExpectedStrokes(db, 'TEE', hcp) : getExpectedStrokes(db, prevLie, hcp);
+          expAfter = s.lie === 'GREEN' ? getExpectedPutts(da, hcp) : (da > 0 ? getExpectedStrokes(da, s.lie, hcp) : 2.5);
+          sgVal = expBefore - expAfter - 1;
+          // Classify: around the green if <50 yards and not tee shot
+          if (s.shotNum > 1 && db <= 50 && !s.isPutt) hARG += sgVal;
+          else hAPP += sgVal;
+        }
+      });
+      sg.ott += hOTT; sg.app += hAPP; sg.arg += hARG; sg.putt += hPutt;
+      sg.holes++;
+    });
+  });
+
+  if (sg.holes === 0) {
+    noData.style.display = 'block';
+    return;
+  }
+
+  // Normalize to per-18 values
+  var scale = 18 / sg.holes;
+  _ppSGData = {
+    ott: sg.ott * scale,
+    app: sg.app * scale,
+    arg: sg.arg * scale,
+    putt: sg.putt * scale,
+    rounds: data.length,
+    holes: sg.holes
+  };
+
+  results.style.display = '';
+  ppRenderPlan(_ppSGData);
+}
+
+function ppRenderPlan(sg) {
+  // Categories: more negative SG = more strokes lost = needs more practice time
+  var cats = [
+    { key:'ott', label:'Driving', sg:sg.ott, color:'#e06666', icon:'🏌️‍♂️' },
+    { key:'app', label:'Approach', sg:sg.app, color:'#6fa8dc', icon:'🎯' },
+    { key:'arg', label:'Short Game', sg:sg.arg, color:'#93c47d', icon:'⛳' },
+    { key:'putt', label:'Putting', sg:sg.putt, color:'#f6b26b', icon:'🏌️' }
+  ];
+
+  // Convert SG to "need" weight: more negative = more weight
+  // Use absolute value of negative SG, with a minimum floor so no category gets 0%
+  var weights = cats.map(function(c) {
+    var need = Math.max(0.05, -c.sg); // floor of 0.05 so even positive SG areas get some time
+    return { key: c.key, need: need };
+  });
+  var totalNeed = weights.reduce(function(s, w) { return s + w.need; }, 0);
+
+  // Add warm-up: 5 mins or 10% of time, whichever is less
+  var warmupMins = Math.min(5, Math.round(_ppTime * 0.1));
+  var practiceMins = _ppTime - warmupMins;
+
+  cats.forEach(function(c, i) {
+    var pct = weights[i].need / totalNeed;
+    c.pct = Math.round(pct * 100);
+    c.mins = Math.max(5, Math.round(pct * practiceMins / 5) * 5); // round to nearest 5 mins, min 5
+  });
+
+  // Adjust so mins sum to practiceMins
+  var sumMins = cats.reduce(function(s, c) { return s + c.mins; }, 0);
+  if (sumMins !== practiceMins) {
+    // Add/subtract from the category with highest need
+    cats.sort(function(a, b) { return a.sg - b.sg; });
+    cats[0].mins += (practiceMins - sumMins);
+    if (cats[0].mins < 5) cats[0].mins = 5;
+  }
+  // Recalc pcts from final mins
+  cats.forEach(function(c) { c.pct = Math.round(c.mins / _ppTime * 100); });
+  cats.sort(function(a, b) { return a.sg - b.sg; }); // worst first
+
+  // Draw pie chart
+  ppDrawPie(cats, warmupMins);
+
+  // Build breakdown cards
+  var html = '';
+  // Warm-up card
+  html += '<div style="background:#222;border-radius:12px;padding:14px 16px;border-left:4px solid #888;">';
+  html += '<div style="display:flex;justify-content:space-between;align-items:center;">';
+  html += '<div style="font-size:14px;font-weight:700;color:#fff;">🔥 Warm-up</div>';
+  html += '<div style="font-size:13px;font-weight:700;color:#888;">' + warmupMins + ' min</div>';
+  html += '</div>';
+  html += '<div style="font-size:12px;color:#999;margin-top:6px;">Dynamic stretching, easy swings, tempo focus</div>';
+  html += '</div>';
+
+  cats.forEach(function(c) {
+    var drills = ppGetDrills(c.key, c.mins, c.sg);
+    html += '<div onclick="this.querySelector(\'.pp-drill-detail\').style.display=this.querySelector(\'.pp-drill-detail\').style.display===\'none\'?\'\':\'none\'" style="background:#222;border-radius:12px;padding:14px 16px;cursor:pointer;border-left:4px solid ' + c.color + ';">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;">';
+    html += '<div style="font-size:14px;font-weight:700;color:#fff;">' + c.icon + ' ' + c.label + '</div>';
+    html += '<div style="display:flex;align-items:center;gap:8px;">';
+    html += '<span style="font-size:11px;font-weight:600;color:' + (c.sg < 0 ? '#ff5252' : '#00c853') + ';">' + (c.sg >= 0 ? '+' : '') + c.sg.toFixed(1) + ' SG</span>';
+    html += '<span style="font-size:13px;font-weight:700;color:' + c.color + ';">' + c.mins + ' min</span>';
+    html += '</div></div>';
+    html += '<div class="pp-drill-detail" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid #333;">';
+    drills.forEach(function(d) {
+      html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:6px 0;">';
+      html += '<div style="font-size:13px;color:#ccc;flex:1;">' + d.name + '</div>';
+      html += '<div style="font-size:12px;font-weight:700;color:#888;white-space:nowrap;margin-left:8px;">' + d.mins + ' min</div>';
+      html += '</div>';
+      if (d.detail) html += '<div style="font-size:11px;color:#666;margin:-2px 0 4px;">' + d.detail + '</div>';
+    });
+    html += '</div></div>';
+  });
+
+  document.getElementById('ppBreakdownList').innerHTML = html;
+}
+
+function ppDrawPie(cats, warmupMins) {
+  var canvas = document.getElementById('ppPieChart');
+  var ctx = canvas.getContext('2d');
+  var dpr = window.devicePixelRatio || 1;
+  canvas.width = 280 * dpr;
+  canvas.height = 280 * dpr;
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, 280, 280);
+
+  var cx = 140, cy = 140, r = 110, ir = 60;
+  var total = warmupMins;
+  cats.forEach(function(c) { total += c.mins; });
+
+  var angle = -Math.PI / 2;
+  // Warm-up slice
+  var warmSlice = (warmupMins / total) * Math.PI * 2;
+  ctx.beginPath();
+  ctx.moveTo(cx + ir * Math.cos(angle), cy + ir * Math.sin(angle));
+  ctx.arc(cx, cy, r, angle, angle + warmSlice);
+  ctx.arc(cx, cy, ir, angle + warmSlice, angle, true);
+  ctx.closePath();
+  ctx.fillStyle = '#555';
+  ctx.fill();
+  angle += warmSlice;
+
+  // Category slices
+  cats.forEach(function(c) {
+    var slice = (c.mins / total) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.moveTo(cx + ir * Math.cos(angle), cy + ir * Math.sin(angle));
+    ctx.arc(cx, cy, r, angle, angle + slice);
+    ctx.arc(cx, cy, ir, angle + slice, angle, true);
+    ctx.closePath();
+    ctx.fillStyle = c.color;
+    ctx.fill();
+    // Label
+    var mid = angle + slice / 2;
+    var lr = (r + ir) / 2 + 5;
+    var lx = cx + lr * Math.cos(mid);
+    var ly = cy + lr * Math.sin(mid);
+    if (c.pct >= 8) {
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 13px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(c.mins + 'm', lx, ly);
+    }
+    angle += slice;
+  });
+
+  // Center text
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 22px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(_ppTime + ' min', cx, cy - 6);
+  ctx.font = '11px sans-serif';
+  ctx.fillStyle = '#999';
+  ctx.fillText('total practice', cx, cy + 14);
+}
+
+function ppGetDrills(category, totalMins, sgVal) {
+  var drills = [];
+  if (category === 'putt') {
+    if (totalMins <= 15) {
+      drills.push({ name: 'Putts 4-8 ft', mins: Math.round(totalMins * 0.6), detail: 'Focus on make percentage — these are scoring putts' });
+      drills.push({ name: 'Lag putts 25-40 ft', mins: Math.round(totalMins * 0.4), detail: 'Get within 3 ft to eliminate 3-putts' });
+    } else {
+      var t1 = Math.round(totalMins * 0.35);
+      var t2 = Math.round(totalMins * 0.35);
+      var t3 = totalMins - t1 - t2;
+      drills.push({ name: 'Putts 4-8 ft', mins: t1, detail: 'Gate drill — two tees just wider than putter head' });
+      drills.push({ name: 'Putts 8-15 ft', mins: t2, detail: 'Focus on speed control — die it at the hole' });
+      drills.push({ name: 'Lag putts 25-50 ft', mins: t3, detail: 'Distance control — get within a 3 ft circle' });
+    }
+  } else if (category === 'arg') {
+    if (totalMins <= 15) {
+      drills.push({ name: 'Chip & pitch 10-30 yds', mins: Math.round(totalMins * 0.6), detail: 'Vary trajectory — low runners and high lobs' });
+      drills.push({ name: 'Bunker shots', mins: Math.round(totalMins * 0.4), detail: 'Greenside bunker — open face, hit 2 inches behind ball' });
+    } else {
+      var t1 = Math.round(totalMins * 0.4);
+      var t2 = Math.round(totalMins * 0.3);
+      var t3 = totalMins - t1 - t2;
+      drills.push({ name: 'Chip & pitch 10-30 yds', mins: t1, detail: 'Land spot focused — pick a spot and land it there' });
+      drills.push({ name: 'Up & downs from 40-60 yds', mins: t2, detail: 'Half-swing wedges to a specific pin' });
+      drills.push({ name: 'Bunker play', mins: t3, detail: 'Vary lies — buried, fried egg, clean' });
+    }
+  } else if (category === 'app') {
+    if (totalMins <= 15) {
+      drills.push({ name: 'Mid irons 140-170 yds', mins: Math.round(totalMins * 0.5), detail: 'Focus on center contact and distance control' });
+      drills.push({ name: 'Long approach 180-210 yds', mins: Math.round(totalMins * 0.5), detail: 'Hit to a target — GIR matters most here' });
+    } else {
+      var t1 = Math.round(totalMins * 0.35);
+      var t2 = Math.round(totalMins * 0.35);
+      var t3 = totalMins - t1 - t2;
+      drills.push({ name: 'Wedges 80-120 yds', mins: t1, detail: 'Scoring clubs — work through PW, GW, SW distances' });
+      drills.push({ name: 'Mid irons 140-170 yds', mins: t2, detail: 'Alternate between 7i, 8i, 9i to specific targets' });
+      drills.push({ name: 'Long approach 180-210 yds', mins: t3, detail: '5i/6i or hybrids — focus on hitting the green' });
+    }
+  } else if (category === 'ott') {
+    if (totalMins <= 15) {
+      drills.push({ name: 'Driver — target focus', mins: Math.round(totalMins * 0.6), detail: 'Pick a fairway-width target, aim for 70% hit rate' });
+      drills.push({ name: '3 Wood / hybrid off tee', mins: Math.round(totalMins * 0.4), detail: 'Controlled tee shots for tight holes' });
+    } else {
+      var t1 = Math.round(totalMins * 0.45);
+      var t2 = Math.round(totalMins * 0.3);
+      var t3 = totalMins - t1 - t2;
+      drills.push({ name: 'Driver — shape shots', mins: t1, detail: 'Alternate draw/fade to specific targets' });
+      drills.push({ name: 'Driver — tempo & rhythm', mins: t2, detail: 'Swing at 80% — focus on center strike' });
+      drills.push({ name: '3 Wood off the tee', mins: t3, detail: 'Control club for when driver is risky' });
+    }
+  }
+  return drills;
+}
+
+function ppRenderTourRoutine() {
+  var html = '';
+  var sections = [
+    { title: 'Warm-up', time: '15 min', color: '#888', items: [
+      'Dynamic stretching & mobility (5 min)',
+      'Easy wedge swings — half, three-quarter (5 min)',
+      'Work up through bag: 9i, 7i, 5i (5 min)'
+    ]},
+    { title: 'Full Swing — Irons', time: '20 min', color: '#6fa8dc', items: [
+      'Wedges 80-120 yds to specific targets (8 min)',
+      'Mid irons 140-170 yds, alternating clubs (7 min)',
+      'Long irons / hybrids 180-210 yds (5 min)'
+    ]},
+    { title: 'Full Swing — Driver', time: '15 min', color: '#e06666', items: [
+      'Rhythm swings — 70% power (5 min)',
+      'Stock shot to fairway target (5 min)',
+      'Shot shaping — draw & fade (5 min)'
+    ]},
+    { title: 'Short Game', time: '25 min', color: '#93c47d', items: [
+      'Chipping 10-30 yds, vary trajectory (8 min)',
+      'Pitching 40-60 yds to specific pin (7 min)',
+      'Bunker play — vary lies (5 min)',
+      'Up & down game with scorecard (5 min)'
+    ]},
+    { title: 'Putting', time: '30 min', color: '#f6b26b', items: [
+      'Short putts 3-5 ft — make 10 in a row (8 min)',
+      'Mid putts 8-15 ft — speed & read (8 min)',
+      'Lag putts 25-50 ft — 3 ft circle (7 min)',
+      'Pressure drill — 9 hole putting game (7 min)'
+    ]},
+    { title: 'Course Simulation', time: '15 min', color: '#b4a7d6', items: [
+      'Play 3 imaginary holes — pick target, pick club, commit (10 min)',
+      'Pre-shot routine practice with every shot (5 min)'
+    ]}
+  ];
+  var totalMins = 0;
+  sections.forEach(function(s) { totalMins += parseInt(s.time); });
+  html += '<div style="text-align:center;margin-bottom:14px;"><span style="font-size:24px;font-weight:800;color:#fff;">' + totalMins + ' min</span> <span style="font-size:13px;color:#606060;">total session</span></div>';
+
+  sections.forEach(function(s) {
+    html += '<div style="background:#222;border-radius:12px;padding:14px 16px;margin-bottom:8px;border-left:4px solid ' + s.color + ';">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">';
+    html += '<div style="font-size:14px;font-weight:700;color:#fff;">' + s.title + '</div>';
+    html += '<div style="font-size:13px;font-weight:700;color:' + s.color + ';">' + s.time + '</div>';
+    html += '</div>';
+    s.items.forEach(function(item) {
+      html += '<div style="font-size:12px;color:#999;padding:3px 0 3px 12px;border-left:2px solid #333;">• ' + item + '</div>';
+    });
+    html += '</div>';
+  });
+  document.getElementById('ppTourContent').innerHTML = html;
 }
 
 function openLearningLibrary() {
@@ -17745,15 +18197,9 @@ var _practiceNotes = [];
 var _editingPracticeSessionId = null;
 
 function setPracticePlanSubTab(sub) {
-  document.getElementById('ppNewSession').style.display = sub === 'new' ? '' : 'none';
-  document.getElementById('ppHistory').style.display    = sub === 'history' ? '' : 'none';
-
-  var newBtn = document.getElementById('ppSubNew');
-  var hisBtn = document.getElementById('ppSubHistory');
-  if (newBtn) { newBtn.style.background = sub === 'new' ? '#2d7abc' : '#282828'; newBtn.style.color = sub === 'new' ? '#ffffff' : '#606060'; }
-  if (hisBtn) { hisBtn.style.background = sub === 'history' ? '#2d7abc' : '#282828'; hisBtn.style.color = sub === 'history' ? '#ffffff' : '#606060'; }
-
-  if (sub === 'history') loadPracticeHistory();
+  // Legacy compat — now handled by ppShowLogSession / ppShowHistory
+  if (sub === 'new') ppShowLogSession();
+  else if (sub === 'history') ppShowHistory();
 }
 
 function initPracticeSessionForm() {
