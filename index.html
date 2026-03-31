@@ -17081,18 +17081,27 @@ function ppRenderPlan(sg) {
 
   // Adjust so category mins sum exactly to practiceMins
   var sumMins = cats.reduce(function(s, c) { return s + c.mins; }, 0);
-  while (sumMins !== practiceMins) {
+  var maxIter = 50;
+  while (sumMins !== practiceMins && maxIter-- > 0) {
     cats.sort(function(a, b) { return a.sg - b.sg; }); // worst SG first
     if (sumMins < practiceMins) {
       cats[0].mins += 5;
       sumMins += 5;
     } else {
       // Remove from best SG category (last), but don't go below minimum
+      var removed = false;
       for (var ri = cats.length - 1; ri >= 0; ri--) {
-        if (cats[ri].mins > minPerCat) { cats[ri].mins -= 5; sumMins -= 5; break; }
+        if (cats[ri].mins > minPerCat) { cats[ri].mins -= 5; sumMins -= 5; removed = true; break; }
       }
-      if (sumMins > practiceMins && cats.every(function(c){ return c.mins <= minPerCat; })) break; // safety
+      if (!removed) break; // all at minimum, can't reduce further
     }
+  }
+  // Final correction: if still off, force the difference onto the weakest category
+  sumMins = cats.reduce(function(s, c) { return s + c.mins; }, 0);
+  if (sumMins !== practiceMins) {
+    cats.sort(function(a, b) { return a.sg - b.sg; });
+    cats[0].mins += (practiceMins - sumMins);
+    if (cats[0].mins < minPerCat) cats[0].mins = minPerCat;
   }
 
   // Recalc pcts from final mins (use _ppTime so warm-up is included)
@@ -17160,18 +17169,20 @@ function ppDrawPie(cats, warmupMins) {
   ctx.fill();
   angle += warmSlice;
 
-  // Category slices
-  cats.forEach(function(c) {
-    var slice = (c.mins / total) * Math.PI * 2;
+  // Category slices — last slice always closes to the start angle to prevent gaps
+  var endAngle = -Math.PI / 2 + Math.PI * 2; // full circle end
+  cats.forEach(function(c, idx) {
+    var isLast = idx === cats.length - 1;
+    var sliceEnd = isLast ? endAngle : angle + (c.mins / total) * Math.PI * 2;
     ctx.beginPath();
     ctx.moveTo(cx + ir * Math.cos(angle), cy + ir * Math.sin(angle));
-    ctx.arc(cx, cy, r, angle, angle + slice);
-    ctx.arc(cx, cy, ir, angle + slice, angle, true);
+    ctx.arc(cx, cy, r, angle, sliceEnd);
+    ctx.arc(cx, cy, ir, sliceEnd, angle, true);
     ctx.closePath();
     ctx.fillStyle = c.color;
     ctx.fill();
     // Label
-    var mid = angle + slice / 2;
+    var mid = (angle + sliceEnd) / 2;
     var lr = (r + ir) / 2 + 5;
     var lx = cx + lr * Math.cos(mid);
     var ly = cy + lr * Math.sin(mid);
@@ -17182,7 +17193,7 @@ function ppDrawPie(cats, warmupMins) {
       ctx.textBaseline = 'middle';
       ctx.fillText(c.mins + 'm', lx, ly);
     }
-    angle += slice;
+    angle = sliceEnd;
   });
 
   // Center text
