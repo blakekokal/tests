@@ -1100,7 +1100,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
       <!-- Landing: choose practice mode -->
       <div id="ppLanding">
         <div style="display:flex;flex-direction:column;gap:10px;align-items:center;">
-          <button onclick="ppShowTourPractice()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:linear-gradient(135deg,#1a4a8a,#007a52);border-radius:12px;text-align:left;">
+          <button onclick="ppShowTourPractice()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
             <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🏆</span>
             <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Tour Practice</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Follow a PGA Tour-style practice structure</div></div>
           </button>
@@ -1116,9 +1116,9 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
             <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">✏️</span>
             <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Custom Practice</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Build your own plan and save it for later</div></div>
           </button>
-          <button onclick="ppShowWarmUp()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:linear-gradient(135deg,#8a4a1a,#1a4a8a);border-radius:12px;text-align:left;">
+          <button onclick="ppShowWarmUp()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
             <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🔥</span>
-            <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Pre-Round Warm Up</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Range, chipping, and putting before your round</div></div>
+            <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Comprehensive Warm Up</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Range, chipping, and putting before your round</div></div>
           </button>
         </div>
         <!-- Log / History link -->
@@ -1240,7 +1240,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
       <!-- PRE-ROUND WARM UP VIEW -->
       <div id="ppWarmUpView" style="display:none;">
         <button onclick="ppBackToLanding()" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:#2d7abc;font-size:13px;font-weight:700;cursor:pointer;padding:0;margin-bottom:14px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg> Back</button>
-        <div style="font-size:18px;font-weight:800;text-align:center;margin-bottom:4px;">Pre-Round Warm Up</div>
+        <div style="font-size:18px;font-weight:800;text-align:center;margin-bottom:4px;">Comprehensive Warm Up</div>
         <p style="text-align:center;font-size:11px;color:rgba(255,255,255,0.4);margin:0 0 14px;">Get loose and dial in before your round</p>
         <div id="ppWarmUpContent"></div>
       </div>
@@ -17164,7 +17164,9 @@ function ppRenderPlan(sg) {
       html += '<div style="flex:1;"><div style="font-size:13px;color:#ccc;">' + d.name + '</div>';
       if (d.detail) html += '<div style="font-size:11px;color:#666;margin-top:2px;">' + d.detail + '</div>';
       html += '</div>';
-      html += '<div style="font-size:12px;font-weight:700;color:#888;white-space:nowrap;margin-left:8px;">' + d.mins + ' min</div>';
+      html += '<div style="display:flex;align-items:center;gap:2px;white-space:nowrap;margin-left:8px;">';
+      html += '<input type="number" value="' + d.mins + '" min="1" max="120" style="width:36px;height:24px;background:#1e1e1e;color:#888;border:1px solid #3d3d3d;border-radius:6px;text-align:center;font-size:11px;font-weight:700;padding:0;font-family:inherit;" onclick="event.stopPropagation()">';
+      html += '<span style="font-size:10px;color:#555;">min</span></div>';
       html += '</div>';
     });
     html += '</div></div>';
@@ -17214,12 +17216,18 @@ function ppLogFromPractice(source) {
       var textEl = cb.nextElementSibling;
       if (!textEl) return;
       var name = textEl.textContent.trim();
-      // Extract minutes from the row
-      var minsEl = row.querySelector('div[style*="white-space:nowrap"]');
+      // Check for editable time input first
       var mins = 0;
-      if (minsEl) {
-        var m = minsEl.textContent.match(/(\d+)/);
-        if (m) mins = parseInt(m[1]);
+      var timeInput = row.querySelector('input[type="number"]');
+      if (timeInput) {
+        mins = parseInt(timeInput.value) || 0;
+      }
+      if (!mins) {
+        var minsEl = row.querySelector('div[style*="white-space:nowrap"]');
+        if (minsEl) {
+          var m = minsEl.textContent.match(/(\d+)/);
+          if (m) mins = parseInt(m[1]);
+        }
       }
       // For tour/custom items, parse mins from the text like "Dynamic stretching & mobility (5 min)"
       if (!mins && (source === 'tour' || source === 'custom')) {
@@ -17593,9 +17601,19 @@ function ppRenderTourRoutine() {
     html += '</div>';
     s.items.forEach(function(item, ii) {
       var uid = 'ppTourDrill_' + s.title.replace(/[^a-zA-Z]/g,'') + '_' + ii;
+      // Parse default mins from item text like "(5 min)"
+      var defMins = '';
+      var itemText = item;
+      var pm = item.match(/\((\d+)\s*min\)/);
+      if (pm) { defMins = pm[1]; itemText = item.replace(/\s*\(\d+\s*min\)/, '').trim(); }
       html += '<div style="display:flex;align-items:center;gap:10px;padding:4px 0;">';
       html += '<div id="' + uid + '" onclick="ppToggleDrill(this,event)" style="width:22px;height:22px;min-width:22px;border-radius:50%;border:2px solid #555;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;"></div>';
-      html += '<div style="flex:1;font-size:12px;color:#999;">' + item + '</div>';
+      html += '<div style="flex:1;font-size:12px;color:#999;">' + itemText + '</div>';
+      if (defMins) {
+        html += '<div style="display:flex;align-items:center;gap:2px;white-space:nowrap;">';
+        html += '<input type="number" value="' + defMins + '" min="1" max="120" style="width:36px;height:24px;background:#1e1e1e;color:#888;border:1px solid #3d3d3d;border-radius:6px;text-align:center;font-size:11px;font-weight:700;padding:0;font-family:inherit;" onclick="event.stopPropagation()">';
+        html += '<span style="font-size:10px;color:#555;">min</span></div>';
+      }
       html += '</div>';
     });
     html += '</div>';
@@ -17611,29 +17629,31 @@ function ppShowWarmUp() {
 
 function ppRenderWarmUp() {
   var sections = [
+    { title: 'Stretching', color: '#888', items: [
+      { text: 'Static stretches — hold each 15-20 sec', mins: 1 },
+      { text: 'Dynamic stretches — leg swings, arm circles, torso rotations', mins: 2 }
+    ]},
     { title: 'Range', color: '#e06666', items: [
-      'Static stretches — hold each 15-20 sec (1 min)',
-      'Dynamic stretches — leg swings, arm circles, torso rotations (2 min)',
-      'Leapfrog wedges — 20, 30, 40, 50, 60 yds (5-10 balls)',
-      'Short irons — 9I, PW (3-5 balls)',
-      'Mid irons — 7I, 8I (3-5 balls)',
-      'Long irons — 5I, 6I (3-5 balls)',
-      'Woods / hybrids (3-5 balls)',
-      'Driver (5-8 balls)',
-      'Random shots through the bag',
-      'Finish with the club you hit off the first tee'
+      { text: 'Leapfrog wedges — 20, 30, 40, 50, 60 yds', note: '5-10 balls' },
+      { text: 'Short irons — 9I, PW', note: '3-5 balls' },
+      { text: 'Mid irons — 7I, 8I', note: '3-5 balls' },
+      { text: 'Long irons — 5I, 6I', note: '3-5 balls' },
+      { text: 'Woods / hybrids', note: '3-5 balls' },
+      { text: 'Driver', note: '5-8 balls' },
+      { text: 'Random shots through the bag' },
+      { text: 'Finish with the club you hit off the first tee' }
     ]},
     { title: 'Chipping', color: '#93c47d', items: [
-      'Low chips from 10-30 yds (3-5 balls)',
-      'Mid-trajectory chips from 10-30 yds (3-5 balls)',
-      'High chips / flops from 10-30 yds (3-5 balls)',
-      'Bunker shots (3-5 balls)'
+      { text: 'Low chips from 10-30 yds', note: '3-5 balls' },
+      { text: 'Mid-trajectory chips from 10-30 yds', note: '3-5 balls' },
+      { text: 'High chips / flops from 10-30 yds', note: '3-5 balls' },
+      { text: 'Bunker shots', note: '3-5 balls' }
     ]},
     { title: 'Putting', color: '#f6b26b', items: [
-      'Make 5 three-footers in a row',
-      'Circle drill — 5-10 putts around the hole from 3-7 ft',
-      'Lag putts from 20-30 ft (5 putts)',
-      'Miscellaneous putts from all distances — dial in green speed'
+      { text: 'Make 5 three-footers in a row' },
+      { text: 'Circle drill — 5-10 putts around the hole from 3-7 ft' },
+      { text: 'Lag putts from 20-30 ft', note: '5 putts' },
+      { text: 'Miscellaneous putts from all distances — dial in green speed' }
     ]}
   ];
 
@@ -17645,7 +17665,14 @@ function ppRenderWarmUp() {
       var uid = 'ppWarmDrill_' + s.title.replace(/[^a-zA-Z]/g,'') + '_' + ii;
       html += '<div style="display:flex;align-items:center;gap:10px;padding:4px 0;">';
       html += '<div id="' + uid + '" onclick="ppToggleDrill(this,event)" style="width:22px;height:22px;min-width:22px;border-radius:50%;border:2px solid #555;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;"></div>';
-      html += '<div style="flex:1;font-size:12px;color:#999;">' + item + '</div>';
+      html += '<div style="flex:1;font-size:12px;color:#999;">' + item.text + '</div>';
+      if (item.mins) {
+        html += '<div style="display:flex;align-items:center;gap:2px;white-space:nowrap;">';
+        html += '<input type="number" value="' + item.mins + '" min="1" max="120" style="width:36px;height:24px;background:#1e1e1e;color:#888;border:1px solid #3d3d3d;border-radius:6px;text-align:center;font-size:11px;font-weight:700;padding:0;font-family:inherit;" onclick="event.stopPropagation()">';
+        html += '<span style="font-size:10px;color:#555;">min</span></div>';
+      } else if (item.note) {
+        html += '<div style="font-size:10px;color:#555;white-space:nowrap;">' + item.note + '</div>';
+      }
       html += '</div>';
     });
     html += '</div>';
