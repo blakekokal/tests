@@ -17292,8 +17292,8 @@ function ppRenderTourRoutine() {
   var sections = [
     { title: 'Warm-up', time: '15 min', color: '#888', items: [
       'Dynamic stretching & mobility (5 min)',
-      'Easy wedge swings — half, three-quarter (5 min)',
-      'Work up through bag: 9i, 7i, 5i (5 min)'
+      'Wedge leapfrog — 20, 30, 40, 50, 60 yds, each a little farther (5 min)',
+      'Full swing wedges to specific targets (5 min)'
     ]},
     { title: 'Full Swing — Irons', time: '20 min', color: '#6fa8dc', items: [
       'Wedges 80-120 yds to specific targets (8 min)',
@@ -17332,8 +17332,12 @@ function ppRenderTourRoutine() {
     html += '<div style="font-size:14px;font-weight:700;color:#fff;">' + s.title + '</div>';
     html += '<div style="font-size:13px;font-weight:700;color:' + s.color + ';">' + s.time + '</div>';
     html += '</div>';
-    s.items.forEach(function(item) {
-      html += '<div style="font-size:12px;color:#999;padding:3px 0 3px 12px;border-left:2px solid #333;">• ' + item + '</div>';
+    s.items.forEach(function(item, ii) {
+      var uid = 'ppTourDrill_' + s.title.replace(/[^a-zA-Z]/g,'') + '_' + ii;
+      html += '<div style="display:flex;align-items:center;gap:10px;padding:4px 0;">';
+      html += '<div id="' + uid + '" onclick="ppToggleDrill(this,event)" style="width:22px;height:22px;min-width:22px;border-radius:50%;border:2px solid #555;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;"></div>';
+      html += '<div style="flex:1;font-size:12px;color:#999;">' + item + '</div>';
+      html += '</div>';
     });
     html += '</div>';
   });
