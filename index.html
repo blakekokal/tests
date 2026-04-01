@@ -258,6 +258,16 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
       <div id="hcpSaveMsg" style="font-size:11px;color:#00b87a;min-height:12px;"></div>
     </div>
 
+    <!-- LAUNCH MONITOR -->
+    <div style="margin-top:6px;width:100%;border-top:1px solid #333333;padding-top:8px;display:flex;flex-direction:column;align-items:center;gap:4px;">
+      <div style="font-size:12px;color:#606060;">Launch Monitor</div>
+      <div style="display:flex;gap:6px;width:100%;max-width:280px;">
+        <button id="lmYesBtn" onclick="saveLaunchMonitor(true)" style="flex:1;height:36px;font-size:12px;background:#333333;border-radius:8px;border:none;font-weight:600;color:#606060;cursor:pointer;">I have one</button>
+        <button id="lmNoBtn" onclick="saveLaunchMonitor(false)" style="flex:1;height:36px;font-size:12px;background:#333333;border-radius:8px;border:none;font-weight:600;color:#606060;cursor:pointer;">I don't have one</button>
+      </div>
+      <div id="lmSaveMsg" style="font-size:11px;color:#00b87a;min-height:12px;"></div>
+    </div>
+
 
     <!-- PASSWORD -->
     <div style="margin-top:6px;width:100%;border-top:1px solid #333333;padding-top:8px;display:flex;flex-direction:column;align-items:center;gap:4px;">
@@ -11647,6 +11657,7 @@ function loadProfileInfo() {
   document.getElementById('profileMsg').textContent = '';
   document.getElementById('pwMsg').textContent = '';
   loadUserRole();
+  updateLaunchMonitorUI();
 }
 
 function showProfile() {
@@ -12257,6 +12268,25 @@ async function saveHcpPreference(hcp) {
     document.getElementById('playerHandicap').value = hcp;
     setTimeout(function() { msg.textContent = ''; }, 2000);
   }
+}
+
+function hasLaunchMonitor() {
+  try { return localStorage.getItem('hasLaunchMonitor') === 'true'; } catch(e) { return false; }
+}
+
+function saveLaunchMonitor(val) {
+  localStorage.setItem('hasLaunchMonitor', val ? 'true' : 'false');
+  updateLaunchMonitorUI();
+  var msg = document.getElementById('lmSaveMsg');
+  if (msg) { msg.textContent = 'Saved'; setTimeout(function() { msg.textContent = ''; }, 2000); }
+}
+
+function updateLaunchMonitorUI() {
+  var has = hasLaunchMonitor();
+  var yesBtn = document.getElementById('lmYesBtn');
+  var noBtn = document.getElementById('lmNoBtn');
+  if (yesBtn) { yesBtn.style.background = has ? '#007a52' : '#333333'; yesBtn.style.color = has ? '#fff' : '#606060'; }
+  if (noBtn) { noBtn.style.background = has ? '#333333' : '#007a52'; noBtn.style.color = has ? '#606060' : '#fff'; }
 }
 
 async function changePassword() {
