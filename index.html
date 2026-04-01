@@ -1025,8 +1025,8 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
     <!-- 4-tab bar -->
     <div style="display:flex;gap:0;width:100%;max-width:360px;margin-bottom:0;border-radius:10px;overflow:hidden;">
       <button onclick="setPracticeHubTab('combines')" id="phTabCombines" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#2d7abc;border:none;color:#ffffff;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Combines</button>
-      <button onclick="setPracticeHubTab('drills')" id="phTabDrills" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#282828;border:none;color:#606060;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Drills</button>
       <button onclick="setPracticeHubTab('plan')" id="phTabPlan" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#282828;border:none;color:#606060;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Practice</button>
+      <button onclick="setPracticeHubTab('drills')" id="phTabDrills" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#282828;border:none;color:#606060;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Drills</button>
       <button onclick="setPracticeHubTab('learn')" id="phTabLearn" style="flex:1;height:40px;font-size:13px;font-weight:700;background:#282828;border:none;color:#606060;cursor:pointer;max-width:none;width:auto;padding:0;margin:0;">Learn</button>
     </div>
   </div>
@@ -1038,7 +1038,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
     <!-- COMBINES TAB -->
     <div id="phCombinesContent">
       <div style="display:flex;flex-direction:column;gap:10px;align-items:center;">
-        <button onclick="goToAutoCombine()" id="phAutoCombineBtn" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:linear-gradient(135deg,#1a4a8a,#007a52);border-radius:12px;text-align:left;">
+        <button onclick="goToAutoCombine()" id="phAutoCombineBtn" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
           <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🎯</span>
           <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Auto Combine</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;" id="phAutoDesc">Picks your weakest area from last round</div></div>
         </button>
