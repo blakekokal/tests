@@ -17214,9 +17214,10 @@ function ppFindClubsInRange(minYds, maxYds) {
   var matched = [];
   clubs.forEach(function(c) {
     var dist = c.carry || c.total || 0;
-    if (dist >= minYds && dist <= maxYds) matched.push(c.name);
+    if (dist >= minYds && dist <= maxYds) matched.push({ name: c.name, dist: dist });
   });
-  return matched.join(', ');
+  matched.sort(function(a, b) { return a.dist - b.dist; });
+  return matched.map(function(m) { return m.name; }).join(', ');
 }
 
 function ppGetDrills(category, totalMins, sgVal) {
