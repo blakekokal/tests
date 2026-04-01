@@ -17208,55 +17208,79 @@ function ppDrawPie(cats, total) {
   ctx.fillText('total practice', cx, cy + 14);
 }
 
+function ppFindClubsInRange(minYds, maxYds) {
+  var clubs = getBagClubs();
+  if (!clubs || !clubs.length) return '';
+  var matched = [];
+  clubs.forEach(function(c) {
+    var dist = c.carry || c.total || 0;
+    if (dist >= minYds && dist <= maxYds) matched.push(c.name);
+  });
+  return matched.join(', ');
+}
+
 function ppGetDrills(category, totalMins, sgVal) {
   var drills = [];
   if (category === 'putt') {
     if (totalMins <= 15) {
-      drills.push({ name: 'Putts 4-8 ft', mins: Math.round(totalMins * 0.6), detail: 'Focus on make percentage — these are scoring putts' });
-      drills.push({ name: 'Lag putts 25-40 ft', mins: Math.round(totalMins * 0.4), detail: 'Get within 3 ft to eliminate 3-putts' });
+      drills.push({ name: 'Putts 4-8 ft', mins: Math.round(totalMins * 0.6), detail: '' });
+      drills.push({ name: 'Lag putts 25-40 ft', mins: Math.round(totalMins * 0.4), detail: '' });
     } else {
       var t1 = Math.round(totalMins * 0.35);
       var t2 = Math.round(totalMins * 0.35);
       var t3 = totalMins - t1 - t2;
-      drills.push({ name: 'Putts 4-8 ft', mins: t1, detail: 'Gate drill — two tees just wider than putter head' });
-      drills.push({ name: 'Putts 8-15 ft', mins: t2, detail: 'Focus on speed control — die it at the hole' });
-      drills.push({ name: 'Lag putts 25-50 ft', mins: t3, detail: 'Distance control — get within a 3 ft circle' });
+      drills.push({ name: 'Putts 4-8 ft', mins: t1, detail: '' });
+      drills.push({ name: 'Putts 8-15 ft', mins: t2, detail: '' });
+      drills.push({ name: 'Lag putts 25-50 ft', mins: t3, detail: '' });
     }
   } else if (category === 'arg') {
+    var argClubs10_30 = ppFindClubsInRange(10, 30);
+    var argClubs40_60 = ppFindClubsInRange(40, 60);
     if (totalMins <= 15) {
-      drills.push({ name: 'Chip & pitch 10-30 yds', mins: Math.round(totalMins * 0.6), detail: 'Vary trajectory — low runners and high lobs' });
-      drills.push({ name: 'Bunker shots', mins: Math.round(totalMins * 0.4), detail: 'Greenside bunker — open face, hit 2 inches behind ball' });
+      drills.push({ name: 'Chip & pitch 10-30 yds', mins: Math.round(totalMins * 0.6), detail: argClubs10_30 });
+      drills.push({ name: 'Bunker shots', mins: Math.round(totalMins * 0.4), detail: '' });
     } else {
       var t1 = Math.round(totalMins * 0.4);
       var t2 = Math.round(totalMins * 0.3);
       var t3 = totalMins - t1 - t2;
-      drills.push({ name: 'Chip & pitch 10-30 yds', mins: t1, detail: 'Land spot focused — pick a spot and land it there' });
-      drills.push({ name: 'Up & downs from 40-60 yds', mins: t2, detail: 'Half-swing wedges to a specific pin' });
-      drills.push({ name: 'Bunker play', mins: t3, detail: 'Vary lies — buried, fried egg, clean' });
+      drills.push({ name: 'Chip & pitch 10-30 yds', mins: t1, detail: argClubs10_30 });
+      drills.push({ name: 'Up & downs from 40-60 yds', mins: t2, detail: argClubs40_60 });
+      drills.push({ name: 'Bunker play', mins: t3, detail: '' });
     }
   } else if (category === 'app') {
+    var appClubs80_120 = ppFindClubsInRange(80, 120);
+    var appClubs140_170 = ppFindClubsInRange(140, 170);
+    var appClubs180_210 = ppFindClubsInRange(180, 210);
     if (totalMins <= 15) {
-      drills.push({ name: 'Mid irons 140-170 yds', mins: Math.round(totalMins * 0.5), detail: 'Focus on center contact and distance control' });
-      drills.push({ name: 'Long approach 180-210 yds', mins: Math.round(totalMins * 0.5), detail: 'Hit to a target — GIR matters most here' });
+      drills.push({ name: 'Mid irons 140-170 yds', mins: Math.round(totalMins * 0.5), detail: appClubs140_170 });
+      drills.push({ name: 'Long approach 180-210 yds', mins: Math.round(totalMins * 0.5), detail: appClubs180_210 });
     } else {
       var t1 = Math.round(totalMins * 0.35);
       var t2 = Math.round(totalMins * 0.35);
       var t3 = totalMins - t1 - t2;
-      drills.push({ name: 'Wedges 80-120 yds', mins: t1, detail: 'Scoring clubs — work through PW, GW, SW distances' });
-      drills.push({ name: 'Mid irons 140-170 yds', mins: t2, detail: 'Alternate between 7i, 8i, 9i to specific targets' });
-      drills.push({ name: 'Long approach 180-210 yds', mins: t3, detail: '5i/6i or hybrids — focus on hitting the green' });
+      drills.push({ name: 'Wedges 80-120 yds', mins: t1, detail: appClubs80_120 });
+      drills.push({ name: 'Mid irons 140-170 yds', mins: t2, detail: appClubs140_170 });
+      drills.push({ name: 'Long approach 180-210 yds', mins: t3, detail: appClubs180_210 });
     }
   } else if (category === 'ott') {
+    var clubs = getBagClubs();
+    var driverName = '', woodName = '';
+    if (clubs && clubs.length) {
+      clubs.forEach(function(c) {
+        if (c.name === 'Dr' && !driverName) driverName = c.name;
+        if ((c.name === '3W' || c.name === '2W' || c.name === '4W' || c.name === '5W') && !woodName) woodName = c.name;
+      });
+    }
     if (totalMins <= 15) {
-      drills.push({ name: 'Driver — target focus', mins: Math.round(totalMins * 0.6), detail: 'Pick a fairway-width target, aim for 70% hit rate' });
-      drills.push({ name: '3 Wood / hybrid off tee', mins: Math.round(totalMins * 0.4), detail: 'Controlled tee shots for tight holes' });
+      drills.push({ name: 'Driver — target focus', mins: Math.round(totalMins * 0.6), detail: driverName });
+      drills.push({ name: '3 Wood / hybrid off tee', mins: Math.round(totalMins * 0.4), detail: woodName });
     } else {
       var t1 = Math.round(totalMins * 0.45);
       var t2 = Math.round(totalMins * 0.3);
       var t3 = totalMins - t1 - t2;
-      drills.push({ name: 'Driver — shape shots', mins: t1, detail: 'Alternate draw/fade to specific targets' });
-      drills.push({ name: 'Driver — tempo & rhythm', mins: t2, detail: 'Swing at 80% — focus on center strike' });
-      drills.push({ name: '3 Wood off the tee', mins: t3, detail: 'Control club for when driver is risky' });
+      drills.push({ name: 'Driver — shape shots', mins: t1, detail: driverName });
+      drills.push({ name: 'Driver — tempo & rhythm', mins: t2, detail: driverName });
+      drills.push({ name: '3 Wood off the tee', mins: t3, detail: woodName });
     }
   }
   return drills;
