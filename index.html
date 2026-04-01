@@ -16960,7 +16960,7 @@ function ppShowRecommended() {
   ppHideAllViews();
   document.getElementById('ppRecommendedView').style.display = '';
   document.getElementById('ppRecTitle').textContent = 'Recommended Practice';
-  document.getElementById('ppRecSubtitle').textContent = 'Based on your last 5 rounds';
+  document.getElementById('ppRecSubtitle').textContent = 'Based on your rounds and combines';
   document.getElementById('ppTimeInputWrap').style.display = 'none';
   _ppTime = 60;
   ppLoadAndRender();
@@ -17023,9 +17023,14 @@ async function ppLoadAndRender() {
 
   var resp = await _sb.from('rounds').select('*').eq('user_id', activeUserId()).order('round_date', { ascending: false }).limit(5);
   var data = resp.data;
+
+  // Also fetch recent combine scores
+  var combResp = await _sb.from('combine_scores').select('combine_type, total_sg, filled_count, combine_date').eq('user_id', activeUserId()).order('combine_date', { ascending: false }).limit(20);
+  var combines = combResp.data || [];
+
   loading.style.display = 'none';
 
-  if (!data || data.length === 0) {
+  if ((!data || data.length === 0) && combines.length === 0) {
     noData.style.display = 'block';
     return;
   }
@@ -17072,20 +17077,66 @@ async function ppLoadAndRender() {
     });
   });
 
-  if (sg.holes === 0) {
+  // Aggregate combine SG by category (map combine_type to SG category)
+  // Use average SG per combine type from recent results
+  var combSG = { putt: [], arg: [], app: [], ott: [] };
+  combines.forEach(function(c) {
+    if (c.total_sg == null) return;
+    var type = (c.combine_type || '').toLowerCase();
+    if (type === 'putting') combSG.putt.push(c.total_sg);
+    else if (type === 'chipping (prox)' || type === 'chip hole out') combSG.arg.push(c.total_sg);
+    else if (type === 'wedge') combSG.app.push(c.total_sg);
+    else if (type === 'driver') combSG.ott.push(c.total_sg);
+  });
+
+  // Average each combine category
+  var combAvg = {};
+  ['putt','arg','app','ott'].forEach(function(k) {
+    if (combSG[k].length > 0) {
+      combAvg[k] = combSG[k].reduce(function(s,v){return s+v;},0) / combSG[k].length;
+    }
+  });
+
+  if (sg.holes === 0 && Object.keys(combAvg).length === 0) {
     noData.style.display = 'block';
     return;
   }
 
-  // Normalize to per-18 values
-  var scale = 18 / sg.holes;
+  // Normalize round SG to per-18 values
+  var roundSG = { ott: 0, app: 0, arg: 0, putt: 0 };
+  if (sg.holes > 0) {
+    var scale = 18 / sg.holes;
+    roundSG.ott = sg.ott * scale;
+    roundSG.app = sg.app * scale;
+    roundSG.arg = sg.arg * scale;
+    roundSG.putt = sg.putt * scale;
+  }
+
+  // Blend: round data weighted 70%, combine data 30% (if both exist)
+  // If only one source exists, use 100% of that source
+  var blended = {};
+  ['ott','app','arg','putt'].forEach(function(k) {
+    var hasRound = sg.holes > 0;
+    var hasComb = combAvg[k] != null;
+    if (hasRound && hasComb) {
+      blended[k] = roundSG[k] * 0.7 + combAvg[k] * 0.3;
+    } else if (hasRound) {
+      blended[k] = roundSG[k];
+    } else if (hasComb) {
+      blended[k] = combAvg[k];
+    } else {
+      blended[k] = 0;
+    }
+  });
+
   _ppSGData = {
-    ott: sg.ott * scale,
-    app: sg.app * scale,
-    arg: sg.arg * scale,
-    putt: sg.putt * scale,
-    rounds: data.length,
-    holes: sg.holes
+    ott: blended.ott,
+    app: blended.app,
+    arg: blended.arg,
+    putt: blended.putt,
+    rounds: data ? data.length : 0,
+    holes: sg.holes,
+    combinesUsed: combines.length
   };
 
   results.style.display = '';
