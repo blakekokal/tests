@@ -7017,6 +7017,12 @@ function updateAuthUI(loggedIn) {
     if (settingsHcp) settingsHcp.value = savedHcp;
     var dashHcpF = document.getElementById('dashHcpFilter');
     if (dashHcpF) dashHcpF.value = savedHcp;
+
+    // Load launch monitor preference
+    if (currentUser.user_metadata?.has_launch_monitor != null) {
+      localStorage.setItem('hasLaunchMonitor', currentUser.user_metadata.has_launch_monitor ? 'true' : 'false');
+    }
+    updateLaunchMonitorUI();
   } else {
     authUser.textContent = '';
     authBtn.textContent = 'Login';
@@ -12271,13 +12277,23 @@ async function saveHcpPreference(hcp) {
 }
 
 function hasLaunchMonitor() {
+  if (currentUser && currentUser.user_metadata && currentUser.user_metadata.has_launch_monitor != null) {
+    return currentUser.user_metadata.has_launch_monitor === true;
+  }
   try { return localStorage.getItem('hasLaunchMonitor') === 'true'; } catch(e) { return false; }
 }
 
-function saveLaunchMonitor(val) {
+async function saveLaunchMonitor(val) {
   localStorage.setItem('hasLaunchMonitor', val ? 'true' : 'false');
   updateLaunchMonitorUI();
   var msg = document.getElementById('lmSaveMsg');
+  if (currentUser) {
+    await _sb.from('profiles').update({ has_launch_monitor: val }).eq('id', activeUserId());
+    if (!_viewingAsStudent) {
+      await _sb.auth.updateUser({ data: { has_launch_monitor: val } });
+      currentUser.user_metadata.has_launch_monitor = val;
+    }
+  }
   if (msg) { msg.textContent = 'Saved'; setTimeout(function() { msg.textContent = ''; }, 2000); }
 }
 
