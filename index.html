@@ -17123,21 +17123,19 @@ async function ppLoadAndRender() {
     });
   });
 
-  // Aggregate combine SG by category (map combine_type to SG category)
-  // Use average SG per combine type from recent results
-  var combSG = { putt: [], arg: [], app: [], ott: [] };
+  // Aggregate combine SG by category — only use putting and wedge combines
+  // Driver and chipping combines use different scoring, not comparable to round SG
+  var combSG = { putt: [], app: [] };
   combines.forEach(function(c) {
     if (c.total_sg == null) return;
     var type = (c.combine_type || '').toLowerCase();
     if (type === 'putting') combSG.putt.push(c.total_sg);
-    else if (type === 'chipping (prox)' || type === 'chip hole out') combSG.arg.push(c.total_sg);
     else if (type === 'wedge') combSG.app.push(c.total_sg);
-    else if (type === 'driver') combSG.ott.push(c.total_sg);
   });
 
   // Average each combine category
   var combAvg = {};
-  ['putt','arg','app','ott'].forEach(function(k) {
+  ['putt','app'].forEach(function(k) {
     if (combSG[k].length > 0) {
       combAvg[k] = combSG[k].reduce(function(s,v){return s+v;},0) / combSG[k].length;
     }
