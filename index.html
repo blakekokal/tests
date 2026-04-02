@@ -1142,7 +1142,13 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
       <div id="ppTourView" style="display:none;">
         <button onclick="ppBackToLanding()" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:#2d7abc;font-size:13px;font-weight:700;cursor:pointer;padding:0;margin-bottom:14px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg> Back</button>
         <div style="font-size:18px;font-weight:800;text-align:center;margin-bottom:4px;">Tour Practice Routine</div>
-        <p style="text-align:center;font-size:11px;color:rgba(255,255,255,0.4);margin:0 0 14px;">Typical PGA Tour practice structure</p>
+        <p style="text-align:center;font-size:11px;color:rgba(255,255,255,0.4);margin:0 0 10px;">Typical PGA Tour practice structure</p>
+        <!-- Season tabs -->
+        <div style="display:flex;gap:0;width:100%;border-radius:10px;overflow:hidden;margin-bottom:14px;">
+          <button id="ppTourSeasonTab0" onclick="ppShowTourSeason(0)" style="flex:1;height:36px;font-size:11px;font-weight:700;background:#282828;border-radius:0;border:none;color:#606060;max-width:none;width:auto;padding:0;margin:0;">Off Season</button>
+          <button id="ppTourSeasonTab1" onclick="ppShowTourSeason(1)" style="flex:1;height:36px;font-size:11px;font-weight:700;background:#2d7abc;border-radius:0;border:none;color:#ffffff;max-width:none;width:auto;padding:0;margin:0;">In Season</button>
+          <button id="ppTourSeasonTab2" onclick="ppShowTourSeason(2)" style="flex:1;height:36px;font-size:11px;font-weight:700;background:#282828;border-radius:0;border:none;color:#606060;max-width:none;width:auto;padding:0;margin:0;">Pre Tournament</button>
+        </div>
         <div id="ppTourContent"></div>
       </div>
 
@@ -17294,9 +17300,24 @@ function ppBackToLanding() {
   document.getElementById('ppLanding').style.display = '';
 }
 
+var _ppTourSeason = 1; // 0=off season, 1=in season, 2=pre tournament
+
 function ppShowTourPractice() {
   ppHideAllViews();
   document.getElementById('ppTourView').style.display = '';
+  _ppTourSeason = 1;
+  ppShowTourSeason(1);
+}
+
+function ppShowTourSeason(idx) {
+  _ppTourSeason = idx;
+  for (var i = 0; i < 3; i++) {
+    var btn = document.getElementById('ppTourSeasonTab' + i);
+    if (btn) {
+      btn.style.background = i === idx ? '#2d7abc' : '#282828';
+      btn.style.color = i === idx ? '#ffffff' : '#606060';
+    }
+  }
   ppRenderTourRoutine();
 }
 
@@ -18022,7 +18043,8 @@ function ppGetDrills(category, totalMins, sgVal) {
 
 function ppRenderTourRoutine() {
   var html = '';
-  var sections = [
+
+  var inSeasonSections = [
     { title: 'Warm Up & Exercises', color: '#888', items: [] },
     { title: 'Putting', color: '#f6b26b', items: [
       { text: 'Make 15 Gate drill in a row from 3 ft' },
@@ -18062,6 +18084,23 @@ function ppRenderTourRoutine() {
     ]},
     { title: 'On Course', color: '#b4a7d6', items: [] }
   ];
+
+  var offSeasonSections = [
+    { title: 'Off Season', color: '#888', items: [
+      { text: 'Coming soon — send txt file to populate' }
+    ]}
+  ];
+
+  var preTournamentSections = [
+    { title: 'Pre Tournament', color: '#888', items: [
+      { text: 'Coming soon — send txt file to populate' }
+    ]}
+  ];
+
+  var sections;
+  if (_ppTourSeason === 0) sections = offSeasonSections;
+  else if (_ppTourSeason === 2) sections = preTournamentSections;
+  else sections = inSeasonSections;
 
   sections.forEach(function(s, si) {
     var detailId = 'ppTourDetail_' + si;
