@@ -1152,20 +1152,15 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
         <div id="ppRecTitle" style="font-size:18px;font-weight:800;text-align:center;margin-bottom:4px;">Recommended Practice</div>
         <p id="ppRecSubtitle" style="text-align:center;font-size:11px;color:rgba(255,255,255,0.4);margin:0 0 14px;">Based on your last 5 rounds</p>
         <!-- Time input -->
-        <div id="ppTimeInputWrap" style="background:#222;border-radius:12px;padding:16px;margin-bottom:14px;text-align:center;">
+        <div id="ppTimeInputWrap" style="background:#222;border-radius:12px;padding:14px 16px;margin-bottom:14px;text-align:center;">
           <div style="font-size:12px;color:#9a9a9a;margin-bottom:8px;font-weight:600;">How much time do you have?</div>
-          <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:10px;">
-            <button onclick="ppSetTime(30)" class="pp-time-btn" style="padding:10px 16px;border:2px solid #333;border-radius:10px;background:#2a2a2a;color:#999;font-size:14px;font-weight:700;cursor:pointer;">30 min</button>
-            <button onclick="ppSetTime(45)" class="pp-time-btn" style="padding:10px 16px;border:2px solid #333;border-radius:10px;background:#2a2a2a;color:#999;font-size:14px;font-weight:700;cursor:pointer;">45 min</button>
-            <button onclick="ppSetTime(60)" class="pp-time-btn pp-time-active" style="padding:10px 16px;border:2px solid #2d7abc;border-radius:10px;background:#2d7abc;color:#fff;font-size:14px;font-weight:700;cursor:pointer;">60 min</button>
-            <button onclick="ppSetTime(90)" class="pp-time-btn" style="padding:10px 16px;border:2px solid #333;border-radius:10px;background:#2a2a2a;color:#999;font-size:14px;font-weight:700;cursor:pointer;">90 min</button>
-            <button onclick="ppSetTime(120)" class="pp-time-btn" style="padding:10px 16px;border:2px solid #333;border-radius:10px;background:#2a2a2a;color:#999;font-size:14px;font-weight:700;cursor:pointer;">2 hrs</button>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;justify-content:center;">
-            <span style="font-size:12px;color:#606060;">Custom:</span>
-            <input type="number" id="ppCustomTime" min="10" max="300" value="60" style="width:70px;height:36px;background:#1e1e1e;color:#fff;border:2px solid #333;border-radius:8px;text-align:center;font-size:15px;font-weight:700;font-family:inherit;" oninput="ppSetTime(parseInt(this.value))">
-            <span style="font-size:12px;color:#606060;">min</span>
-          </div>
+          <select id="ppTimeSelect" onchange="ppSetTime(parseInt(this.value))" style="width:100%;height:42px;background:#1e1e1e;color:#fff;border:1px solid #3d3d3d;border-radius:8px;text-align:center;font-size:15px;font-weight:700;font-family:inherit;appearance:none;-webkit-appearance:none;padding:0 10px;">
+            <option value="30">30 min</option>
+            <option value="45">45 min</option>
+            <option value="60" selected>60 min</option>
+            <option value="90">90 min</option>
+            <option value="120">2 hrs</option>
+          </select>
         </div>
         <!-- Pie chart + breakdown -->
         <div id="ppRecLoading" style="display:none;text-align:center;color:#606060;padding:20px;">Loading your round data...</div>
