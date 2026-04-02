@@ -17715,9 +17715,42 @@ function ppRenderTourRoutine() {
   var html = '';
   var sections = [
     { title: 'Warm Up & Exercises', color: '#888', items: [] },
-    { title: 'Range', color: '#e06666', items: [] },
-    { title: 'Short Game', color: '#93c47d', items: [] },
-    { title: 'Putting', color: '#f6b26b', items: [] },
+    { title: 'Putting', color: '#f6b26b', items: [
+      { text: 'Make 15 Gate drill in a row from 3 ft' },
+      { text: 'Make 15 Double gate drill from 7 ft', goal: '10/15' },
+      { text: 'break' },
+      { text: 'Hit 3x5 Around the world from 5 ft', goal: '10/15', tour: '11/15' },
+      { text: 'Hit 3x5 Around the world from 10 ft', goal: '6/15', tour: '6/15' },
+      { text: 'Hit 3x5 Around the world from 15 ft', goal: '3/15', tour: '3/15' },
+      { text: 'break' },
+      { text: 'Leapfrog drill — fit 8 balls into 10 ft space from 3 ft' },
+      { text: 'Hit 3x3 Around the world from 30 ft', goal: 'Avg 2 putts', tour: '1.98 putts' },
+      { text: 'Play 6 holes with 1 ball: 4ft, 30ft, 9ft, 12ft, 25ft, 6ft', goal: '<12', tour: '9.7 putts' }
+    ]},
+    { title: 'Short Game', color: '#93c47d', items: [
+      { text: '5 from 5 yds', goal: '3 ft', tour: '<3 ft' },
+      { text: '5 from 10 yds', goal: '5 ft', tour: '4 ft' },
+      { text: '5 from 15 yds', goal: '6 ft', tour: '5 ft' },
+      { text: '5 from 20 yds', goal: '7 ft', tour: '6 ft' },
+      { text: '5 from 25 yds', goal: '8 ft', tour: '7 ft' },
+      { text: 'break' },
+      { text: '5 short bunker shots (5-10 yds)', goal: 'On green', tour: '9 ft' },
+      { text: '5 medium bunker shots (10-15 yds)', goal: 'On green', tour: '10 ft' },
+      { text: '5 long bunker shots (15+ yds)', goal: 'On green', tour: '11 ft' }
+    ]},
+    { title: 'Range', color: '#e06666', items: [
+      { text: '5 balls leapfrogging 30-60 yards' },
+      { text: '5 short irons (PW-8i) at single target' },
+      { text: '5 mid irons (7i-6i) at single target' },
+      { text: '5 long irons/hybrids (5i-4i) at single target' },
+      { text: 'break' },
+      { text: '5 woods (5W-3W) at single target' },
+      { text: '5 drivers at single target' },
+      { text: 'break' },
+      { text: '5 drivers in 5 different "fairways"' },
+      { text: '5 mid irons at 5 different "greens"' },
+      { text: '5 drivers focusing solely on speed/distance' }
+    ]},
     { title: 'On Course', color: '#b4a7d6', items: [] }
   ];
 
@@ -17732,11 +17765,23 @@ function ppRenderTourRoutine() {
       html += '<div style="font-size:12px;color:#555;font-style:italic;">Coming soon</div>';
     }
     s.items.forEach(function(item, ii) {
+      if (item.text === 'break') {
+        html += '<div style="border-top:1px solid #333;margin:6px 0;"></div>';
+        return;
+      }
       var uid = 'ppTourDrill_' + s.title.replace(/[^a-zA-Z]/g,'') + '_' + ii;
       html += '<div style="display:flex;align-items:center;gap:10px;padding:4px 0;">';
       html += '<div id="' + uid + '" onclick="ppToggleDrill(this,event)" style="width:22px;height:22px;min-width:22px;border-radius:50%;border:2px solid #555;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;"></div>';
-      html += '<div style="flex:1;font-size:12px;color:#999;">' + item + '</div>';
-      html += '</div>';
+      html += '<div style="flex:1;">';
+      html += '<div style="font-size:12px;color:#999;">' + item.text + '</div>';
+      if (item.goal || item.tour) {
+        html += '<div style="font-size:10px;color:#555;margin-top:1px;">';
+        if (item.goal) html += '<span style="color:#6fa8dc;">Goal: ' + item.goal + '</span>';
+        if (item.goal && item.tour) html += '<span style="margin:0 6px;">|</span>';
+        if (item.tour) html += '<span style="color:#93c47d;">Tour: ' + item.tour + '</span>';
+        html += '</div>';
+      }
+      html += '</div></div>';
     });
     html += '</div></div>';
   });
