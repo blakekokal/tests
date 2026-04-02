@@ -17668,7 +17668,6 @@ function ppGetDrills(category, totalMins, sgVal) {
     var wedgeTips = ['Block: 10 shots with same wedge to 100 yd target — same club, same swing','Block: Clock system — 9 o\'clock swing, 10 shots, then 10 o\'clock, 10 shots','Random: Leapfrog — 80, 90, 100, 110, 120 yd targets, different club each shot','Random: Alternate wedges — PW to 110, GW to 100, SW to 80, rotate through'];
     if (lm) wedgeTips.push('Random: Run a Wedge Combine');
     var midIronTips = ['Block: 10 shots with 7i to same target — focus on center contact','Block: 10 shots with 8i to same target — consistent distance','Random: Alternate clubs — hit 7i, then 8i, then 9i, different target each shot','Random: Leapfrog — 140, 150, 160, 170 yd targets, pick the right club each time'];
-    if (lm) midIronTips.push('Random: Run a Wedge Combine');
     var longAppTips = ['Block: 10 shots with same long iron to one flag — commit to target','Block: Stock shot — same club, same target, 10 in a row','Random: Shape practice — alternate draw and fade to same target','Random: 3-shot challenge — 3 balls to same target, check dispersion, move to new target'];
     if (totalMins <= 15) {
       drills.push({ name: 'Mid irons 140-170 yds', mins: Math.round(totalMins * 0.5), detail: appClubs140_170, tips: midIronTips });
@@ -17691,9 +17690,7 @@ function ppGetDrills(category, totalMins, sgVal) {
       });
     }
     var driverTips = ['Block: 10 drivers to same fairway target — aim for 7/10 hit rate','Block: Swing at 80% — 10 shots focusing on center strike, not distance','Random: Tee shot simulation — pick a hole, pick a target, commit, then switch holes','Random: Play 9 imaginary holes — change target shape each time'];
-    if (lm) driverTips.push('Random: Run a Driver Combine');
     var driverShapeTips = ['Block: 10 draws in a row to same target','Block: 10 fades in a row to same target','Random: Alternate draw/fade — switch shape every shot','Random: Tee shot simulation — play imaginary holes, pick the right shape each time'];
-    if (lm) driverShapeTips.push('Random: Run a Driver Combine');
     var driverTempoTips = ['Block: 10 swings at 70% — same target, focus on center contact','Block: Slow motion swing then real swing — alternate, 10 reps','Random: 3 balls same target — watch the dispersion, adjust tempo','Random: Hit driver, then 3W, then driver — change clubs to reset tempo'];
     var woodTips = ['Block: 10 shots with 3W to same target — focus on solid contact','Block: Punch shots — 10 low trajectory shots in a row','Random: Tight fairway sim — narrow your target, change target each shot','Random: Alternate draw and fade off the tee — different shape each shot'];
     if (totalMins <= 15) {
