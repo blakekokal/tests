@@ -17266,8 +17266,8 @@ function ppRenderPlan(sg) {
       html += '<span style="font-size:10px;color:#555;">min</span></div>';
       html += '</div>';
       if (d.tips && d.tips.length) {
-        html += '<div style="margin-left:34px;margin-top:4px;">';
-        html += '<button onclick="var t=document.getElementById(\'' + tipsId + '\');t.style.display=t.style.display===\'none\'?\'\':\'none\';this.textContent=t.style.display===\'none\'?\'How to practice ▸\':\'How to practice ▾\';event.stopPropagation();" style="background:none;border:none;color:#2d7abc;font-size:11px;font-weight:700;cursor:pointer;padding:0;height:auto;max-width:none;width:auto;">How to practice ▸</button>';
+        html += '<div style="margin-left:0;margin-top:4px;">';
+        html += '<button onclick="var t=document.getElementById(\'' + tipsId + '\');t.style.display=t.style.display===\'none\'?\'\':\'none\';this.textContent=t.style.display===\'none\'?\'What to practice ▸\':\'What to practice ▾\';event.stopPropagation();" style="background:none;border:none;color:#2d7abc;font-size:11px;font-weight:700;cursor:pointer;padding:0;height:auto;max-width:none;width:auto;">What to practice ▸</button>';
         html += '<div id="' + tipsId + '" style="display:none;margin-top:6px;">';
         d.tips.forEach(function(tip) {
           html += '<div style="font-size:11px;color:#888;padding:3px 0;padding-left:8px;border-left:2px solid #333;">' + tip + '</div>';
