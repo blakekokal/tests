@@ -17231,13 +17231,45 @@ function ppRenderPlan(sg) {
   cats.forEach(function(c) { c.pct = Math.round(c.mins / practiceMins * 100); });
   cats.sort(function(a, b) { return a.sg - b.sg; }); // worst first
 
-  // Draw pie chart
-  ppDrawPie(cats, practiceMins);
+  // Build pie chart categories — group APP + OTT into "Range"
+  var pieCats = [];
+  var rangeMins = 0;
+  var rangePct = 0;
+  cats.forEach(function(c) {
+    if (c.key === 'app' || c.key === 'ott') {
+      rangeMins += c.mins;
+      rangePct += c.pct;
+    } else {
+      pieCats.push(c);
+    }
+  });
+  if (rangeMins > 0) {
+    pieCats.unshift({ key: 'range', label: 'Range', fullLabel: 'Range', mins: rangeMins, pct: rangePct, color: '#e06666' });
+  }
 
-  // Build breakdown cards
+  // Draw pie chart with grouped categories
+  ppDrawPie(pieCats, practiceMins);
+
+  // Build breakdown cards — order: APP, OTT, then rest (so range drills are together)
   var html = '';
+  var appCat = null, ottCat = null, otherCats = [];
+  cats.forEach(function(c) {
+    if (c.key === 'app') appCat = c;
+    else if (c.key === 'ott') ottCat = c;
+    else otherCats.push(c);
+  });
 
-  cats.forEach(function(c, ci) {
+  // Show range header with combined time
+  if (appCat || ottCat) {
+    html += '<div style="font-size:12px;font-weight:700;color:#e06666;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Range — ' + rangeMins + ' min</div>';
+  }
+
+  var orderedCats = [];
+  if (appCat) orderedCats.push(appCat);
+  if (ottCat) orderedCats.push(ottCat);
+  orderedCats = orderedCats.concat(otherCats);
+
+  orderedCats.forEach(function(c, ci) {
     var drills = ppGetDrills(c.key, c.mins, c.sg);
     html += '<div style="background:#222;border-radius:12px;padding:14px 16px;border-left:4px solid ' + c.color + ';">';
     html += '<div onclick="this.parentElement.querySelector(\'.pp-drill-detail\').style.display=this.parentElement.querySelector(\'.pp-drill-detail\').style.display===\'none\'?\'\':\'none\'" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;">';
