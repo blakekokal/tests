@@ -17685,7 +17685,6 @@ function ppRenderPlan(sg) {
       html += '</div>';
       if (d.tips && d.tips.length) {
         // Pick 1 random Block tip and 1 random Random tip
-        // Tips can be strings ("Block: ...") or objects ({type:'block', text:'...', drillId, drillCat})
         var blockTips = d.tips.filter(function(t) {
           return typeof t === 'object' ? t.type === 'block' : t.indexOf('Block:') === 0;
         });
@@ -17695,28 +17694,37 @@ function ppRenderPlan(sg) {
         var pickedTips = [];
         if (blockTips.length) pickedTips.push(blockTips[Math.floor(Math.random() * blockTips.length)]);
         if (randomTips.length) pickedTips.push(randomTips[Math.floor(Math.random() * randomTips.length)]);
-        html += '<div style="margin-left:0;margin-top:4px;">';
-        html += '<button onclick="var t=document.getElementById(\'' + tipsId + '\');t.style.display=t.style.display===\'none\'?\'\':\'none\';this.textContent=t.style.display===\'none\'?\'What to practice ▸\':\'What to practice ▾\';event.stopPropagation();" style="background:none;border:none;color:#2d7abc;font-size:11px;font-weight:700;cursor:pointer;padding:0;height:auto;max-width:none;width:auto;">What to practice ▸</button>';
-        html += '<div id="' + tipsId + '" style="display:none;margin-top:6px;">';
+        html += '<div style="margin-left:34px;margin-top:4px;">';
         pickedTips.forEach(function(tip) {
           var label = '';
-          var text = '';
-          var drillLink = '';
+          var drillName = '';
+          var drillId = null;
+          var drillCat = null;
           if (typeof tip === 'object') {
             label = tip.type === 'block' ? 'Block' : tip.type === 'random' ? 'Random' : '';
-            text = tip.text;
-            if (tip.drillId && tip.drillCat) {
-              drillLink = ' <a onclick="ppOpenDrillFromPractice(\'' + tip.drillId + '\',\'' + tip.drillCat + '\');event.stopPropagation();" style="color:#44b8f0;font-weight:700;cursor:pointer;text-decoration:underline;">View Drill ›</a>';
+            drillId = tip.drillId;
+            drillCat = tip.drillCat;
+            // Extract drill title from drillsData
+            if (drillId && drillCat && drillsData[drillCat]) {
+              var drillObj = drillsData[drillCat].find(function(dd) { return dd.id === drillId; });
+              drillName = drillObj ? drillObj.title : tip.text;
+            } else {
+              drillName = tip.text;
             }
           } else {
-            if (tip.indexOf('Block:') === 0) { label = 'Block'; text = tip.substring(6).trim(); }
-            else if (tip.indexOf('Random:') === 0) { label = 'Random'; text = tip.substring(7).trim(); }
-            else { text = tip; }
+            if (tip.indexOf('Block:') === 0) { label = 'Block'; drillName = tip.substring(6).trim(); }
+            else if (tip.indexOf('Random:') === 0) { label = 'Random'; drillName = tip.substring(7).trim(); }
+            else { drillName = tip; }
           }
-          var labelHtml = label ? '<span style="font-size:10px;font-weight:700;color:' + (label === 'Block' ? '#6fa8dc' : '#e6a84d') + ';margin-right:4px;">' + label + '</span>' : '';
-          html += '<div style="font-size:11px;color:#888;padding:3px 0;padding-left:8px;border-left:2px solid ' + (label === 'Block' ? '#6fa8dc' : label === 'Random' ? '#e6a84d' : '#333') + ';">' + labelHtml + text + drillLink + '</div>';
+          var labelColor = label === 'Block' ? '#6fa8dc' : '#e6a84d';
+          var labelHtml = label ? '<span style="font-size:10px;font-weight:700;color:' + labelColor + ';margin-right:6px;">' + label + '</span>' : '';
+          if (drillId && drillCat) {
+            html += '<div style="font-size:12px;padding:4px 0;">' + labelHtml + '<a onclick="ppOpenDrillFromPractice(\'' + drillId + '\',\'' + drillCat + '\');event.stopPropagation();" style="color:#44b8f0;font-weight:700;cursor:pointer;text-decoration:underline;">' + drillName + '</a></div>';
+          } else {
+            html += '<div style="font-size:12px;color:#888;padding:4px 0;">' + labelHtml + drillName + '</div>';
+          }
         });
-        html += '</div></div>';
+        html += '</div>';
       }
       html += '</div>';
     });
