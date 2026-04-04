@@ -15744,6 +15744,7 @@ async function loadStudentAssignedCombines() {
 var _drillDetailBackTarget = 'drillsPage';
 var _drillDetailBackPracticeTab = null; // track if we came from recommended practice
 var _drillDetailBackCategory = null; // track which drill category to restore
+var _ppReturningFromDrill = false; // skip ppBackToLanding when returning from drill detail
 function drillDetailBack() {
   var target = _drillDetailBackTarget;
   var practiceTab = _drillDetailBackPracticeTab;
@@ -15751,6 +15752,7 @@ function drillDetailBack() {
   _drillDetailBackTarget = 'drillsPage';
   _drillDetailBackPracticeTab = null;
   _drillDetailBackCategory = null;
+  if (practiceTab === 'plan') _ppReturningFromDrill = true;
   show(target);
   if (target === 'practiceHubPage' && practiceTab) {
     setPracticeHubTab(practiceTab);
@@ -17039,7 +17041,11 @@ function setPracticeHubTab(tab) {
   if (tab === 'combines') loadPHCombineHistory();
   if (tab === 'drills') { _drillsOnPracticeHub = true; setDrillCategory('putting'); }
   if (tab === 'plan') {
-    ppBackToLanding();
+    if (_ppReturningFromDrill) {
+      _ppReturningFromDrill = false;
+    } else {
+      ppBackToLanding();
+    }
   }
   // When leaving Learn tab, return SG calc to its original home
   if (tab !== 'learn') returnSGCalcToHelp();
