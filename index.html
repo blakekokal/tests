@@ -15693,11 +15693,21 @@ async function loadStudentAssignedCombines() {
 }
 
 var _drillDetailBackTarget = 'drillsPage';
+var _drillDetailBackPracticeTab = null; // track if we came from recommended practice
 function drillDetailBack() {
   var target = _drillDetailBackTarget;
+  var practiceTab = _drillDetailBackPracticeTab;
   _drillDetailBackTarget = 'drillsPage';
+  _drillDetailBackPracticeTab = null;
   show(target);
-  if (target === 'practiceHubPage') setPracticeHubTab('drills');
+  if (target === 'practiceHubPage' && practiceTab) setPracticeHubTab(practiceTab);
+  else if (target === 'practiceHubPage') setPracticeHubTab('drills');
+}
+
+function ppOpenDrillFromPractice(drillId, drillCat) {
+  _drillDetailBackTarget = 'practiceHubPage';
+  _drillDetailBackPracticeTab = 'plan';
+  showDrillDetail(drillId, drillCat);
 }
 
 function openAssignedDrillDetail(idx) {
@@ -17605,8 +17615,13 @@ function ppRenderPlan(sg) {
       html += '</div>';
       if (d.tips && d.tips.length) {
         // Pick 1 random Block tip and 1 random Random tip
-        var blockTips = d.tips.filter(function(t) { return t.indexOf('Block:') === 0; });
-        var randomTips = d.tips.filter(function(t) { return t.indexOf('Random:') === 0; });
+        // Tips can be strings ("Block: ...") or objects ({type:'block', text:'...', drillId, drillCat})
+        var blockTips = d.tips.filter(function(t) {
+          return typeof t === 'object' ? t.type === 'block' : t.indexOf('Block:') === 0;
+        });
+        var randomTips = d.tips.filter(function(t) {
+          return typeof t === 'object' ? t.type === 'random' : t.indexOf('Random:') === 0;
+        });
         var pickedTips = [];
         if (blockTips.length) pickedTips.push(blockTips[Math.floor(Math.random() * blockTips.length)]);
         if (randomTips.length) pickedTips.push(randomTips[Math.floor(Math.random() * randomTips.length)]);
@@ -17615,11 +17630,21 @@ function ppRenderPlan(sg) {
         html += '<div id="' + tipsId + '" style="display:none;margin-top:6px;">';
         pickedTips.forEach(function(tip) {
           var label = '';
-          var text = tip;
-          if (tip.indexOf('Block:') === 0) { label = 'Block'; text = tip.substring(6).trim(); }
-          else if (tip.indexOf('Random:') === 0) { label = 'Random'; text = tip.substring(7).trim(); }
+          var text = '';
+          var drillLink = '';
+          if (typeof tip === 'object') {
+            label = tip.type === 'block' ? 'Block' : tip.type === 'random' ? 'Random' : '';
+            text = tip.text;
+            if (tip.drillId && tip.drillCat) {
+              drillLink = ' <a onclick="ppOpenDrillFromPractice(\'' + tip.drillId + '\',\'' + tip.drillCat + '\');event.stopPropagation();" style="color:#44b8f0;font-weight:700;cursor:pointer;text-decoration:underline;">View Drill ›</a>';
+            }
+          } else {
+            if (tip.indexOf('Block:') === 0) { label = 'Block'; text = tip.substring(6).trim(); }
+            else if (tip.indexOf('Random:') === 0) { label = 'Random'; text = tip.substring(7).trim(); }
+            else { text = tip; }
+          }
           var labelHtml = label ? '<span style="font-size:10px;font-weight:700;color:' + (label === 'Block' ? '#6fa8dc' : '#e6a84d') + ';margin-right:4px;">' + label + '</span>' : '';
-          html += '<div style="font-size:11px;color:#888;padding:3px 0;padding-left:8px;border-left:2px solid ' + (label === 'Block' ? '#6fa8dc' : label === 'Random' ? '#e6a84d' : '#333') + ';">' + labelHtml + text + '</div>';
+          html += '<div style="font-size:11px;color:#888;padding:3px 0;padding-left:8px;border-left:2px solid ' + (label === 'Block' ? '#6fa8dc' : label === 'Random' ? '#e6a84d' : '#333') + ';">' + labelHtml + text + drillLink + '</div>';
         });
         html += '</div></div>';
       }
@@ -17955,9 +17980,28 @@ function ppGetDrills(category, totalMins, sgVal) {
   var drills = [];
   var lm = hasLaunchMonitor();
   if (category === 'putt') {
-    var shortTips = ['Block: Make 10 in a row from 4 ft, then 5 ft, then 6 ft — restart if you miss','Block: Gate drill — two tees just wider than putter, make 10 in a row','Block: Double gate drill — gates at putter and at hole, 10 putts','Random: Around the world — 4-8 putts in a circle, different breaks each putt','Random: Tornado drill — make from one spot, move to next, go back if you miss','Random: Run a Short Putting Combine'];
-    var midTips = ['Block: Pick one distance (10 ft), same putt 10 times — focus on speed','Block: Gate drill from 10 ft — 10 putts through the gate','Random: Around the world from 10 ft — different breaks, read each one','Random: 3 balls to 5 different holes — read, commit, roll','Random: Run a Putting Combine'];
-    var lagTips = ['Block: 10 putts to 25 ft — get all within 3 ft circle','Block: 10 putts to 35 ft — same target, dial in speed','Random: Leapfrog — putt to 25 ft, next putt past it, keep going to 50 ft','Random: Speed ladder — putt to 25, 30, 40, 50 ft, different distances each putt','Random: Eyes closed putting — feel the distance, check result','Random: Run a Putting Combine for long putts'];
+    var shortTips = [
+      {type:'block', text:'Gate Drill — two tees just wider than putter, make 10 in a row', drillId:'gate', drillCat:'putting'},
+      {type:'block', text:'Double Gate Drill — gates at putter and at hole, 10 putts', drillId:'double_gate', drillCat:'putting'},
+      {type:'block', text:'Clock Drill — 4-8 putts in a circle from 3-5 ft', drillId:'clock', drillCat:'putting'},
+      {type:'random', text:'Around the world — 4-8 putts in a circle, different breaks each putt'},
+      {type:'random', text:'Spiral Pressure Drill — make from one spot, move out, go back if you miss', drillId:'spiral_pressure', drillCat:'putting'},
+      {type:'random', text:'Run a Short Putting Combine'}
+    ];
+    var midTips = [
+      {type:'block', text:'Gate Drill from 10 ft — 10 putts through the gate', drillId:'gate', drillCat:'putting'},
+      {type:'block', text:'3-6-9 Circle Drill — putts at 3, 6, and 9 ft around the hole', drillId:'369_circle', drillCat:'putting'},
+      {type:'random', text:'Around the world from 10 ft — different breaks, read each one'},
+      {type:'random', text:'3 balls to 5 different holes — read, commit, roll'},
+      {type:'random', text:'Run a Putting Combine'}
+    ];
+    var lagTips = [
+      {type:'block', text:'Lag Putting Ladder — 10 putts to 25 ft, get all within 3 ft circle', drillId:'lag_ladder', drillCat:'putting'},
+      {type:'block', text:'10 putts to 35 ft — same target, dial in speed'},
+      {type:'random', text:'Leapfrog Drill — putt to 25 ft, next putt past it, keep going to 50 ft', drillId:'leapfrog_putting', drillCat:'putting'},
+      {type:'random', text:'Speed ladder — putt to 25, 30, 40, 50 ft, different distances each putt'},
+      {type:'random', text:'Run a Putting Combine for long putts'}
+    ];
     if (totalMins <= 15) {
       drills.push({ name: 'Putts 4-8 ft', mins: Math.round(totalMins * 0.6), detail: '', tips: shortTips });
       drills.push({ name: 'Lag putts 25-40 ft', mins: Math.round(totalMins * 0.4), detail: '', tips: lagTips });
