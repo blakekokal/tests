@@ -15754,7 +15754,13 @@ function drillDetailBack() {
   _drillDetailBackCategory = null;
   if (practiceTab === 'plan') _ppReturningFromDrill = true;
   show(target);
-  if (target === 'practiceHubPage' && practiceTab) {
+  // When returning from drill to recommended practice, show() already
+  // called setPracticeHubTab via the practiceHubPage handler, and the
+  // _ppReturningFromDrill flag prevented ppBackToLanding. Don't call
+  // setPracticeHubTab again. Just restore the recommended view.
+  if (target === 'practiceHubPage' && practiceTab === 'plan') {
+    // Recommended view is already visible thanks to the flag
+  } else if (target === 'practiceHubPage' && practiceTab) {
     setPracticeHubTab(practiceTab);
   } else if (target === 'practiceHubPage') {
     setPracticeHubTab('drills');
