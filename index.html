@@ -17694,7 +17694,10 @@ function ppRenderPlan(sg) {
         var pickedTips = [];
         if (blockTips.length) pickedTips.push(blockTips[Math.floor(Math.random() * blockTips.length)]);
         if (randomTips.length) pickedTips.push(randomTips[Math.floor(Math.random() * randomTips.length)]);
+        var wpId = 'wpTips_' + ci + '_' + di;
         html += '<div style="margin-left:34px;margin-top:4px;">';
+        html += '<div onclick="var el=document.getElementById(\'' + wpId + '\');var arr=this.querySelector(\'span\');if(el.style.display===\'none\'){el.style.display=\'block\';arr.textContent=\'▾\';}else{el.style.display=\'none\';arr.textContent=\'▸\';};event.stopPropagation();" style="font-size:11px;color:#888;cursor:pointer;font-weight:600;">What to practice <span>▸</span></div>';
+        html += '<div id="' + wpId + '" style="display:none;margin-top:4px;text-align:left;">';
         pickedTips.forEach(function(tip) {
           var label = '';
           var drillName = '';
@@ -17704,7 +17707,6 @@ function ppRenderPlan(sg) {
             label = tip.type === 'block' ? 'Block' : tip.type === 'random' ? 'Random' : '';
             drillId = tip.drillId;
             drillCat = tip.drillCat;
-            // Extract drill title from drillsData
             if (drillId && drillCat && drillsData[drillCat]) {
               var drillObj = drillsData[drillCat].find(function(dd) { return dd.id === drillId; });
               drillName = drillObj ? drillObj.title : tip.text;
@@ -17717,14 +17719,14 @@ function ppRenderPlan(sg) {
             else { drillName = tip; }
           }
           var labelColor = label === 'Block' ? '#6fa8dc' : '#e6a84d';
-          var labelHtml = label ? '<span style="font-size:10px;font-weight:700;color:' + labelColor + ';margin-right:6px;">' + label + '</span>' : '';
+          var labelHtml = label ? '<span style="font-size:11px;font-weight:700;color:' + labelColor + ';margin-right:6px;">' + label + ' -</span>' : '';
           if (drillId && drillCat) {
-            html += '<div style="font-size:12px;padding:4px 0;">' + labelHtml + '<a onclick="ppOpenDrillFromPractice(\'' + drillId + '\',\'' + drillCat + '\');event.stopPropagation();" style="color:#44b8f0;font-weight:700;cursor:pointer;text-decoration:underline;">' + drillName + '</a></div>';
+            html += '<div style="font-size:12px;padding:4px 0;text-align:left;">' + labelHtml + '<a onclick="ppOpenDrillFromPractice(\'' + drillId + '\',\'' + drillCat + '\');event.stopPropagation();" style="color:#44b8f0;font-weight:700;cursor:pointer;text-decoration:underline;">' + drillName + '</a></div>';
           } else {
-            html += '<div style="font-size:12px;color:#888;padding:4px 0;">' + labelHtml + drillName + '</div>';
+            html += '<div style="font-size:12px;color:#888;padding:4px 0;text-align:left;">' + labelHtml + drillName + '</div>';
           }
         });
-        html += '</div>';
+        html += '</div></div>';
       }
       html += '</div>';
     });
