@@ -18021,7 +18021,7 @@ function ppGetDrills(category, totalMins, sgVal) {
     var driverTempoTips = ['Block: 10 swings at 70% — same target, focus on center contact','Block: Slow motion swing then real swing — alternate, 10 reps','Random: 3 balls same target — watch the dispersion, adjust tempo','Random: Hit driver, then 3W, then driver — change clubs to reset tempo'];
     var woodTips = ['Block: 10 shots with 3W to same target — focus on solid contact','Block: Punch shots — 10 low trajectory shots in a row','Random: Tight fairway sim — narrow your target, change target each shot','Random: Alternate draw and fade off the tee — different shape each shot'];
     if (totalMins <= 15) {
-      drills.push({ name: 'Driver — target focus', mins: Math.round(totalMins * 0.6), detail: driverName, tips: driverTips });
+      drills.push({ name: 'Driver — fairway focus', mins: Math.round(totalMins * 0.6), detail: driverName, tips: driverTips });
       drills.push({ name: '3 Wood / hybrid off tee', mins: Math.round(totalMins * 0.4), detail: woodName, tips: woodTips });
     } else {
       var t1 = Math.round(totalMins * 0.45);
