@@ -17925,18 +17925,26 @@ function ppDrawPie(cats, total) {
     ctx.fill();
     // Label: category name + time on the slice
     var mid = (angle + sliceEnd) / 2;
-    var lr = (r + ir) / 2 + 5;
+    var lr = (r + ir) / 2;
     var lx = cx + lr * Math.cos(mid);
     var ly = cy + lr * Math.sin(mid);
+    // Clamp labels so they don't hang off the canvas edge
+    var pad = 24;
+    if (lx < pad) lx = pad;
+    if (lx > 280 - pad) lx = 280 - pad;
+    if (ly < pad) ly = pad;
+    if (ly > 280 - pad) ly = 280 - pad;
     ctx.fillStyle = '#fff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    if (c.pct >= 15) {
+    // Only show labels if slice is big enough
+    var sliceAngle = sliceEnd - angle;
+    if (sliceAngle > 0.6) {
       ctx.font = 'bold 11px sans-serif';
       ctx.fillText(c.label, lx, ly - 7);
       ctx.font = 'bold 13px sans-serif';
       ctx.fillText(c.mins + ' min', lx, ly + 8);
-    } else if (c.pct >= 8) {
+    } else if (sliceAngle > 0.3) {
       ctx.font = 'bold 10px sans-serif';
       ctx.fillText(c.mins + 'm', lx, ly);
     }
