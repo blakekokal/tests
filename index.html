@@ -17604,10 +17604,16 @@ function ppRenderPlan(sg) {
       html += '<span style="font-size:10px;color:#555;">min</span></div>';
       html += '</div>';
       if (d.tips && d.tips.length) {
+        // Pick 1 random Block tip and 1 random Random tip
+        var blockTips = d.tips.filter(function(t) { return t.indexOf('Block:') === 0; });
+        var randomTips = d.tips.filter(function(t) { return t.indexOf('Random:') === 0; });
+        var pickedTips = [];
+        if (blockTips.length) pickedTips.push(blockTips[Math.floor(Math.random() * blockTips.length)]);
+        if (randomTips.length) pickedTips.push(randomTips[Math.floor(Math.random() * randomTips.length)]);
         html += '<div style="margin-left:0;margin-top:4px;">';
         html += '<button onclick="var t=document.getElementById(\'' + tipsId + '\');t.style.display=t.style.display===\'none\'?\'\':\'none\';this.textContent=t.style.display===\'none\'?\'What to practice ▸\':\'What to practice ▾\';event.stopPropagation();" style="background:none;border:none;color:#2d7abc;font-size:11px;font-weight:700;cursor:pointer;padding:0;height:auto;max-width:none;width:auto;">What to practice ▸</button>';
         html += '<div id="' + tipsId + '" style="display:none;margin-top:6px;">';
-        d.tips.forEach(function(tip) {
+        pickedTips.forEach(function(tip) {
           var label = '';
           var text = tip;
           if (tip.indexOf('Block:') === 0) { label = 'Block'; text = tip.substring(6).trim(); }
