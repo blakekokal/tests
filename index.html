@@ -17695,10 +17695,12 @@ function ppRenderPlan(sg) {
           var drillName = '';
           var drillId = null;
           var drillCat = null;
+          var combineFunc = null;
           if (typeof tip === 'object') {
             label = tip.type === 'block' ? 'Block' : tip.type === 'random' ? 'Random' : '';
             drillId = tip.drillId;
             drillCat = tip.drillCat;
+            combineFunc = tip.combineFunc || null;
             if (drillId && drillCat && drillsData[drillCat]) {
               var drillObj = drillsData[drillCat].find(function(dd) { return dd.id === drillId; });
               drillName = drillObj ? drillObj.title : tip.text;
@@ -17712,7 +17714,9 @@ function ppRenderPlan(sg) {
           }
           var labelColor = label === 'Block' ? '#6fa8dc' : '#e6a84d';
           var labelHtml = label ? '<span style="font-size:11px;font-weight:700;color:' + labelColor + ';margin-right:6px;">' + label + ' -</span>' : '';
-          if (drillId && drillCat) {
+          if (combineFunc) {
+            wpExpandHtml += '<div style="font-size:12px;padding:4px 0;text-align:left;">' + labelHtml + '<a onclick="' + combineFunc + '();event.stopPropagation();" style="color:#44b8f0;font-weight:700;cursor:pointer;text-decoration:underline;">' + drillName + '</a></div>';
+          } else if (drillId && drillCat) {
             wpExpandHtml += '<div style="font-size:12px;padding:4px 0;text-align:left;">' + labelHtml + '<a onclick="ppOpenDrillFromPractice(\'' + drillId + '\',\'' + drillCat + '\');event.stopPropagation();" style="color:#44b8f0;font-weight:700;cursor:pointer;text-decoration:underline;">' + drillName + '</a></div>';
           } else {
             wpExpandHtml += '<div style="font-size:12px;color:#888;padding:4px 0;text-align:left;">' + labelHtml + drillName + '</div>';
@@ -18070,21 +18074,21 @@ function ppGetDrills(category, totalMins, sgVal) {
       {type:'block', text:'Clock Drill — 4-8 putts in a circle from 3-5 ft', drillId:'clock', drillCat:'putting'},
       {type:'random', text:'Around the world — 4-8 putts in a circle, different breaks each putt'},
       {type:'random', text:'Spiral Pressure Drill — make from one spot, move out, go back if you miss', drillId:'spiral_pressure', drillCat:'putting'},
-      {type:'random', text:'Run a Short Putting Combine'}
+      {type:'random', text:'Run a Short Putting Combine', combineFunc:'goToPuttingCombine'}
     ];
     var midTips = [
       {type:'block', text:'Gate Drill from 10 ft — 10 putts through the gate', drillId:'gate', drillCat:'putting'},
       {type:'block', text:'3, 6, 9 Drill — make 9 in a row, 3 from each distance, restart on miss', drillId:'369_drill', drillCat:'putting'},
       {type:'random', text:'Around the world from 10 ft — different breaks, read each one'},
       {type:'random', text:'3 balls to 5 different holes — read, commit, roll'},
-      {type:'random', text:'Run a Putting Combine'}
+      {type:'random', text:'Run a Putting Combine', combineFunc:'goToPuttingCombine'}
     ];
     var lagTips = [
       {type:'block', text:'Anti 3-Putt Drill — two-putt from increasing distances, restart on 3-putt', drillId:'anti_3putt', drillCat:'putting'},
       {type:'block', text:'10 putts to 35 ft — same target, dial in speed'},
       {type:'random', text:'Leapfrog Drill — putt to 25 ft, next putt past it, keep going to 50 ft', drillId:'leapfrog_putting', drillCat:'putting'},
       {type:'random', text:'Speed ladder — putt to 25, 30, 40, 50 ft, different distances each putt'},
-      {type:'random', text:'Run a Putting Combine for long putts'}
+      {type:'random', text:'Run a Putting Combine for long putts', combineFunc:'goToPuttingCombine'}
     ];
     if (totalMins <= 15) {
       drills.push({ name: 'Putts 4-8 ft', mins: Math.round(totalMins * 0.6), detail: '', tips: shortTips });
@@ -18099,7 +18103,7 @@ function ppGetDrills(category, totalMins, sgVal) {
     }
   } else if (category === 'arg') {
     var argClubs10_30 = ppFindClubsInRange(10, 30);
-    var chipTips = ['Block: 10 shots from 10 yds to same target — focus on landing spot and consistent trajectory','Block: Move back to 20 yds, 10 more shots to same spot','Block: Move back to 30 yds, 10 more shots — same landing zone focus','Random: Low/mid/high — alternate all 3 trajectories to the same hole','Random: Up & down challenge — chip and putt, keep score, simulate on-course pressure','Random: Run a Chipping Combine'];
+    var chipTips = ['Block: 10 shots from 10 yds to same target — focus on landing spot and consistent trajectory','Block: Move back to 20 yds, 10 more shots to same spot','Block: Move back to 30 yds, 10 more shots — same landing zone focus','Random: Low/mid/high — alternate all 3 trajectories to the same hole','Random: Up & down challenge — chip and putt, keep score, simulate on-course pressure',{type:'random', text:'Run a Chipping Combine', combineFunc:'goToCombines'}];
     var bunkerTips = ['Block: 10 shots from same lie — focus on hitting 2 inches behind the ball','Block: 10 shots to same pin — vary between short and long bunker shots','Random: Different lies — clean, plugged, uphill, downhill, change each shot','Random: Up & down from sand — bunker shot + putt, keep score like on the course'];
     if (totalMins <= 15) {
       drills.push({ name: 'Chipping 10-30 yds', mins: Math.round(totalMins * 0.6), detail: argClubs10_30, tips: chipTips });
@@ -18116,9 +18120,9 @@ function ppGetDrills(category, totalMins, sgVal) {
     var appClubs140_170 = ppFindClubsInRange(140, 170);
     var appClubs180_210 = ppFindClubsInRange(180, 210);
     var shortWedgeTips = ['Block: 10 half-swing pitches from 40 yds to one pin — same club, same swing','Block: Move to 50 yds, 10 more shots — adjust for distance','Block: Clock system — 9 o\'clock swing, 10 shots, then 10 o\'clock, 10 shots','Random: Leapfrog — 30, 40, 50, 60, 70 yd targets, different distance each shot','Random: Up & down game — pitch and putt from random spots, keep score'];
-    if (lm) shortWedgeTips.push('Random: Run a Wedge Combine');
+    if (lm) shortWedgeTips.push({type:'random', text:'Run a Wedge Combine', combineFunc:'goToWedgeCombine'});
     var wedgeTips = ['Block: 10 shots with same wedge to 100 yd target — same club, same swing','Block: Clock system — 9 o\'clock swing, 10 shots, then 10 o\'clock, 10 shots','Random: Leapfrog — 80, 90, 100, 110, 120 yd targets, different club each shot','Random: Alternate wedges — PW to 110, GW to 100, SW to 80, rotate through'];
-    if (lm) wedgeTips.push('Random: Run a Wedge Combine');
+    if (lm) wedgeTips.push({type:'random', text:'Run a Wedge Combine', combineFunc:'goToWedgeCombine'});
     var midIronTips = ['Block: 10 shots with 7i to same target — focus on center contact','Block: 10 shots with 8i to same target — consistent distance','Random: Alternate clubs — hit 7i, then 8i, then 9i, different target each shot','Random: Leapfrog — 140, 150, 160, 170 yd targets, pick the right club each time'];
     var longAppTips = ['Block: 10 shots with same long iron to one flag — commit to target','Block: Stock shot — same club, same target, 10 in a row','Random: Shape practice — alternate draw and fade to same target','Random: 3-shot challenge — 3 balls to same target, check dispersion, move to new target'];
     if (totalMins <= 15) {
