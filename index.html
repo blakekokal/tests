@@ -3623,9 +3623,14 @@ function goBackFromRoundView() {
 }
 
 function persistentBack() {
-  // Special case: editRoundInfoPage uses goBackFromEditRound
   var activePage = document.querySelector('.page.active');
   var activeId = activePage ? activePage.id : '';
+  // Special case: drillDetailPage uses drillDetailBack to restore context
+  if (activeId === 'drillDetailPage') {
+    drillDetailBack();
+    return;
+  }
+  // Special case: editRoundInfoPage uses goBackFromEditRound
   if (activeId === 'editRoundInfoPage' && typeof goBackFromEditRound === 'function') {
     goBackFromEditRound();
     return;
@@ -9110,6 +9115,7 @@ function showDrillDetail(drillId, cat) {
   if (_drillsOnPracticeHub) {
     _drillDetailBackTarget = 'practiceHubPage';
   }
+  _drillDetailBackCategory = cat;
   document.getElementById('drillDetailContent').innerHTML = html;
   show('drillDetailPage');
 }
@@ -15732,14 +15738,23 @@ async function loadStudentAssignedCombines() {
 
 var _drillDetailBackTarget = 'drillsPage';
 var _drillDetailBackPracticeTab = null; // track if we came from recommended practice
+var _drillDetailBackCategory = null; // track which drill category to restore
 function drillDetailBack() {
   var target = _drillDetailBackTarget;
   var practiceTab = _drillDetailBackPracticeTab;
+  var backCat = _drillDetailBackCategory;
   _drillDetailBackTarget = 'drillsPage';
   _drillDetailBackPracticeTab = null;
+  _drillDetailBackCategory = null;
   show(target);
-  if (target === 'practiceHubPage' && practiceTab) setPracticeHubTab(practiceTab);
-  else if (target === 'practiceHubPage') setPracticeHubTab('drills');
+  if (target === 'practiceHubPage' && practiceTab) {
+    setPracticeHubTab(practiceTab);
+  } else if (target === 'practiceHubPage') {
+    setPracticeHubTab('drills');
+    if (backCat) setDrillCategory(backCat);
+  } else if (target === 'drillsPage') {
+    if (backCat) setDrillCategory(backCat);
+  }
 }
 
 function ppOpenDrillFromPractice(drillId, drillCat) {
