@@ -17695,8 +17695,8 @@ function ppRenderPlan(sg) {
         if (blockTips.length) pickedTips.push(blockTips[Math.floor(Math.random() * blockTips.length)]);
         if (randomTips.length) pickedTips.push(randomTips[Math.floor(Math.random() * randomTips.length)]);
         var wpId = 'wpTips_' + ci + '_' + di;
-        html += '<div style="margin-left:34px;margin-top:4px;">';
-        html += '<div onclick="var el=document.getElementById(\'' + wpId + '\');var arr=this.querySelector(\'span\');if(el.style.display===\'none\'){el.style.display=\'block\';arr.textContent=\'▾\';}else{el.style.display=\'none\';arr.textContent=\'▸\';};event.stopPropagation();" style="font-size:11px;color:#888;cursor:pointer;font-weight:600;">What to practice <span>▸</span></div>';
+        html += '<div style="margin-left:10px;margin-top:4px;">';
+        html += '<div onclick="var el=document.getElementById(\'' + wpId + '\');var arr=this.querySelector(\'span\');if(el.style.display===\'none\'){el.style.display=\'block\';arr.textContent=\'▾\';}else{el.style.display=\'none\';arr.textContent=\'▸\';};event.stopPropagation();" style="font-size:11px;color:#44b8f0;cursor:pointer;font-weight:600;text-decoration:underline;">What to practice <span style="text-decoration:none;display:inline-block;">▸</span></div>';
         html += '<div id="' + wpId + '" style="display:none;margin-top:4px;text-align:left;">';
         pickedTips.forEach(function(tip) {
           var label = '';
