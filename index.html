@@ -15877,41 +15877,12 @@ async function loadCoachingPageCoachView() {
 
 function renderCoachingStudentRoster(students) {
   window._coachRosterData = students || [];
-  filterCoachingRoster();
+  // Old flat roster removed — teams view handles display now
+  // Just store data for other functions that reference it
 }
 
 function filterCoachingRoster() {
-  var students = window._coachRosterData || [];
-  var el = document.getElementById('coachingStudentRoster');
-  var q = (document.getElementById('coachRosterSearch').value || '').toLowerCase().trim();
-  
-  var filtered = students.filter(function(s) {
-    if (!q) return true;
-    return ((s.student_name || '').toLowerCase().indexOf(q) !== -1 || (s.student_email || '').toLowerCase().indexOf(q) !== -1);
-  });
-  
-  if (!students || students.length === 0) {
-    el.innerHTML = '<div style="text-align:center;color:#2e2e2e;font-size:13px;padding:20px 0;">No students yet. Add one above.</div>';
-    return;
-  }
-  if (filtered.length === 0) {
-    el.innerHTML = '<div style="text-align:center;color:#2e2e2e;font-size:13px;padding:20px 0;">No students match your search.</div>';
-    return;
-  }
-  el.innerHTML = filtered.map(function(s) {
-    var initials = (s.student_name || 'S').split(' ').map(function(w){ return w[0]; }).join('').toUpperCase().slice(0,2);
-    var sid = s.student_id.replace(/'/g, '');
-    var sname = (s.student_name || 'Student').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-    var semail = (s.student_email || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #282828;">'
-      + '<div style="width:36px;height:36px;border-radius:50%;background:#2d7abc;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#44b8f0;flex-shrink:0;">' + escapeHtml(initials) + '</div>'
-      + '<div style="flex:1;min-width:0;">'
-      + '<div style="display:flex;align-items:center;gap:6px;"><span style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(s.student_name || 'Student') + '</span>'
-      + '<span id="rosterHcp_' + sid + '" style="font-size:10px;font-weight:700;background:#1a4a8a;color:#44b8f0;padding:1px 6px;border-radius:10px;white-space:nowrap;"></span></div>'
-      + '<div style="font-size:11px;color:#2e2e2e;">' + escapeHtml(s.student_email || '') + '</div></div>'
-      + '<button onclick="viewStudent(\'' + sid + '\',\'' + sname + '\',\'' + semail + '\')" style="font-size:11px;font-weight:700;background:#2d7abc;border-radius:6px;padding:6px 10px;height:auto;max-width:none;width:auto;white-space:nowrap;">View</button>'
-      + '</div>';
-  }).join('');
+  // Old flat roster removed — teams view handles display now
 }
 
 function populateCoachStudentSelects(students) {
