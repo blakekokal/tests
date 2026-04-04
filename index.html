@@ -9097,14 +9097,14 @@ function showDrillDetail(drillId, cat) {
   if (drill.distance) html += '<span style="font-size:11px;color:#888;">' + drill.distance + '</span>';
   html += '</div>';
   html += '<div style="font-size:11px;color:#606060;text-align:center;margin-bottom:12px;">' + tags + '</div>';
-  if (drill.image) {
-    html += '<img src="' + drill.image + '" alt="' + drill.title + '" style="width:100%;border-radius:12px;display:block;margin:0 0 10px;">';
-  }
   if (drill.description) {
     html += '<div style="background:#282828;border-radius:10px;padding:14px;margin-bottom:10px;">';
     html += '<div style="font-size:12px;font-weight:700;color:#00b87a;margin-bottom:6px;">DESCRIPTION</div>';
     html += '<div style="font-size:13px;color:#9a9a9a;line-height:1.5;">' + drill.description + '</div>';
     html += '</div>';
+  }
+  if (drill.image) {
+    html += '<img src="' + drill.image + '" alt="' + drill.title + '" style="width:100%;border-radius:12px;display:block;margin:0 0 10px;">';
   }
 
   if (_drillsOnPracticeHub) {
