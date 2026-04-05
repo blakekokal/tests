@@ -18072,10 +18072,36 @@ function ppFindClubsInRange(minYds, maxYds) {
   var matched = [];
   clubs.forEach(function(c) {
     var dist = c.carry || c.total || 0;
-    if (dist >= minYds && dist <= maxYds) matched.push({ name: c.name, dist: dist });
+    if (dist >= minYds && dist <= maxYds) {
+      matched.push({ name: c.name, dist: dist });
+      return;
+    }
+    // For wedges, also check gapping partial swing distances
+    var isWedge = (typeof WG_WEDGE_LIST !== 'undefined') && WG_WEDGE_LIST.indexOf(c.name) >= 0;
+    if (isWedge) {
+      var wgSess = bagWgGetLatestForClub(c.name);
+      if (wgSess && wgSess.results && wgSess.results[c.name]) {
+        var clubData = wgSess.results[c.name];
+        for (var key in clubData) {
+          if (clubData.hasOwnProperty(key) && clubData[key] && clubData[key].avg != null) {
+            var avg = clubData[key].avg;
+            if (avg >= minYds && avg <= maxYds) {
+              matched.push({ name: c.name, dist: avg });
+              return;
+            }
+          }
+        }
+      }
+    }
   });
   matched.sort(function(a, b) { return a.dist - b.dist; });
-  return matched.map(function(m) { return m.name; }).join(', ');
+  // Deduplicate club names
+  var seen = {};
+  return matched.filter(function(m) {
+    if (seen[m.name]) return false;
+    seen[m.name] = true;
+    return true;
+  }).map(function(m) { return m.name; }).join(', ');
 }
 
 function ppGetMaxApproachDist() {
