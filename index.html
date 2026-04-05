@@ -18173,8 +18173,6 @@ function ppGetDrills(category, totalMins, sgVal) {
 
     var appClubs30_70 = ppFindClubsInRange(30, 70);
     var appClubs80_120 = ppFindClubsInRange(80, 120);
-    var appClubs120_170 = ppFindClubsInRange(120, Math.min(170, maxAppDist));
-    var appClubs170_plus = (maxAppDist > 170) ? ppFindClubsInRange(170, maxAppDist) : '';
 
     var shortWedgeTips = [
       {type:'random', text:'Leapfrog — carry first ball 30, then 35, etc until 70 yards. Increments of 5 or 10 yards', drillId:'leapfrog_wedges', drillCat:'fullswing'},
@@ -18200,45 +18198,49 @@ function ppGetDrills(category, totalMins, sgVal) {
       {type:'random', text:'9 Shot Challenge — 9 different shot shapes to same target with same club', drillId:'9shot_challenge', drillCat:'fullswing'}
     ];
 
-    // Build approach bands based on available time and max approach distance
-    if (totalMins <= 15) {
-      drills.push({ name: '80-120 yds', mins: Math.round(totalMins * 0.5), detail: appClubs80_120, tips: wedgeTips });
-      if (maxAppDist > 120) {
-        var upperLabel = maxAppDist > 170 ? '120-' + maxAppDist + ' yds' : '120-170 yds';
-        var upperDetail = maxAppDist > 170 ? (appClubs120_170 + (appClubs120_170 && appClubs170_plus ? ', ' : '') + appClubs170_plus) : appClubs120_170;
-        drills.push({ name: upperLabel, mins: Math.round(totalMins * 0.5), detail: upperDetail, tips: ironTips });
-      } else {
-        drills.push({ name: '30-70 yds', mins: Math.round(totalMins * 0.5), detail: appClubs30_70, tips: shortWedgeTips });
-      }
-    } else if (totalMins <= 30) {
-      var t1 = Math.round(totalMins * 0.35);
-      var t2 = Math.round(totalMins * 0.35);
-      var t3 = totalMins - t1 - t2;
-      drills.push({ name: '30-70 yds', mins: t1, detail: appClubs30_70, tips: shortWedgeTips });
-      drills.push({ name: '80-120 yds', mins: t2, detail: appClubs80_120, tips: wedgeTips });
-      if (maxAppDist > 120) {
-        var upperLabel = maxAppDist > 170 ? '120-' + maxAppDist + ' yds' : '120-170 yds';
-        var upperDetail = maxAppDist > 170 ? (appClubs120_170 + (appClubs120_170 && appClubs170_plus ? ', ' : '') + appClubs170_plus) : appClubs120_170;
-        drills.push({ name: upperLabel, mins: t3, detail: upperDetail, tips: ironTips });
-      }
-    } else {
-      var bands = [];
-      bands.push({ name: '30-70 yds', detail: appClubs30_70, tips: shortWedgeTips });
-      bands.push({ name: '80-120 yds', detail: appClubs80_120, tips: wedgeTips });
-      if (maxAppDist > 120 && maxAppDist <= 170) {
-        bands.push({ name: '120-' + maxAppDist + ' yds', detail: appClubs120_170, tips: ironTips });
-      } else if (maxAppDist > 170) {
-        bands.push({ name: '120-170 yds', detail: appClubs120_170, tips: ironTips });
-        bands.push({ name: '170-' + maxAppDist + ' yds', detail: appClubs170_plus, tips: ironTips });
-      }
-      var perBand = Math.round(totalMins / bands.length);
-      var remaining = totalMins;
-      bands.forEach(function(b, i) {
-        var m = (i === bands.length - 1) ? remaining : perBand;
-        remaining -= m;
-        drills.push({ name: b.name, mins: m, detail: b.detail, tips: b.tips });
-      });
+    // Build all possible approach bands based on max approach distance
+    var allBands = [
+      { name: '30-70 yds', detail: appClubs30_70, tips: shortWedgeTips },
+      { name: '80-120 yds', detail: appClubs80_120, tips: wedgeTips }
+    ];
+    if (maxAppDist > 120) {
+      var upper1 = Math.min(150, maxAppDist);
+      allBands.push({ name: '120-' + upper1 + ' yds', detail: ppFindClubsInRange(120, upper1), tips: ironTips });
     }
+    if (maxAppDist > 150) {
+      var upper2 = Math.min(180, maxAppDist);
+      allBands.push({ name: '150-' + upper2 + ' yds', detail: ppFindClubsInRange(150, upper2), tips: ironTips });
+    }
+    if (maxAppDist > 180) {
+      var upper3 = Math.min(210, maxAppDist);
+      allBands.push({ name: '180-' + upper3 + ' yds', detail: ppFindClubsInRange(180, upper3), tips: ironTips });
+    }
+    if (maxAppDist > 210) {
+      allBands.push({ name: '210-' + maxAppDist + ' yds', detail: ppFindClubsInRange(210, maxAppDist), tips: ironTips });
+    }
+
+    // Pick how many bands: 10 min minimum per band, max 4
+    var numBands = Math.min(4, Math.max(1, Math.floor(totalMins / 10)));
+    if (numBands > allBands.length) numBands = allBands.length;
+
+    // Randomly select which bands to focus on this session
+    var shuffled = allBands.slice();
+    for (var si = shuffled.length - 1; si > 0; si--) {
+      var sj = Math.floor(Math.random() * (si + 1));
+      var tmp = shuffled[si]; shuffled[si] = shuffled[sj]; shuffled[sj] = tmp;
+    }
+    var picked = shuffled.slice(0, numBands);
+    // Sort picked bands by distance order (match original allBands order)
+    picked.sort(function(a, b) { return allBands.indexOf(a) - allBands.indexOf(b); });
+
+    // Distribute time evenly across picked bands
+    var perBand = Math.floor(totalMins / picked.length);
+    var remaining = totalMins;
+    picked.forEach(function(b, i) {
+      var m = (i === picked.length - 1) ? remaining : perBand;
+      remaining -= m;
+      drills.push({ name: b.name, mins: m, detail: b.detail, tips: b.tips });
+    });
   } else if (category === 'ott') {
     var clubs = getBagClubs();
     var driverName = '', woodName = '';
