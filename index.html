@@ -15341,6 +15341,11 @@ function goToWedgeCombine(){
   combShowModeSelect('wedge');
 }
 
+function goToWedgeGapping(){
+  show('myBagPage');
+  setBagTab('wedgeGap');
+}
+
 function goToDriverCombinePicker(){
   _combSaveForStudent = null;
   _combFromDriverTab = true;
@@ -18073,50 +18078,89 @@ function ppFindClubsInRange(minYds, maxYds) {
   return matched.map(function(m) { return m.name; }).join(', ');
 }
 
+function ppGetMaxApproachDist() {
+  var clubs = getBagClubs();
+  if (!clubs || !clubs.length) return 210; // default when no bag
+  var woodHybridNames = ['2W','3W','4W','5W','6W','7W','2HY','3HY','4HY','5HY','6HY','7HY'];
+  var maxDist = 0;
+  clubs.forEach(function(c) {
+    if (woodHybridNames.indexOf(c.name) >= 0) {
+      var dist = c.carry || c.total || 0;
+      if (dist > maxDist) maxDist = dist;
+    }
+  });
+  return maxDist || 210;
+}
+
 function ppGetDrills(category, totalMins, sgVal) {
   var drills = [];
   var lm = hasLaunchMonitor();
   if (category === 'putt') {
     var shortTips = [
-      {type:'block', text:'Gate Drill — two tees just wider than putter, make 10 in a row', drillId:'gate', drillCat:'putting'},
-      {type:'block', text:'Double Gate Drill — gates at putter and at hole, 10 putts', drillId:'double_gate', drillCat:'putting'},
-      {type:'block', text:'Clock Drill — 4-8 putts in a circle from 3-5 ft', drillId:'clock', drillCat:'putting'},
-      {type:'random', text:'Around the world — 4-8 putts in a circle, different breaks each putt'},
-      {type:'random', text:'Spiral Pressure Drill — make from one spot, move out, go back if you miss', drillId:'spiral_pressure', drillCat:'putting'},
-      {type:'random', text:'Run a Short Putting Combine', combineFunc:'goToPuttingCombine'}
+      {type:'block', text:'Gate Drill — two tees just wider than your putter, make 10 in a row', drillId:'gate', drillCat:'putting'},
+      {type:'block', text:'Double Gate Drill — One gate for putter, one for ball, make 10 in a row', drillId:'double_gate', drillCat:'putting'},
+      {type:'block', text:'Clock Drill/Around the World — 4-8 putts in a circle from 3-7 ft', drillId:'clock', drillCat:'putting'},
+      {type:'random', text:'Spiral Pressure Drill — Series of 3, 5, 7 ft putts, must make them in a row', drillId:'spiral_pressure', drillCat:'putting'},
+      {type:'random', text:'Run a Short Putting Combine', combineFunc:'goToPuttingCombine'},
+      {type:'block', text:'Leapfrog Gates — 5-6 gates 3-7 ft 12 inches apart, one ball through each gate in order', drillId:'leapfrog_gates', drillCat:'putting'}
     ];
     var midTips = [
-      {type:'block', text:'Gate Drill from 10 ft — 10 putts through the gate', drillId:'gate', drillCat:'putting'},
+      {type:'block', text:'Gate Drill — two tees just wider than your putter, make 7 in a row', drillId:'gate', drillCat:'putting'},
       {type:'block', text:'3, 6, 9 Drill — make 9 in a row, 3 from each distance, restart on miss', drillId:'369_drill', drillCat:'putting'},
-      {type:'random', text:'Around the world from 10 ft — different breaks, read each one'},
-      {type:'random', text:'3 balls to 5 different holes — read, commit, roll'},
-      {type:'random', text:'Run a Putting Combine', combineFunc:'goToPuttingCombine'}
+      {type:'random', text:'Clock Drill/Around the World — 4-8 putts in a circle from 7-15 ft', drillId:'clock', drillCat:'putting'},
+      {type:'random', text:'3 balls to 5 different holes — read commit roll'},
+      {type:'random', text:'Run a Putting Combine', combineFunc:'goToPuttingCombine'},
+      {type:'block', text:'Double Gate Drill — One gate for putter, one for ball, make 10 in a row', drillId:'double_gate', drillCat:'putting'},
+      {type:'block', text:'Leapfrog Gates — 5-8 gates 7-15 ft 18 inches apart, one ball through each gate in order', drillId:'leapfrog_gates', drillCat:'putting'}
+    ];
+    var midLagTips = [
+      {type:'random', text:'Run a Putting Combine', combineFunc:'goToPuttingCombine'},
+      {type:'block', text:'Leapfrog Drill — putt to 15 ft, next putt must go farther, max is 25 ft', drillId:'leapfrog_putting', drillCat:'putting'},
+      {type:'block', text:'Leapfrog Gates — 5-8 gates 15-25 ft 24 inches apart, one ball through each gate in order', drillId:'leapfrog_gates', drillCat:'putting'}
     ];
     var lagTips = [
       {type:'block', text:'Anti 3-Putt Drill — two-putt from increasing distances, restart on 3-putt', drillId:'anti_3putt', drillCat:'putting'},
-      {type:'block', text:'10 putts to 35 ft — same target, dial in speed'},
-      {type:'random', text:'Leapfrog Drill — putt to 25 ft, next putt past it, keep going to 50 ft', drillId:'leapfrog_putting', drillCat:'putting'},
-      {type:'random', text:'Speed ladder — putt to 25, 30, 40, 50 ft, different distances each putt'},
-      {type:'random', text:'Run a Putting Combine for long putts', combineFunc:'goToPuttingCombine'}
+      {type:'block', text:'Leapfrog Drill — putt to 25 ft, next putt must go farther, max is 50 ft', drillId:'leapfrog_putting', drillCat:'putting'},
+      {type:'random', text:'Run a Putting Combine for long putts', combineFunc:'goToPuttingCombine'},
+      {type:'random', text:'Speed Calibration — 2 putts from 15-50 feet, focused on speed control', drillId:'speed_calibration', drillCat:'putting'}
     ];
     if (totalMins <= 15) {
-      drills.push({ name: 'Putts 4-8 ft', mins: Math.round(totalMins * 0.6), detail: '', tips: shortTips });
-      drills.push({ name: 'Lag putts 25-40 ft', mins: Math.round(totalMins * 0.4), detail: '', tips: lagTips });
-    } else {
+      drills.push({ name: 'Putts 3-7 ft', mins: Math.round(totalMins * 0.6), detail: '', tips: shortTips });
+      drills.push({ name: 'Lag putts 25-50 ft', mins: Math.round(totalMins * 0.4), detail: '', tips: lagTips });
+    } else if (totalMins <= 30) {
       var t1 = Math.round(totalMins * 0.35);
       var t2 = Math.round(totalMins * 0.35);
       var t3 = totalMins - t1 - t2;
-      drills.push({ name: 'Putts 4-8 ft', mins: t1, detail: '', tips: shortTips });
-      drills.push({ name: 'Putts 8-15 ft', mins: t2, detail: '', tips: midTips });
+      drills.push({ name: 'Putts 3-7 ft', mins: t1, detail: '', tips: shortTips });
+      drills.push({ name: 'Putts 7-15 ft', mins: t2, detail: '', tips: midTips });
       drills.push({ name: 'Lag putts 25-50 ft', mins: t3, detail: '', tips: lagTips });
+    } else {
+      var t1 = Math.round(totalMins * 0.25);
+      var t2 = Math.round(totalMins * 0.25);
+      var t3 = Math.round(totalMins * 0.25);
+      var t4 = totalMins - t1 - t2 - t3;
+      drills.push({ name: 'Putts 3-7 ft', mins: t1, detail: '', tips: shortTips });
+      drills.push({ name: 'Putts 7-15 ft', mins: t2, detail: '', tips: midTips });
+      drills.push({ name: 'Putts 15-25 ft', mins: t3, detail: '', tips: midLagTips });
+      drills.push({ name: 'Lag putts 25-50 ft', mins: t4, detail: '', tips: lagTips });
     }
   } else if (category === 'arg') {
     var argClubs10_30 = ppFindClubsInRange(10, 30);
-    var chipTips = ['Block: 10 shots from 10 yds to same target — focus on landing spot and consistent trajectory','Block: Move back to 20 yds, 10 more shots to same spot','Block: Move back to 30 yds, 10 more shots — same landing zone focus','Random: Low/mid/high — alternate all 3 trajectories to the same hole','Random: Up & down challenge — chip and putt, keep score, simulate on-course pressure',{type:'random', text:'Run a Chipping Combine', combineFunc:'goToCombines'}];
-    var bunkerTips = ['Block: 10 shots from same lie — focus on hitting 2 inches behind the ball','Block: 10 shots to same pin — vary between short and long bunker shots','Random: Different lies — clean, plugged, uphill, downhill, change each shot','Random: Up & down from sand — bunker shot + putt, keep score like on the course'];
+    var chipTips = [
+      {type:'block', text:'5-10 shots from 10, 20, 30 yards, focus on consistent landing spot and trajectory'},
+      {type:'block', text:'Flamingo Drill — 99% of weight on lead foot, focus on controlling low point in front of ball', drillId:'flamingo', drillCat:'shortgame'},
+      {type:'random', text:'Low/mid/high — alternate all 3 trajectories to the same hole'},
+      {type:'random', text:'Up & Down Combine — Play holes from 10-30 yards and hole out'},
+      {type:'random', text:'Run a Shortgame Combine', combineFunc:'goToCombines'}
+    ];
+    var bunkerTips = [
+      {type:'block', text:'5-10 shots from same lie — focus on hitting 1/2 inch to 1 inch behind the ball'},
+      {type:'block', text:'5-10 shots to same pin — Alternate between high and low shots'},
+      {type:'random', text:'Different lies — flat, clean, uphill/downhill, plugged etc'}
+    ];
     if (totalMins <= 15) {
       drills.push({ name: 'Chipping 10-30 yds', mins: Math.round(totalMins * 0.6), detail: argClubs10_30, tips: chipTips });
-      drills.push({ name: 'Bunker shots', mins: Math.round(totalMins * 0.4), detail: '', tips: bunkerTips });
+      drills.push({ name: 'Bunker play', mins: Math.round(totalMins * 0.4), detail: '', tips: bunkerTips });
     } else {
       var t1 = Math.round(totalMins * 0.6);
       var t2 = totalMins - t1;
@@ -18124,35 +18168,78 @@ function ppGetDrills(category, totalMins, sgVal) {
       drills.push({ name: 'Bunker play', mins: t2, detail: '', tips: bunkerTips });
     }
   } else if (category === 'app') {
+    // Determine max approach distance from player's bag (highest non-driver wood/hybrid carry)
+    var maxAppDist = ppGetMaxApproachDist();
+
     var appClubs30_70 = ppFindClubsInRange(30, 70);
     var appClubs80_120 = ppFindClubsInRange(80, 120);
-    var appClubs140_170 = ppFindClubsInRange(140, 170);
-    var appClubs180_210 = ppFindClubsInRange(180, 210);
-    var shortWedgeTips = ['Block: 10 half-swing pitches from 40 yds to one pin — same club, same swing','Block: Move to 50 yds, 10 more shots — adjust for distance','Block: Clock system — 9 o\'clock swing, 10 shots, then 10 o\'clock, 10 shots','Random: Leapfrog — 30, 40, 50, 60, 70 yd targets, different distance each shot','Random: Up & down game — pitch and putt from random spots, keep score'];
-    if (lm) shortWedgeTips.push({type:'random', text:'Run a Wedge Combine', combineFunc:'goToWedgeCombine'});
-    var wedgeTips = ['Block: 10 shots with same wedge to 100 yd target — same club, same swing','Block: Clock system — 9 o\'clock swing, 10 shots, then 10 o\'clock, 10 shots','Random: Leapfrog — 80, 90, 100, 110, 120 yd targets, different club each shot','Random: Alternate wedges — PW to 110, GW to 100, SW to 80, rotate through'];
-    if (lm) wedgeTips.push({type:'random', text:'Run a Wedge Combine', combineFunc:'goToWedgeCombine'});
-    var midIronTips = ['Block: 10 shots with 7i to same target — focus on center contact','Block: 10 shots with 8i to same target — consistent distance','Random: Alternate clubs — hit 7i, then 8i, then 9i, different target each shot','Random: Leapfrog — 140, 150, 160, 170 yd targets, pick the right club each time'];
-    var longAppTips = ['Block: 10 shots with same long iron to one flag — commit to target','Block: Stock shot — same club, same target, 10 in a row','Random: Shape practice — alternate draw and fade to same target','Random: 3-shot challenge — 3 balls to same target, check dispersion, move to new target'];
+    var appClubs120_170 = ppFindClubsInRange(120, Math.min(170, maxAppDist));
+    var appClubs170_plus = (maxAppDist > 170) ? ppFindClubsInRange(170, maxAppDist) : '';
+
+    var shortWedgeTips = [
+      {type:'random', text:'Leapfrog — carry first ball 30, then 35, etc until 70 yards. Increments of 5 or 10 yards', drillId:'leapfrog_wedges', drillCat:'fullswing'},
+      {type:'block', text:'5-10 shots at each yardage — 30, 40, 50, 60, 70'}
+    ];
+    if (lm) {
+      shortWedgeTips.push({type:'random', text:'Run a Wedge Combine', combineFunc:'goToWedgeCombine'});
+      shortWedgeTips.push({type:'block', text:'Wedge Gapping/Matrix — dial in your partial swing distances', combineFunc:'goToWedgeGapping'});
+    }
+
+    var wedgeTips = [
+      {type:'block', text:'3-7 shots with same wedge to 80, 90, 100, 110, and 120'},
+      {type:'random', text:'Leapfrog — 80, 90, 100, 110, 120 yd targets, different club each shot', drillId:'leapfrog_wedges', drillCat:'fullswing'},
+      {type:'random', text:'3 clubs one carry — hit 3 wedges the same carry, SW, GW, PW all 100 carry for example'}
+    ];
+    if (lm) {
+      wedgeTips.push({type:'random', text:'Run a Wedge Combine', combineFunc:'goToWedgeCombine'});
+      wedgeTips.push({type:'block', text:'Wedge Gapping/Matrix — dial in your partial swing distances', combineFunc:'goToWedgeGapping'});
+    }
+
+    var ironTips = [
+      {type:'block', text:'10 shots to same target — focus on center contact and hitting ball first'},
+      {type:'block', text:'10 shots to same target — focus on consistent shot shape'},
+      {type:'random', text:'Alternate clubs to different targets, pre shot routine on every shot'},
+      {type:'random', text:'9 Shot Challenge — 9 different shot shapes to same target with same club', drillId:'9shot_challenge', drillCat:'fullswing'}
+    ];
+
+    // Build approach bands based on available time and max approach distance
     if (totalMins <= 15) {
-      drills.push({ name: 'Mid irons 140-170 yds', mins: Math.round(totalMins * 0.5), detail: appClubs140_170, tips: midIronTips });
-      drills.push({ name: 'Long approach 180-210 yds', mins: Math.round(totalMins * 0.5), detail: appClubs180_210, tips: longAppTips });
+      drills.push({ name: '80-120 yds', mins: Math.round(totalMins * 0.5), detail: appClubs80_120, tips: wedgeTips });
+      if (maxAppDist > 120) {
+        var upperLabel = maxAppDist > 170 ? '120-' + maxAppDist + ' yds' : '120-170 yds';
+        var upperDetail = maxAppDist > 170 ? (appClubs120_170 + (appClubs120_170 && appClubs170_plus ? ', ' : '') + appClubs170_plus) : appClubs120_170;
+        drills.push({ name: upperLabel, mins: Math.round(totalMins * 0.5), detail: upperDetail, tips: ironTips });
+      } else {
+        drills.push({ name: '30-70 yds', mins: Math.round(totalMins * 0.5), detail: appClubs30_70, tips: shortWedgeTips });
+      }
     } else if (totalMins <= 30) {
       var t1 = Math.round(totalMins * 0.35);
       var t2 = Math.round(totalMins * 0.35);
       var t3 = totalMins - t1 - t2;
-      drills.push({ name: 'Wedges 30-120 yds', mins: t1, detail: appClubs30_70 + (appClubs30_70 && appClubs80_120 ? ', ' : '') + appClubs80_120, tips: wedgeTips.concat(shortWedgeTips) });
-      drills.push({ name: 'Mid irons 140-170 yds', mins: t2, detail: appClubs140_170, tips: midIronTips });
-      drills.push({ name: 'Long approach 180-210 yds', mins: t3, detail: appClubs180_210, tips: longAppTips });
+      drills.push({ name: '30-70 yds', mins: t1, detail: appClubs30_70, tips: shortWedgeTips });
+      drills.push({ name: '80-120 yds', mins: t2, detail: appClubs80_120, tips: wedgeTips });
+      if (maxAppDist > 120) {
+        var upperLabel = maxAppDist > 170 ? '120-' + maxAppDist + ' yds' : '120-170 yds';
+        var upperDetail = maxAppDist > 170 ? (appClubs120_170 + (appClubs120_170 && appClubs170_plus ? ', ' : '') + appClubs170_plus) : appClubs120_170;
+        drills.push({ name: upperLabel, mins: t3, detail: upperDetail, tips: ironTips });
+      }
     } else {
-      var t1 = Math.round(totalMins * 0.25);
-      var t2 = Math.round(totalMins * 0.25);
-      var t3 = Math.round(totalMins * 0.25);
-      var t4 = totalMins - t1 - t2 - t3;
-      drills.push({ name: 'Short wedges 30-70 yds', mins: t1, detail: appClubs30_70, tips: shortWedgeTips });
-      drills.push({ name: 'Wedges 80-120 yds', mins: t2, detail: appClubs80_120, tips: wedgeTips });
-      drills.push({ name: 'Mid irons 140-170 yds', mins: t3, detail: appClubs140_170, tips: midIronTips });
-      drills.push({ name: 'Long approach 180-210 yds', mins: t4, detail: appClubs180_210, tips: longAppTips });
+      var bands = [];
+      bands.push({ name: '30-70 yds', detail: appClubs30_70, tips: shortWedgeTips });
+      bands.push({ name: '80-120 yds', detail: appClubs80_120, tips: wedgeTips });
+      if (maxAppDist > 120 && maxAppDist <= 170) {
+        bands.push({ name: '120-' + maxAppDist + ' yds', detail: appClubs120_170, tips: ironTips });
+      } else if (maxAppDist > 170) {
+        bands.push({ name: '120-170 yds', detail: appClubs120_170, tips: ironTips });
+        bands.push({ name: '170-' + maxAppDist + ' yds', detail: appClubs170_plus, tips: ironTips });
+      }
+      var perBand = Math.round(totalMins / bands.length);
+      var remaining = totalMins;
+      bands.forEach(function(b, i) {
+        var m = (i === bands.length - 1) ? remaining : perBand;
+        remaining -= m;
+        drills.push({ name: b.name, mins: m, detail: b.detail, tips: b.tips });
+      });
     }
   } else if (category === 'ott') {
     var clubs = getBagClubs();
@@ -18163,10 +18250,30 @@ function ppGetDrills(category, totalMins, sgVal) {
         if ((c.name === '3W' || c.name === '2W' || c.name === '4W' || c.name === '5W') && !woodName) woodName = c.name;
       });
     }
-    var driverTips = ['Block: 10 drivers to same fairway target — aim for 7/10 hit rate','Block: Swing at 80% — 10 shots focusing on center strike, not distance','Random: Tee shot simulation — pick a hole, pick a target, commit, then switch holes','Random: Play 9 imaginary holes — change target shape each time'];
-    var driverShapeTips = ['Block: 10 draws in a row to same target','Block: 10 fades in a row to same target','Random: Alternate draw/fade — switch shape every shot','Random: Tee shot simulation — play imaginary holes, pick the right shape each time'];
-    var driverTempoTips = ['Block: 10 swings at 70% — same target, focus on center contact','Block: Slow motion swing then real swing — alternate, 10 reps','Random: 3 balls same target — watch the dispersion, adjust tempo','Random: Hit driver, then 3W, then driver — change clubs to reset tempo'];
-    var woodTips = ['Block: 10 shots with 3W to same target — focus on solid contact','Block: Punch shots — 10 low trajectory shots in a row','Random: Tight fairway sim — narrow your target, change target each shot','Random: Alternate draw and fade off the tee — different shape each shot'];
+    var driverTips = [
+      {type:'block', text:'10 drivers to same fairway target — aim for 7/10 hit rate'},
+      {type:'block', text:'Swing at 80% — 10 shots focusing on center strike not distance'},
+      {type:'random', text:'Tee shot simulation — pick a hole, pick a target, commit, then switch holes'},
+      {type:'random', text:'Play 9 imaginary holes — change target shape each time'}
+    ];
+    var driverShapeTips = [
+      {type:'block', text:'10 draws in a row to same target'},
+      {type:'block', text:'10 fades in a row to same target'},
+      {type:'random', text:'Alternate draw/fade — switch shape every shot'},
+      {type:'random', text:'Tee shot simulation — play imaginary holes, pick the right shape each time'}
+    ];
+    var driverTempoTips = [
+      {type:'block', text:'10 swings at 70% — same target, focus on center contact'},
+      {type:'block', text:'Slow motion swing then real swing — alternate, 10 reps'},
+      {type:'random', text:'3 balls same target — watch the dispersion, adjust tempo'},
+      {type:'random', text:'Hit driver, then 3W, then driver — change clubs to reset tempo'}
+    ];
+    var woodTips = [
+      {type:'block', text:'10 shots with 3W to same target — focus on solid contact'},
+      {type:'block', text:'Punch shots — 10 low trajectory shots in a row'},
+      {type:'random', text:'Tight fairway sim — narrow your target, change target each shot'},
+      {type:'random', text:'Alternate draw and fade off the tee — different shape each shot'}
+    ];
     if (totalMins <= 15) {
       drills.push({ name: 'Driver — fairway focus', mins: Math.round(totalMins * 0.6), detail: driverName, tips: driverTips });
       drills.push({ name: '3 Wood / hybrid off tee', mins: Math.round(totalMins * 0.4), detail: woodName, tips: woodTips });
@@ -18174,9 +18281,9 @@ function ppGetDrills(category, totalMins, sgVal) {
       var t1 = Math.round(totalMins * 0.45);
       var t2 = Math.round(totalMins * 0.3);
       var t3 = totalMins - t1 - t2;
-      drills.push({ name: 'Driver — shape shots', mins: t1, detail: driverName, tips: driverShapeTips });
-      drills.push({ name: 'Driver — tempo & rhythm', mins: t2, detail: driverName, tips: driverTempoTips });
-      drills.push({ name: '3 Wood off the tee', mins: t3, detail: woodName, tips: woodTips });
+      drills.push({ name: 'Driver — shape control', mins: t1, detail: driverName, tips: driverShapeTips });
+      drills.push({ name: 'Driver — tempo & contact', mins: t2, detail: driverName, tips: driverTempoTips });
+      drills.push({ name: '3 Wood / hybrid off tee', mins: t3, detail: woodName, tips: woodTips });
     }
   }
   return drills;
