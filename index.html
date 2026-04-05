@@ -18118,6 +18118,8 @@ function ppGetMaxApproachDist() {
   return maxDist || 210;
 }
 
+function ppRound5(n) { return Math.round(n / 5) * 5 || 5; }
+
 function ppGetDrills(category, totalMins, sgVal) {
   var drills = [];
   var lm = hasLaunchMonitor();
@@ -18151,19 +18153,21 @@ function ppGetDrills(category, totalMins, sgVal) {
       {type:'random', text:'Speed Calibration — 2 putts from 15-50 feet, focused on speed control', drillId:'speed_calibration', drillCat:'putting'}
     ];
     if (totalMins <= 15) {
-      drills.push({ name: 'Putts 3-7 ft', mins: Math.round(totalMins * 0.6), detail: '', tips: shortTips });
-      drills.push({ name: 'Lag putts 25-50 ft', mins: Math.round(totalMins * 0.4), detail: '', tips: lagTips });
+      var t1 = ppRound5(totalMins * 0.6);
+      var t2 = totalMins - t1;
+      drills.push({ name: 'Putts 3-7 ft', mins: t1, detail: '', tips: shortTips });
+      drills.push({ name: 'Lag putts 25-50 ft', mins: t2, detail: '', tips: lagTips });
     } else if (totalMins <= 30) {
-      var t1 = Math.round(totalMins * 0.35);
-      var t2 = Math.round(totalMins * 0.35);
+      var t1 = ppRound5(totalMins * 0.35);
+      var t2 = ppRound5(totalMins * 0.35);
       var t3 = totalMins - t1 - t2;
       drills.push({ name: 'Putts 3-7 ft', mins: t1, detail: '', tips: shortTips });
       drills.push({ name: 'Putts 7-15 ft', mins: t2, detail: '', tips: midTips });
       drills.push({ name: 'Lag putts 25-50 ft', mins: t3, detail: '', tips: lagTips });
     } else {
-      var t1 = Math.round(totalMins * 0.25);
-      var t2 = Math.round(totalMins * 0.25);
-      var t3 = Math.round(totalMins * 0.25);
+      var t1 = ppRound5(totalMins * 0.25);
+      var t2 = ppRound5(totalMins * 0.25);
+      var t3 = ppRound5(totalMins * 0.25);
       var t4 = totalMins - t1 - t2 - t3;
       drills.push({ name: 'Putts 3-7 ft', mins: t1, detail: '', tips: shortTips });
       drills.push({ name: 'Putts 7-15 ft', mins: t2, detail: '', tips: midTips });
@@ -18185,10 +18189,12 @@ function ppGetDrills(category, totalMins, sgVal) {
       {type:'random', text:'Different lies — flat, clean, uphill/downhill, plugged etc'}
     ];
     if (totalMins <= 15) {
-      drills.push({ name: 'Chipping 10-30 yds', mins: Math.round(totalMins * 0.6), detail: argClubs10_30, tips: chipTips });
-      drills.push({ name: 'Bunker play', mins: Math.round(totalMins * 0.4), detail: '', tips: bunkerTips });
+      var t1 = ppRound5(totalMins * 0.6);
+      var t2 = totalMins - t1;
+      drills.push({ name: 'Chipping 10-30 yds', mins: t1, detail: argClubs10_30, tips: chipTips });
+      drills.push({ name: 'Bunker play', mins: t2, detail: '', tips: bunkerTips });
     } else {
-      var t1 = Math.round(totalMins * 0.6);
+      var t1 = ppRound5(totalMins * 0.6);
       var t2 = totalMins - t1;
       drills.push({ name: 'Chipping 10-30 yds', mins: t1, detail: argClubs10_30, tips: chipTips });
       drills.push({ name: 'Bunker play', mins: t2, detail: '', tips: bunkerTips });
@@ -18245,6 +18251,11 @@ function ppGetDrills(category, totalMins, sgVal) {
       allBands.push({ name: '210-' + maxAppDist + ' yds', detail: ppFindClubsInRange(210, maxAppDist), tips: ironTips });
     }
 
+    // 3-min warmup: leapfrog wedges 30-70 yds (does not count toward practice time)
+    drills.push({ name: 'Warmup — Leapfrog wedges 30-70 yds', mins: 3, detail: appClubs30_70, tips: [
+      {type:'block', text:'Leapfrog — carry first ball 30, then 35, etc until 70 yards. Increments of 5 or 10 yards', drillId:'leapfrog_wedges', drillCat:'fullswing'}
+    ]});
+
     // Pick how many bands: 10 min minimum per band, max 4
     var numBands = Math.min(4, Math.max(1, Math.floor(totalMins / 10)));
     if (numBands > allBands.length) numBands = allBands.length;
@@ -18259,8 +18270,8 @@ function ppGetDrills(category, totalMins, sgVal) {
     // Sort picked bands by distance order (match original allBands order)
     picked.sort(function(a, b) { return allBands.indexOf(a) - allBands.indexOf(b); });
 
-    // Distribute time evenly across picked bands
-    var perBand = Math.floor(totalMins / picked.length);
+    // Distribute time evenly across picked bands, rounded to nearest 5
+    var perBand = ppRound5(totalMins / picked.length);
     var remaining = totalMins;
     picked.forEach(function(b, i) {
       var m = (i === picked.length - 1) ? remaining : perBand;
@@ -18301,11 +18312,13 @@ function ppGetDrills(category, totalMins, sgVal) {
       {type:'random', text:'Alternate draw and fade off the tee — different shape each shot'}
     ];
     if (totalMins <= 15) {
-      drills.push({ name: 'Driver — fairway focus', mins: Math.round(totalMins * 0.6), detail: driverName, tips: driverTips });
-      drills.push({ name: '3 Wood / hybrid off tee', mins: Math.round(totalMins * 0.4), detail: woodName, tips: woodTips });
+      var t1 = ppRound5(totalMins * 0.6);
+      var t2 = totalMins - t1;
+      drills.push({ name: 'Driver — fairway focus', mins: t1, detail: driverName, tips: driverTips });
+      drills.push({ name: '3 Wood / hybrid off tee', mins: t2, detail: woodName, tips: woodTips });
     } else {
-      var t1 = Math.round(totalMins * 0.45);
-      var t2 = Math.round(totalMins * 0.3);
+      var t1 = ppRound5(totalMins * 0.45);
+      var t2 = ppRound5(totalMins * 0.3);
       var t3 = totalMins - t1 - t2;
       drills.push({ name: 'Driver — shape control', mins: t1, detail: driverName, tips: driverShapeTips });
       drills.push({ name: 'Driver — tempo & contact', mins: t2, detail: driverName, tips: driverTempoTips });
