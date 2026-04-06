@@ -14542,17 +14542,27 @@ var _combPendingType = null;
 var _combFromShortGame = false;
 var _combFromDriverTab = false;
 var _combFromPracticeHub = false;
+var _combReturnToView = null; // which practice view to return to
 
 function combHeaderBack() {
   var trackerVisible = document.getElementById('comb-tracker-view').style.display !== 'none';
   var modeSelectVisible = document.getElementById('comb-mode-select').style.display !== 'none';
   var shortGameVisible = document.getElementById('comb-shortgame-select').style.display !== 'none';
   if ((_combFromDriverTab || _combFromPracticeHub) && (trackerVisible || modeSelectVisible || shortGameVisible)) {
+    var returnView = _combReturnToView;
     _combFromDriverTab = false;
     _combFromPracticeHub = false;
+    _combReturnToView = null;
     combGoHome();
     show('practiceHubPage');
-    setPracticeHubTab('combines');
+    if (returnView) {
+      setPracticeHubTab('plan');
+      ppHideAllViews();
+      var el = document.getElementById(returnView);
+      if (el) el.style.display = '';
+    } else {
+      setPracticeHubTab('combines');
+    }
     return;
   }
   if (trackerVisible) {
@@ -15380,10 +15390,20 @@ async function saveCombNote(id, userId) {
 }
 
 /* ── Navigation helpers ── */
+function _combDetectReturnView() {
+  var views = ['ppRecommendedView','ppGeneratorView','ppTourView','ppCustomUseView','ppWarmUpView'];
+  for (var i = 0; i < views.length; i++) {
+    var el = document.getElementById(views[i]);
+    if (el && el.style.display !== 'none') return views[i];
+  }
+  return null;
+}
+
 function goToCombines(){
   // Clear any coach-for-student state
   _combSaveForStudent = null;
   _combFromPracticeHub = true;
+  _combReturnToView = _combDetectReturnView();
   var banner = document.getElementById('combStudentBanner');
   if (banner) banner.style.display = 'none';
   show('combinesPage');
@@ -15398,6 +15418,7 @@ function goToCombines(){
 function goToPuttingCombine(){
   _combSaveForStudent = null;
   _combFromPracticeHub = true;
+  _combReturnToView = _combDetectReturnView();
   var banner = document.getElementById('combStudentBanner');
   if (banner) banner.style.display = 'none';
   show('combinesPage');
@@ -15407,6 +15428,7 @@ function goToPuttingCombine(){
 function goToWedgeCombine(){
   _combSaveForStudent = null;
   _combFromPracticeHub = true;
+  _combReturnToView = _combDetectReturnView();
   var banner = document.getElementById('combStudentBanner');
   if (banner) banner.style.display = 'none';
   show('combinesPage');
