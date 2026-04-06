@@ -14430,14 +14430,20 @@ function combVis(id,show){
   if(el){ el.style.display=show?(id==='comb-wedge-score-grp'||id==='comb-wedge-range-grp'||id==='comb-putting-type-grp'||id==='comb-wedge-type-grp'?'flex':''):'none'; }
 }
 
+var _combHcpToSgKey = {'Tour Pro':'pro','Scratch':'0','5':'5','10':'10','15':'15','20':'20','25':'25','30':'30'};
+
 function combGetE(t,d,l,h){
-  var ds = t==='putting' ? combHcpData.putting : combHcpData.chipping[l];
+  // For putting, use the full per-foot sgPuttingData table
+  if(t==='putting'){
+    var sgKey = _combHcpToSgKey[h] || 'pro';
+    return getExpectedPutts(d, sgKey);
+  }
+  // Chipping uses the sparse combHcpData — interpolate between keys
+  var ds = combHcpData.chipping[l];
   var ks = Object.keys(ds).map(Number).sort(function(a,b){return a-b;});
   if(d <= ks[0]) return ds[ks[0]][h];
   if(d >= ks[ks.length-1]) return ds[ks[ks.length-1]][h];
-  // Exact match
   if(ds[d]) return ds[d][h];
-  // Interpolate between surrounding keys
   for(var i=0; i<ks.length-1; i++){
     if(d > ks[i] && d < ks[i+1]){
       var v1 = ds[ks[i]][h], v2 = ds[ks[i+1]][h];
