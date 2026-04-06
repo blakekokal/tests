@@ -19576,7 +19576,9 @@ async function loadPracticeHistory() {
 
     html += '<div style="background:#222222;border-radius:12px;padding:14px;margin-bottom:10px;">';
     html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">';
-    html += '<div style="font-size:14px;font-weight:800;color:#ffffff;">' + (s.session_date || '') + '</div>';
+    var _dp = (s.session_date || '').split('-'), _mn = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var _dispDate = _dp.length === 3 ? (_mn[parseInt(_dp[1],10)-1] + ' ' + parseInt(_dp[2],10) + ', ' + _dp[0]) : (s.session_date || '');
+    html += '<div style="font-size:14px;font-weight:800;color:#ffffff;">' + _dispDate + '</div>';
     html += '<div style="font-size:13px;font-weight:700;color:#00b87a;">' + (s.total_minutes || 0) + ' min</div>';
     html += '</div>';
 
@@ -19971,7 +19973,9 @@ async function loadStudentPracticeSessions() {
 
     html += '<div style="background:#222222;border-radius:12px;padding:14px;margin-bottom:10px;">';
     html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">';
-    html += '<div style="font-size:14px;font-weight:800;color:#ffffff;">' + (s.session_date || '') + '</div>';
+    var _dp = (s.session_date || '').split('-'), _mn = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var _dispDate = _dp.length === 3 ? (_mn[parseInt(_dp[1],10)-1] + ' ' + parseInt(_dp[2],10) + ', ' + _dp[0]) : (s.session_date || '');
+    html += '<div style="font-size:14px;font-weight:800;color:#ffffff;">' + _dispDate + '</div>';
     html += '<div style="font-size:13px;font-weight:700;color:#00b87a;">' + (s.total_minutes || 0) + ' min</div>';
     html += '</div>';
 
