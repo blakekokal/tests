@@ -14432,8 +14432,19 @@ function combVis(id,show){
 
 function combGetE(t,d,l,h){
   var ds = t==='putting' ? combHcpData.putting : combHcpData.chipping[l];
-  var ks = Object.keys(ds).map(Number).sort((a,b)=>a-b);
-  var c  = ks.reduce((p,n)=>Math.abs(n-d)<Math.abs(p-d)?n:p);
+  var ks = Object.keys(ds).map(Number).sort(function(a,b){return a-b;});
+  if(d <= ks[0]) return ds[ks[0]][h];
+  if(d >= ks[ks.length-1]) return ds[ks[ks.length-1]][h];
+  // Exact match
+  if(ds[d]) return ds[d][h];
+  // Interpolate between surrounding keys
+  for(var i=0; i<ks.length-1; i++){
+    if(d > ks[i] && d < ks[i+1]){
+      var v1 = ds[ks[i]][h], v2 = ds[ks[i+1]][h];
+      return v1 + (v2 - v1) * (d - ks[i]) / (ks[i+1] - ks[i]);
+    }
+  }
+  var c = ks.reduce(function(p,n){return Math.abs(n-d)<Math.abs(p-d)?n:p;});
   return ds[c][h];
 }
 
