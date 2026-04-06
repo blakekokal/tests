@@ -14431,27 +14431,16 @@ function combVis(id,show){
 }
 
 var _combHcpToSgKey = {'Tour Pro':'pro','Scratch':'0','5':'5','10':'10','15':'15','20':'20','25':'25','30':'30'};
+var _combLieToSgLie = {'Fairway':'FAIRWAY','Rough':'ROUGH','Sand':'SAND'};
 
 function combGetE(t,d,l,h){
-  // For putting, use the full per-foot sgPuttingData table
+  var sgKey = _combHcpToSgKey[h] || 'pro';
   if(t==='putting'){
-    var sgKey = _combHcpToSgKey[h] || 'pro';
     return getExpectedPutts(d, sgKey);
   }
-  // Chipping uses the sparse combHcpData — interpolate between keys
-  var ds = combHcpData.chipping[l];
-  var ks = Object.keys(ds).map(Number).sort(function(a,b){return a-b;});
-  if(d <= ks[0]) return ds[ks[0]][h];
-  if(d >= ks[ks.length-1]) return ds[ks[ks.length-1]][h];
-  if(ds[d]) return ds[d][h];
-  for(var i=0; i<ks.length-1; i++){
-    if(d > ks[i] && d < ks[i+1]){
-      var v1 = ds[ks[i]][h], v2 = ds[ks[i+1]][h];
-      return v1 + (v2 - v1) * (d - ks[i]) / (ks[i+1] - ks[i]);
-    }
-  }
-  var c = ks.reduce(function(p,n){return Math.abs(n-d)<Math.abs(p-d)?n:p;});
-  return ds[c][h];
+  // Chipping — use full sg data tables via getExpectedStrokes
+  var sgLie = _combLieToSgLie[l] || 'FAIRWAY';
+  return getExpectedStrokes(d, sgLie, sgKey);
 }
 
 function combFmt(v){
