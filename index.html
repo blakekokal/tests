@@ -3138,6 +3138,15 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
     <button onclick="showCreateCourse()" style="background:transparent;border:1px solid #3d3d3d;border-radius:10px;color:#606060;font-size:12px;padding:8px 18px;cursor:pointer;">+ Create Custom Course</button>
     <button onclick="showMyCoursesPage()" style="background:transparent;border:1px solid #3d3d3d;border-radius:10px;color:#606060;font-size:12px;padding:8px 18px;cursor:pointer;">My Courses</button>
   </div>
+
+  <!-- Paper Stats Sheet Flow -->
+  <div style="width:100%;max-width:320px;margin-top:18px;padding-top:14px;border-top:1px solid #2a2a2a;">
+    <div style="font-size:11px;color:#2e2e2e;text-align:center;margin-bottom:8px;letter-spacing:0.5px;text-transform:uppercase;">Or Use a Paper Stats Sheet</div>
+    <button onclick="downloadStatsPrintout()" style="width:100%;height:40px;font-size:13px;background:#2d7abc;border:none;border-radius:10px;color:#ffffff;font-weight:700;margin-bottom:8px;cursor:pointer;">📥 Print Stats Sheet</button>
+    <button onclick="document.getElementById('statsPhotoInput').click()" style="width:100%;height:40px;font-size:13px;background:#007a52;border:none;border-radius:10px;color:#ffffff;font-weight:700;cursor:pointer;">📸 Upload Picture</button>
+    <input type="file" id="statsPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="handleStatsPhotoUpload(this)">
+    <div id="statsPhotoMsg" style="font-size:11px;color:#606060;text-align:center;margin-top:6px;min-height:14px;"></div>
+  </div>
 </div>
 
 <!-- CREATE CUSTOM COURSE PAGE -->
@@ -3212,6 +3221,18 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
   <div style="font-size:20px;font-weight:800;margin-bottom:4px;">Hole by Hole Entry</div>
   <div id="hbhCourseName" style="font-size:13px;color:#606060;margin-bottom:2px;display:none;"></div>
   <div style="font-size:12px;color:#2e2e2e;margin-bottom:16px;">Enter each hole then submit</div>
+  <div id="hbhPhotoWrap" style="display:none;width:100%;max-width:360px;margin-bottom:14px;background:#222222;border:1px solid #2a2a2a;border-radius:12px;padding:10px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <div style="font-size:11px;color:#2e2e2e;text-transform:uppercase;letter-spacing:0.5px;">Your Stats Sheet</div>
+      <button onclick="clearStatsPhoto()" style="background:transparent;border:none;color:#d4706e;font-size:11px;cursor:pointer;padding:2px 6px;">Remove</button>
+    </div>
+    <img id="hbhPhotoImg" style="width:100%;max-height:320px;object-fit:contain;border-radius:8px;cursor:zoom-in;" onclick="openStatsPhotoFullscreen()">
+    <div style="font-size:10px;color:#606060;text-align:center;margin-top:6px;">Tap photo to zoom · Enter values hole by hole below</div>
+  </div>
+  <div id="hbhPhotoFullscreen" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:9999;overflow:auto;padding:20px;text-align:center;" onclick="closeStatsPhotoFullscreen()">
+    <img id="hbhPhotoFullscreenImg" style="max-width:100%;height:auto;">
+    <div style="color:#ffffff;font-size:12px;margin-top:10px;">Tap to close</div>
+  </div>
   <div id="hbhHolesList" style="width:100%;max-width:360px;display:flex;flex-direction:column;gap:14px;"></div>
   <div style="width:100%;max-width:360px;margin-top:16px;display:flex;flex-direction:column;gap:8px;">
     <button onclick="submitHoleByHole()" style="width:100%;height:52px;background:#007a52;border:none;border-radius:12px;color:#ffffff;font-size:16px;font-weight:800;cursor:pointer;">✅ Submit Round</button>
@@ -8274,6 +8295,7 @@ function resetRoundState() {
   if(document.getElementById('holeHeader')) document.getElementById('holeHeader').innerText = 'Hole 1';
   if(document.getElementById('scoreBarText')) document.getElementById('scoreBarText').innerText = 'E through 0';
   if(document.getElementById('courseLabel')) document.getElementById('courseLabel').innerText = '';
+  if(typeof clearStatsPhoto === 'function') clearStatsPhoto();
   if(document.getElementById('hbhCourseName')) { document.getElementById('hbhCourseName').innerText = ''; document.getElementById('hbhCourseName').style.display = 'none'; }
   if(document.getElementById('teeSelector')) { document.getElementById('teeSelector').style.display = 'none'; document.getElementById('teeSelector').innerHTML = '<option value="">Select Tee Box...</option>'; }
   if(document.getElementById('teeInfo')) document.getElementById('teeInfo').style.display = 'none';
@@ -11366,6 +11388,88 @@ function readFileAsArrayBuffer(file) {
     reader.onerror = function() { reject(new Error('File read failed')); };
     reader.readAsArrayBuffer(file);
   });
+}
+
+// =============================================
+// PAPER STATS SHEET: PRINT + PHOTO UPLOAD
+// =============================================
+function downloadStatsPrintout() {
+  var msg = document.getElementById('statsPhotoMsg');
+  if (msg) { msg.style.color = '#606060'; msg.textContent = 'Downloading stats sheet...'; }
+  var a = document.createElement('a');
+  a.href = encodeURI('stats printout(4).xlsx');
+  a.download = 'stats printout.xlsx';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  if (msg) {
+    msg.style.color = '#00b87a';
+    msg.textContent = '✓ Sheet downloaded. Print it, fill it in, then tap "Upload Picture".';
+    setTimeout(function(){ if (msg.textContent.indexOf('Sheet downloaded') === 0) msg.textContent = ''; }, 6000);
+  }
+}
+
+function handleStatsPhotoUpload(input) {
+  var file = input.files && input.files[0];
+  var msg = document.getElementById('statsPhotoMsg');
+  if (!file) return;
+  if (!file.type || file.type.indexOf('image/') !== 0) {
+    if (msg) { msg.style.color = '#d4706e'; msg.textContent = 'Please choose an image file.'; }
+    input.value = '';
+    return;
+  }
+
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var dataUrl = e.target.result;
+
+    // Decide how many holes to use (respect current selection on the New Round page)
+    var c = parseInt(document.getElementById('customHoles').value);
+    if (c >= 3 && c <= 18) totalHoles = c;
+    else if (!totalHoles || totalHoles < 3) totalHoles = 18;
+
+    // Attach photo to the hole-by-hole page
+    var wrap = document.getElementById('hbhPhotoWrap');
+    var img = document.getElementById('hbhPhotoImg');
+    if (img) img.src = dataUrl;
+    if (wrap) wrap.style.display = 'block';
+
+    // Force hole-by-hole entry mode and jump straight to the entry page
+    _entryMode = 'hole';
+    _currentRoundId = null;
+    var cName = document.getElementById('courseName').value || '';
+    var hbhCN = document.getElementById('hbhCourseName');
+    if (hbhCN) { hbhCN.innerText = cName; hbhCN.style.display = cName ? 'block' : 'none'; }
+    buildHoleByHoleForm();
+    show('holeByHolePage');
+    if (msg) msg.textContent = '';
+  };
+  reader.onerror = function() {
+    if (msg) { msg.style.color = '#d4706e'; msg.textContent = 'Could not read photo.'; }
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+function clearStatsPhoto() {
+  var wrap = document.getElementById('hbhPhotoWrap');
+  var img = document.getElementById('hbhPhotoImg');
+  if (img) img.src = '';
+  if (wrap) wrap.style.display = 'none';
+}
+
+function openStatsPhotoFullscreen() {
+  var src = document.getElementById('hbhPhotoImg');
+  var fsImg = document.getElementById('hbhPhotoFullscreenImg');
+  var fs = document.getElementById('hbhPhotoFullscreen');
+  if (!src || !src.src || !fs) return;
+  if (fsImg) fsImg.src = src.src;
+  fs.style.display = 'block';
+}
+
+function closeStatsPhotoFullscreen() {
+  var fs = document.getElementById('hbhPhotoFullscreen');
+  if (fs) fs.style.display = 'none';
 }
 
 function parseExcelRound(wb) {
