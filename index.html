@@ -12243,7 +12243,7 @@ function renderDashboard(data, hcp, targetId) {
           var dd=h.yards-s.distanceAfter; A.drives.push(dd);
           if (dd>A.longestDrive) A.longestDrive=dd; if (dd<A.shortestDrive) A.shortestDrive=dd;
         }
-        if (s.lie==='PENALTY') { var prev5=shots[idx-1]; if(prev5){ if(prev5.shotNum===1){if(h.par===3)A.par3TeePen++;else A.par45TeePen++;}else if(prev5.distanceBefore>30)A.appPen++;else A.sgPen++;} }
+        if (s.lie==='PENALTY') { var prev5=shots[idx-1]; if(prev5){ if(prev5.shotNum===1){if(h.par===3)A.par3TeePen++;else A.par45TeePen++;}else if(prev5.distanceBefore>100)A.appPen++;else A.sgPen++;} }
         var _db=s.distanceBefore||0;var _isPar45Tee=s.shotNum===1&&(h.par===4||h.par===5);var _isAppAttempt=!s.isPutt&&_db>100&&!_isPar45Tee&&s.lie!=='PENALTY';
         function _gp(sh,i,st){if(st.lie==='HOLED')return 0;var nx=sh[i+1];if(nx&&nx.isPutt&&nx.distanceBefore>0)return nx.distanceBefore;return st.distanceAfter||0;}
         if(_isAppAttempt){A.appRanges.forEach(function(rr){if(_db>=rr.min&&_db<=rr.max){rr.total++;if(s.lie==='GREEN'||s.lie==='HOLED')rr.s.push(_gp(shots,idx,s));}});}
