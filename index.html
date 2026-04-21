@@ -17643,15 +17643,6 @@ function ppSetTime(mins) {
   if (!mins || mins < 10) mins = 10;
   if (mins > 300) mins = 300;
   _ppTime = mins;
-  document.getElementById('ppCustomTime').value = mins;
-  document.querySelectorAll('.pp-time-btn').forEach(function(b) {
-    var bMins = parseInt(b.textContent);
-    if (b.textContent.indexOf('hr') !== -1) bMins = parseFloat(b.textContent) * 60;
-    var isActive = bMins === mins;
-    b.style.background = isActive ? '#2d7abc' : '#2a2a2a';
-    b.style.color = isActive ? '#fff' : '#999';
-    b.style.borderColor = isActive ? '#2d7abc' : '#333';
-  });
   if (_ppSGData) ppRenderPlan(_ppSGData);
 }
 
