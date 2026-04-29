@@ -9269,6 +9269,12 @@ function renderDrillsList(cat, subFilter) {
   content.innerHTML = html;
 }
 
+function getYouTubeId(url) {
+  if (!url) return '';
+  var m = url.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|v\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : '';
+}
+
 function showDrillDetail(drillId, cat) {
   var drills = drillsData[cat] || [];
   var drill = drills.find(function(d) { return d.id === drillId; });
@@ -9295,10 +9301,17 @@ function showDrillDetail(drillId, cat) {
     html += '<img src="' + drill.image + '" alt="' + drill.title + '" style="width:100%;border-radius:12px;display:block;margin:0 0 10px;">';
   }
   if (drill.videoUrl) {
-    html += '<a href="' + drill.videoUrl + '" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#cc0000;border-radius:10px;padding:12px;margin-bottom:10px;text-decoration:none;cursor:pointer;">';
-    html += '<svg viewBox="0 0 24 24" width="20" height="20" fill="#ffffff"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/><path fill="#cc0000" d="M0 0h24v24H0z" fill-opacity="0"/><polygon fill="#ffffff" points="9.545,15.568 15.818,12 9.545,8.432"/></svg>';
-    html += '<span style="font-size:14px;font-weight:700;color:#ffffff;">Watch Video</span>';
-    html += '</a>';
+    var ytId = getYouTubeId(drill.videoUrl);
+    if (ytId) {
+      html += '<div style="position:relative;width:100%;padding-bottom:56.25%;height:0;border-radius:12px;overflow:hidden;margin-bottom:10px;background:#000;">';
+      html += '<iframe src="https://www.youtube.com/embed/' + ytId + '" title="' + drill.title + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;"></iframe>';
+      html += '</div>';
+    } else {
+      html += '<a href="' + drill.videoUrl + '" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#cc0000;border-radius:10px;padding:12px;margin-bottom:10px;text-decoration:none;cursor:pointer;">';
+      html += '<svg viewBox="0 0 24 24" width="20" height="20" fill="#ffffff"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/><path fill="#cc0000" d="M0 0h24v24H0z" fill-opacity="0"/><polygon fill="#ffffff" points="9.545,15.568 15.818,12 9.545,8.432"/></svg>';
+      html += '<span style="font-size:14px;font-weight:700;color:#ffffff;">Watch Video</span>';
+      html += '</a>';
+    }
   }
 
   if (_drillsOnPracticeHub) {
