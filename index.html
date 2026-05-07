@@ -3006,8 +3006,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
           <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#aad4ff;margin-bottom:4px;">Final Score</div>
           <div id="ld-final-score" style="font-size:54px;font-weight:800;color:#ffffff;line-height:1;">0</div>
           <div style="font-size:13px;color:#aad4ff;margin-top:4px;">total yards offline</div>
-          <div id="ld-final-grade" style="font-size:14px;font-weight:700;margin-top:8px;"></div>
-          <div id="ld-final-bench" style="font-size:11px;color:#aad4ff;margin-top:6px;line-height:1.5;"></div>
+          <div id="ld-save-msg" style="font-size:12px;text-align:center;margin-top:8px;min-height:16px;color:#9affc8;"></div>
         </div>
 
         <!-- Stats grid -->
@@ -3036,17 +3035,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
           </div>
         </div>
 
-        <!-- Note -->
-        <div style="background:#222222;border:1px solid #333333;border-radius:10px;padding:10px;margin-bottom:12px;">
-          <label style="font-size:10px;color:#606060;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Note (optional)</label>
-          <input type="text" id="ld-note" placeholder="e.g. 7-iron, range session" style="width:100%;background:#282828;color:#ffffff;border:1px solid #333333;border-radius:8px;padding:8px 10px;font-size:13px;box-sizing:border-box;">
-        </div>
-
-        <!-- Save -->
-        <button id="ld-save-btn" onclick="lineDrillSave()" style="width:100%;height:50px;background:#007a52;color:#ffffff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;max-width:none;">💾 Save to Profile</button>
-        <div id="ld-save-msg" style="font-size:12px;text-align:center;margin-top:8px;min-height:16px;color:#00b87a;"></div>
-
-        <button onclick="lineDrillBackToSetup()" style="width:100%;height:44px;background:#282828;color:#ffffff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px;max-width:none;">Run Another Drill</button>
+        <button onclick="lineDrillBackToSetup()" style="width:100%;height:44px;background:#282828;color:#ffffff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;max-width:none;">Run Another Drill</button>
 
         <!-- Shot table -->
         <div style="margin-top:14px;">
@@ -15583,18 +15572,6 @@ function _ldShowSummary(){
 
   document.getElementById('ld-final-score').textContent = total % 1 === 0 ? total : total.toFixed(1);
 
-  var gEl = document.getElementById('ld-final-grade');
-  gEl.innerHTML = '<span style="color:'+_ldGradeColor(grade)+';font-size:20px;font-weight:800;">'+grade+'/100</span>';
-
-  // Benchmark line
-  var bench = '';
-  if (total <= 50) bench = '🏆 Better than the best pros — elite!';
-  else if (total <= 95) bench = '🔥 In the range of a Tour Pro';
-  else if (total <= 115) bench = '💪 All-American Junior level';
-  else if (total <= 160) bench = 'Solid amateur — keep grinding';
-  else bench = 'Lots of room to improve — keep practicing';
-  document.getElementById('ld-final-bench').textContent = bench;
-
   document.getElementById('ld-stat-left').textContent = leftCount;
   document.getElementById('ld-stat-right').textContent = rightCount;
   document.getElementById('ld-stat-left-pct').textContent  = n ? Math.round(leftCount  / n * 100) + '%' : '0%';
@@ -15626,18 +15603,18 @@ function _ldShowSummary(){
   }).join('');
   document.getElementById('ld-summary-shots').innerHTML = hdr + body;
 
-  // Reset save state
-  document.getElementById('ld-save-btn').disabled = false;
-  document.getElementById('ld-save-btn').textContent = '💾 Save to Profile';
-  document.getElementById('ld-save-msg').textContent = '';
+  // Auto-save to profile
+  lineDrillSave();
 }
 
 async function lineDrillSave(){
-  if (!currentUser) { showAuthPage(); return; }
-  var btn = document.getElementById('ld-save-btn');
   var msg = document.getElementById('ld-save-msg');
   var shots = _ldState.shots;
-  if (!shots.length) { msg.style.color='#d4706e'; msg.textContent='Complete the drill first.'; return; }
+  if (!shots.length) return;
+  if (!currentUser) {
+    if (msg) { msg.style.color = '#d4706e'; msg.textContent = 'Log in to save to your profile.'; }
+    return;
+  }
 
   var total = 0, leftCount = 0, rightCount = 0, biggest = 0;
   shots.forEach(function(s){
@@ -15656,12 +15633,10 @@ async function lineDrillSave(){
     rowData[i+1] = { d: s.target, v: s.offline, l: s.dir, sg: 0, exp1: 0 };
   });
 
-  var note = (document.getElementById('ld-note').value || '').trim();
   var version = _ldState.version === 'short' ? 'Short (10)' : 'Standard (20)';
-  var meta = '['+version+', '+_ldState.minYds+'-'+_ldState.maxYds+' yds, L:'+leftCount+' R:'+rightCount+', biggest:'+biggest+']';
-  var fullNote = note ? meta + ' ' + note : meta;
+  var fullNote = '['+version+', '+_ldState.minYds+'-'+_ldState.maxYds+' yds, L:'+leftCount+' R:'+rightCount+', biggest:'+biggest+']';
 
-  btn.disabled = true; btn.textContent = 'Saving...'; msg.textContent = '';
+  if (msg) { msg.style.color = '#9affc8'; msg.textContent = 'Saving...'; }
 
   var payload = {
     user_id:       activeUserId(),
@@ -15683,12 +15658,10 @@ async function lineDrillSave(){
 
   var resp = await _sb.from('combine_scores').insert(payload);
   if (resp.error) {
-    btn.disabled = false; btn.textContent = '💾 Save to Profile';
-    msg.style.color = '#d4706e'; msg.textContent = 'Save failed: ' + resp.error.message;
+    if (msg) { msg.style.color = '#d4706e'; msg.textContent = 'Save failed: ' + resp.error.message; }
     return;
   }
-  btn.textContent = '✅ Saved!';
-  msg.style.color = '#00b87a'; msg.textContent = 'Saved! View in Combine History.';
+  if (msg) { msg.style.color = '#9affc8'; msg.textContent = '✅ Saved to your profile'; }
 
   // Notify coach (best-effort)
   try {
