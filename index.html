@@ -1065,10 +1065,6 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
     <!-- COMBINES TAB -->
     <div id="phCombinesContent">
       <div style="display:flex;flex-direction:column;gap:10px;align-items:center;">
-        <button onclick="goToAutoCombine()" id="phAutoCombineBtn" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
-          <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🎯</span>
-          <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Auto Combine</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;" id="phAutoDesc">Picks your weakest area from last round</div></div>
-        </button>
         <button onclick="goToPuttingCombine()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
           <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🏌️</span>
           <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Putting</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Speed &amp; accuracy on the greens</div></div>
@@ -1081,13 +1077,17 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
           <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🎯</span>
           <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Wedge Distances</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Dial in carry distances 40-125 yds</div></div>
         </button>
+        <button onclick="goToLineDrill()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
+          <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">📏</span>
+          <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Line Drill</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Approach accuracy 140-240 yds</div></div>
+        </button>
         <button onclick="goToDriverCombinePicker()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
           <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🏌️‍♂️</span>
           <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Driver</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Track drive distance &amp; accuracy</div></div>
         </button>
-        <button onclick="goToLineDrill()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
-          <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">📏</span>
-          <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Line Drill</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Approach accuracy 140-240 yds</div></div>
+        <button onclick="goToAutoCombine()" id="phAutoCombineBtn" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
+          <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🎯</span>
+          <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Auto Combine</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;" id="phAutoDesc">Picks your weakest area from last round</div></div>
         </button>
       </div>
       <!-- Combine History -->
