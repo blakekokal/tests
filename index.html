@@ -3048,6 +3048,123 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
   </div>
 </div>
 
+<div id="driverDrillPage" class="page" style="justify-content:flex-start;padding:0;overflow:hidden;">
+  <!-- Header -->
+  <div style="background:#1e1e1e;border-bottom:2px solid #00b87a;width:100%;text-align:center;padding:11px 0;position:relative;flex-shrink:0;">
+    <button onclick="driverDrillBack()" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);background:#333333;border:none;color:#ffffff;border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:#ffffff;stroke-width:2.5;fill:none;"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <div style="font-size:1.2rem;font-weight:800;color:#ffffff;">Driver Combine</div>
+  </div>
+
+  <!-- Scrollable body -->
+  <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;width:100%;">
+    <div style="max-width:520px;margin:0 auto;padding:14px 14px 100px;">
+
+      <!-- SETUP VIEW -->
+      <div id="dd-setup-view">
+        <div style="background:#222222;border:1px solid #333333;border-radius:10px;padding:14px;margin-bottom:14px;">
+          <div style="font-size:13px;color:#ffffff;line-height:1.5;">
+            <strong style="color:#00b87a;">Driver Combine</strong> — hit drives one at a time. After each shot enter the drive distance, how many yards offline it finished, and whether the miss was Left or Right. Score = average drive distance net of offline (drive − offline).
+          </div>
+        </div>
+
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#606060;margin-bottom:8px;">Number of Shots</div>
+        <div style="display:flex;gap:8px;margin-bottom:14px;">
+          <button id="dd-version-std"  onclick="driverDrillSetVersion(6)"  style="flex:1;height:46px;background:#00b87a;color:#ffffff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;max-width:none;">Standard (6)</button>
+          <button id="dd-version-long" onclick="driverDrillSetVersion(12)" style="flex:1;height:46px;background:#282828;color:#606060;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;max-width:none;">Long (12)</button>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;">
+          <span style="font-size:12px;color:#606060;">Custom:</span>
+          <input type="number" id="dd-custom" value="6" min="1" max="50" inputmode="numeric" oninput="driverDrillSetVersion('custom')" style="flex:1;height:42px;background:#282828;color:#ffffff;border:1px solid #333333;border-radius:10px;text-align:center;font-size:15px;">
+          <span style="color:#606060;font-size:13px;">shots</span>
+        </div>
+
+        <button onclick="driverDrillStart()" style="width:100%;height:50px;background:#007a52;color:#ffffff;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;max-width:none;">Start Drill →</button>
+        <div id="dd-setup-msg" style="font-size:12px;color:#d4706e;text-align:center;margin-top:8px;min-height:16px;"></div>
+      </div>
+
+      <!-- TRACKER VIEW -->
+      <div id="dd-tracker-view" style="display:none;">
+        <!-- Progress -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div style="font-size:12px;color:#606060;">Shot <span id="dd-shot-num" style="color:#ffffff;font-weight:700;">1</span> of <span id="dd-shot-total" style="color:#ffffff;font-weight:700;">6</span></div>
+          <div style="font-size:12px;color:#606060;">Avg net: <span id="dd-running-avg" style="color:#00b87a;font-weight:700;">0</span> yds</div>
+        </div>
+        <div style="background:#282828;height:6px;border-radius:3px;overflow:hidden;margin-bottom:14px;">
+          <div id="dd-progress-bar" style="background:#00b87a;height:100%;width:0%;transition:width 0.2s;"></div>
+        </div>
+
+        <!-- Drive distance -->
+        <div style="background:#222222;border:1px solid #333333;border-radius:12px;padding:14px;margin-bottom:10px;">
+          <div style="font-size:12px;color:#606060;margin-bottom:8px;text-align:center;">Drive Distance (yards)</div>
+          <input type="number" id="dd-drive-input" placeholder="0" inputmode="numeric" min="0" style="width:100%;height:60px;background:#282828;color:#ffffff;border:1px solid #333333;border-radius:10px;text-align:center;font-size:32px;font-weight:800;box-sizing:border-box;">
+        </div>
+
+        <!-- Offline + L/R -->
+        <div style="background:#222222;border:1px solid #333333;border-radius:12px;padding:14px;margin-bottom:14px;">
+          <div style="font-size:12px;color:#606060;margin-bottom:8px;text-align:center;">Offline (yards)</div>
+          <input type="number" id="dd-offline-input" placeholder="0" inputmode="decimal" min="0" step="0.1" style="width:100%;height:60px;background:#282828;color:#ffffff;border:1px solid #333333;border-radius:10px;text-align:center;font-size:32px;font-weight:800;box-sizing:border-box;">
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <button id="dd-dir-left" onclick="driverDrillSetDir('L')" style="flex:1;height:50px;background:#282828;color:#606060;border:1px solid #333333;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;max-width:none;">◀ Left</button>
+            <button id="dd-dir-right" onclick="driverDrillSetDir('R')" style="flex:1;height:50px;background:#282828;color:#606060;border:1px solid #333333;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;max-width:none;">Right ▶</button>
+          </div>
+        </div>
+
+        <button id="dd-next-btn" onclick="driverDrillRecordShot()" style="width:100%;height:52px;background:#007a52;color:#ffffff;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;max-width:none;">Record Shot →</button>
+        <button onclick="driverDrillBackToSetup()" style="width:100%;height:40px;background:transparent;color:#606060;border:none;font-size:13px;cursor:pointer;margin-top:8px;max-width:none;">Cancel Drill</button>
+
+        <!-- Shots so far -->
+        <div id="dd-shots-list" style="margin-top:14px;"></div>
+      </div>
+
+      <!-- SUMMARY VIEW -->
+      <div id="dd-summary-view" style="display:none;">
+        <!-- Final score -->
+        <div style="background:#1a4a8a;border:2px solid #2d7abc;border-radius:14px;padding:20px 14px;text-align:center;margin-bottom:12px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#aad4ff;margin-bottom:4px;">Final Score</div>
+          <div id="dd-final-score" style="font-size:54px;font-weight:800;color:#ffffff;line-height:1;">0</div>
+          <div style="font-size:13px;color:#aad4ff;margin-top:4px;">avg net yards (drive − offline)</div>
+          <div id="dd-save-msg" style="font-size:12px;text-align:center;margin-top:8px;min-height:16px;color:#9affc8;"></div>
+        </div>
+
+        <!-- Stats grid -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+          <div style="background:#222222;border:1px solid #333333;border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-size:10px;color:#606060;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Misses Left</div>
+            <div id="dd-stat-left" style="font-size:22px;font-weight:800;color:#ffffff;">0</div>
+            <div id="dd-stat-left-pct" style="font-size:11px;color:#9a9a9a;margin-top:2px;">0%</div>
+            <div id="dd-stat-left-avg" style="font-size:11px;color:#9a9a9a;margin-top:2px;">0.0 yds avg</div>
+          </div>
+          <div style="background:#222222;border:1px solid #333333;border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-size:10px;color:#606060;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Misses Right</div>
+            <div id="dd-stat-right" style="font-size:22px;font-weight:800;color:#ffffff;">0</div>
+            <div id="dd-stat-right-pct" style="font-size:11px;color:#9a9a9a;margin-top:2px;">0%</div>
+            <div id="dd-stat-right-avg" style="font-size:11px;color:#9a9a9a;margin-top:2px;">0.0 yds avg</div>
+          </div>
+          <div style="background:#222222;border:1px solid #333333;border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-size:10px;color:#606060;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Avg Drive</div>
+            <div id="dd-stat-avg-drive" style="font-size:22px;font-weight:800;color:#ffffff;">0</div>
+            <div style="font-size:11px;color:#9a9a9a;margin-top:2px;">yds</div>
+          </div>
+          <div style="background:#222222;border:1px solid #333333;border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-size:10px;color:#606060;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Biggest Miss</div>
+            <div id="dd-stat-biggest" style="font-size:22px;font-weight:800;color:#ffffff;">0</div>
+            <div id="dd-stat-biggest-side" style="font-size:11px;color:#9a9a9a;margin-top:2px;">—</div>
+          </div>
+        </div>
+
+        <button onclick="driverDrillBackToSetup()" style="width:100%;height:44px;background:#282828;color:#ffffff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;max-width:none;">Run Another Drill</button>
+
+        <!-- Shot table -->
+        <div style="margin-top:14px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#606060;margin-bottom:6px;">Shots</div>
+          <div id="dd-summary-shots" style="background:#1e1e1e;border-radius:8px;overflow:hidden;"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <div id="combinesPage" class="page" style="justify-content:flex-start;padding:0;overflow:hidden;">
 
   <!-- Fixed header -->
@@ -3817,6 +3934,7 @@ var _backTargetMap = {
   'authPage': 'homePage',
   'combinesPage': 'practiceHubPage',
   'lineDrillPage': 'practiceHubPage',
+  'driverDrillPage': 'practiceHubPage',
   'whatsNewPage': 'homePage',
   'guideToGolfPage': 'practiceHubPage',
   'myCoursesPage': 'roundPage',
@@ -15687,6 +15805,287 @@ async function lineDrillSave(){
   } catch(e) { console.error('[notify] Line drill notification error:', e); }
 }
 
+/* ============================================
+   DRIVER DRILL — one-shot-at-a-time driver combine
+   ============================================ */
+var _ddState = {
+  totalShots: 6,
+  versionTag: 'standard',  // 'standard' | 'long' | 'custom'
+  shots: [],               // [{drive, offline, dir}]
+  currentDir: null,
+  currentShotIndex: 0
+};
+
+function goToDriverDrill(){
+  show('driverDrillPage');
+  driverDrillBackToSetup();
+}
+
+function driverDrillBack(){
+  show('practiceHubPage');
+}
+
+function driverDrillBackToSetup(){
+  document.getElementById('dd-setup-view').style.display = '';
+  document.getElementById('dd-tracker-view').style.display = 'none';
+  document.getElementById('dd-summary-view').style.display = 'none';
+  _ddState.shots = [];
+  _ddState.currentShotIndex = 0;
+  _ddState.currentDir = null;
+  document.getElementById('dd-setup-msg').textContent = '';
+}
+
+function driverDrillSetVersion(v){
+  var stdBtn  = document.getElementById('dd-version-std');
+  var longBtn = document.getElementById('dd-version-long');
+  var custom  = document.getElementById('dd-custom');
+  var on  = '#00b87a', onTxt = '#ffffff';
+  var off = '#282828', offTxt = '#606060';
+  if (v === 6)  { _ddState.totalShots = 6;  _ddState.versionTag = 'standard'; custom.value = 6;  }
+  else if (v === 12) { _ddState.totalShots = 12; _ddState.versionTag = 'long'; custom.value = 12; }
+  else { /* custom */
+    var cv = parseInt(custom.value, 10);
+    if (!isFinite(cv) || cv < 1) cv = 1;
+    if (cv > 50) cv = 50;
+    _ddState.totalShots = cv;
+    _ddState.versionTag = (cv === 6) ? 'standard' : (cv === 12 ? 'long' : 'custom');
+  }
+  stdBtn.style.background  = _ddState.totalShots === 6  ? on : off;
+  stdBtn.style.color       = _ddState.totalShots === 6  ? onTxt : offTxt;
+  longBtn.style.background = _ddState.totalShots === 12 ? on : off;
+  longBtn.style.color      = _ddState.totalShots === 12 ? onTxt : offTxt;
+}
+
+function driverDrillStart(){
+  var msg = document.getElementById('dd-setup-msg');
+  if (_ddState.totalShots < 1) { msg.textContent = 'Pick at least 1 shot.'; return; }
+  _ddState.shots = [];
+  _ddState.currentShotIndex = 0;
+  document.getElementById('dd-setup-view').style.display = 'none';
+  document.getElementById('dd-summary-view').style.display = 'none';
+  document.getElementById('dd-tracker-view').style.display = '';
+  document.getElementById('dd-shot-total').textContent = _ddState.totalShots;
+  _ddNextShot();
+}
+
+function _ddNextShot(){
+  if (_ddState.currentShotIndex >= _ddState.totalShots) {
+    _ddShowSummary();
+    return;
+  }
+  _ddState.currentDir = null;
+  document.getElementById('dd-shot-num').textContent = _ddState.currentShotIndex + 1;
+  var di = document.getElementById('dd-drive-input');
+  var oi = document.getElementById('dd-offline-input');
+  di.value = ''; oi.value = '';
+  di.focus();
+  var L = document.getElementById('dd-dir-left');
+  var R = document.getElementById('dd-dir-right');
+  L.style.background = '#282828'; L.style.color = '#606060';
+  R.style.background = '#282828'; R.style.color = '#606060';
+  var pct = (_ddState.currentShotIndex / _ddState.totalShots) * 100;
+  document.getElementById('dd-progress-bar').style.width = pct + '%';
+  _ddRenderShotsList();
+}
+
+function driverDrillSetDir(dir){
+  _ddState.currentDir = dir;
+  var L = document.getElementById('dd-dir-left');
+  var R = document.getElementById('dd-dir-right');
+  if (dir === 'L') {
+    L.style.background = '#2d7abc'; L.style.color = '#ffffff';
+    R.style.background = '#282828'; R.style.color = '#606060';
+  } else {
+    R.style.background = '#2d7abc'; R.style.color = '#ffffff';
+    L.style.background = '#282828'; L.style.color = '#606060';
+  }
+}
+
+function driverDrillRecordShot(){
+  var di = document.getElementById('dd-drive-input');
+  var oi = document.getElementById('dd-offline-input');
+  var drive = parseFloat(di.value);
+  var off   = parseFloat(oi.value);
+  if (!isFinite(drive) || drive <= 0) { di.style.borderColor = '#d4706e'; di.focus(); return; }
+  if (!isFinite(off) || off < 0) { oi.style.borderColor = '#d4706e'; oi.focus(); return; }
+  if (off > 0 && !_ddState.currentDir) {
+    var L = document.getElementById('dd-dir-left');
+    var R = document.getElementById('dd-dir-right');
+    L.style.borderColor = '#d4706e';
+    R.style.borderColor = '#d4706e';
+    setTimeout(function(){ L.style.borderColor=''; R.style.borderColor=''; }, 900);
+    return;
+  }
+  di.style.borderColor = ''; oi.style.borderColor = '';
+  _ddState.shots.push({
+    drive: drive,
+    offline: off,
+    dir: off === 0 ? '—' : _ddState.currentDir
+  });
+  _ddState.currentShotIndex++;
+  // Update running avg net
+  var n = _ddState.shots.length;
+  var totalNet = _ddState.shots.reduce(function(s,x){ return s + (x.drive - x.offline); }, 0);
+  var avgNet = n ? totalNet / n : 0;
+  document.getElementById('dd-running-avg').textContent = avgNet.toFixed(0);
+  _ddNextShot();
+}
+
+function _ddRenderShotsList(){
+  var list = document.getElementById('dd-shots-list');
+  if (!_ddState.shots.length) { list.innerHTML = ''; return; }
+  var rows = _ddState.shots.map(function(s, i){
+    var dirCol = s.dir === 'L' ? '#44b8f0' : (s.dir === 'R' ? '#f0c830' : '#00b87a');
+    var dirTxt = s.dir === 'L' ? 'L' : (s.dir === 'R' ? 'R' : '—');
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;border-top:1px solid #282828;font-size:12px;">'
+      + '<span style="color:#606060;width:24px;">'+(i+1)+'.</span>'
+      + '<span style="color:#9a9a9a;flex:1;">'+s.drive+' yds drive</span>'
+      + '<span style="color:'+dirCol+';font-weight:700;width:30px;text-align:right;">'+dirTxt+'</span>'
+      + '<span style="color:#ffffff;font-weight:700;width:60px;text-align:right;">'+s.offline+' off</span>'
+      + '</div>';
+  }).join('');
+  list.innerHTML = '<div style="background:#1e1e1e;border-radius:8px;overflow:hidden;">'
+    + '<div style="padding:8px 10px;font-size:11px;color:#606060;text-transform:uppercase;letter-spacing:.5px;font-weight:700;">Shots so far</div>'
+    + rows + '</div>';
+}
+
+function _ddShowSummary(){
+  document.getElementById('dd-tracker-view').style.display = 'none';
+  document.getElementById('dd-summary-view').style.display = '';
+
+  var shots = _ddState.shots;
+  var n = shots.length;
+  var totalDrive = 0, totalOff = 0, leftCount = 0, rightCount = 0;
+  var leftYds = 0, rightYds = 0, biggest = 0, biggestSide = '—';
+  shots.forEach(function(s){
+    totalDrive += s.drive;
+    totalOff   += s.offline;
+    if (s.dir === 'L') { leftCount++; leftYds += s.offline; }
+    else if (s.dir === 'R') { rightCount++; rightYds += s.offline; }
+    if (s.offline > biggest) {
+      biggest = s.offline;
+      biggestSide = s.dir === 'L' ? 'Left' : (s.dir === 'R' ? 'Right' : 'Straight');
+    }
+  });
+  var avgDrive = n ? totalDrive / n : 0;
+  var avgNet   = n ? (totalDrive - totalOff) / n : 0;
+
+  document.getElementById('dd-final-score').textContent = avgNet.toFixed(0);
+  document.getElementById('dd-stat-avg-drive').textContent = avgDrive.toFixed(0);
+  document.getElementById('dd-stat-left').textContent = leftCount;
+  document.getElementById('dd-stat-right').textContent = rightCount;
+  document.getElementById('dd-stat-left-pct').textContent  = n ? Math.round(leftCount  / n * 100) + '%' : '0%';
+  document.getElementById('dd-stat-right-pct').textContent = n ? Math.round(rightCount / n * 100) + '%' : '0%';
+  var leftAvg  = leftCount  ? leftYds  / leftCount  : 0;
+  var rightAvg = rightCount ? rightYds / rightCount : 0;
+  document.getElementById('dd-stat-left-avg').textContent  = leftAvg.toFixed(1)  + ' yds avg';
+  document.getElementById('dd-stat-right-avg').textContent = rightAvg.toFixed(1) + ' yds avg';
+  document.getElementById('dd-stat-biggest').textContent = biggest % 1 === 0 ? biggest : biggest.toFixed(1);
+  document.getElementById('dd-stat-biggest-side').textContent = biggestSide;
+
+  // Shots table
+  var hdr = '<div style="display:flex;padding:8px 10px;font-size:10px;color:#606060;text-transform:uppercase;letter-spacing:.5px;font-weight:700;background:#1e1e1e;">'
+    + '<span style="width:24px;">#</span>'
+    + '<span style="flex:1;">Drive</span>'
+    + '<span style="width:60px;text-align:right;">Side</span>'
+    + '<span style="width:50px;text-align:right;">Off</span>'
+    + '<span style="width:50px;text-align:right;">Net</span>'
+    + '</div>';
+  var body = shots.map(function(s, i){
+    var dirCol = s.dir === 'L' ? '#44b8f0' : (s.dir === 'R' ? '#f0c830' : '#00b87a');
+    var dirTxt = s.dir === 'L' ? 'Left' : (s.dir === 'R' ? 'Right' : 'Straight');
+    var net = s.drive - s.offline;
+    return '<div style="display:flex;padding:6px 10px;font-size:12px;border-top:1px solid #282828;">'
+      + '<span style="width:24px;color:#606060;">'+(i+1)+'</span>'
+      + '<span style="flex:1;color:#9a9a9a;">'+s.drive+' yds</span>'
+      + '<span style="width:60px;text-align:right;color:'+dirCol+';font-weight:700;">'+dirTxt+'</span>'
+      + '<span style="width:50px;text-align:right;color:#ffffff;font-weight:700;">'+s.offline+'</span>'
+      + '<span style="width:50px;text-align:right;color:#44b8f0;font-weight:700;">'+net.toFixed(0)+'</span>'
+      + '</div>';
+  }).join('');
+  document.getElementById('dd-summary-shots').innerHTML = hdr + body;
+
+  // Auto-save
+  driverDrillSave();
+}
+
+async function driverDrillSave(){
+  var msg = document.getElementById('dd-save-msg');
+  var shots = _ddState.shots;
+  if (!shots.length) return;
+  if (!currentUser) {
+    if (msg) { msg.style.color = '#d4706e'; msg.textContent = 'Log in to save to your profile.'; }
+    return;
+  }
+  var n = shots.length;
+  var totalDrive = 0, totalOff = 0, leftCount = 0, rightCount = 0, biggest = 0;
+  shots.forEach(function(s){
+    totalDrive += s.drive; totalOff += s.offline;
+    if (s.dir === 'L') leftCount++; else if (s.dir === 'R') rightCount++;
+    if (s.offline > biggest) biggest = s.offline;
+  });
+  var avgNet = n ? (totalDrive - totalOff) / n : 0;
+  var avgDrive = n ? totalDrive / n : 0;
+  var grade = Math.round(Math.max(0, Math.min(100, (avgNet - 100) / 2)));
+
+  // row_data: keep d=drive, v=offline, l=L/R for compatibility with details renderer
+  var rowData = {};
+  shots.forEach(function(s, i){ rowData[i+1] = { d: s.drive, v: s.offline, l: s.dir, sg: s.drive - s.offline, exp1: 0 }; });
+
+  var versionLabel = _ddState.totalShots === 6 ? 'Standard (6)' : (_ddState.totalShots === 12 ? 'Long (12)' : 'Custom (' + _ddState.totalShots + ')');
+  var fullNote = '['+versionLabel+', avgDrive:'+avgDrive.toFixed(0)+' yds, L:'+leftCount+' R:'+rightCount+', biggest:'+biggest+']';
+
+  if (msg) { msg.style.color = '#9affc8'; msg.textContent = 'Saving...'; }
+
+  var payload = {
+    user_id:       activeUserId(),
+    combine_date:  getTodayCentral(),
+    combine_type:  'Driver',
+    is_combine:    true,
+    holes_count:   n,
+    filled_count:  n,
+    total_sg:      parseFloat((totalDrive - totalOff).toFixed(2)),
+    avg_pts:       parseFloat(avgNet.toFixed(2)),
+    total_exp:     0,
+    total_strokes: null,
+    handicap:      'Tour Pro',
+    score_mode:    'driver',
+    note:          fullNote,
+    row_data:      JSON.stringify(rowData),
+    grade_100:     grade
+  };
+
+  var resp = await _sb.from('combine_scores').insert(payload);
+  if (resp.error) {
+    if (msg) { msg.style.color = '#d4706e'; msg.textContent = 'Save failed: ' + resp.error.message; }
+    return;
+  }
+  if (msg) { msg.style.color = '#9affc8'; msg.textContent = '✅ Saved to your profile'; }
+
+  // Notify coach (best-effort)
+  try {
+    var { data: prof } = await _sb.from('profiles').select('coach_id, display_name').eq('id', currentUser.id).single();
+    var coachId = prof && prof.coach_id ? prof.coach_id : null;
+    if (!coachId) {
+      var { data: link } = await _sb.from('coach_students').select('coach_id').eq('student_id', currentUser.id).limit(1);
+      if (link && link.length > 0) coachId = link[0].coach_id;
+    }
+    if (coachId) {
+      var playerName = (prof && prof.display_name) || currentUser.email || 'A student';
+      await _sb.from('notifications').insert({
+        user_id: coachId,
+        type: 'new_combine',
+        title: 'New Driver Combine from ' + playerName,
+        message: playerName + ' completed a Driver combine (' + n + ' shots, avg net ' + avgNet.toFixed(0) + ' yds)',
+        student_id: currentUser.id,
+        student_name: playerName,
+        read: false,
+        created_at: new Date().toISOString()
+      });
+    }
+  } catch(e) { console.error('[notify] Driver drill notification error:', e); }
+}
+
 /* ── LOAD history on the Combines page ── */
 async function combLoadHistory(){
   var msg  = document.getElementById('combHistMsg');
@@ -15902,7 +16301,12 @@ function toggleCombDetails(id) {
     if (isPut) row += '<td style="padding:3px 4px;">'+distStr+' ft</td><td style="padding:3px 4px;">'+valStr+'</td><td style="padding:3px 4px;">'+sgStr+'</td>';
     else if (isWedge) row += '<td style="padding:3px 4px;">'+distStr+' yds</td><td style="padding:3px 4px;">'+valStr+'</td><td style="padding:3px 4px;">'+sgStr+'</td>';
     else if (isChipProx) row += '<td style="padding:3px 4px;">'+distStr+' yds</td><td style="padding:3px 4px;font-size:10px;">'+lieStr+'</td><td style="padding:3px 4px;">'+valStr+' ft</td><td style="padding:3px 4px;">'+sgStr+'</td>';
-    else if (isDriver) { var scoreVal = (r.d!==''&&r.v!=='') ? (parseFloat(r.d)-parseFloat(r.v)).toFixed(0) : '–'; row += '<td style="padding:3px 4px;">'+distStr+' yds</td><td style="padding:3px 4px;">'+valStr+' yds</td><td style="padding:3px 4px;font-weight:700;color:#44b8f0;">'+scoreVal+'</td>'; }
+    else if (isDriver) {
+      var scoreVal = (r.d!==''&&r.v!=='') ? (parseFloat(r.d)-parseFloat(r.v)).toFixed(0) : '–';
+      var dirCol = r.l === 'L' ? '#44b8f0' : (r.l === 'R' ? '#f0c830' : '#9a9a9a');
+      var dirTxt = r.l === 'L' ? 'L' : (r.l === 'R' ? 'R' : (r.l ? r.l : '—'));
+      row += '<td style="padding:3px 4px;">'+distStr+' yds</td><td style="padding:3px 4px;">'+valStr+' yds <span style="color:'+dirCol+';font-weight:700;">'+dirTxt+'</span></td><td style="padding:3px 4px;font-weight:700;color:#44b8f0;">'+scoreVal+'</td>';
+    }
     else if (isLineDrill) {
       var sideTxt = lieStr === 'L' ? 'Left' : (lieStr === 'R' ? 'Right' : 'Straight');
       var sideCol = lieStr === 'L' ? '#44b8f0' : (lieStr === 'R' ? '#f0c830' : '#00b87a');
@@ -16025,12 +16429,8 @@ function goToWedgeGapping(){
 }
 
 function goToDriverCombinePicker(){
-  _combSaveForStudent = null;
-  _combFromDriverTab = true;
-  var banner = document.getElementById('combStudentBanner');
-  if (banner) banner.style.display = 'none';
-  show('combinesPage');
-  combShowModeSelect('driver');
+  // New one-shot-at-a-time Driver flow (UI matches Line Drill).
+  goToDriverDrill();
 }
 
 async function goToAutoCombine(){
