@@ -3016,11 +3016,13 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
             <div style="font-size:10px;color:#606060;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Misses Left</div>
             <div id="ld-stat-left" style="font-size:22px;font-weight:800;color:#ffffff;">0</div>
             <div id="ld-stat-left-pct" style="font-size:11px;color:#9a9a9a;margin-top:2px;">0%</div>
+            <div id="ld-stat-left-avg" style="font-size:11px;color:#9a9a9a;margin-top:2px;">0.0 yds avg</div>
           </div>
           <div style="background:#222222;border:1px solid #333333;border-radius:10px;padding:12px;text-align:center;">
             <div style="font-size:10px;color:#606060;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Misses Right</div>
             <div id="ld-stat-right" style="font-size:22px;font-weight:800;color:#ffffff;">0</div>
             <div id="ld-stat-right-pct" style="font-size:11px;color:#9a9a9a;margin-top:2px;">0%</div>
+            <div id="ld-stat-right-avg" style="font-size:11px;color:#9a9a9a;margin-top:2px;">0.0 yds avg</div>
           </div>
           <div style="background:#222222;border:1px solid #333333;border-radius:10px;padding:12px;text-align:center;">
             <div style="font-size:10px;color:#606060;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Avg Offline</div>
@@ -3032,12 +3034,6 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
             <div id="ld-stat-biggest" style="font-size:22px;font-weight:800;color:#ffffff;">0</div>
             <div id="ld-stat-biggest-side" style="font-size:11px;color:#9a9a9a;margin-top:2px;">—</div>
           </div>
-        </div>
-
-        <!-- Bias indicator -->
-        <div id="ld-bias-box" style="background:#222222;border:1px solid #333333;border-radius:10px;padding:10px 12px;margin-bottom:12px;text-align:center;">
-          <div style="font-size:11px;color:#606060;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">Pattern</div>
-          <div id="ld-bias-text" style="font-size:13px;color:#ffffff;font-weight:700;">—</div>
         </div>
 
         <!-- Note -->
@@ -15603,23 +15599,13 @@ function _ldShowSummary(){
   document.getElementById('ld-stat-right').textContent = rightCount;
   document.getElementById('ld-stat-left-pct').textContent  = n ? Math.round(leftCount  / n * 100) + '%' : '0%';
   document.getElementById('ld-stat-right-pct').textContent = n ? Math.round(rightCount / n * 100) + '%' : '0%';
+  var leftAvg  = leftCount  ? leftYds  / leftCount  : 0;
+  var rightAvg = rightCount ? rightYds / rightCount : 0;
+  document.getElementById('ld-stat-left-avg').textContent  = leftAvg.toFixed(1)  + ' yds avg';
+  document.getElementById('ld-stat-right-avg').textContent = rightAvg.toFixed(1) + ' yds avg';
   document.getElementById('ld-stat-avg').textContent = avg.toFixed(1);
   document.getElementById('ld-stat-biggest').textContent = biggest % 1 === 0 ? biggest : biggest.toFixed(1);
   document.getElementById('ld-stat-biggest-side').textContent = biggestSide;
-
-  // Bias text
-  var biasTxt;
-  var sided = leftCount + rightCount;
-  if (sided === 0) { biasTxt = 'All shots dead straight'; }
-  else if (leftCount === rightCount) { biasTxt = 'Balanced — no left/right bias'; }
-  else if (leftCount > rightCount) {
-    var diff = leftCount - rightCount;
-    biasTxt = 'Bias: '+diff+' more miss'+(diff===1?'':'es')+' Left ('+leftYds.toFixed(1)+' yds vs '+rightYds.toFixed(1)+' yds)';
-  } else {
-    var diff2 = rightCount - leftCount;
-    biasTxt = 'Bias: '+diff2+' more miss'+(diff2===1?'':'es')+' Right ('+rightYds.toFixed(1)+' yds vs '+leftYds.toFixed(1)+' yds)';
-  }
-  document.getElementById('ld-bias-text').textContent = biasTxt;
 
   // Shots table
   var hdr = '<div style="display:flex;padding:8px 10px;font-size:10px;color:#606060;text-transform:uppercase;letter-spacing:.5px;font-weight:700;background:#1e1e1e;">'
