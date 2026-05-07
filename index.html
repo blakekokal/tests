@@ -1132,6 +1132,10 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
       <!-- Landing: choose practice mode -->
       <div id="ppLanding">
         <div style="display:flex;flex-direction:column;gap:10px;align-items:center;">
+          <button onclick="ppShowSwingJournal()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
+            <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">📓</span>
+            <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Swing Journal</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Log your swing thoughts by date</div></div>
+          </button>
           <button onclick="ppShowWarmUp()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
             <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🔥</span>
             <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Pre-Round Warm Up</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Comprehensive warm up before your round</div></div>
@@ -1342,6 +1346,25 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
         <div style="font-size:18px;font-weight:800;text-align:center;margin-bottom:4px;">Pre-Round Warm Up</div>
         <p style="text-align:center;font-size:11px;color:rgba(255,255,255,0.4);margin:0 0 14px;">Get loose and dial in before your round</p>
         <div id="ppWarmUpContent"></div>
+      </div>
+
+      <!-- SWING JOURNAL VIEW -->
+      <div id="ppSwingJournalView" style="display:none;">
+        <button onclick="ppBackToLanding()" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:#2d7abc;font-size:13px;font-weight:700;cursor:pointer;padding:0;margin-bottom:14px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg> Back</button>
+        <div style="font-size:18px;font-weight:800;text-align:center;margin-bottom:4px;">Swing Journal</div>
+        <p style="text-align:center;font-size:11px;color:rgba(255,255,255,0.4);margin:0 0 14px;">Track your current swing thoughts</p>
+        <div style="background:#222;border-radius:12px;padding:14px 16px;margin-bottom:12px;">
+          <div style="margin-bottom:10px;">
+            <label style="font-size:12px;color:#9a9a9a;display:block;margin-bottom:4px;">Date</label>
+            <input type="date" id="sjEntryDate" style="width:100%;height:40px;background:#1e1e1e;color:#ffffff;border:1px solid #3d3d3d;border-radius:8px;padding:0 10px;font-size:14px;box-sizing:border-box;">
+          </div>
+          <div style="margin-bottom:10px;">
+            <label style="font-size:12px;color:#9a9a9a;display:block;margin-bottom:4px;">Swing Thought</label>
+            <input type="text" id="sjEntryText" placeholder="e.g. Feel left shoulder turn down" style="width:100%;height:40px;background:#1e1e1e;color:#ffffff;border:1px solid #3d3d3d;border-radius:8px;padding:0 10px;font-size:14px;box-sizing:border-box;">
+          </div>
+          <button onclick="addSwingJournalEntry()" style="width:100%;height:42px;background:#007a52;border:none;border-radius:10px;color:#ffffff;font-size:14px;font-weight:700;cursor:pointer;max-width:none;">+ Add Thought</button>
+        </div>
+        <div id="sjEntries"></div>
       </div>
 
     </div>
@@ -18447,10 +18470,85 @@ var _ppMode = 'recommended'; // 'recommended' or 'timed'
 var _ppSGData = null;
 
 function ppHideAllViews() {
-  ['ppLanding','ppTourView','ppRecommendedView','ppLogView','ppHistoryView','ppCustomView','ppCustomUseView','ppGeneratorView','ppWarmUpView'].forEach(function(id) {
+  ['ppLanding','ppTourView','ppRecommendedView','ppLogView','ppHistoryView','ppCustomView','ppCustomUseView','ppGeneratorView','ppWarmUpView','ppSwingJournalView'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
+}
+
+var _SWING_JOURNAL_KEY = 'swingJournal_v1';
+
+function ppShowSwingJournal() {
+  ppHideAllViews();
+  document.getElementById('ppSwingJournalView').style.display = '';
+  var dateInput = document.getElementById('sjEntryDate');
+  if (dateInput && !dateInput.value) {
+    var d = new Date();
+    var iso = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    dateInput.value = iso;
+  }
+  renderSwingJournal();
+}
+
+function getSwingJournalEntries() {
+  try { return JSON.parse(localStorage.getItem(_SWING_JOURNAL_KEY)) || []; }
+  catch(e) { return []; }
+}
+
+function saveSwingJournalEntries(entries) {
+  localStorage.setItem(_SWING_JOURNAL_KEY, JSON.stringify(entries));
+}
+
+function addSwingJournalEntry() {
+  var dateInput = document.getElementById('sjEntryDate');
+  var textInput = document.getElementById('sjEntryText');
+  var date = dateInput.value;
+  var text = (textInput.value || '').trim();
+  if (!date || !text) return;
+  var entries = getSwingJournalEntries();
+  entries.push({ id: Date.now() + '_' + Math.random().toString(36).slice(2,8), date: date, text: text });
+  saveSwingJournalEntries(entries);
+  textInput.value = '';
+  renderSwingJournal();
+}
+
+function deleteSwingJournalEntry(id) {
+  var entries = getSwingJournalEntries().filter(function(e) { return e.id !== id; });
+  saveSwingJournalEntries(entries);
+  renderSwingJournal();
+}
+
+function renderSwingJournal() {
+  var container = document.getElementById('sjEntries');
+  if (!container) return;
+  var entries = getSwingJournalEntries().slice().sort(function(a,b) {
+    if (a.date === b.date) return (b.id || '').localeCompare(a.id || '');
+    return b.date.localeCompare(a.date);
+  });
+  if (entries.length === 0) {
+    container.innerHTML = '<div style="text-align:center;font-size:12px;color:#606060;padding:16px 0;">No entries yet. Add your first swing thought above.</div>';
+    return;
+  }
+  var groups = {};
+  entries.forEach(function(e) { (groups[e.date] = groups[e.date] || []).push(e); });
+  var dates = Object.keys(groups).sort(function(a,b) { return b.localeCompare(a); });
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var html = '';
+  dates.forEach(function(d) {
+    var dp = d.split('-');
+    var disp = dp.length === 3 ? (months[parseInt(dp[1],10)-1] + ' ' + parseInt(dp[2],10) + ', ' + dp[0]) : d;
+    html += '<div style="background:#222;border-radius:12px;padding:14px 16px;margin-bottom:10px;">';
+    html += '<div style="font-size:13px;font-weight:800;color:#ffffff;margin-bottom:8px;">' + disp + '</div>';
+    html += '<ul style="margin:0;padding-left:18px;font-size:13px;color:#9a9a9a;line-height:1.7;">';
+    groups[d].forEach(function(e) {
+      html += '<li style="display:flex;align-items:flex-start;gap:8px;">';
+      html += '<span style="flex:1;">' + escHtml(e.text) + '</span>';
+      html += '<button onclick="deleteSwingJournalEntry(\'' + e.id + '\')" style="background:transparent;border:none;color:#2e2e2e;font-size:11px;cursor:pointer;padding:0 4px;height:auto;max-width:none;width:auto;flex-shrink:0;">×</button>';
+      html += '</li>';
+    });
+    html += '</ul></div>';
+  });
+  container.innerHTML = html;
 }
 
 function ppBackToLanding() {
