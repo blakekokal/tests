@@ -363,6 +363,8 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
         <option value="Chipping (Prox)">Chipping Prox</option>
         <option value="Chip Hole Out">Chip Hole Out</option>
         <option value="Wedge">Wedge</option>
+        <option value="Driver">Driver</option>
+        <option value="Line Drill">Line Drill</option>
       </select>
       <select id="profileCombFilterTime" onchange="loadMyCombines()" style="background:#282828;color:#ffffff;border:1px solid #3d3d3d;border-radius:6px;padding:4px 8px;font-size:12px;">
         <option value="all">All Time</option>
@@ -1083,6 +1085,10 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
           <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🏌️‍♂️</span>
           <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Driver</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Track drive distance &amp; accuracy</div></div>
         </button>
+        <button onclick="goToLineDrill()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
+          <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">📏</span>
+          <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Line Drill</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Mid-iron accuracy 140-240 yds (launch monitor)</div></div>
+        </button>
       </div>
       <!-- Combine History -->
       <div style="margin-top:16px;">
@@ -1095,6 +1101,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
             <option value="Chip Hole Out">Chip Hole Out</option>
             <option value="Wedge">Wedge</option>
             <option value="Driver">Driver</option>
+            <option value="Line Drill">Line Drill</option>
           </select>
           <select id="phCombFilterMode" onchange="loadPHCombineHistory()" style="background:#282828;color:#ffffff;border:1px solid #3d3d3d;border-radius:6px;padding:5px 8px;font-size:12px;">
             <option value="all">Custom &amp; Combine</option>
@@ -2912,6 +2919,150 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
 </div>
 
 <!-- SHORT GAME COMBINES PAGE -->
+<div id="lineDrillPage" class="page" style="justify-content:flex-start;padding:0;overflow:hidden;">
+  <!-- Header -->
+  <div style="background:#1e1e1e;border-bottom:2px solid #00b87a;width:100%;text-align:center;padding:11px 0;position:relative;flex-shrink:0;">
+    <button onclick="lineDrillBack()" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);background:#333333;border:none;color:#ffffff;border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:#ffffff;stroke-width:2.5;fill:none;"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <div style="font-size:1.2rem;font-weight:800;color:#ffffff;">Line Drill</div>
+  </div>
+
+  <!-- Scrollable body -->
+  <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;width:100%;">
+    <div style="max-width:520px;margin:0 auto;padding:14px 14px 100px;">
+
+      <!-- SETUP VIEW -->
+      <div id="ld-setup-view">
+        <div style="background:#222222;border:1px solid #333333;border-radius:10px;padding:14px;margin-bottom:14px;">
+          <div style="font-size:13px;color:#ffffff;line-height:1.5;">
+            <strong style="color:#00b87a;">Line Drill</strong> tests mid-iron accuracy. We give you a random yardage; you hit your club for that distance. Enter how many yards offline the shot finished — that's your score for the shot. Lower is better.
+          </div>
+          <div style="font-size:11px;color:#d49a10;margin-top:8px;font-weight:700;">⚠ Requires a launch monitor for offline measurement.</div>
+          <div style="font-size:11px;color:#9a9a9a;margin-top:8px;line-height:1.5;">
+            <strong style="color:#ffffff;">Benchmarks (total offline):</strong><br>
+            • Best Pro: ~40<br>
+            • Tour Pro avg: ~95<br>
+            • All-American Junior: ~115
+          </div>
+        </div>
+
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#606060;margin-bottom:8px;">Version</div>
+        <div style="display:flex;gap:8px;margin-bottom:14px;">
+          <button id="ld-version-std" onclick="lineDrillSetVersion('standard')" style="flex:1;height:46px;background:#00b87a;color:#ffffff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;max-width:none;">Standard (20)</button>
+          <button id="ld-version-short" onclick="lineDrillSetVersion('short')" style="flex:1;height:46px;background:#282828;color:#606060;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;max-width:none;">Short (10)</button>
+        </div>
+
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#606060;margin-bottom:8px;">Yardage Range</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;">
+          <input type="number" id="ld-min" value="140" min="50" max="400" inputmode="numeric" style="flex:1;height:46px;background:#282828;color:#ffffff;border:1px solid #333333;border-radius:10px;text-align:center;font-size:15px;">
+          <span style="color:#606060;font-size:14px;">to</span>
+          <input type="number" id="ld-max" value="240" min="50" max="400" inputmode="numeric" style="flex:1;height:46px;background:#282828;color:#ffffff;border:1px solid #333333;border-radius:10px;text-align:center;font-size:15px;">
+          <span style="color:#606060;font-size:13px;">yds</span>
+        </div>
+        <div style="font-size:11px;color:#606060;margin-bottom:14px;">Default 140-240. Distances are rounded to the nearest 5.</div>
+
+        <button onclick="lineDrillStart()" style="width:100%;height:50px;background:#007a52;color:#ffffff;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;max-width:none;">Start Drill →</button>
+        <div id="ld-setup-msg" style="font-size:12px;color:#d4706e;text-align:center;margin-top:8px;min-height:16px;"></div>
+      </div>
+
+      <!-- TRACKER VIEW -->
+      <div id="ld-tracker-view" style="display:none;">
+        <!-- Progress -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div style="font-size:12px;color:#606060;">Shot <span id="ld-shot-num" style="color:#ffffff;font-weight:700;">1</span> of <span id="ld-shot-total" style="color:#ffffff;font-weight:700;">20</span></div>
+          <div style="font-size:12px;color:#606060;">Total: <span id="ld-running-total" style="color:#00b87a;font-weight:700;">0</span> yds</div>
+        </div>
+        <div style="background:#282828;height:6px;border-radius:3px;overflow:hidden;margin-bottom:14px;">
+          <div id="ld-progress-bar" style="background:#00b87a;height:100%;width:0%;transition:width 0.2s;"></div>
+        </div>
+
+        <!-- Target yardage -->
+        <div style="background:#00402c;border:2px solid #00b87a;border-radius:14px;padding:22px 14px;text-align:center;margin-bottom:14px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#9affc8;margin-bottom:6px;">Target Distance</div>
+          <div id="ld-target-yds" style="font-size:54px;font-weight:800;color:#ffffff;line-height:1;">175</div>
+          <div style="font-size:13px;color:#9affc8;margin-top:4px;">yards — hit your club for this</div>
+        </div>
+
+        <!-- Offline entry -->
+        <div style="background:#222222;border:1px solid #333333;border-radius:12px;padding:14px;margin-bottom:14px;">
+          <div style="font-size:12px;color:#606060;margin-bottom:8px;text-align:center;">Offline (yards)</div>
+          <input type="number" id="ld-offline-input" placeholder="0" inputmode="decimal" min="0" step="0.1" style="width:100%;height:60px;background:#282828;color:#ffffff;border:1px solid #333333;border-radius:10px;text-align:center;font-size:32px;font-weight:800;box-sizing:border-box;">
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <button id="ld-dir-left" onclick="lineDrillSetDir('L')" style="flex:1;height:50px;background:#282828;color:#606060;border:1px solid #333333;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;max-width:none;">◀ Left</button>
+            <button id="ld-dir-right" onclick="lineDrillSetDir('R')" style="flex:1;height:50px;background:#282828;color:#606060;border:1px solid #333333;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;max-width:none;">Right ▶</button>
+          </div>
+        </div>
+
+        <button id="ld-next-btn" onclick="lineDrillRecordShot()" style="width:100%;height:52px;background:#007a52;color:#ffffff;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;max-width:none;">Record Shot →</button>
+        <button onclick="lineDrillBackToSetup()" style="width:100%;height:40px;background:transparent;color:#606060;border:none;font-size:13px;cursor:pointer;margin-top:8px;max-width:none;">Cancel Drill</button>
+
+        <!-- Shots so far -->
+        <div id="ld-shots-list" style="margin-top:14px;"></div>
+      </div>
+
+      <!-- SUMMARY VIEW -->
+      <div id="ld-summary-view" style="display:none;">
+        <!-- Total score -->
+        <div style="background:#1a4a8a;border:2px solid #2d7abc;border-radius:14px;padding:20px 14px;text-align:center;margin-bottom:12px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#aad4ff;margin-bottom:4px;">Final Score</div>
+          <div id="ld-final-score" style="font-size:54px;font-weight:800;color:#ffffff;line-height:1;">0</div>
+          <div style="font-size:13px;color:#aad4ff;margin-top:4px;">total yards offline</div>
+          <div id="ld-final-grade" style="font-size:14px;font-weight:700;margin-top:8px;"></div>
+          <div id="ld-final-bench" style="font-size:11px;color:#aad4ff;margin-top:6px;line-height:1.5;"></div>
+        </div>
+
+        <!-- Stats grid -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+          <div style="background:#222222;border:1px solid #333333;border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-size:10px;color:#606060;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Misses Left</div>
+            <div id="ld-stat-left" style="font-size:22px;font-weight:800;color:#ffffff;">0</div>
+            <div id="ld-stat-left-pct" style="font-size:11px;color:#9a9a9a;margin-top:2px;">0%</div>
+          </div>
+          <div style="background:#222222;border:1px solid #333333;border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-size:10px;color:#606060;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Misses Right</div>
+            <div id="ld-stat-right" style="font-size:22px;font-weight:800;color:#ffffff;">0</div>
+            <div id="ld-stat-right-pct" style="font-size:11px;color:#9a9a9a;margin-top:2px;">0%</div>
+          </div>
+          <div style="background:#222222;border:1px solid #333333;border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-size:10px;color:#606060;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Avg Offline</div>
+            <div id="ld-stat-avg" style="font-size:22px;font-weight:800;color:#ffffff;">0</div>
+            <div style="font-size:11px;color:#9a9a9a;margin-top:2px;">yds/shot</div>
+          </div>
+          <div style="background:#222222;border:1px solid #333333;border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-size:10px;color:#606060;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Biggest Miss</div>
+            <div id="ld-stat-biggest" style="font-size:22px;font-weight:800;color:#ffffff;">0</div>
+            <div id="ld-stat-biggest-side" style="font-size:11px;color:#9a9a9a;margin-top:2px;">—</div>
+          </div>
+        </div>
+
+        <!-- Bias indicator -->
+        <div id="ld-bias-box" style="background:#222222;border:1px solid #333333;border-radius:10px;padding:10px 12px;margin-bottom:12px;text-align:center;">
+          <div style="font-size:11px;color:#606060;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">Pattern</div>
+          <div id="ld-bias-text" style="font-size:13px;color:#ffffff;font-weight:700;">—</div>
+        </div>
+
+        <!-- Note -->
+        <div style="background:#222222;border:1px solid #333333;border-radius:10px;padding:10px;margin-bottom:12px;">
+          <label style="font-size:10px;color:#606060;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Note (optional)</label>
+          <input type="text" id="ld-note" placeholder="e.g. 7-iron, range session" style="width:100%;background:#282828;color:#ffffff;border:1px solid #333333;border-radius:8px;padding:8px 10px;font-size:13px;box-sizing:border-box;">
+        </div>
+
+        <!-- Save -->
+        <button id="ld-save-btn" onclick="lineDrillSave()" style="width:100%;height:50px;background:#007a52;color:#ffffff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;max-width:none;">💾 Save to Profile</button>
+        <div id="ld-save-msg" style="font-size:12px;text-align:center;margin-top:8px;min-height:16px;color:#00b87a;"></div>
+
+        <button onclick="lineDrillBackToSetup()" style="width:100%;height:44px;background:#282828;color:#ffffff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px;max-width:none;">Run Another Drill</button>
+
+        <!-- Shot table -->
+        <div style="margin-top:14px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#606060;margin-bottom:6px;">Shots</div>
+          <div id="ld-summary-shots" style="background:#1e1e1e;border-radius:8px;overflow:hidden;"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <div id="combinesPage" class="page" style="justify-content:flex-start;padding:0;overflow:hidden;">
 
   <!-- Fixed header -->
@@ -3558,7 +3709,8 @@ var _searchEntries = [
   { label:'My Bag', keywords:['my bag','clubs','club distances','yardages','bag'], action:function(){show('myBagPage');} },
   { label:'Gap Visualizer', keywords:['gap','visualizer','distance gaps','gap visualizer'], action:function(){show('gapVisualizerPage');} },
   { label:'Practice Hub', keywords:['practice','practice hub','drills','drill'], action:function(){goToPracticeHub();} },
-  { label:'Combines', keywords:['combines','combine','auto combine','putting combine','short game combine','wedge combine','driver combine'], action:function(){_currentPHTab='combines';show('practiceHubPage');} },
+  { label:'Combines', keywords:['combines','combine','auto combine','putting combine','short game combine','wedge combine','driver combine','line drill'], action:function(){_currentPHTab='combines';show('practiceHubPage');} },
+  { label:'Line Drill', keywords:['line drill','line','accuracy','iron accuracy','offline','launch monitor drill'], action:function(){goToLineDrill();} },
   { label:'Drills', keywords:['drills','drill'], action:function(){_currentPHTab='drills';show('practiceHubPage');} },
   { label:'Custom Practice', keywords:['custom practice','practice session','practice log'], action:function(){_currentPHTab='practice';show('practiceHubPage');} },
   { label:'Learn', keywords:['learn','learning','library','educational'], action:function(){_currentPHTab='learn';show('practiceHubPage');} },
@@ -3679,6 +3831,7 @@ var _backTargetMap = {
   'editRoundInfoPage': 'summaryPage',
   'authPage': 'homePage',
   'combinesPage': 'practiceHubPage',
+  'lineDrillPage': 'practiceHubPage',
   'whatsNewPage': 'homePage',
   'guideToGolfPage': 'practiceHubPage',
   'myCoursesPage': 'roundPage',
@@ -15094,6 +15247,15 @@ function calcCombGrade(type, wedgeMode, totalSg, filled, totalExp) {
 }
 
 function getCombGradeFromCard(c) {
+  // For Line Drill, grade by avg yards offline per shot (lower is better)
+  if (c.combine_type === 'Line Drill') {
+    if (c.grade_100 !== null && c.grade_100 !== undefined) return Math.round(c.grade_100);
+    if (c.avg_pts !== null && c.avg_pts !== undefined) {
+      var g = 100 - (c.avg_pts - 2) * 12;
+      return Math.round(Math.max(0, Math.min(100, g)));
+    }
+    return null;
+  }
   // For driver combines, grade based on avg score per shot
   if (c.combine_type === 'Driver' && c.avg_pts !== null && c.avg_pts !== undefined) {
     var grade = (c.avg_pts - 100) / 2;
@@ -15234,6 +15396,338 @@ async function combSave(){
   } catch(e) { console.error('[notify] Combine notification exception:', e); }
 }
 
+/* ============================================
+   LINE DRILL — mid-iron accuracy combine
+   ============================================ */
+var _ldState = {
+  version: 'standard', // or 'short'
+  totalShots: 20,
+  minYds: 140,
+  maxYds: 240,
+  shots: [],           // [{target, offline, dir}]
+  currentTarget: null,
+  currentDir: null,
+  currentShotIndex: 0  // 0-based
+};
+
+function goToLineDrill(){
+  show('lineDrillPage');
+  lineDrillBackToSetup();
+}
+
+function lineDrillBack(){
+  show('practiceHubPage');
+}
+
+function lineDrillBackToSetup(){
+  document.getElementById('ld-setup-view').style.display = '';
+  document.getElementById('ld-tracker-view').style.display = 'none';
+  document.getElementById('ld-summary-view').style.display = 'none';
+  _ldState.shots = [];
+  _ldState.currentShotIndex = 0;
+  _ldState.currentTarget = null;
+  _ldState.currentDir = null;
+  document.getElementById('ld-setup-msg').textContent = '';
+  document.getElementById('ld-save-msg').textContent = '';
+}
+
+function lineDrillSetVersion(v){
+  _ldState.version = v;
+  _ldState.totalShots = (v === 'short') ? 10 : 20;
+  var stdBtn   = document.getElementById('ld-version-std');
+  var shortBtn = document.getElementById('ld-version-short');
+  var on  = '#00b87a', onTxt = '#ffffff';
+  var off = '#282828', offTxt = '#606060';
+  stdBtn.style.background   = v==='standard' ? on  : off;
+  stdBtn.style.color        = v==='standard' ? onTxt : offTxt;
+  shortBtn.style.background = v==='short' ? on : off;
+  shortBtn.style.color      = v==='short' ? onTxt : offTxt;
+}
+
+function _ldRandomYardage(min, max){
+  // Round to nearest 5 within [min, max]. Use 5-yard buckets between rounded bounds.
+  var lo = Math.ceil(min/5)*5;
+  var hi = Math.floor(max/5)*5;
+  if (hi < lo) { var t=lo; lo=hi; hi=t; }
+  var steps = Math.floor((hi - lo) / 5) + 1;
+  return lo + 5 * Math.floor(Math.random() * steps);
+}
+
+function lineDrillStart(){
+  var msg = document.getElementById('ld-setup-msg');
+  var min = parseInt(document.getElementById('ld-min').value, 10);
+  var max = parseInt(document.getElementById('ld-max').value, 10);
+  if (!isFinite(min) || !isFinite(max)) { msg.textContent = 'Enter valid yardages.'; return; }
+  if (min < 30 || max > 400) { msg.textContent = 'Range must be between 30 and 400 yards.'; return; }
+  if (max - min < 5) { msg.textContent = 'Max must be at least 5 yards greater than min.'; return; }
+  _ldState.minYds = min;
+  _ldState.maxYds = max;
+  _ldState.shots = [];
+  _ldState.currentShotIndex = 0;
+  document.getElementById('ld-setup-view').style.display = 'none';
+  document.getElementById('ld-summary-view').style.display = 'none';
+  document.getElementById('ld-tracker-view').style.display = '';
+  document.getElementById('ld-shot-total').textContent = _ldState.totalShots;
+  _ldNextShot();
+}
+
+function _ldNextShot(){
+  if (_ldState.currentShotIndex >= _ldState.totalShots) {
+    _ldShowSummary();
+    return;
+  }
+  _ldState.currentTarget = _ldRandomYardage(_ldState.minYds, _ldState.maxYds);
+  _ldState.currentDir = null;
+  document.getElementById('ld-target-yds').textContent = _ldState.currentTarget;
+  document.getElementById('ld-shot-num').textContent = _ldState.currentShotIndex + 1;
+  var inp = document.getElementById('ld-offline-input');
+  inp.value = '';
+  inp.focus();
+  // Reset direction buttons
+  var L = document.getElementById('ld-dir-left');
+  var R = document.getElementById('ld-dir-right');
+  L.style.background = '#282828'; L.style.color = '#606060';
+  R.style.background = '#282828'; R.style.color = '#606060';
+  // Update progress
+  var pct = (_ldState.currentShotIndex / _ldState.totalShots) * 100;
+  document.getElementById('ld-progress-bar').style.width = pct + '%';
+  _ldRenderShotsList();
+}
+
+function lineDrillSetDir(dir){
+  _ldState.currentDir = dir;
+  var L = document.getElementById('ld-dir-left');
+  var R = document.getElementById('ld-dir-right');
+  if (dir === 'L') {
+    L.style.background = '#2d7abc'; L.style.color = '#ffffff';
+    R.style.background = '#282828'; R.style.color = '#606060';
+  } else {
+    R.style.background = '#2d7abc'; R.style.color = '#ffffff';
+    L.style.background = '#282828'; L.style.color = '#606060';
+  }
+}
+
+function lineDrillRecordShot(){
+  var inp = document.getElementById('ld-offline-input');
+  var raw = inp.value.trim();
+  var off = parseFloat(raw);
+  if (!isFinite(off) || off < 0) { inp.style.borderColor = '#d4706e'; inp.focus(); return; }
+  if (off > 0 && !_ldState.currentDir) {
+    // Need direction unless dead straight (off === 0)
+    var L = document.getElementById('ld-dir-left');
+    var R = document.getElementById('ld-dir-right');
+    L.style.borderColor = '#d4706e';
+    R.style.borderColor = '#d4706e';
+    setTimeout(function(){ L.style.borderColor=''; R.style.borderColor=''; }, 900);
+    return;
+  }
+  inp.style.borderColor = '';
+  _ldState.shots.push({
+    target: _ldState.currentTarget,
+    offline: off,
+    dir: off === 0 ? '—' : _ldState.currentDir
+  });
+  _ldState.currentShotIndex++;
+  // Update running total
+  var total = _ldState.shots.reduce(function(s,x){ return s + x.offline; }, 0);
+  document.getElementById('ld-running-total').textContent = total.toFixed(total % 1 === 0 ? 0 : 1);
+  _ldNextShot();
+}
+
+function _ldRenderShotsList(){
+  var list = document.getElementById('ld-shots-list');
+  if (!_ldState.shots.length) { list.innerHTML = ''; return; }
+  var rows = _ldState.shots.map(function(s, i){
+    var dirCol = s.dir === 'L' ? '#44b8f0' : (s.dir === 'R' ? '#f0c830' : '#00b87a');
+    var dirTxt = s.dir === 'L' ? 'Left' : (s.dir === 'R' ? 'Right' : 'Straight');
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;border-top:1px solid #282828;font-size:12px;">'
+      + '<span style="color:#606060;width:24px;">'+(i+1)+'.</span>'
+      + '<span style="color:#9a9a9a;flex:1;">'+s.target+' yds</span>'
+      + '<span style="color:'+dirCol+';font-weight:700;width:60px;text-align:right;">'+dirTxt+'</span>'
+      + '<span style="color:#ffffff;font-weight:700;width:50px;text-align:right;">'+s.offline+'</span>'
+      + '</div>';
+  }).join('');
+  list.innerHTML = '<div style="background:#1e1e1e;border-radius:8px;overflow:hidden;">'
+    + '<div style="padding:8px 10px;font-size:11px;color:#606060;text-transform:uppercase;letter-spacing:.5px;font-weight:700;">Shots so far</div>'
+    + rows + '</div>';
+}
+
+function _ldGradeFromAvg(avgOffline){
+  // 2 yds/shot ≈ 100, 4.75 yds/shot (pro avg) ≈ 67, 5.75 (AA junior) ≈ 55, 10 ≈ 4
+  var g = 100 - (avgOffline - 2) * 12;
+  return Math.round(Math.max(0, Math.min(100, g)));
+}
+
+function _ldGradeColor(g){
+  if (g >= 80) return '#00b87a';
+  if (g >= 60) return '#00b87a';
+  if (g >= 40) return '#f0c830';
+  return '#d4706e';
+}
+
+function _ldShowSummary(){
+  document.getElementById('ld-tracker-view').style.display = 'none';
+  document.getElementById('ld-summary-view').style.display = '';
+
+  var shots = _ldState.shots;
+  var n = shots.length;
+  var total = 0, leftCount = 0, rightCount = 0, biggest = 0, biggestSide = '—';
+  var leftYds = 0, rightYds = 0;
+  shots.forEach(function(s){
+    total += s.offline;
+    if (s.dir === 'L') { leftCount++; leftYds += s.offline; }
+    else if (s.dir === 'R') { rightCount++; rightYds += s.offline; }
+    if (s.offline > biggest) {
+      biggest = s.offline;
+      biggestSide = s.dir === 'L' ? 'Left' : (s.dir === 'R' ? 'Right' : 'Straight');
+    }
+  });
+  var avg = n ? total / n : 0;
+  var grade = _ldGradeFromAvg(avg);
+
+  document.getElementById('ld-final-score').textContent = total % 1 === 0 ? total : total.toFixed(1);
+
+  var gEl = document.getElementById('ld-final-grade');
+  gEl.innerHTML = '<span style="color:'+_ldGradeColor(grade)+';font-size:20px;font-weight:800;">'+grade+'/100</span>';
+
+  // Benchmark line
+  var bench = '';
+  if (total <= 50) bench = '🏆 Better than the best pros — elite!';
+  else if (total <= 95) bench = '🔥 In the range of a Tour Pro';
+  else if (total <= 115) bench = '💪 All-American Junior level';
+  else if (total <= 160) bench = 'Solid amateur — keep grinding';
+  else bench = 'Lots of room to improve — keep practicing';
+  document.getElementById('ld-final-bench').textContent = bench;
+
+  document.getElementById('ld-stat-left').textContent = leftCount;
+  document.getElementById('ld-stat-right').textContent = rightCount;
+  document.getElementById('ld-stat-left-pct').textContent  = n ? Math.round(leftCount  / n * 100) + '%' : '0%';
+  document.getElementById('ld-stat-right-pct').textContent = n ? Math.round(rightCount / n * 100) + '%' : '0%';
+  document.getElementById('ld-stat-avg').textContent = avg.toFixed(1);
+  document.getElementById('ld-stat-biggest').textContent = biggest % 1 === 0 ? biggest : biggest.toFixed(1);
+  document.getElementById('ld-stat-biggest-side').textContent = biggestSide;
+
+  // Bias text
+  var biasTxt;
+  var sided = leftCount + rightCount;
+  if (sided === 0) { biasTxt = 'All shots dead straight'; }
+  else if (leftCount === rightCount) { biasTxt = 'Balanced — no left/right bias'; }
+  else if (leftCount > rightCount) {
+    var diff = leftCount - rightCount;
+    biasTxt = 'Bias: '+diff+' more miss'+(diff===1?'':'es')+' Left ('+leftYds.toFixed(1)+' yds vs '+rightYds.toFixed(1)+' yds)';
+  } else {
+    var diff2 = rightCount - leftCount;
+    biasTxt = 'Bias: '+diff2+' more miss'+(diff2===1?'':'es')+' Right ('+rightYds.toFixed(1)+' yds vs '+leftYds.toFixed(1)+' yds)';
+  }
+  document.getElementById('ld-bias-text').textContent = biasTxt;
+
+  // Shots table
+  var hdr = '<div style="display:flex;padding:8px 10px;font-size:10px;color:#606060;text-transform:uppercase;letter-spacing:.5px;font-weight:700;background:#1e1e1e;">'
+    + '<span style="width:24px;">#</span>'
+    + '<span style="flex:1;">Target</span>'
+    + '<span style="width:60px;text-align:right;">Side</span>'
+    + '<span style="width:50px;text-align:right;">Off</span>'
+    + '</div>';
+  var body = shots.map(function(s, i){
+    var dirCol = s.dir === 'L' ? '#44b8f0' : (s.dir === 'R' ? '#f0c830' : '#00b87a');
+    var dirTxt = s.dir === 'L' ? 'Left' : (s.dir === 'R' ? 'Right' : 'Straight');
+    return '<div style="display:flex;padding:6px 10px;font-size:12px;border-top:1px solid #282828;">'
+      + '<span style="width:24px;color:#606060;">'+(i+1)+'</span>'
+      + '<span style="flex:1;color:#9a9a9a;">'+s.target+' yds</span>'
+      + '<span style="width:60px;text-align:right;color:'+dirCol+';font-weight:700;">'+dirTxt+'</span>'
+      + '<span style="width:50px;text-align:right;color:#ffffff;font-weight:700;">'+s.offline+'</span>'
+      + '</div>';
+  }).join('');
+  document.getElementById('ld-summary-shots').innerHTML = hdr + body;
+
+  // Reset save state
+  document.getElementById('ld-save-btn').disabled = false;
+  document.getElementById('ld-save-btn').textContent = '💾 Save to Profile';
+  document.getElementById('ld-save-msg').textContent = '';
+}
+
+async function lineDrillSave(){
+  if (!currentUser) { showAuthPage(); return; }
+  var btn = document.getElementById('ld-save-btn');
+  var msg = document.getElementById('ld-save-msg');
+  var shots = _ldState.shots;
+  if (!shots.length) { msg.style.color='#d4706e'; msg.textContent='Complete the drill first.'; return; }
+
+  var total = 0, leftCount = 0, rightCount = 0, biggest = 0;
+  shots.forEach(function(s){
+    total += s.offline;
+    if (s.dir === 'L') leftCount++;
+    else if (s.dir === 'R') rightCount++;
+    if (s.offline > biggest) biggest = s.offline;
+  });
+  var n = shots.length;
+  var avg = total / n;
+  var grade = _ldGradeFromAvg(avg);
+
+  // Build row_data keyed 1..n, matching the combine_scores format
+  var rowData = {};
+  shots.forEach(function(s, i){
+    rowData[i+1] = { d: s.target, v: s.offline, l: s.dir, sg: 0, exp1: 0 };
+  });
+
+  var note = (document.getElementById('ld-note').value || '').trim();
+  var version = _ldState.version === 'short' ? 'Short (10)' : 'Standard (20)';
+  var meta = '['+version+', '+_ldState.minYds+'-'+_ldState.maxYds+' yds, L:'+leftCount+' R:'+rightCount+', biggest:'+biggest+']';
+  var fullNote = note ? meta + ' ' + note : meta;
+
+  btn.disabled = true; btn.textContent = 'Saving...'; msg.textContent = '';
+
+  var payload = {
+    user_id:       activeUserId(),
+    combine_date:  getTodayCentral(),
+    combine_type:  'Line Drill',
+    is_combine:    true,
+    holes_count:   n,
+    filled_count:  n,
+    total_sg:      null,
+    avg_pts:       parseFloat(avg.toFixed(2)),
+    total_exp:     parseFloat(total.toFixed(2)),
+    total_strokes: parseFloat(total.toFixed(2)),
+    handicap:      'Tour Pro',
+    score_mode:    'line-drill',
+    note:          fullNote,
+    row_data:      JSON.stringify(rowData),
+    grade_100:     grade
+  };
+
+  var resp = await _sb.from('combine_scores').insert(payload);
+  if (resp.error) {
+    btn.disabled = false; btn.textContent = '💾 Save to Profile';
+    msg.style.color = '#d4706e'; msg.textContent = 'Save failed: ' + resp.error.message;
+    return;
+  }
+  btn.textContent = '✅ Saved!';
+  msg.style.color = '#00b87a'; msg.textContent = 'Saved! View in Combine History.';
+
+  // Notify coach (best-effort)
+  try {
+    var { data: prof } = await _sb.from('profiles').select('coach_id, display_name').eq('id', currentUser.id).single();
+    var coachId = prof && prof.coach_id ? prof.coach_id : null;
+    if (!coachId) {
+      var { data: link } = await _sb.from('coach_students').select('coach_id').eq('student_id', currentUser.id).limit(1);
+      if (link && link.length > 0) coachId = link[0].coach_id;
+    }
+    if (coachId) {
+      var playerName = (prof && prof.display_name) || currentUser.email || 'A student';
+      await _sb.from('notifications').insert({
+        user_id: coachId,
+        type: 'new_combine',
+        title: 'New Line Drill from ' + playerName,
+        message: playerName + ' completed a Line Drill (' + n + ' shots, ' + total.toFixed(0) + ' yds total offline)',
+        student_id: currentUser.id,
+        student_name: playerName,
+        read: false,
+        created_at: new Date().toISOString()
+      });
+    }
+  } catch(e) { console.error('[notify] Line drill notification error:', e); }
+}
+
 /* ── LOAD history on the Combines page ── */
 async function combLoadHistory(){
   var msg  = document.getElementById('combHistMsg');
@@ -15350,7 +15844,9 @@ function renderCombCard(c, canDelete, canEditNote){
   var gradeLine = '';
   var strokesLine = '';
   
-  if(c.combine_type==='Driver' && c.avg_pts!==null && c.avg_pts!==undefined){
+  if(c.combine_type==='Line Drill' && c.total_strokes!==null && c.total_strokes!==undefined){
+    sgLine='<span style="color:#44b8f0;font-size:15px;font-weight:700;">'+(+c.total_strokes).toFixed(0)+' yds offline · '+(+c.avg_pts).toFixed(1)+'/shot</span>';
+  } else if(c.combine_type==='Driver' && c.avg_pts!==null && c.avg_pts!==undefined){
     sgLine='<span style="color:#44b8f0;font-size:15px;font-weight:700;">'+(+c.avg_pts).toFixed(0)+' avg score</span>';
   } else if(c.total_sg!==null && c.total_sg!==undefined){
     var s=parseFloat(c.total_sg);
@@ -15419,6 +15915,7 @@ function toggleCombDetails(id) {
   var isChipProx = combType === 'Chipping (Prox)';
   var isChipHole = combType === 'Chip Hole Out';
   var isDriver = combType === 'Driver';
+  var isLineDrill = combType === 'Line Drill';
 
   // Build header
   var hdr = '<tr style="font-size:10px;color:#606060;text-transform:uppercase;">';
@@ -15427,6 +15924,7 @@ function toggleCombDetails(id) {
   else if (isWedge) hdr += '<th style="padding:3px 4px;">Target</th><th style="padding:3px 4px;">Carry</th><th style="padding:3px 4px;">SG</th>';
   else if (isChipProx) hdr += '<th style="padding:3px 4px;">Dist</th><th style="padding:3px 4px;">Lie</th><th style="padding:3px 4px;">Prox</th><th style="padding:3px 4px;">SG</th>';
   else if (isDriver) hdr += '<th style="padding:3px 4px;">Drive</th><th style="padding:3px 4px;">Offline</th><th style="padding:3px 4px;">Score</th>';
+  else if (isLineDrill) hdr += '<th style="padding:3px 4px;">Target</th><th style="padding:3px 4px;">Side</th><th style="padding:3px 4px;">Offline</th>';
   else hdr += '<th style="padding:3px 4px;">Dist</th><th style="padding:3px 4px;">Lie</th><th style="padding:3px 4px;">Score</th><th style="padding:3px 4px;">SG</th>';
   hdr += '</tr>';
   
@@ -15446,6 +15944,11 @@ function toggleCombDetails(id) {
     else if (isWedge) row += '<td style="padding:3px 4px;">'+distStr+' yds</td><td style="padding:3px 4px;">'+valStr+'</td><td style="padding:3px 4px;">'+sgStr+'</td>';
     else if (isChipProx) row += '<td style="padding:3px 4px;">'+distStr+' yds</td><td style="padding:3px 4px;font-size:10px;">'+lieStr+'</td><td style="padding:3px 4px;">'+valStr+' ft</td><td style="padding:3px 4px;">'+sgStr+'</td>';
     else if (isDriver) { var scoreVal = (r.d!==''&&r.v!=='') ? (parseFloat(r.d)-parseFloat(r.v)).toFixed(0) : '–'; row += '<td style="padding:3px 4px;">'+distStr+' yds</td><td style="padding:3px 4px;">'+valStr+' yds</td><td style="padding:3px 4px;font-weight:700;color:#44b8f0;">'+scoreVal+'</td>'; }
+    else if (isLineDrill) {
+      var sideTxt = lieStr === 'L' ? 'Left' : (lieStr === 'R' ? 'Right' : 'Straight');
+      var sideCol = lieStr === 'L' ? '#44b8f0' : (lieStr === 'R' ? '#f0c830' : '#00b87a');
+      row += '<td style="padding:3px 4px;">'+distStr+' yds</td><td style="padding:3px 4px;color:'+sideCol+';font-weight:700;">'+sideTxt+'</td><td style="padding:3px 4px;font-weight:700;">'+valStr+' yds</td>';
+    }
     else row += '<td style="padding:3px 4px;">'+distStr+' yds</td><td style="padding:3px 4px;font-size:10px;">'+lieStr+'</td><td style="padding:3px 4px;">'+valStr+'</td><td style="padding:3px 4px;">'+sgStr+'</td>';
     row += '</tr>';
     return row;
