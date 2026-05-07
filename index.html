@@ -1087,7 +1087,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
         </button>
         <button onclick="goToLineDrill()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
           <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">📏</span>
-          <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Line Drill</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Mid-iron accuracy 140-240 yds</div></div>
+          <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Line Drill</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Approach accuracy 140-240 yds</div></div>
         </button>
       </div>
       <!-- Combine History -->
@@ -2934,7 +2934,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
       <div id="ld-setup-view">
         <div style="background:#222222;border:1px solid #333333;border-radius:10px;padding:14px;margin-bottom:14px;">
           <div style="font-size:13px;color:#ffffff;line-height:1.5;">
-            <strong style="color:#00b87a;">Line Drill</strong> tests mid-iron accuracy. We give you a random yardage; you hit your club for that distance. Enter how many yards offline the shot finished — that's your score for the shot. Lower is better.
+            <strong style="color:#00b87a;">Line Drill</strong> tests approach accuracy. We give you a random yardage; you hit your club for that distance. Enter how many yards offline the shot finished — that's your score for the shot. Lower is better.
           </div>
           <div style="font-size:11px;color:#d49a10;margin-top:8px;font-weight:700;">⚠ Requires a launch monitor for offline measurement.</div>
           <div style="font-size:11px;color:#9a9a9a;margin-top:8px;line-height:1.5;">
@@ -15382,7 +15382,7 @@ async function combSave(){
 }
 
 /* ============================================
-   LINE DRILL — mid-iron accuracy combine
+   LINE DRILL — approach accuracy combine
    ============================================ */
 var _ldState = {
   version: 'standard', // or 'short'
