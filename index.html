@@ -15510,7 +15510,9 @@ var _ldState = {
   shots: [],           // [{target, offline, dir}]
   currentTarget: null,
   currentDir: null,
-  currentShotIndex: 0  // 0-based
+  currentShotIndex: 0, // 0-based
+  pool: [],            // shuffled bucket queue, popped per shot, refilled when empty
+  lastTarget: null     // remember last shot to avoid back-to-back repeats on refill
 };
 
 function goToLineDrill(){
@@ -15547,13 +15549,44 @@ function lineDrillSetVersion(v){
   shortBtn.style.color      = v==='short' ? onTxt : offTxt;
 }
 
-function _ldRandomYardage(min, max){
-  // Round to nearest 5 within [min, max]. Use 5-yard buckets between rounded bounds.
+function _ldBuildBuckets(min, max){
   var lo = Math.ceil(min/5)*5;
   var hi = Math.floor(max/5)*5;
   if (hi < lo) { var t=lo; lo=hi; hi=t; }
-  var steps = Math.floor((hi - lo) / 5) + 1;
-  return lo + 5 * Math.floor(Math.random() * steps);
+  var arr = [];
+  for (var y = lo; y <= hi; y += 5) arr.push(y);
+  return arr;
+}
+
+function _ldShuffle(arr){
+  // Fisher-Yates
+  for (var i = arr.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+  }
+  return arr;
+}
+
+function _ldRefillPool(){
+  var pool = _ldBuildBuckets(_ldState.minYds, _ldState.maxYds);
+  _ldShuffle(pool);
+  // Avoid back-to-back repeat across cycles: if first equals last shot, swap with a different bucket
+  if (pool.length > 1 && _ldState.lastTarget !== null && pool[0] === _ldState.lastTarget) {
+    for (var k = 1; k < pool.length; k++) {
+      if (pool[k] !== _ldState.lastTarget) {
+        var tmp = pool[0]; pool[0] = pool[k]; pool[k] = tmp;
+        break;
+      }
+    }
+  }
+  _ldState.pool = pool;
+}
+
+function _ldNextYardage(){
+  if (!_ldState.pool || _ldState.pool.length === 0) _ldRefillPool();
+  var y = _ldState.pool.shift();
+  _ldState.lastTarget = y;
+  return y;
 }
 
 function lineDrillStart(){
@@ -15567,6 +15600,8 @@ function lineDrillStart(){
   _ldState.maxYds = max;
   _ldState.shots = [];
   _ldState.currentShotIndex = 0;
+  _ldState.lastTarget = null;
+  _ldRefillPool();
   document.getElementById('ld-setup-view').style.display = 'none';
   document.getElementById('ld-summary-view').style.display = 'none';
   document.getElementById('ld-tracker-view').style.display = '';
@@ -15579,7 +15614,7 @@ function _ldNextShot(){
     _ldShowSummary();
     return;
   }
-  _ldState.currentTarget = _ldRandomYardage(_ldState.minYds, _ldState.maxYds);
+  _ldState.currentTarget = _ldNextYardage();
   _ldState.currentDir = null;
   document.getElementById('ld-target-yds').textContent = _ldState.currentTarget;
   document.getElementById('ld-shot-num').textContent = _ldState.currentShotIndex + 1;
