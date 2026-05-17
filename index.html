@@ -1079,7 +1079,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
         </button>
         <button onclick="goToLineDrill()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
           <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">📏</span>
-          <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Line Drill</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Approach accuracy 140-240 yds</div></div>
+          <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Line Drill</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Accuracy from PW to your highest wood</div></div>
         </button>
         <button onclick="goToDriverCombinePicker()" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
           <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🏌️‍♂️</span>
@@ -2974,14 +2974,23 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
           <button id="ld-version-short" onclick="lineDrillSetVersion('short')" style="flex:1;height:46px;background:#282828;color:#606060;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;max-width:none;">Short (10)</button>
         </div>
 
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#606060;margin-bottom:8px;">Yardage Range</div>
-        <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;">
-          <input type="number" id="ld-min" value="140" min="50" max="400" inputmode="numeric" style="flex:1;height:46px;background:#282828;color:#ffffff;border:1px solid #333333;border-radius:10px;text-align:center;font-size:15px;">
-          <span style="color:#606060;font-size:14px;">to</span>
-          <input type="number" id="ld-max" value="240" min="50" max="400" inputmode="numeric" style="flex:1;height:46px;background:#282828;color:#ffffff;border:1px solid #333333;border-radius:10px;text-align:center;font-size:15px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#606060;margin-bottom:8px;">Your Carry Distances</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+          <div style="flex:1;font-size:14px;font-weight:700;color:#ffffff;">Pitching Wedge</div>
+          <input type="number" id="ld-pw-carry" value="130" min="30" max="200" inputmode="numeric" style="width:88px;height:46px;background:#282828;color:#ffffff;border:1px solid #333333;border-radius:10px;text-align:center;font-size:15px;">
           <span style="color:#606060;font-size:13px;">yds</span>
         </div>
-        <div style="font-size:11px;color:#606060;margin-bottom:14px;">Default 140-240. Distances are rounded to the nearest 5.</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+          <select id="ld-wood-club" style="flex:1;height:46px;background:#282828;color:#ffffff;border:1px solid #333333;border-radius:10px;font-size:14px;font-weight:700;padding:0 8px;box-sizing:border-box;">
+            <option value="3w">3 Wood</option>
+            <option value="4w">4 Wood</option>
+            <option value="5w">5 Wood</option>
+            <option value="7w">7 Wood</option>
+          </select>
+          <input type="number" id="ld-wood-carry" value="240" min="120" max="400" inputmode="numeric" style="width:88px;height:46px;background:#282828;color:#ffffff;border:1px solid #333333;border-radius:10px;text-align:center;font-size:15px;">
+          <span style="color:#606060;font-size:13px;">yds</span>
+        </div>
+        <div style="font-size:11px;color:#606060;margin-bottom:14px;">Enter your PW carry and your highest wood (excluding driver). Targets are generated across that range, rounded to the nearest 5.</div>
 
         <button onclick="lineDrillStart()" style="width:100%;height:50px;background:#007a52;color:#ffffff;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;max-width:none;">Start Drill →</button>
         <div id="ld-setup-msg" style="font-size:12px;color:#d4706e;text-align:center;margin-top:8px;min-height:16px;"></div>
@@ -15616,11 +15625,11 @@ function _ldNextYardage(){
 
 function lineDrillStart(){
   var msg = document.getElementById('ld-setup-msg');
-  var min = parseInt(document.getElementById('ld-min').value, 10);
-  var max = parseInt(document.getElementById('ld-max').value, 10);
-  if (!isFinite(min) || !isFinite(max)) { msg.textContent = 'Enter valid yardages.'; return; }
-  if (min < 30 || max > 400) { msg.textContent = 'Range must be between 30 and 400 yards.'; return; }
-  if (max - min < 5) { msg.textContent = 'Max must be at least 5 yards greater than min.'; return; }
+  var min = parseInt(document.getElementById('ld-pw-carry').value, 10);
+  var max = parseInt(document.getElementById('ld-wood-carry').value, 10);
+  if (!isFinite(min) || !isFinite(max)) { msg.textContent = 'Enter valid carry distances.'; return; }
+  if (min < 30 || max > 400) { msg.textContent = 'Carries must be between 30 and 400 yards.'; return; }
+  if (max - min < 5) { msg.textContent = 'Highest wood carry must be at least 5 yards greater than PW carry.'; return; }
   _ldState.minYds = min;
   _ldState.maxYds = max;
   _ldState.shots = [];
