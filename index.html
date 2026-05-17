@@ -15275,7 +15275,9 @@ function combCalcRow(i){
     // Always calculate both SG and pts for wedge
     r.pts = Math.max(0, 100-px);
     r.exp1 = combGetE('chipping',r.d,'Fairway',h);
-    var e2 = combGetE('putting',px,null,h), ts = 1+e2;
+    // Floor proximity at 1 ft for SG: an exact-yardage strike is hit to 1 ft, not holed
+    var sgPx = Math.max(1, px);
+    var e2 = combGetE('putting',sgPx,null,h), ts = 1+e2;
     r.sg   = r.exp1 - ts;
     if(combWedgeMode==='sg'){
       document.getElementById('ce1-'+i).textContent = r.exp1.toFixed(2);
