@@ -99,17 +99,6 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
 .comb-menu-grid {
   display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:8px;
 }
-.comb-grid-btn {
-  color:#ffffff; border:none; padding:14px 8px; font-size:0.92rem; font-weight:700;
-  border-radius:10px; cursor:pointer; min-height:66px; line-height:1.4;
-  touch-action:manipulation; display:flex; flex-direction:column;
-  align-items:center; justify-content:center; text-align:center;
-  width:100%; max-width:none;
-}
-.comb-grid-btn small { font-size:0.75rem; font-weight:400; opacity:.85; }
-.comb-green { background:#007a52; }
-.comb-blue  { background:#2d7abc; }
-.comb-grid-btn:active { filter:brightness(.8); }
 
 /* Table styles for combines */
 #comb-table thead th {
@@ -3272,12 +3261,22 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
       <!-- HOME VIEW (menu grid + history) -->
       <div id="comb-home-view">
 
-        <!-- Practice sub-view: 3 type buttons -->
+        <!-- Combine type picker -->
         <div id="comb-practice-sub">
-          <div style="display:flex;flex-direction:column;gap:10px;">
-            <button class="comb-grid-btn comb-green" onclick="combShowModeSelect('putting')" style="min-height:54px;font-size:1rem;border-radius:10px;">Putting</button>
-            <button class="comb-grid-btn comb-blue" onclick="combShowShortGameSelect()" style="min-height:54px;font-size:1rem;border-radius:10px;">Short Game</button>
-            <button class="comb-grid-btn" style="background:#d49a10;min-height:54px;font-size:1rem;border-radius:10px;" onclick="combShowModeSelect('wedge')">Wedge Distances</button>
+          <div style="font-size:1.1rem;font-weight:800;color:#ffffff;margin-bottom:14px;text-align:center;">Choose a Combine</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <button onclick="combShowModeSelect('putting')" style="background:#1a4a8a;border:2px solid #2d7abc;border-radius:12px;padding:16px;text-align:left;color:#ffffff;cursor:pointer;height:auto;max-width:none;width:100%;box-sizing:border-box;">
+              <div style="font-size:1rem;font-weight:800;">Putting</div>
+              <div style="font-size:0.82rem;color:#44b8f0;line-height:1.4;margin-top:4px;">Test putts from set distances and breaks.</div>
+            </button>
+            <button onclick="combShowShortGameSelect()" style="background:#1a4a8a;border:2px solid #2d7abc;border-radius:12px;padding:16px;text-align:left;color:#ffffff;cursor:pointer;height:auto;max-width:none;width:100%;box-sizing:border-box;">
+              <div style="font-size:1rem;font-weight:800;">Short Game</div>
+              <div style="font-size:0.82rem;color:#44b8f0;line-height:1.4;margin-top:4px;">Proximity based or up &amp; downs around the green.</div>
+            </button>
+            <button onclick="combShowModeSelect('wedge')" style="background:#1a4a8a;border:2px solid #2d7abc;border-radius:12px;padding:16px;text-align:left;color:#ffffff;cursor:pointer;height:auto;max-width:none;width:100%;box-sizing:border-box;">
+              <div style="font-size:1rem;font-weight:800;">Wedge Distances</div>
+              <div style="font-size:0.82rem;color:#44b8f0;line-height:1.4;margin-top:4px;">Dial in carry distances from 40–125 yards.</div>
+            </button>
           </div>
         </div><!-- /comb-practice-sub -->
 
