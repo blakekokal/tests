@@ -3373,7 +3373,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
 
         <!-- Nav bar -->
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-          <button onclick="combGoHome()" style="background:#333333;color:#ffffff;border:none;padding:9px 14px;border-radius:8px;font-size:0.9rem;cursor:pointer;touch-action:manipulation;max-width:none;width:auto;height:auto;">← Menu</button>
+          <button onclick="combHeaderBack()" style="background:#333333;color:#ffffff;border:none;padding:9px 14px;border-radius:8px;font-size:0.9rem;cursor:pointer;touch-action:manipulation;max-width:none;width:auto;height:auto;">← Menu</button>
           <h2 id="comb-title" style="margin:0;color:#00b87a;font-size:1rem;font-weight:800;text-align:center;flex:1;padding:0 6px;"></h2>
           <div style="width:70px;"></div>
         </div>
@@ -15077,6 +15077,13 @@ function combShortGameBack() {
 }
 
 function combShowModeSelect(type) {
+  // During an Eval Combine, skip the Combine/Custom prompt — open a 9-hole combine directly
+  if (_evalState && _evalState.active) {
+    combOpen(type, 'combine');
+    var hsel = document.getElementById('comb-holes-combine');
+    if (hsel) { hsel.value = '9'; combSetup(); }
+    return;
+  }
   _combPendingType = type;
   var names = {putting:'Putting','chip-prox':'Proximity Based','chip-hole':'Up & Downs',wedge:'Wedge',driver:'Driver'};
   document.getElementById('comb-mode-type-label').textContent = names[type];
