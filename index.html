@@ -1085,9 +1085,9 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
           <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🏌️‍♂️</span>
           <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Driver</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Track drive distance &amp; accuracy</div></div>
         </button>
-        <button onclick="goToAutoCombine()" id="phAutoCombineBtn" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
+        <button onclick="goToEvalCombine()" id="phEvalCombineBtn" style="width:100%;display:flex;align-items:center;gap:13px;height:auto;padding:16px 15px;font-size:15px;font-weight:700;background:#1a4a8a;border-radius:12px;text-align:left;">
           <span style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">🎯</span>
-          <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Auto Combine</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;" id="phAutoDesc">Picks your weakest area from last round</div></div>
+          <div><div style="font-size:1.1rem;font-weight:700;line-height:1;">Eval Combine</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;">Baseline your game with a series of mini combines</div></div>
         </button>
       </div>
       <!-- Combine History -->
@@ -3197,6 +3197,65 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
   </div>
 </div>
 
+<!-- EVAL COMBINE -->
+<div id="evalCombinePage" class="page" style="justify-content:flex-start;padding:0;overflow:hidden;">
+  <div style="background:#1e1e1e;border-bottom:2px solid #00b87a;width:100%;text-align:center;padding:11px 0;position:relative;flex-shrink:0;">
+    <button onclick="evalCombineBack()" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);background:#333333;border:none;color:#ffffff;border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:#ffffff;stroke-width:2.5;fill:none;"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <div style="font-size:1.2rem;font-weight:800;color:#ffffff;">Eval Combine</div>
+  </div>
+  <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;width:100%;">
+    <div style="max-width:520px;margin:0 auto;padding:14px 14px 100px;">
+
+      <!-- MODE SELECT -->
+      <div id="eval-mode-view">
+        <div style="background:#222222;border:1px solid #333333;border-radius:10px;padding:14px;margin-bottom:14px;">
+          <div style="font-size:13px;color:#ffffff;line-height:1.5;">
+            <strong style="color:#00b87a;">Eval Combine</strong> runs a series of mini combines to build a baseline of your game. You'll get a total score out of 100, your strokes gained, and a handicap comparison.
+          </div>
+        </div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#606060;margin-bottom:8px;">Choose Format</div>
+        <button onclick="evalStart('lm')" style="width:100%;height:auto;padding:16px;background:#1a4a8a;border:2px solid #2d7abc;border-radius:12px;text-align:left;color:#ffffff;cursor:pointer;margin-bottom:10px;max-width:none;">
+          <div style="font-size:1rem;font-weight:800;">Launch Monitor</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.55);margin-top:3px;">Full evaluation using launch monitor data</div>
+        </button>
+        <button onclick="evalStart('nolm')" style="width:100%;height:auto;padding:16px;background:#282828;border:2px solid #333333;border-radius:12px;text-align:left;color:#ffffff;cursor:pointer;max-width:none;">
+          <div style="font-size:1rem;font-weight:800;">No Launch Monitor</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.55);margin-top:3px;">Coming soon</div>
+        </button>
+      </div>
+
+      <!-- CHECKLIST -->
+      <div id="eval-steps-view" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div style="font-size:12px;color:#606060;">Launch Monitor Eval</div>
+          <div style="font-size:12px;color:#606060;">Step <span id="eval-step-num" style="color:#ffffff;font-weight:700;">1</span> of 4</div>
+        </div>
+        <div style="background:#282828;height:6px;border-radius:3px;overflow:hidden;margin-bottom:14px;">
+          <div id="eval-progress-bar" style="background:#00b87a;height:100%;width:0%;transition:width 0.2s;"></div>
+        </div>
+        <div id="eval-steps-list"></div>
+        <button onclick="evalCancel()" style="width:100%;height:40px;background:transparent;color:#606060;border:none;font-size:13px;cursor:pointer;margin-top:8px;max-width:none;">Cancel Eval</button>
+      </div>
+
+      <!-- RESULTS -->
+      <div id="eval-results-view" style="display:none;">
+        <div style="background:#1a4a8a;border:2px solid #2d7abc;border-radius:14px;padding:20px 14px;text-align:center;margin-bottom:12px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#aad4ff;margin-bottom:4px;">Eval Combine Score</div>
+          <div id="eval-total-score" style="font-size:54px;font-weight:800;color:#ffffff;line-height:1;">0</div>
+          <div style="font-size:13px;color:#aad4ff;margin-top:2px;">out of 100</div>
+          <div id="eval-total-sg" style="font-size:13px;color:#9affc8;margin-top:6px;font-weight:700;">0.0 total SG</div>
+          <div id="eval-hcp-compare" style="font-size:12px;color:#aad4ff;margin-top:4px;"></div>
+          <div id="eval-save-msg" style="font-size:12px;text-align:center;margin-top:8px;min-height:16px;color:#9affc8;"></div>
+        </div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#606060;margin-bottom:8px;">Category Breakdown</div>
+        <div id="eval-breakdown"></div>
+        <button onclick="evalCombineBack()" style="width:100%;height:44px;background:#282828;color:#ffffff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-top:12px;max-width:none;">Done</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <div id="combinesPage" class="page" style="justify-content:flex-start;padding:0;overflow:hidden;">
 
   <!-- Fixed header -->
@@ -3843,7 +3902,8 @@ var _searchEntries = [
   { label:'My Bag', keywords:['my bag','clubs','club distances','yardages','bag'], action:function(){show('myBagPage');} },
   { label:'Gap Visualizer', keywords:['gap','visualizer','distance gaps','gap visualizer'], action:function(){show('gapVisualizerPage');} },
   { label:'Practice Hub', keywords:['practice','practice hub','drills','drill'], action:function(){goToPracticeHub();} },
-  { label:'Combines', keywords:['combines','combine','auto combine','putting combine','short game combine','wedge combine','driver combine','line drill'], action:function(){_currentPHTab='combines';show('practiceHubPage');} },
+  { label:'Combines', keywords:['combines','combine','eval combine','putting combine','short game combine','wedge combine','driver combine','line drill'], action:function(){_currentPHTab='combines';show('practiceHubPage');} },
+  { label:'Eval Combine', keywords:['eval combine','evaluation','baseline','new student eval'], action:function(){goToEvalCombine();} },
   { label:'Line Drill', keywords:['line drill','line','accuracy','iron accuracy','offline','launch monitor drill'], action:function(){goToLineDrill();} },
   { label:'Drills', keywords:['drills','drill'], action:function(){_currentPHTab='drills';show('practiceHubPage');} },
   { label:'Custom Practice', keywords:['custom practice','practice session','practice log'], action:function(){_currentPHTab='practice';show('practiceHubPage');} },
@@ -3967,6 +4027,7 @@ var _backTargetMap = {
   'combinesPage': 'practiceHubPage',
   'lineDrillPage': 'practiceHubPage',
   'driverDrillPage': 'practiceHubPage',
+  'evalCombinePage': 'practiceHubPage',
   'whatsNewPage': 'homePage',
   'guideToGolfPage': 'practiceHubPage',
   'myCoursesPage': 'roundPage',
@@ -15384,6 +15445,10 @@ function calcCombGrade(type, wedgeMode, totalSg, filled, totalExp) {
 }
 
 function getCombGradeFromCard(c) {
+  // Eval Combine stores its final 0-100 score directly
+  if (c.combine_type === 'Eval Combine' && c.grade_100 !== null && c.grade_100 !== undefined) {
+    return Math.round(c.grade_100);
+  }
   // For Line Drill, grade by avg yards offline per shot (lower is better)
   if (c.combine_type === 'Line Drill') {
     if (c.grade_100 !== null && c.grade_100 !== undefined) return Math.round(c.grade_100);
@@ -15482,6 +15547,13 @@ async function combSave(){
     return;
   }
   btn.textContent='✅ Saved!';
+
+  // Eval Combine: capture this sub-combine's result
+  if(_evalState && _evalState.active){
+    var _evalKey = combCurType==='putting' ? 'putting'
+      : ((combCurType==='chip-prox'||combCurType==='chip-hole') ? 'shortgame' : null);
+    if(_evalKey) evalCaptureResult(_evalKey, payload.grade_100, totalSg);
+  }
 
   // If coach saved for student, show link back
   if (_combSaveForStudent) {
@@ -15850,6 +15922,9 @@ async function lineDrillSave(){
   }
   if (msg) { msg.style.color = '#9affc8'; msg.textContent = '✅ Saved to your profile'; }
 
+  // Eval Combine: capture line drill result
+  if(_evalState && _evalState.active) evalCaptureResult('linedrill', grade, 0);
+
   // Notify coach (best-effort)
   try {
     var { data: prof } = await _sb.from('profiles').select('coach_id, display_name').eq('id', currentUser.id).single();
@@ -16131,6 +16206,9 @@ async function driverDrillSave(){
   }
   if (msg) { msg.style.color = '#9affc8'; msg.textContent = '✅ Saved to your profile'; }
 
+  // Eval Combine: capture driver result
+  if(_evalState && _evalState.active) evalCaptureResult('driver', grade, 0);
+
   // Notify coach (best-effort)
   try {
     var { data: prof } = await _sb.from('profiles').select('coach_id, display_name').eq('id', currentUser.id).single();
@@ -16343,11 +16421,14 @@ function toggleCombDetails(id) {
   var isChipHole = combType === 'Chip Hole Out';
   var isDriver = combType === 'Driver';
   var isLineDrill = combType === 'Line Drill';
+  var isEval = combType === 'Eval Combine';
 
   // Build header
   var hdr = '<tr style="font-size:10px;color:#606060;text-transform:uppercase;">';
-  hdr += '<th style="padding:3px 4px;text-align:center;">#</th>';
-  if (isPut) hdr += '<th style="padding:3px 4px;">Dist</th><th style="padding:3px 4px;">Putts</th><th style="padding:3px 4px;">SG</th>';
+  hdr += isEval ? '<th style="padding:3px 4px;text-align:left;">Category</th>'
+                : '<th style="padding:3px 4px;text-align:center;">#</th>';
+  if (isEval) hdr += '<th style="padding:3px 4px;">Score</th><th style="padding:3px 4px;">SG</th>';
+  else if (isPut) hdr += '<th style="padding:3px 4px;">Dist</th><th style="padding:3px 4px;">Putts</th><th style="padding:3px 4px;">SG</th>';
   else if (isWedge) hdr += '<th style="padding:3px 4px;">Target</th><th style="padding:3px 4px;">Carry</th><th style="padding:3px 4px;">SG</th>';
   else if (isChipProx) hdr += '<th style="padding:3px 4px;">Dist</th><th style="padding:3px 4px;">Lie</th><th style="padding:3px 4px;">Prox</th><th style="padding:3px 4px;">SG</th>';
   else if (isDriver) hdr += '<th style="padding:3px 4px;">Drive</th><th style="padding:3px 4px;">Offline</th><th style="padding:3px 4px;">Score</th>';
@@ -16366,6 +16447,13 @@ function toggleCombDetails(id) {
     var lieStr = r.l || '';
     
     var row = '<tr style="font-size:12px;border-top:1px solid #282828;">';
+    if (isEval) {
+      var evalLabels = { putting:'Putting', shortgame:'Short Game', linedrill:'Line Drill', driver:'Driver' };
+      row += '<td style="padding:3px 4px;color:#9a9a9a;font-weight:700;">'+(evalLabels[k]||k)+'</td>';
+      row += '<td style="padding:3px 4px;font-weight:700;">'+(r.grade!==undefined?r.grade:'–')+'</td><td style="padding:3px 4px;">'+sgStr+'</td>';
+      row += '</tr>';
+      return row;
+    }
     row += '<td style="padding:3px 4px;color:#2e2e2e;text-align:center;font-weight:700;">'+k+'</td>';
     if (isPut) row += '<td style="padding:3px 4px;">'+distStr+' ft</td><td style="padding:3px 4px;">'+valStr+'</td><td style="padding:3px 4px;">'+sgStr+'</td>';
     else if (isWedge) row += '<td style="padding:3px 4px;">'+distStr+' yds</td><td style="padding:3px 4px;">'+valStr+'</td><td style="padding:3px 4px;">'+sgStr+'</td>';
@@ -16502,39 +16590,149 @@ function goToDriverCombinePicker(){
   goToDriverDrill();
 }
 
-async function goToAutoCombine(){
-  // Look at last round's SG categories to find the weakest area
-  if(!currentUser){ goToPuttingCombine(); return; }
-  try {
-    var resp = await _sb.from('rounds')
-      .select('round_data')
-      .eq('user_id', activeUserId())
-      .order('round_date',{ascending:false})
-      .limit(1);
-    if(resp.error || !resp.data || !resp.data.length){ goToPuttingCombine(); return; }
-    var rd = resp.data[0].round_data;
-    if(!rd || !rd.allHoles || !rd.allHoles.length){ goToPuttingCombine(); return; }
-    // Sum SG by category
-    var sgP=0, sgOTT=0, sgAPP=0, sgARG=0;
-    rd.allHoles.forEach(function(h){
-      sgP   += h.sgPutting || 0;
-      sgOTT += h.sgOTT    || 0;
-      sgAPP += h.sgAPP    || 0;
-      sgARG += h.sgARG    || 0;
-    });
-    // Map categories to combine types (lowest SG = weakest)
-    var cats = [
-      {sg:sgP,   name:'Putting',     go:goToPuttingCombine},
-      {sg:sgARG, name:'Short Game',   go:goToCombines},
-      {sg:sgAPP, name:'Wedge Distances', go:goToWedgeCombine},
-      {sg:sgOTT, name:'Driver',       go:goToDriverCombinePicker}
-    ];
-    cats.sort(function(a,b){ return a.sg - b.sg; });
-    var weakest = cats[0];
-    var desc = document.getElementById('phAutoDesc');
-    if(desc) desc.textContent = 'Weakest: ' + weakest.name + ' (' + weakest.sg.toFixed(1) + ' SG)';
-    weakest.go();
-  } catch(e){ goToPuttingCombine(); }
+/* ============================================
+   EVAL COMBINE — baseline multi-combine
+   ============================================ */
+var _evalState = { active:false, mode:null, step:0, results:{}, saved:false };
+var _evalSteps = [
+  { key:'putting',   label:'Putting Combine',    sub:'9 holes',                           launch:function(){ goToPuttingCombine(); } },
+  { key:'shortgame', label:'Short Game Combine', sub:'9 holes — Proximity or Up & Downs',  launch:function(){ goToCombines(); } },
+  { key:'linedrill', label:'Line Drill',         sub:'10 shots',                          launch:function(){ goToLineDrill(); lineDrillSetVersion('short'); } },
+  { key:'driver',    label:'Driver Combine',     sub:'Standard',                          launch:function(){ goToDriverDrill(); } }
+];
+
+function goToEvalCombine(){
+  show('evalCombinePage');
+  if(_evalState.active){ evalRender(); return; }  // resume an in-progress eval
+  _evalState = { active:false, mode:null, step:0, results:{}, saved:false };
+  document.getElementById('eval-mode-view').style.display = '';
+  document.getElementById('eval-steps-view').style.display = 'none';
+  document.getElementById('eval-results-view').style.display = 'none';
+}
+
+function evalCombineBack(){
+  _evalState.active = false;
+  show('practiceHubPage');
+}
+
+function evalCancel(){
+  _evalState.active = false;
+  goToEvalCombine();
+}
+
+function evalStart(mode){
+  if(mode === 'nolm'){
+    alert('The No Launch Monitor eval is coming soon.');
+    return;
+  }
+  _evalState = { active:true, mode:'lm', step:0, results:{}, saved:false };
+  evalRender();
+}
+
+function evalRender(){
+  if(!_evalState.active) return;
+  if(_evalState.step >= _evalSteps.length){ evalShowResults(); return; }
+  document.getElementById('eval-mode-view').style.display = 'none';
+  document.getElementById('eval-results-view').style.display = 'none';
+  document.getElementById('eval-steps-view').style.display = '';
+  document.getElementById('eval-step-num').textContent = _evalState.step + 1;
+  document.getElementById('eval-progress-bar').style.width = (_evalState.step / _evalSteps.length * 100) + '%';
+  var html = '';
+  _evalSteps.forEach(function(st, i){
+    var done = !!_evalState.results[st.key];
+    var current = i === _evalState.step;
+    var bg   = done ? '#0f3024' : (current ? '#1a4a8a' : '#222222');
+    var bord = done ? '#00b87a' : (current ? '#2d7abc' : '#333333');
+    var dotBg = done ? '#00b87a' : (current ? '#2d7abc' : '#333333');
+    var badge = done ? '<span style="font-size:13px;font-weight:800;color:#00b87a;">' + _evalState.results[st.key].grade + '/100</span>'
+                     : (current ? '<span style="font-size:11px;font-weight:700;color:#aad4ff;">START &rarr;</span>'
+                                : '<span style="font-size:14px;color:#606060;">&#128274;</span>');
+    html += '<div' + (current ? ' onclick="evalRunStep()"' : '') + ' style="display:flex;align-items:center;gap:10px;background:' + bg + ';border:1px solid ' + bord + ';border-radius:10px;padding:13px 12px;margin-bottom:8px;' + (current ? 'cursor:pointer;' : '') + '">'
+      + '<div style="width:24px;height:24px;border-radius:50%;background:' + dotBg + ';color:#ffffff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' + (done ? '&#10003;' : (i+1)) + '</div>'
+      + '<div style="flex:1;"><div style="font-size:14px;font-weight:700;color:#ffffff;">' + st.label + '</div><div style="font-size:11px;color:#9a9a9a;margin-top:1px;">' + st.sub + '</div></div>'
+      + badge + '</div>';
+  });
+  document.getElementById('eval-steps-list').innerHTML = html;
+}
+
+function evalRunStep(){
+  if(!_evalState.active) return;
+  var st = _evalSteps[_evalState.step];
+  if(st) st.launch();
+}
+
+function evalCaptureResult(key, grade, sg){
+  if(!_evalState.active) return;
+  var st = _evalSteps[_evalState.step];
+  if(!st || st.key !== key || _evalState.results[key]) return;
+  _evalState.results[key] = { grade: Math.round(grade || 0), sg: sg || 0 };
+  _evalState.step++;
+  setTimeout(function(){ show('evalCombinePage'); evalRender(); }, 800);
+}
+
+function evalHcpLabel(score){
+  if(score >= 85) return 'Comparable to: Tour / elite level';
+  if(score >= 70) return 'Comparable to: scratch — low single digit';
+  if(score >= 55) return 'Comparable to: single-digit handicap';
+  if(score >= 40) return 'Comparable to: mid handicap (10–18)';
+  return 'Comparable to: high handicap (18+)';
+}
+
+function evalShowResults(){
+  document.getElementById('eval-mode-view').style.display = 'none';
+  document.getElementById('eval-steps-view').style.display = 'none';
+  document.getElementById('eval-results-view').style.display = '';
+  var keys = ['putting','shortgame','linedrill','driver'];
+  var labels = { putting:'Putting', shortgame:'Short Game', linedrill:'Line Drill', driver:'Driver' };
+  var totalGrade = 0, totalSg = 0;
+  keys.forEach(function(k){
+    var r = _evalState.results[k] || { grade:0, sg:0 };
+    totalGrade += r.grade;
+    totalSg += r.sg;
+  });
+  var score = Math.round(totalGrade / keys.length);
+  document.getElementById('eval-total-score').textContent = score;
+  document.getElementById('eval-total-sg').textContent = (totalSg >= 0 ? '+' : '') + totalSg.toFixed(1) + ' total SG';
+  document.getElementById('eval-hcp-compare').textContent = evalHcpLabel(score);
+  var html = '';
+  keys.forEach(function(k){
+    var r = _evalState.results[k] || { grade:0, sg:0 };
+    html += '<div style="display:flex;align-items:center;gap:10px;background:#222222;border:1px solid #333333;border-radius:10px;padding:12px;margin-bottom:8px;">'
+      + '<div style="flex:1;font-size:14px;font-weight:700;color:#ffffff;">' + labels[k] + '</div>'
+      + '<div style="font-size:11px;color:#606060;">25% weight</div>'
+      + '<div style="font-size:18px;font-weight:800;color:' + gradeColor(r.grade) + ';width:58px;text-align:right;">' + r.grade + '</div>'
+      + '</div>';
+  });
+  document.getElementById('eval-breakdown').innerHTML = html;
+  evalSaveSummary(score, totalSg);
+}
+
+async function evalSaveSummary(score, totalSg){
+  if(_evalState.saved) return;
+  _evalState.saved = true;
+  var msg = document.getElementById('eval-save-msg');
+  if(!currentUser){ if(msg){ msg.style.color='#d4706e'; msg.textContent='Log in to save your Eval Combine.'; } return; }
+  if(msg){ msg.style.color='#9affc8'; msg.textContent='Saving...'; }
+  var payload = {
+    user_id:       activeUserId(),
+    combine_date:  getTodayCentral(),
+    combine_type:  'Eval Combine',
+    is_combine:    true,
+    holes_count:   4,
+    filled_count:  4,
+    total_sg:      parseFloat(totalSg.toFixed(2)),
+    avg_pts:       null,
+    total_exp:     0,
+    total_strokes: null,
+    handicap:      'Tour Pro',
+    score_mode:    'eval',
+    note:          '[Eval Combine — Launch Monitor]',
+    row_data:      JSON.stringify(_evalState.results),
+    grade_100:     score
+  };
+  var resp = await _sb.from('combine_scores').insert(payload);
+  if(resp.error){ if(msg){ msg.style.color='#d4706e'; msg.textContent='Save failed: '+resp.error.message; } return; }
+  if(msg){ msg.style.color='#9affc8'; msg.textContent='✅ Eval Combine saved to your profile'; }
 }
 
 function combShowHomeTab(tab){
