@@ -15019,6 +15019,13 @@ function combHeaderBack() {
   var trackerVisible = document.getElementById('comb-tracker-view').style.display !== 'none';
   var modeSelectVisible = document.getElementById('comb-mode-select').style.display !== 'none';
   var shortGameVisible = document.getElementById('comb-shortgame-select').style.display !== 'none';
+  // During an Eval Combine, any combine sub-screen returns to the Eval checklist
+  if (_evalState && _evalState.active && (trackerVisible || modeSelectVisible || shortGameVisible)) {
+    combGoHome();
+    show('evalCombinePage');
+    evalRender();
+    return;
+  }
   if ((_combFromDriverTab || _combFromPracticeHub) && (trackerVisible || modeSelectVisible || shortGameVisible)) {
     var returnView = _combReturnToView;
     _combFromDriverTab = false;
@@ -15038,6 +15045,11 @@ function combHeaderBack() {
   }
   if (trackerVisible) {
     combGoHome();
+    // Players land on the Practice Hub combines list, not the legacy type grid
+    if (!_combSaveForStudent) {
+      show('practiceHubPage');
+      setPracticeHubTab('combines');
+    }
   } else if (modeSelectVisible) {
     combModeBack();
   } else if (shortGameVisible) {
