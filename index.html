@@ -3093,7 +3093,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
           <button id="dd-version-std"  onclick="driverDrillSetVersion(6)"  style="flex:1;height:46px;background:#00b87a;color:#ffffff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;max-width:none;">Standard (6)</button>
           <button id="dd-version-long" onclick="driverDrillSetVersion(12)" style="flex:1;height:46px;background:#282828;color:#606060;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;max-width:none;">Long (12)</button>
         </div>
-        <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;">
+        <div id="dd-custom-row" style="display:flex;gap:8px;align-items:center;margin-bottom:14px;">
           <span style="font-size:12px;color:#606060;">Custom:</span>
           <input type="number" id="dd-custom" value="6" min="1" max="50" inputmode="numeric" oninput="driverDrillSetVersion('custom')" style="flex:1;height:42px;background:#282828;color:#ffffff;border:1px solid #333333;border-radius:10px;text-align:center;font-size:15px;">
           <span style="color:#606060;font-size:13px;">shots</span>
@@ -3116,7 +3116,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
 
         <!-- Drive distance -->
         <div style="background:#222222;border:1px solid #333333;border-radius:12px;padding:14px;margin-bottom:10px;">
-          <div style="font-size:12px;color:#606060;margin-bottom:8px;text-align:center;">Drive Distance (yards)</div>
+          <div style="font-size:12px;color:#606060;margin-bottom:8px;text-align:center;">Total Drive Distance (yards)</div>
           <input type="number" id="dd-drive-input" placeholder="0" inputmode="numeric" min="0" style="width:100%;height:60px;background:#282828;color:#ffffff;border:1px solid #333333;border-radius:10px;text-align:center;font-size:32px;font-weight:800;box-sizing:border-box;">
         </div>
 
@@ -15995,6 +15995,11 @@ function driverDrillBackToSetup(){
   _ddState.currentShotIndex = 0;
   _ddState.currentDir = null;
   document.getElementById('dd-setup-msg').textContent = '';
+  // In the Evaluation Test, only the fixed 6 or 12 shot options are allowed
+  var evalMode = _evalState && _evalState.active;
+  var customRow = document.getElementById('dd-custom-row');
+  if (customRow) customRow.style.display = evalMode ? 'none' : '';
+  if (evalMode && _ddState.totalShots !== 6 && _ddState.totalShots !== 12) driverDrillSetVersion(6);
 }
 
 function driverDrillSetVersion(v){
@@ -16689,11 +16694,14 @@ function evalCaptureResult(key, grade, sg){
 }
 
 function evalHcpLabel(score){
-  if(score >= 85) return 'Comparable to: Tour / elite level';
-  if(score >= 70) return 'Comparable to: scratch — low single digit';
-  if(score >= 55) return 'Comparable to: single-digit handicap';
-  if(score >= 40) return 'Comparable to: mid handicap (10–18)';
-  return 'Comparable to: high handicap (18+)';
+  if(score >= 88) return 'Comparable to: Tour / professional';
+  if(score >= 78) return 'Comparable to: scratch';
+  if(score >= 68) return 'Comparable to: 5 handicap';
+  if(score >= 58) return 'Comparable to: 5–10 handicap';
+  if(score >= 48) return 'Comparable to: 10 handicap';
+  if(score >= 38) return 'Comparable to: 15 handicap';
+  if(score >= 28) return 'Comparable to: 20 handicap';
+  return 'Comparable to: 25+ handicap';
 }
 
 function evalShowResults(){
