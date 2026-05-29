@@ -23658,7 +23658,7 @@ function wgClearSession() {
   if (!confirm('Clear your wedge gapping data?')) return;
   saveWgSessions([]);
   renderWgTab();
-  renderBagClubList();
+  renderBagClubs();
 }
 
 function wgChangeSwingType(newType) {
@@ -23701,7 +23701,7 @@ function wgChangeSwingType(newType) {
   s.swingType = newType;
   saveWgSessions(sessions);
   renderWgTab();
-  renderBagClubList();
+  renderBagClubs();
   if (typeof renderGapVisualizerChart === 'function') renderGapVisualizerChart();
 }
 
@@ -23727,7 +23727,7 @@ function wgEditAvg(safeClub, club, swingIndex, value) {
       saveBagClubs(sortBagClubs(clubs));
     }
   }
-  renderBagClubList();
+  renderBagClubs();
   if (typeof renderGapVisualizerChart === 'function') renderGapVisualizerChart();
 }
 
