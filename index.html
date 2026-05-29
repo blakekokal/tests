@@ -8205,7 +8205,7 @@ async function notifyCoachOfNewRound(playerName, courseName, roundDate, score, p
       user_id: coachId,
       type: 'new_round',
       title: 'New Round from ' + playerName,
-      message: playerName + ' shot ' + score + ' (' + toParStr + ') at ' + courseName + ' on ' + roundDate,
+      message: playerName + ' shot ' + score + ' (' + toParStr + ') at ' + courseName + ' on ' + formatDateForDisplay(roundDate),
       student_id: currentUser.id,
       student_name: playerName,
       read: false,
@@ -8218,7 +8218,7 @@ async function notifyCoachOfNewRound(playerName, courseName, roundDate, score, p
         user_id: coachId,
         type: 'new_round',
         title: 'New Round from ' + playerName,
-        message: playerName + ' shot ' + score + ' (' + toParStr + ') at ' + courseName + ' on ' + roundDate,
+        message: playerName + ' shot ' + score + ' (' + toParStr + ') at ' + courseName + ' on ' + formatDateForDisplay(roundDate),
         read: false,
         created_at: new Date().toISOString()
       });
@@ -21387,7 +21387,7 @@ async function savePracticeSession() {
         user_id: profile.coach_id,
         type: 'practice_session',
         title: playerName + ' logged a practice session',
-        message: dateVal + ' - ' + totalMins + ' min total' + (combineId ? ' (with combine)' : ''),
+        message: formatDateForDisplay(dateVal) + ' - ' + totalMins + ' min total' + (combineId ? ' (with combine)' : ''),
         read: false,
         created_at: new Date().toISOString()
       });
