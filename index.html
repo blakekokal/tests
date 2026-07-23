@@ -792,6 +792,7 @@ input[id^="simple_score_"]::-webkit-inner-spin-button,input[id^="simple_score_"]
         <span style="font-size:11px;color:#2e2e2e;">Jul 23, 2026</span>
       </div>
       <ul style="margin:0;padding-left:18px;font-size:13px;color:#9a9a9a;line-height:1.8;">
+        <li>New round notifications in the coach activity feed now include a <strong style="color:#ffffff;">"View Round" button</strong> that jumps straight to the round your student just posted</li>
         <li>Coaching and recent activity <strong style="color:#ffffff;">notification dates</strong> now display in a cleaner month-day-year format</li>
         <li>Fixed a bug in the <strong style="color:#ffffff;">wedge gapping</strong> tools that could cause club edits to fail</li>
       </ul>
@@ -7835,7 +7836,7 @@ async function autoSaveRound() {
     var saveBtn = document.getElementById('saveToAccountBtn');
     if (saveBtn) saveBtn.style.display = 'none';
     // Notify coach if student
-    notifyCoachOfNewRound(playerName, courseName, roundDate, totalStrokes, totalPar);
+    notifyCoachOfNewRound(playerName, courseName, roundDate, totalStrokes, totalPar, _currentRoundId);
   }
 }
 
@@ -8183,7 +8184,7 @@ function isRoundIncomplete(round) {
 }
 
 // Notify coach when student uploads a round
-async function notifyCoachOfNewRound(playerName, courseName, roundDate, score, par) {
+async function notifyCoachOfNewRound(playerName, courseName, roundDate, score, par, roundId) {
   // Check if user is a student with a coach
   if (!currentUser) return;
 
@@ -8219,21 +8220,36 @@ async function notifyCoachOfNewRound(playerName, courseName, roundDate, score, p
       message: playerName + ' shot ' + score + ' (' + toParStr + ') at ' + courseName + ' on ' + formatDateForDisplay(roundDate),
       student_id: currentUser.id,
       student_name: playerName,
+      round_id: roundId || null,
       read: false,
       created_at: new Date().toISOString()
     });
     if (insertErr) {
-      console.warn('[notify] Round notification insert failed:', insertErr.message, '— retrying without student fields');
-      // Fallback: insert without student_id/student_name in case columns don't exist
+      console.warn('[notify] Round notification insert failed:', insertErr.message, '— retrying without round_id');
+      // Fallback 1: drop round_id (column may not exist yet) but keep student fields so View Profile still works
       var { error: retryErr } = await _sb.from('notifications').insert({
         user_id: coachId,
         type: 'new_round',
         title: 'New Round from ' + playerName,
         message: playerName + ' shot ' + score + ' (' + toParStr + ') at ' + courseName + ' on ' + formatDateForDisplay(roundDate),
+        student_id: currentUser.id,
+        student_name: playerName,
         read: false,
         created_at: new Date().toISOString()
       });
-      if (retryErr) console.error('[notify] Round notification retry also failed:', retryErr.message);
+      if (retryErr) {
+        console.warn('[notify] Round notification retry failed:', retryErr.message, '— retrying without student fields');
+        // Fallback 2: drop student fields too in case those columns don't exist
+        var { error: retryErr2 } = await _sb.from('notifications').insert({
+          user_id: coachId,
+          type: 'new_round',
+          title: 'New Round from ' + playerName,
+          message: playerName + ' shot ' + score + ' (' + toParStr + ') at ' + courseName + ' on ' + formatDateForDisplay(roundDate),
+          read: false,
+          created_at: new Date().toISOString()
+        });
+        if (retryErr2) console.error('[notify] Round notification retry also failed:', retryErr2.message);
+      }
     }
   } catch(e) { console.error('[notify] Round notification exception:', e); }
 }
@@ -8582,6 +8598,13 @@ async function viewSavedRound(roundId) {
     saveBtn2.style.display = '';
     saveBtn2.textContent = '💾 UPDATE ROUND';
   }
+}
+
+// Coach: jump straight from an activity-feed notification to the student's posted round.
+// Enters the student view (same as "View Profile") then opens the specific round's stats.
+async function viewStudentRound(studentId, name, roundId) {
+  enterStudentView(studentId, name || 'Student', '');
+  await viewSavedRound(roundId);
 }
 
 async function deleteSavedRound(roundId, btn) {
@@ -17706,10 +17729,21 @@ async function loadCoachActivityFeed() {
   var markBtn = document.getElementById('markReadBtn');
 
   var { data, error } = await _sb.from('notifications')
-    .select('id, title, message, read, created_at, type, student_id, student_name')
+    .select('id, title, message, read, created_at, type, student_id, student_name, round_id')
     .eq('user_id', currentUser.id)
     .order('created_at', { ascending: false })
     .limit(20);
+
+  // Fallback if round_id column doesn't exist yet
+  if (error && error.message && error.message.indexOf('round_id') !== -1) {
+    var resp = await _sb.from('notifications')
+      .select('id, title, message, read, created_at, type, student_id, student_name')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false })
+      .limit(20);
+    data = resp.data;
+    error = resp.error;
+  }
 
   if (error || !data || data.length === 0) {
     el.innerHTML = '<div style="text-align:center;color:#2e2e2e;font-size:13px;padding:10px 0;">No recent activity.</div>';
@@ -17731,6 +17765,11 @@ async function loadCoachActivityFeed() {
       viewBtn = '<button onclick="viewStudent(\'' + n.student_id + '\',\'' + safeName + '\',\'\')" '
         + 'style="margin-top:6px;font-size:11px;font-weight:700;background:#2d7abc;color:#ffffff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer;height:auto;max-width:none;width:auto;">'
         + 'View Profile</button>';
+    }
+    if (n.type === 'new_round' && n.student_id && n.round_id) {
+      viewBtn += ' <button onclick="viewStudentRound(\'' + n.student_id + '\',\'' + safeName + '\',\'' + n.round_id + '\')" '
+        + 'style="margin-top:6px;font-size:11px;font-weight:700;background:#00b87a;color:#ffffff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer;height:auto;max-width:none;width:auto;">'
+        + 'View Round</button>';
     }
     if (n.type === 'student_message' && n.student_id) {
       viewBtn += ' <button onclick="openChatWithStudent(\'' + n.student_id + '\')" '
