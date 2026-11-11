@@ -913,7 +913,7 @@ export function generateExcelWorkbook(){
               border: THIN_BORDER
             };
           } else {
-            ws7[cellRef2].s = { border: border };
+            ws7[cellRef2].s = { border: THIN_BORDER };
           }
         } else {
           // Non-SG cells in column 2 - just border, no color

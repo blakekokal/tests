@@ -3,7 +3,7 @@ import { expose } from '../core/expose.js';
 import { setBagTab } from '../bag/clubs.js';
 import { goToDriverDrill } from './driver-drill.js';
 import { combShowModeSelect, getCombGradeFromCard, gradeColor } from './table.js';
-import { show } from '../core/nav.js';
+import { show } from '../core/router.js';
 import { activeUserId } from '../core/session.js';
 import { _sb } from '../core/supabase.js';
 import { escapeHtml } from '../core/util.js';

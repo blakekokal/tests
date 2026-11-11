@@ -1,6 +1,6 @@
 import { S } from '../core/state.js';
 import { expose } from '../core/expose.js';
-import { show } from '../core/nav.js';
+import { show } from '../core/router.js';
 import { activeUserId } from '../core/session.js';
 import { _sb } from '../core/supabase.js';
 import { pickCourse } from './search.js';

@@ -4,7 +4,7 @@ import { _BAG_KEY, syncBagFromSupabase } from '../bag/clubs.js';
 import { _SPEED_KEY } from '../bag/speed.js';
 import { _WG_KEY } from '../bag/wedge-gapping.js';
 import { loadUserRole } from '../coaching/roles.js';
-import { show } from '../core/nav.js';
+import { show } from '../core/router.js';
 import { _sb } from '../core/supabase.js';
 import { showProfileTab, updateLaunchMonitorUI } from '../profile/profile.js';
 

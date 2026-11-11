@@ -1,7 +1,7 @@
 import { S } from '../core/state.js';
 import { expose } from '../core/expose.js';
 import { combOpen } from '../combines/table.js';
-import { show } from '../core/nav.js';
+import { onBack, show } from '../core/router.js';
 import { _sb } from '../core/supabase.js';
 import { drillsData } from '../data/drills.js';
 import { setDrillCategory, showDrillDetail } from '../practice/drills.js';
@@ -183,6 +183,9 @@ async function toggleCombineComplete(btn, idx) {
     });
   }
 }
+
+// Back from a drill restores wherever the drill was opened from
+onBack('drillDetailPage', drillDetailBack);
 
 // Functions called from inline HTML handlers
 expose({ drillDetailBack, ppOpenDrillFromPractice, openAssignedDrillDetail, toggleDrillComplete, closeDrillCompleteModal, confirmDrillComplete, startCoachCombine, toggleCombineComplete });

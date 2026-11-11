@@ -1,6 +1,6 @@
 import { S } from '../core/state.js';
 import { expose } from '../core/expose.js';
-import { show } from '../core/nav.js';
+import { show } from '../core/router.js';
 import { getTodayCentral } from '../core/util.js';
 import { buildHoleByHoleForm } from './hole-entry.js';
 import { updateParPageRoundActions } from './save.js';
@@ -41,20 +41,30 @@ export function resetRoundState() {
 }
 
 // ─── ENTRY MODE ───────────────────────────────────────────
- // 'shot', 'hole', or 'simple'
+// S.entryMode: 'shot', 'hole', 'simple' or 'photo'. Photo hands over to 'simple' or 'hole'
+// once the photo is read, so saved rounds only ever carry the first three.
+
+// Button colour for each entry mode when selected
+var ENTRY_MODE_COLORS = { shot: '#007a52', hole: '#2d7abc', simple: '#3d96ee', photo: '#1a4a8a' };
 
 export function setEntryMode(mode) {
   S.entryMode = mode;
-  var shotBtn = document.getElementById('modeBtn_shot');
-  var holeBtn = document.getElementById('modeBtn_hole');
-  var simpleBtn = document.getElementById('modeBtn_simple');
-  var off = 'transparent', offC = '#606060';
-  shotBtn.style.background = off; shotBtn.style.color = offC;
-  holeBtn.style.background = off; holeBtn.style.color = offC;
-  simpleBtn.style.background = off; simpleBtn.style.color = offC;
-  if (mode === 'shot') { shotBtn.style.background = '#007a52'; shotBtn.style.color = '#ffffff'; }
-  else if (mode === 'hole') { holeBtn.style.background = '#2d7abc'; holeBtn.style.color = '#ffffff'; }
-  else { simpleBtn.style.background = '#3d96ee'; simpleBtn.style.color = '#ffffff'; }
+  Object.keys(ENTRY_MODE_COLORS).forEach(function(m) {
+    var btn = document.getElementById('modeBtn_' + m);
+    btn.style.background = 'transparent';
+    btn.style.color = '#606060';
+  });
+  var selected = document.getElementById('modeBtn_' + mode);
+  selected.style.background = ENTRY_MODE_COLORS[mode];
+  selected.style.color = '#ffffff';
+}
+
+/** The "filled in from your photo" notes only apply to forms opened from Photo entry. */
+export function hidePhotoNotices() {
+  ['simplePhotoNotice', 'hbhPhotoNotice'].forEach(function(id) {
+    var n = document.getElementById(id);
+    if (n) n.style.display = 'none';
+  });
 }
 
 function enterScoring() {
@@ -68,7 +78,10 @@ function enterScoring() {
   var cName = document.getElementById('courseName').value || '';
   if (cLabel) cLabel.innerText = cName;
 
-  if (S.entryMode === 'simple') {
+  hidePhotoNotices();
+  if (S.entryMode === 'photo') {
+    show('photoEntryPage');
+  } else if (S.entryMode === 'simple') {
     var sCN = document.getElementById('simplCourseName');
     if (sCN) { sCN.innerText = cName; sCN.style.display = cName ? 'block' : 'none'; }
     buildSimpleForm();

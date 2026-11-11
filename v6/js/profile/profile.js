@@ -3,7 +3,7 @@ import { expose } from '../core/expose.js';
 import { showAuthPage, updateAuthUI } from '../auth/auth.js';
 import { loadUserRole } from '../coaching/roles.js';
 import { loadMyCombines } from '../combines/history.js';
-import { goToDashboard } from '../core/nav.js';
+import { goToDashboard } from '../home/home.js';
 import { _viewingAsStudent, activeUserId } from '../core/session.js';
 import { _sb } from '../core/supabase.js';
 import { loadMyRounds } from '../round/history.js';

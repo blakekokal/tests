@@ -1,3 +1,4 @@
+import { onEnter } from '../core/router.js';
 import { S } from '../core/state.js';
 import { expose } from '../core/expose.js';
 import { _viewingAsStudent, activeUserId } from '../core/session.js';
@@ -649,6 +650,14 @@ function perfTabHeader(key, title, color) {
     '<button onclick="togglePerfTab(\'' + key + '\')" style="background:transparent;border:none;color:#232a27;font-size:12px;cursor:pointer;height:auto;max-width:none;width:auto;padding:0;">✕ Close</button>' +
     '</div>';
 }
+
+onEnter('performanceAnalysisPage', function() {
+  // Reset cache so navigating away and back re-fetches fresh data
+  S.perfCachedRounds = null;
+  S.perfCombineLoaded = false;
+  setPerfPage('rounds');
+  setTimeout(loadPerformanceAnalysis, 50);
+});
 
 // Functions called from inline HTML handlers
 expose({ togglePerfTab, setPerfPage });

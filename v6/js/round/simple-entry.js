@@ -1,7 +1,7 @@
 import { S } from '../core/state.js';
 import { expose } from '../core/expose.js';
 import { showAuthPage } from '../auth/auth.js';
-import { show } from '../core/nav.js';
+import { show } from '../core/router.js';
 import { autoSaveRound, saveIncompleteRound } from './save.js';
 import { resetRoundState } from './setup.js';
 import { renderSummary } from './summary.js';
@@ -54,7 +54,7 @@ function simpleToParLabel(score, par) {
   return '<span style="color:#3d96ee;">' + diff + '</span>';
 }
 
-function simpleUpdateToPar(hole) {
+export function simpleUpdateToPar(hole) {
   var card = document.getElementById('simple_hole_' + hole);
   var par = parseInt(card.dataset.par) || 4;
   var score = parseInt(document.getElementById('simple_score_' + hole).value) || 0;

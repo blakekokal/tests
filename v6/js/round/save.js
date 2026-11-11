@@ -1,12 +1,13 @@
+import { fillHoleByHoleForm, fillSimpleForm } from './form-fill.js';
 import { S } from '../core/state.js';
 import { expose } from '../core/expose.js';
 import { showAuthPage } from '../auth/auth.js';
-import { show } from '../core/nav.js';
+import { onEnter, show } from '../core/router.js';
 import { activeUserId } from '../core/session.js';
 import { _sb } from '../core/supabase.js';
 import { formatDateForDisplay, getTodayCentral } from '../core/util.js';
 import { buildHoleByHoleForm, hbhAddShot, hbhLieChanged, hbhSetPar } from './hole-entry.js';
-import { resetRoundState, setEntryMode } from './setup.js';
+import { hidePhotoNotices, resetRoundState, setEntryMode } from './setup.js';
 import { buildSimpleForm } from './simple-entry.js';
 import { renderSummary } from './summary.js';
 
@@ -322,6 +323,7 @@ async function resumeIncompleteRound(roundId) {
   var cLabel = document.getElementById('courseLabel');
   if (cLabel) cLabel.innerText = data.course_name || '';
 
+  hidePhotoNotices();
   if (rd.entryMode === 'simple' && rd.simpleFormData) {
     // Resume simple mode
     S.entryMode = 'simple';
@@ -331,23 +333,7 @@ async function resumeIncompleteRound(roundId) {
     buildSimpleForm();
     var sCN = document.getElementById('simplCourseName');
     if (sCN) { sCN.innerText = data.course_name || ''; sCN.style.display = data.course_name ? 'block' : 'none'; }
-    // Restore scores and pars
-    rd.simpleFormData.forEach(function(hd) {
-      var card = document.getElementById('simple_hole_' + hd.hole);
-      if (card) {
-        card.dataset.par = hd.par;
-        var parBtns = card.querySelectorAll('button[onclick^="simpleSetPar"]');
-        parBtns.forEach(function(b) {
-          var match = b.getAttribute('onclick').match(/simpleSetPar\(\d+,(\d+)/);
-          if (match && parseInt(match[1]) === hd.par) { b.style.background = '#3d96ee'; b.style.color = '#ffffff'; }
-          else { b.style.background = '#333333'; b.style.color = '#606060'; }
-        });
-      }
-      var scoreEl = document.getElementById('simple_score_' + hd.hole);
-      if (scoreEl && hd.score) scoreEl.value = hd.score;
-      var yardsEl = document.getElementById('simple_yards_' + hd.hole);
-      if (yardsEl && hd.yards) yardsEl.value = hd.yards;
-    });
+    fillSimpleForm(rd.simpleFormData);
     show('simpleEntryPage');
   } else if (rd.entryMode === 'hole' && rd.hbhFormData) {
     // Resume hole-by-hole mode
@@ -362,45 +348,7 @@ async function resumeIncompleteRound(roundId) {
     var hbhCN = document.getElementById('hbhCourseName');
     if (hbhCN) { hbhCN.innerText = data.course_name || ''; hbhCN.style.display = data.course_name ? 'block' : 'none'; }
 
-    // Restore form data
-    rd.hbhFormData.forEach(function(hd) {
-      var h = hd.hole;
-      // Set par by clicking the appropriate par button
-      var card = document.getElementById('hbh_hole_' + h);
-      if (card) {
-        card.dataset.par = hd.par;
-        // Find the par buttons (3 buttons in the par selector div)
-        var parBtns = card.querySelectorAll('button[onclick^="hbhSetPar"]');
-        parBtns.forEach(function(b) {
-          var onclickStr = b.getAttribute('onclick') || '';
-          var match = onclickStr.match(/hbhSetPar\(\d+,(\d+)/);
-          if (match && parseInt(match[1]) === hd.par) {
-            hbhSetPar(h, hd.par, b);
-          }
-        });
-      }
-      // Set yards
-      var yardsEl = document.getElementById('hbh_yards_' + h);
-      if (yardsEl && hd.yards) yardsEl.value = hd.yards;
-      // Set shots
-      if (hd.shots && hd.shots.length > 0) {
-        // Ensure enough shot rows exist
-        var shotsContainer = document.getElementById('hbh_shots_' + h);
-        if (shotsContainer) {
-          var existing = shotsContainer.querySelectorAll('[id^="hbh_shot_' + h + '_"]');
-          for (var s = existing.length; s < hd.shots.length; s++) {
-            hbhAddShot(h);
-          }
-        }
-        hd.shots.forEach(function(shotData, idx) {
-          var sNum = idx + 1;
-          var lieEl = document.getElementById('hbh_lie_' + h + '_' + sNum);
-          var distEl = document.getElementById('hbh_dist_' + h + '_' + sNum);
-          if (lieEl && shotData.lie) { lieEl.value = shotData.lie; hbhLieChanged(h, sNum, lieEl); }
-          if (distEl && shotData.dist) distEl.value = shotData.dist;
-        });
-      }
-    });
+    fillHoleByHoleForm(rd.hbhFormData);
 
     show('holeByHolePage');
   } else {
@@ -591,6 +539,8 @@ async function saveRoundToAccount() {
     status.textContent = S.currentRoundId ? '✓ Round updated!' : '✓ Round saved to your account!';
   }
 }
+
+onEnter('parPage', updateParPageRoundActions);
 
 // Functions called from inline HTML handlers
 expose({ endRoundEarly, saveRoundForLater, saveHoleByHoleForLater, resumeIncompleteRound, saveRoundToAccount });

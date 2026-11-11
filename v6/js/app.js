@@ -1,7 +1,7 @@
 // App entry point: loads every feature module, then boots.
 import { S } from './core/state.js';
 import { expose } from './core/expose.js';
-import * as nav from './core/nav.js';
+import * as home from './home/home.js';
 import * as auth from './auth/auth.js';
 import * as courseSearch from './courses/search.js';
 import * as coachSide from './coaching/coach-side.js';
@@ -31,7 +31,9 @@ import './combines/history.js';
 import './combines/line-drill.js';
 import './combines/table.js';
 import './core/expose.js';
-import './core/nav.js';
+import './core/router.js';
+import './home/home.js';
+import './round/back.js';
 import './core/session.js';
 import './core/state.js';
 import './core/supabase.js';
@@ -51,6 +53,7 @@ import './learn/sg-calculator.js';
 import './learn/sg-explainer.js';
 import './performance/combines.js';
 import './performance/rounds.js';
+import './photo/photo-entry.js';
 import './practice/custom-plans.js';
 import './practice/drills.js';
 import './practice/generator.js';
@@ -84,7 +87,7 @@ import './stats/radar.js';
 expose({ S });
 
 courseSearch.init();
-nav.init();
+home.init();
 auth.init();
 coachSide.init();
 proximity.init();

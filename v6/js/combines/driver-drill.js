@@ -1,7 +1,7 @@
 import { S } from '../core/state.js';
 import { expose } from '../core/expose.js';
 import { _evalState, evalCaptureResult } from './eval-test.js';
-import { show } from '../core/nav.js';
+import { show } from '../core/router.js';
 import { activeUserId } from '../core/session.js';
 import { _sb } from '../core/supabase.js';
 import { getTodayCentral } from '../core/util.js';

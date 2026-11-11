@@ -1,6 +1,6 @@
 import { S } from '../core/state.js';
 import { expose } from '../core/expose.js';
-import { show } from '../core/nav.js';
+import { show } from '../core/router.js';
 import { autoSaveRound } from './save.js';
 import { resetRoundState } from './setup.js';
 import { renderSummary } from './summary.js';

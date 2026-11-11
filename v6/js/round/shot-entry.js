@@ -1,6 +1,6 @@
 import { S } from '../core/state.js';
 import { expose } from '../core/expose.js';
-import { show } from '../core/nav.js';
+import { onAfterShow, onBeforeShow, show } from '../core/router.js';
 import { ordinal } from '../core/util.js';
 import { finishEditedHole } from './edit-hole.js';
 import { autoSaveRound, updateParPageRoundActions } from './save.js';
@@ -641,6 +641,15 @@ function finishHole(){
     }
   }
 }
+
+// Reset the double-tap guard whenever the page changes
+onBeforeShow(function() { S.processingClick = false; });
+
+// Hide score bar on non-scoring pages
+var scoringPages = ['parPage','shotPage','liePage','distancePage','puttPage','penaltyPage','obPenaltyPage','recoveryPage','missedGreenPage'];
+onAfterShow(function(id) {
+  if (scoringPages.indexOf(id) === -1) { var sb = document.getElementById('scoreBar'); if (sb) sb.style.display = 'none'; }
+});
 
 // Functions called from inline HTML handlers
 expose({ selectPresetHoles, setPar, startHole, selectLie, confirmDistance, handlePenalty, handleRecovery, handleMissedGreen, nextPutt, holeOut });

@@ -1,7 +1,7 @@
 import { S } from '../core/state.js';
 import { expose } from '../core/expose.js';
 import { loadStudentRounds, showStudentTab } from '../coaching/student-view.js';
-import { show } from '../core/nav.js';
+import { onBack, show } from '../core/router.js';
 import { _sb } from '../core/supabase.js';
 import { showProfileTab } from '../profile/profile.js';
 import { _allRoundsData, loadMyRounds } from './history.js';
@@ -90,6 +90,8 @@ async function saveEditRoundInfo(ev) {
     }
   }
 }
+
+onBack('editRoundInfoPage', goBackFromEditRound);
 
 // Functions called from inline HTML handlers
 expose({ openEditRoundInfo, goBackFromEditRound, saveEditRoundInfo });

@@ -5,7 +5,7 @@ import { loadCoachMessages, loadStudentMessages } from './messages.js';
 import { generateInviteCode } from './roles.js';
 import { loadCstGoalsAndHandicap } from './student-goals.js';
 import { showCoachTeamList } from './teams.js';
-import { show } from '../core/nav.js';
+import { show } from '../core/router.js';
 import { _viewingAsStudent } from '../core/session.js';
 import { _sb } from '../core/supabase.js';
 import { escapeHtml } from '../core/util.js';

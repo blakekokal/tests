@@ -1,3 +1,4 @@
+import { onEnter } from '../core/router.js';
 import { S } from '../core/state.js';
 import { expose } from '../core/expose.js';
 import { boInit } from '../learn/optimizer.js';
@@ -56,6 +57,10 @@ export function toggleLearnProximityCalc() {
   var isOpen = page.style.display === 'block';
   page.style.display = isOpen ? 'none' : 'block';
 }
+
+onEnter('practiceHubPage', function() {
+  setPracticeHubTab(S.currentPHTab || 'combines');
+});
 
 // Functions called from inline HTML handlers
 expose({ setPracticeHubTab, toggleLearnDistanceOptimizer, toggleLearnProximityCalc });

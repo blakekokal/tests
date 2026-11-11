@@ -1,10 +1,12 @@
+import { showAuthPage } from '../auth/auth.js';
+import { onEnter } from '../core/router.js';
 import { S } from '../core/state.js';
 import { expose } from '../core/expose.js';
 import { fyShowStep1 } from './find-yardage.js';
 import { _SPEED_KEY, getSpeedSessions, renderSpeedTab } from './speed.js';
 import { WG_SWINGS, WG_WEDGE_LIST, _WG_KEY, getWgSessions, renderWgTab, saveWgSessions } from './wedge-gapping.js';
 import { _userRole } from '../coaching/roles.js';
-import { activeUserId } from '../core/session.js';
+import { _viewingAsStudent, activeUserId } from '../core/session.js';
 import { _sb } from '../core/supabase.js';
 
 // ─── MY BAG ─────────────────────────────────────────────────────────────────
@@ -577,6 +579,38 @@ export function setBagTab(tab) {
     renderSpeedTab();
   }
 }
+
+onEnter('myBagPage', function() {
+  if (!S.currentUser) {
+    alert('Please log in to access My Bag.');
+    showAuthPage();
+    return false;
+  }
+  // Reset student view when entering bag page
+  S.bagViewingStudentId = null;
+  S.bagViewingStudentName = null;
+  S.bagStudentClubs = null;
+  S.bagStudentWgSessions = null;
+  S.bagStudentSpeedSessions = null;
+  var bss = document.getElementById('bagStudentSelect');
+  if (bss) bss.value = '';
+
+  if (_viewingAsStudent) {
+    // Auto-load student's bag when viewing as student
+    onBagStudentChange(_viewingAsStudent.id + '|' + _viewingAsStudent.name);
+    // Hide the student selector since we're already viewing as student
+    var bar = document.getElementById('bagCoachStudentBar');
+    if (bar) bar.style.display = 'none';
+  } else {
+    populateBagStudentSelect();
+    renderBagClubs(); // show local cache immediately
+    // Pull latest from Supabase, then re-render
+    syncBagFromSupabase().then(function() {
+      renderBagClubs();
+    });
+  }
+  setBagTab(_currentBagTab || 'myBag');
+});
 
 // Functions called from inline HTML handlers
 expose({ onBagStudentChange, toggleBagAddClub, addBagClub, removeBagClub, updateBagClub, updateWgAvg, openClubDetail, closeClubDetail, importBagFile, setBagTab });

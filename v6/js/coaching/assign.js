@@ -197,14 +197,14 @@ function coachCombRenderShots() {
   var html = shots.map(function(s, i) {
     var lieHtml = '';
     if (isChip) {
-      lieHtml = '<select onchange="window._coachCombShots[' + i + '].lie=this.value" style="height:28px;background:#282828;color:#ffffff;border:1px solid #3d3d3d;border-radius:6px;font-size:11px;padding:0 4px;width:70px;">'
+      lieHtml = '<select onchange="S.coachCombShots[' + i + '].lie=this.value" style="height:28px;background:#282828;color:#ffffff;border:1px solid #3d3d3d;border-radius:6px;font-size:11px;padding:0 4px;width:70px;">'
         + '<option value="Fairway"' + (s.lie === 'Fairway' ? ' selected' : '') + '>Fairway</option>'
         + '<option value="Rough"' + (s.lie === 'Rough' ? ' selected' : '') + '>Rough</option>'
         + '<option value="Sand"' + (s.lie === 'Sand' ? ' selected' : '') + '>Sand</option></select>';
     }
     return '<div style="display:flex;align-items:center;gap:6px;padding:4px 0;' + (i > 0 ? 'border-top:1px solid #282828;' : '') + '">'
       + '<div style="font-size:11px;color:#2e2e2e;width:22px;text-align:center;font-weight:700;">' + (i+1) + '</div>'
-      + '<input type="number" value="' + s.dist + '" onchange="window._coachCombShots[' + i + '].dist=+this.value" style="width:55px;height:28px;font-size:12px;text-align:center;background:#282828;color:#ffffff;border:1px solid #3d3d3d;border-radius:6px;padding:0;">'
+      + '<input type="number" value="' + s.dist + '" onchange="S.coachCombShots[' + i + '].dist=+this.value" style="width:55px;height:28px;font-size:12px;text-align:center;background:#282828;color:#ffffff;border:1px solid #3d3d3d;border-radius:6px;padding:0;">'
       + '<span style="font-size:10px;color:#2e2e2e;">' + s.unit + '</span>' + lieHtml
       + '<button onclick="coachCombRemoveShot(' + i + ')" style="margin-left:auto;background:transparent;border:none;color:#2e2e2e;font-size:13px;cursor:pointer;padding:2px 6px;height:auto;width:auto;max-width:none;">✕</button></div>';
   }).join('');

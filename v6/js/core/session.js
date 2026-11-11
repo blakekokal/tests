@@ -1,6 +1,6 @@
 import { S } from './state.js';
 import { expose } from './expose.js';
-import { show } from './nav.js';
+import { onEnter, show } from './router.js';
 import { _sb } from './supabase.js';
 
 // ─── STUDENT IMPERSONATION (Coach viewing as student) ──────────────
@@ -91,6 +91,8 @@ async function showStudentPicker() {
     list.appendChild(card);
   });
 }
+
+onEnter('homePage', updateViewingAsBanner);
 
 // Functions called from inline HTML handlers
 expose({ activeUserId, exitStudentView });

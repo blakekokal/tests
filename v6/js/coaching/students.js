@@ -3,7 +3,7 @@ import { expose } from '../core/expose.js';
 import { showAuthPage } from '../auth/auth.js';
 import { goToCoaching } from './student-side.js';
 import { showStudentTab, svHcpBadgeLabel } from './student-view.js';
-import { show } from '../core/nav.js';
+import { show } from '../core/router.js';
 import { enterStudentView } from '../core/session.js';
 import { _sb } from '../core/supabase.js';
 

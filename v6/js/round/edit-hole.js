@@ -1,6 +1,6 @@
 import { S } from '../core/state.js';
 import { expose } from '../core/expose.js';
-import { show } from '../core/nav.js';
+import { show } from '../core/router.js';
 import { _sb } from '../core/supabase.js';
 import { renderSummary } from './summary.js';
 import { getExpectedPutts, getExpectedStrokes } from '../sg/calc.js';

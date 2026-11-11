@@ -1,6 +1,6 @@
 import { S } from '../core/state.js';
 import { expose } from '../core/expose.js';
-import { show } from '../core/nav.js';
+import { show } from '../core/router.js';
 import { refreshFullStats } from '../round/edit-hole.js';
 import { calculateSGForHandicap, recalculateAllSG } from '../round/sg-recalc.js';
 import { getExpectedPutts } from '../sg/calc.js';

@@ -1,7 +1,7 @@
 import { expose } from '../core/expose.js';
 import { bagDisplayName, bagWgGetLatestForClub, getBagClubs, sortBagClubs } from './clubs.js';
 import { WG_SWINGS, WG_WEDGE_LIST, getWedgeClubColor } from './wedge-gapping.js';
-import { show } from '../core/nav.js';
+import { show } from '../core/router.js';
 
 // ─── GAP VISUALIZER ────────────────────────────────────────────────────────
 var _gapVizChart = null;

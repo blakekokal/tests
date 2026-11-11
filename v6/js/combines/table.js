@@ -3,7 +3,7 @@ import { expose } from '../core/expose.js';
 import { showAuthPage } from '../auth/auth.js';
 import { showStudentTab } from '../coaching/student-view.js';
 import { _evalState, evalCaptureResult, evalRender } from './eval-test.js';
-import { show } from '../core/nav.js';
+import { show } from '../core/router.js';
 import { activeUserId } from '../core/session.js';
 import { _sb } from '../core/supabase.js';
 import { getTodayCentral } from '../core/util.js';

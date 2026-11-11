@@ -2,7 +2,8 @@ import { S } from '../core/state.js';
 import { expose } from '../core/expose.js';
 import { showAuthPage } from '../auth/auth.js';
 import { showStudentTab } from '../coaching/student-view.js';
-import { goToRoundHistory, show } from '../core/nav.js';
+import { onBack, show } from '../core/router.js';
+import { goToRoundHistory } from '../home/home.js';
 import { _viewingAsStudent, activeUserId, enterStudentView } from '../core/session.js';
 import { _sb } from '../core/supabase.js';
 import { ordinalSuffix } from '../core/util.js';
@@ -349,6 +350,15 @@ export function goBackFromRound() {
     goToRoundHistory();
   }
 }
+
+// When viewing a saved round, Back returns to the round list instead of home
+function backFromSavedRound() {
+  var btrBtn = document.getElementById('backToRoundsBtn');
+  if (btrBtn && btrBtn.style.display !== 'none') { goBackFromRound(); return; }
+  return false;
+}
+onBack('fullStatsPage', backFromSavedRound);
+onBack('summaryPage', backFromSavedRound);
 
 // Functions called from inline HTML handlers
 expose({ goBackFromRoundView, filterRoundsList, viewSavedRound, viewStudentRound, deleteSavedRound, goBackFromRound });
