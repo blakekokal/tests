@@ -59,10 +59,12 @@ export function setEntryMode(mode) {
   selected.style.color = '#ffffff';
 }
 
-/** The "filled in from your photo" note only applies to a form opened from Photo entry. */
+/** The "filled in from your photo" notes only apply to forms opened from Photo entry. */
 export function hidePhotoNotices() {
-  var n = document.getElementById('simplePhotoNotice');
-  if (n) n.style.display = 'none';
+  ['simplePhotoNotice', 'hbhPhotoNotice'].forEach(function(id) {
+    var n = document.getElementById(id);
+    if (n) n.style.display = 'none';
+  });
 }
 
 function enterScoring() {

@@ -1,14 +1,17 @@
-// Photo entry: read a scorecard photo (score, fairways, greens, putts, penalties), then
-// open it in the Simple form so the player can check it before submitting.
+// Photo entry. Two kinds of photo, each opened in a normal entry form to check before submitting:
+//   scorecard  a normal scorecard with score / F / G / Putts / Pen rows  -> Simple form
+//   card       the printable stat card with a bubble per shot           -> Hole-by-Hole form
 import { S } from '../core/state.js';
 import { expose } from '../core/expose.js';
 import { onEnter, show } from '../core/router.js';
 import { goToNewRound } from '../home/home.js';
-import { fillSimpleForm } from '../round/form-fill.js';
+import { fillHoleByHoleForm, fillSimpleForm } from '../round/form-fill.js';
+import { buildHoleByHoleForm } from '../round/hole-entry.js';
 import { setEntryMode } from '../round/setup.js';
 import { buildSimpleForm, simpleUpdateToPar } from '../round/simple-entry.js';
-import { readRoundPhoto } from './reader.js';
+import { readRoundPhoto, readStatCards } from './reader.js';
 
+var photoKind = 'scorecard';   // 'scorecard' | 'card'
 var photoFiles = [];
 var reading = false;
 
@@ -18,6 +21,21 @@ function setStatus(msg, color) {
   var s = el('photoStatus');
   s.textContent = msg || '';
   s.style.color = color || '#9a9a9a';
+}
+
+function setPhotoKind(kind) {
+  photoKind = kind;
+  ['scorecard', 'card'].forEach(function(k) {
+    var btn = el('photoKind_' + k);
+    btn.style.background = k === kind ? '#2d7abc' : 'transparent';
+    btn.style.color = k === kind ? '#ffffff' : '#606060';
+    el('photoGuide_' + k).style.display = k === kind ? 'block' : 'none';
+  });
+  el('photoPrintCardBtn').style.display = kind === 'card' ? '' : 'none';
+}
+
+function printStatCard() {
+  window.open('stat-card.html', '_blank');
 }
 
 function renderPreviews() {
@@ -33,6 +51,7 @@ function renderPreviews() {
   var btn = el('photoReadBtn');
   btn.style.display = photoFiles.length ? '' : 'none';
   btn.textContent = photoFiles.length > 1 ? 'Read ' + photoFiles.length + ' Photos' : 'Read Photo';
+  el('photoPickBtn').textContent = photoFiles.length ? '📷 Choose Different Photos' : '📷 Take or Choose Photo';
 }
 
 function onPhotoFilesChosen(input) {
@@ -67,15 +86,47 @@ function openForReview(holes, source) {
   note.style.display = 'block';
 }
 
+/** Stat card: each shot's lie is filled in; the player types the distances. */
+function openCardForReview(holes, warnings) {
+  // Holes missing from the photos still get a card so the round stays in order
+  var last = Math.max.apply(null, holes.map(function(h) { return h.hole; }));
+  S.totalHoles = last <= 9 ? 9 : 18;
+  el('customHoles').value = S.totalHoles;
+  setEntryMode('hole');
+  buildHoleByHoleForm();
+  fillHoleByHoleForm(holes.map(withCourseData));
+  var cName = el('courseName').value || '';
+  el('hbhCourseName').innerText = cName;
+  el('hbhCourseName').style.display = cName ? 'block' : 'none';
+  el('courseLabel').innerText = cName;
+  show('holeByHolePage');
+  var note = el('hbhPhotoNotice');
+  note.textContent = '📷 Filled in from your stat card. Check each hole, then type the yardage and the distance left '
+    + 'for each shot from your card. Distances are what strokes gained is worked out from.';
+  warnings.forEach(function(w) {
+    var line = document.createElement('div');
+    line.textContent = '⚠ ' + w;
+    line.style.cssText = 'color:#d4706e;margin-top:4px;';
+    note.appendChild(line);
+  });
+  note.style.display = 'block';
+}
+
 async function readChosenPhotos() {
   if (reading || photoFiles.length === 0) return;
   reading = true;
   var btn = el('photoReadBtn');
   btn.style.opacity = '0.5';
   try {
-    var result = await readRoundPhoto(photoFiles, function(msg) { setStatus(msg); });
+    var onStatus = function(msg) { setStatus(msg); };
     S.currentRoundId = null;
-    openForReview(result.holes, result.source);
+    if (photoKind === 'card') {
+      var cards = await readStatCards(photoFiles, onStatus);
+      openCardForReview(cards.holes, cards.warnings);
+    } else {
+      var result = await readRoundPhoto(photoFiles, onStatus);
+      openForReview(result.holes, result.source);
+    }
     photoFiles = [];
     renderPreviews();
     setStatus('');
@@ -96,8 +147,9 @@ onEnter('photoEntryPage', function() {
   var cName = el('courseName').value || '';
   el('photoCourseName').innerText = cName;
   el('photoCourseName').style.display = cName ? 'block' : 'none';
+  setPhotoKind(photoKind);
   renderPreviews();
 });
 
 // Functions called from inline HTML handlers
-expose({ onPhotoFilesChosen, readChosenPhotos, startPhotoRound });
+expose({ setPhotoKind, printStatCard, onPhotoFilesChosen, readChosenPhotos, startPhotoRound });

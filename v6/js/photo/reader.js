@@ -7,6 +7,7 @@
 //   2. On device  - Tesseract.js OCR in the browser. Free, no setup, best on clear printed text.
 import { S } from '../core/state.js';
 import { _sb } from '../core/supabase.js';
+import { cardHolesToForm, readStatCard } from './card-scan.js';
 import { parseScorecardText } from './parse-text.js';
 
 var AI_FUNCTION = 'read-round-photo';
@@ -79,6 +80,37 @@ async function readOnDevice(dataUrls, onStatus) {
     await worker.terminate();
   }
   return parseScorecardText(text);
+}
+
+function loadImage(file) {
+  return new Promise(function(resolve, reject) {
+    var url = URL.createObjectURL(file);
+    var img = new Image();
+    img.onload = function() { URL.revokeObjectURL(url); resolve(img); };
+    img.onerror = function() { URL.revokeObjectURL(url); reject(new Error('Could not open that image.')); };
+    img.src = url;
+  });
+}
+
+/**
+ * Printed stat cards: read the colored bubbles. One photo per card; the cards say which
+ * holes they hold, so the photos can be in any order.
+ * @returns {Promise<{source:'card', holes:object[], warnings:string[]}>} holes in the Hole-by-Hole form's shape
+ */
+export async function readStatCards(files, onStatus) {
+  var scanned = [], warnings = [];
+  for (var i = 0; i < files.length; i++) {
+    onStatus(files.length > 1 ? 'Reading card ' + (i + 1) + ' of ' + files.length + '...' : 'Reading card...');
+    var card = readStatCard(await loadImage(files[i]));
+    if (!card) continue;   // the cover card has no holes
+    scanned = scanned.concat(card.holes);
+    warnings = warnings.concat(card.warnings);
+  }
+  if (scanned.length === 0) {
+    throw new Error('No colored bubbles were found. Take one photo of each holes card, sharp and well lit.');
+  }
+  var form = cardHolesToForm(scanned);
+  return { source: 'card', holes: form.holes, warnings: warnings.concat(form.warnings) };
 }
 
 /**

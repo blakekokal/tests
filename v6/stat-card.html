@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stat Card - Golf Stat Tracker</title>
+<link rel="icon" type="image/png" href="assets/icons/icon-180.png">
+<style>
+@page { size: letter landscape; margin: 0; }
+html, body { margin: 0; padding: 0; background: #1e1e1e; font-family: system-ui, sans-serif; }
+#toolbar { display: flex; gap: 8px; justify-content: center; align-items: center; padding: 12px; flex-wrap: wrap; }
+#toolbar button { height: 44px; padding: 0 20px; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; color: #ffffff; cursor: pointer; background: #3d3d3d; }
+#toolbar button.print { background: #007a52; }
+#toolbar button.on { background: #2d7abc; }
+#toolbar span { color: #9a9a9a; font-size: 12px; width: 100%; text-align: center; }
+#sheets { max-width: 1056px; margin: 0 auto 24px; padding: 0 8px; }
+#sheets svg { display: block; width: 100%; height: auto; margin-bottom: 12px; }
+@media print {
+  html, body { background: #ffffff; }
+  #toolbar { display: none; }
+  #sheets { max-width: none; margin: 0; padding: 0; }
+  #sheets svg { width: 11in; height: 8.5in; margin: 0; page-break-after: always; }
+}
+</style>
+</head>
+<body>
+<div id="toolbar">
+  <button onclick="location.href='./'">Back</button>
+  <button id="btn9" onclick="showHoles(9)">9 Holes</button>
+  <button id="btn18" onclick="showHoles(18)">18 Holes</button>
+  <button class="print" onclick="window.print()">Print</button>
+  <span>Print on Letter paper, landscape, at 100% scale. Cut along the dashed lines. The black corner squares must print.</span>
+</div>
+<div id="sheets"></div>
+<script type="module">
+import { statCardSheets } from './js/photo/card-print.js';
+window.showHoles = function(holes) {
+  document.getElementById('sheets').innerHTML = statCardSheets(holes).join('');
+  document.getElementById('btn9').className = holes === 9 ? 'on' : '';
+  document.getElementById('btn18').className = holes === 18 ? 'on' : '';
+};
+showHoles(new URLSearchParams(location.search).get('holes') === '18' ? 18 : 9);
+</script>
+</body>
+</html>

@@ -31,7 +31,7 @@ js/
   data/               course database, drill library, combine presets
   round/              setup, shot-by-shot, hole-by-hole, simple entry, summary,
                       save/resume, history, edit, Excel/CSV import + export
-  photo/              photo entry (new): scorecard text parser, reader, screen
+  photo/              photo entry (new): scorecard reader, printable stat card + scanner, screen
   stats/              dashboard, full stats, radar charts, handicap index, goals
   performance/        performance analysis (rounds + combines)
   combines/           table combines, line drill, driver drill, evaluation test
@@ -72,7 +72,21 @@ It is saved as a simple round (`entryMode: 'simple'`, no shots, so no strokes ga
 totals. The dashboard counts these rounds toward fairways, greens and putting. Nothing in
 Supabase changes shape; the extra fields live inside the existing `round_data` JSON.
 
-Two readers:
+### Stat card (printable, one bubble per shot)
+
+Photo Entry → **Stat Card** → *Print Stat Cards* opens `stat-card.html`: yardage-book-sized
+cards (4 × 6.5 in, two per Letter sheet, three holes per card). On each hole the player circles
+the par, writes yardage and score, and uses one row per shot: color the bubble for where the
+ball finished and write the distance left.
+
+One photo per card is scanned on the device (`photo/card-scan.js`): it finds the corner
+squares, straightens the card and reads the par ring and the bubbles. The card's code squares
+say which holes it holds, so photos can be in any order. The result opens in the Hole-by-Hole
+form with every shot's lie filled in; the handwritten yardage and distances are typed in there.
+Water and Out of Bounds add a `PENALTY` row. `photo/card-layout.js` is the single source of the
+card's geometry for both printing and scanning; `printouts/` holds PDFs made from that page.
+
+### Readers for the scorecard photo
 
 - **On device** (default, free, no setup): Tesseract.js in the browser. Reads clear printed
   numbers; it cannot be relied on for handwriting or for the check / x marks.
