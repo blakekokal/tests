@@ -9,7 +9,7 @@ import { getExpectedPutts, getExpectedStrokes } from '../sg/calc.js';
 // ─── HOLE-BY-HOLE FORM ────────────────────────────────────
 var HBH_LIES = [
   'FAIRWAY','GREEN','MISSED GREEN','GS BUNKER','FW BUNKER',
-  'LEFT ROUGH','RIGHT ROUGH','OB','RECOVERY','WATER','HOLE'
+  'LEFT ROUGH','RIGHT ROUGH','OB','RECOVERY','WATER','PENALTY','HOLE'
 ];
 var HBH_PUTT_LIES = ['GREEN (putting)','HOLED'];
 

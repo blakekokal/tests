@@ -9,13 +9,14 @@ import { fillHoleByHoleForm, fillSimpleForm } from '../round/form-fill.js';
 import { buildHoleByHoleForm } from '../round/hole-entry.js';
 import { setEntryMode } from '../round/setup.js';
 import { buildSimpleForm, simpleUpdateToPar } from '../round/simple-entry.js';
-import { readRoundPhoto } from './reader.js';
+import { readRoundPhoto, readScanCard } from './reader.js';
 
-var photoKind = 'scorecard';   // 'scorecard' | 'shots'
+var photoKind = 'card';   // 'card' (printed scan card) | 'scorecard' | 'shots'
 var photoFiles = [];
 var reading = false;
 
 var KIND_HELP = {
+  card: 'Print the scan card, check the boxes as you play, then take a photo with all four corner squares showing. Every shot is filled in for you to check.',
   scorecard: 'Take a straight-on photo of the scorecard. Your par and score for each hole are filled in for you to check.',
   shots: 'Take a photo of your shot-by-shot notes. Every shot is filled in for you to check, so you get full strokes gained.'
 };
@@ -30,13 +31,14 @@ function setStatus(msg, color) {
 
 function setPhotoKind(kind) {
   photoKind = kind;
-  var on = { scorecard: el('photoKind_scorecard'), shots: el('photoKind_shots') };
+  var on = { card: el('photoKind_card'), scorecard: el('photoKind_scorecard'), shots: el('photoKind_shots') };
   Object.keys(on).forEach(function(k) {
     on[k].style.background = k === kind ? '#2d7abc' : 'transparent';
     on[k].style.color = k === kind ? '#ffffff' : '#606060';
   });
   el('photoKindHelp').textContent = KIND_HELP[kind];
   el('photoNotesGuide').style.display = kind === 'shots' ? 'block' : 'none';
+  el('photoPrintCardBtn').style.display = kind === 'card' ? '' : 'none';
 }
 
 function renderPreviews() {
@@ -61,10 +63,22 @@ function onPhotoFilesChosen(input) {
   renderPreviews();
 }
 
-function showFromPhotoNotice(pageKind, source) {
+function showFromPhotoNotice(pageKind, source, warnings) {
   var note = el(pageKind === 'shots' ? 'hbhPhotoNotice' : 'simplePhotoNotice');
-  note.textContent = '📷 Filled in from your photo' + (source === 'device' ? ' (read on this device)' : '')
+  var msg = '📷 Filled in from your photo' + (source === 'device' ? ' (read on this device)' : '')
     + '. Check every hole and fix anything that was misread before you submit.';
+  if (source === 'card') {
+    msg = '📷 Filled in from your scan card. Check every hole before you submit. '
+      + 'The card has no distances: add the distance left for each shot to get strokes gained, '
+      + 'or submit as it is for score, fairways, greens and putts.';
+  }
+  note.textContent = msg;
+  (warnings || []).forEach(function(w) {
+    var line = document.createElement('div');
+    line.textContent = '⚠ ' + w;
+    line.style.cssText = 'color:#d4706e;margin-top:4px;';
+    note.appendChild(line);
+  });
   note.style.display = 'block';
 }
 
@@ -90,7 +104,7 @@ function openInSimpleForm(holes, source) {
   showFromPhotoNotice('scorecard', source);
 }
 
-function openInHoleByHoleForm(holes, source) {
+function openInHoleByHoleForm(holes, source, warnings) {
   // Holes missing from the notes still get a card so the round stays in order
   var count = Math.max.apply(null, holes.map(function(h) { return h.hole; }));
   S.totalHoles = Math.max(3, count);
@@ -103,7 +117,7 @@ function openInHoleByHoleForm(holes, source) {
   el('hbhCourseName').style.display = cName ? 'block' : 'none';
   el('courseLabel').innerText = cName;
   show('holeByHolePage');
-  showFromPhotoNotice('shots', source);
+  showFromPhotoNotice('shots', source, warnings);
 }
 
 async function readChosenPhotos() {
@@ -112,9 +126,12 @@ async function readChosenPhotos() {
   var btn = el('photoReadBtn');
   btn.style.opacity = '0.5';
   try {
-    var result = await readRoundPhoto(photoFiles, photoKind, function(msg) { setStatus(msg); });
+    var onStatus = function(msg) { setStatus(msg); };
+    var result = photoKind === 'card'
+      ? await readScanCard(photoFiles, onStatus)
+      : await readRoundPhoto(photoFiles, photoKind, onStatus);
     S.currentRoundId = null;
-    if (photoKind === 'shots') openInHoleByHoleForm(result.holes, result.source);
+    if (photoKind !== 'scorecard') openInHoleByHoleForm(result.holes, result.source, result.warnings);
     else openInSimpleForm(result.holes, result.source);
     photoFiles = [];
     renderPreviews();
@@ -140,5 +157,9 @@ onEnter('photoEntryPage', function() {
   renderPreviews();
 });
 
+function printScanCard() {
+  window.open('scorecard.html', '_blank');
+}
+
 // Functions called from inline HTML handlers
-expose({ setPhotoKind, onPhotoFilesChosen, readChosenPhotos, startPhotoRound });
+expose({ setPhotoKind, onPhotoFilesChosen, readChosenPhotos, startPhotoRound, printScanCard });

@@ -172,7 +172,10 @@
     <button onclick="downloadRoundTemplate()" style="width:100%;height:40px;font-size:13px;background:#2d7abc;border-radius:8px;margin-bottom:6px;">📥 Download Blank Scorecard Template</button>
     <button onclick="document.getElementById('uploadRoundFile').click()" style="width:100%;height:40px;font-size:13px;background:#007a52;border-radius:8px;margin-bottom:8px;">📤 Upload Round (.xlsx)</button>
     <input type="file" id="uploadRoundFile" accept=".xlsx,.xls,.csv" style="display:none;" onchange="handleRoundUpload(this, activeUserId())">
-    <button onclick="startPhotoRound()" style="width:100%;height:40px;font-size:13px;background:#1a4a8a;border-radius:8px;margin-bottom:8px;">📷 Add Round from Photo</button>
+    <div style="display:flex;gap:6px;margin-bottom:8px;">
+      <button onclick="startPhotoRound()" style="flex:1;height:40px;font-size:13px;background:#1a4a8a;border-radius:8px;">📷 Add Round from Photo</button>
+      <button onclick="printScanCard()" style="flex:1;height:40px;font-size:13px;background:#1a4a8a;border-radius:8px;">🖨 Print Scan Card</button>
+    </div>
     <div id="uploadRoundMsg" style="font-size:12px;min-height:16px;text-align:center;margin-bottom:6px;"></div>
     <input id="roundSearchInput" type="text" placeholder="🔍 Search course name..." oninput="filterRoundsList()" style="width:100%;max-width:360px;box-sizing:border-box;margin-bottom:6px;">
     <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-bottom:8px;">
@@ -3390,13 +3393,15 @@
   <div style="width:100%;max-width:320px;">
     <div style="font-size:11px;color:#2e2e2e;text-align:center;margin-bottom:6px;letter-spacing:0.5px;text-transform:uppercase;">What is the photo of?</div>
     <div style="display:flex;gap:0;background:#222222;border-radius:10px;overflow:hidden;border:1px solid #333333;">
-      <button id="photoKind_scorecard" onclick="setPhotoKind('scorecard')" style="flex:1;height:40px;border:none;border-radius:0;font-size:13px;font-weight:700;background:#2d7abc;color:#ffffff;cursor:pointer;transition:background 0.2s;">Scorecard</button>
-      <button id="photoKind_shots" onclick="setPhotoKind('shots')" style="flex:1;height:40px;border:none;border-radius:0;font-size:13px;font-weight:700;background:transparent;color:#606060;cursor:pointer;transition:background 0.2s;">Shot-by-Shot Notes</button>
+      <button id="photoKind_card" onclick="setPhotoKind('card')" style="flex:1;height:40px;border:none;border-radius:0;font-size:13px;font-weight:700;background:#2d7abc;color:#ffffff;cursor:pointer;transition:background 0.2s;">Scan Card</button>
+      <button id="photoKind_scorecard" onclick="setPhotoKind('scorecard')" style="flex:1;height:40px;border:none;border-radius:0;font-size:13px;font-weight:700;background:transparent;color:#606060;cursor:pointer;transition:background 0.2s;">Scorecard</button>
+      <button id="photoKind_shots" onclick="setPhotoKind('shots')" style="flex:1;height:40px;border:none;border-radius:0;font-size:13px;font-weight:700;background:transparent;color:#606060;cursor:pointer;transition:background 0.2s;">Shot Notes</button>
     </div>
     <div id="photoKindHelp" style="font-size:12px;color:#9a9a9a;line-height:1.4;margin-top:8px;"></div>
   </div>
 
-  <button onclick="document.getElementById('photoFileInput').click()" class="big" style="background:#007a52;margin-top:8px;">📷 Take or Choose Photo</button>
+  <button id="photoPrintCardBtn" onclick="printScanCard()" style="background:#1a4a8a;margin-top:8px;">🖨 Print Scan Card</button>
+  <button onclick="document.getElementById('photoFileInput').click()" class="big" style="background:#007a52;">📷 Take or Choose Photo</button>
   <input type="file" id="photoFileInput" accept="image/*" multiple style="display:none;" onchange="onPhotoFilesChosen(this)">
   <div id="photoPreviews" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;width:100%;max-width:320px;"></div>
   <button id="photoReadBtn" onclick="readChosenPhotos()" class="big" style="display:none;background:#2d7abc;">Read Photo</button>

@@ -6,6 +6,7 @@
 //   2. On device  - Tesseract.js OCR in the browser. Free, no setup, best on clear printed text.
 import { S } from '../core/state.js';
 import { _sb } from '../core/supabase.js';
+import { marksToHoles, readCardMarks } from './card-scan.js';
 import { parseScorecardText, parseShotNotesText } from './parse-text.js';
 
 var AI_FUNCTION = 'read-round-photo';
@@ -79,6 +80,33 @@ async function readOnDevice(kind, dataUrls, onStatus) {
     await worker.terminate();
   }
   return kind === 'shots' ? parseShotNotesText(text) : parseScorecardText(text);
+}
+
+function loadImage(file) {
+  return new Promise(function(resolve, reject) {
+    var url = URL.createObjectURL(file);
+    var img = new Image();
+    img.onload = function() { URL.revokeObjectURL(url); resolve(img); };
+    img.onerror = function() { URL.revokeObjectURL(url); reject(new Error('Could not open that image.')); };
+    img.src = url;
+  });
+}
+
+/**
+ * Printed scan card: read the checkboxes. Several photos (for example one per nine) are combined.
+ * @returns {Promise<{source:'card', holes:object[], warnings:string[]}>}
+ */
+export async function readScanCard(files, onStatus) {
+  onStatus('Reading card...');
+  var marks = [];
+  for (var i = 0; i < files.length; i++) {
+    marks = marks.concat(readCardMarks(await loadImage(files[i])));
+  }
+  var result = marksToHoles(marks);
+  if (result.holes.length === 0) {
+    throw new Error('No checked boxes were found. Use a dark pen, and make sure the photo is sharp and well lit.');
+  }
+  return { source: 'card', holes: result.holes, warnings: result.warnings };
 }
 
 /**

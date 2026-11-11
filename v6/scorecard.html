@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scan Card - Golf Stat Tracker</title>
+<link rel="icon" type="image/png" href="assets/icons/icon-180.png">
+<style>
+@page { size: letter landscape; margin: 0; }
+html, body { margin: 0; padding: 0; background: #1e1e1e; font-family: system-ui, sans-serif; }
+#toolbar { display: flex; gap: 8px; justify-content: center; align-items: center; padding: 12px; flex-wrap: wrap; }
+#toolbar button { height: 44px; padding: 0 22px; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; color: #ffffff; cursor: pointer; }
+#toolbar .print { background: #007a52; }
+#toolbar .back { background: #3d3d3d; }
+#toolbar span { color: #9a9a9a; font-size: 12px; width: 100%; text-align: center; }
+#card { max-width: 1056px; margin: 0 auto 24px; padding: 0 8px; }
+#card svg { display: block; width: 100%; height: auto; }
+@media print {
+  html, body { background: #ffffff; }
+  #toolbar { display: none; }
+  #card { max-width: none; margin: 0; padding: 0; }
+  #card svg { width: 11in; height: 8.5in; }
+}
+</style>
+</head>
+<body>
+<div id="toolbar">
+  <button class="back" onclick="location.href='./'">Back</button>
+  <button class="print" onclick="window.print()">Print</button>
+  <span>Print on Letter paper, landscape, at 100% scale. The black corner squares must print.</span>
+</div>
+<div id="card"></div>
+<script type="module">
+import { cardSvg } from './js/photo/card-print.js';
+document.getElementById('card').innerHTML = cardSvg();
+</script>
+</body>
+</html>
