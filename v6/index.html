@@ -172,10 +172,7 @@
     <button onclick="downloadRoundTemplate()" style="width:100%;height:40px;font-size:13px;background:#2d7abc;border-radius:8px;margin-bottom:6px;">📥 Download Blank Scorecard Template</button>
     <button onclick="document.getElementById('uploadRoundFile').click()" style="width:100%;height:40px;font-size:13px;background:#007a52;border-radius:8px;margin-bottom:8px;">📤 Upload Round (.xlsx)</button>
     <input type="file" id="uploadRoundFile" accept=".xlsx,.xls,.csv" style="display:none;" onchange="handleRoundUpload(this, activeUserId())">
-    <div style="display:flex;gap:6px;margin-bottom:8px;">
-      <button onclick="startPhotoRound()" style="flex:1;height:40px;font-size:13px;background:#1a4a8a;border-radius:8px;">📷 Add Round from Photo</button>
-      <button onclick="printScanCard()" style="flex:1;height:40px;font-size:13px;background:#1a4a8a;border-radius:8px;">🖨 Print Scan Card</button>
-    </div>
+    <button onclick="startPhotoRound()" style="width:100%;height:40px;font-size:13px;background:#1a4a8a;border-radius:8px;margin-bottom:8px;">📷 Add Round from Photo</button>
     <div id="uploadRoundMsg" style="font-size:12px;min-height:16px;text-align:center;margin-bottom:6px;"></div>
     <input id="roundSearchInput" type="text" placeholder="🔍 Search course name..." oninput="filterRoundsList()" style="width:100%;max-width:360px;box-sizing:border-box;margin-bottom:6px;">
     <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-bottom:8px;">
@@ -3388,30 +3385,24 @@
   <button class="back-btn-top" onclick="show('roundPage')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
   <div style="font-size:20px;font-weight:800;margin-bottom:4px;">Photo Entry</div>
   <div id="photoCourseName" style="font-size:13px;color:#606060;margin-bottom:2px;display:none;"></div>
-  <div style="font-size:12px;color:#2e2e2e;margin-bottom:16px;">Take a photo instead of typing each hole</div>
+  <div style="font-size:12px;color:#2e2e2e;margin-bottom:16px;">Take a photo of your scorecard instead of typing each hole</div>
 
-  <div style="width:100%;max-width:320px;">
-    <div style="font-size:11px;color:#2e2e2e;text-align:center;margin-bottom:6px;letter-spacing:0.5px;text-transform:uppercase;">What is the photo of?</div>
-    <div style="display:flex;gap:0;background:#222222;border-radius:10px;overflow:hidden;border:1px solid #333333;">
-      <button id="photoKind_card" onclick="setPhotoKind('card')" style="flex:1;height:40px;border:none;border-radius:0;font-size:13px;font-weight:700;background:#2d7abc;color:#ffffff;cursor:pointer;transition:background 0.2s;">Scan Card</button>
-      <button id="photoKind_scorecard" onclick="setPhotoKind('scorecard')" style="flex:1;height:40px;border:none;border-radius:0;font-size:13px;font-weight:700;background:transparent;color:#606060;cursor:pointer;transition:background 0.2s;">Scorecard</button>
-      <button id="photoKind_shots" onclick="setPhotoKind('shots')" style="flex:1;height:40px;border:none;border-radius:0;font-size:13px;font-weight:700;background:transparent;color:#606060;cursor:pointer;transition:background 0.2s;">Shot Notes</button>
-    </div>
-    <div id="photoKindHelp" style="font-size:12px;color:#9a9a9a;line-height:1.4;margin-top:8px;"></div>
-  </div>
-
-  <button id="photoPrintCardBtn" onclick="printScanCard()" style="background:#1a4a8a;margin-top:8px;">🖨 Print Scan Card</button>
   <button onclick="document.getElementById('photoFileInput').click()" class="big" style="background:#007a52;">📷 Take or Choose Photo</button>
   <input type="file" id="photoFileInput" accept="image/*" multiple style="display:none;" onchange="onPhotoFilesChosen(this)">
   <div id="photoPreviews" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;width:100%;max-width:320px;"></div>
   <button id="photoReadBtn" onclick="readChosenPhotos()" class="big" style="display:none;background:#2d7abc;">Read Photo</button>
   <div id="photoStatus" style="font-size:12px;min-height:16px;color:#9a9a9a;max-width:320px;line-height:1.4;"></div>
 
-  <div id="photoNotesGuide" style="display:none;width:100%;max-width:320px;background:#222222;border:1px solid #333333;border-radius:10px;padding:12px;text-align:left;box-sizing:border-box;">
-    <div style="font-size:13px;font-weight:700;margin-bottom:6px;">How to write your notes</div>
-    <div style="font-size:12px;color:#9a9a9a;line-height:1.5;">One line per hole: hole number, par and yardage, then where each shot finished and how far was left (yards, or feet once you are on the green).</div>
-    <div style="font-family:monospace;font-size:12px;color:#ffffff;background:#282828;border-radius:8px;padding:8px 10px;margin:8px 0;line-height:1.6;">1 P4 385: F 150, G 20, G 3, H<br>2 P3 160: G 25, G 2, H<br>3 P5 520: LR 260, F 95, GB 12, G 8, H</div>
-    <div style="font-size:11px;color:#606060;line-height:1.6;">F fairway · G green · LR / RR left / right rough · FB fairway bunker · GB greenside bunker · MG missed green · R recovery · W water · OB out of bounds · H holed</div>
+  <div style="width:100%;max-width:320px;background:#222222;border:1px solid #333333;border-radius:10px;padding:12px;text-align:left;box-sizing:border-box;">
+    <div style="font-size:13px;font-weight:700;margin-bottom:6px;">How to mark your scorecard</div>
+    <div style="font-size:12px;line-height:1.4;">
+      <div style="color:#9a9a9a;padding-bottom:6px;">Use one row for each, and write the letter at the start of the row.</div>
+      <div style="display:flex;gap:10px;padding:5px 0;border-top:1px solid #282828;"><div style="width:54px;font-weight:700;color:#ffffff;">Score</div><div style="flex:1;color:#9a9a9a;">Your strokes on each hole</div></div>
+      <div style="display:flex;gap:10px;padding:5px 0;border-top:1px solid #282828;"><div style="width:54px;font-weight:700;color:#ffffff;">F</div><div style="flex:1;color:#9a9a9a;">Fairway: ✓ hit, ✗ missed. Leave par 3s blank</div></div>
+      <div style="display:flex;gap:10px;padding:5px 0;border-top:1px solid #282828;"><div style="width:54px;font-weight:700;color:#ffffff;">G</div><div style="flex:1;color:#9a9a9a;">Green in regulation: ✓ hit, ✗ missed</div></div>
+      <div style="display:flex;gap:10px;padding:5px 0;border-top:1px solid #282828;"><div style="width:54px;font-weight:700;color:#ffffff;">Putts</div><div style="flex:1;color:#9a9a9a;">Number of putts on the hole</div></div>
+      <div style="display:flex;gap:10px;padding:5px 0;border-top:1px solid #282828;"><div style="width:54px;font-weight:700;color:#ffffff;">Pen</div><div style="flex:1;color:#9a9a9a;">Penalty strokes. Leave blank for none</div></div>
+    </div>
   </div>
   <div style="font-size:11px;color:#606060;max-width:320px;line-height:1.4;">Nothing is saved until you check the holes and submit.</div>
 </div>
@@ -3422,7 +3413,6 @@
   <div style="font-size:20px;font-weight:800;margin-bottom:4px;">Hole by Hole Entry</div>
   <div id="hbhCourseName" style="font-size:13px;color:#606060;margin-bottom:2px;display:none;"></div>
   <div style="font-size:12px;color:#2e2e2e;margin-bottom:16px;">Enter each hole then submit</div>
-  <div id="hbhPhotoNotice" style="display:none;width:100%;max-width:360px;background:#222222;border:1px solid #f0c830;border-radius:10px;padding:10px 12px;font-size:12px;color:#f0c830;line-height:1.4;margin-bottom:8px;box-sizing:border-box;"></div>
   <div id="hbhHolesList" style="width:100%;max-width:360px;display:flex;flex-direction:column;gap:14px;"></div>
   <div style="width:100%;max-width:360px;margin-top:16px;display:flex;flex-direction:column;gap:8px;">
     <button onclick="submitHoleByHole()" style="width:100%;height:52px;background:#007a52;border:none;border-radius:12px;color:#ffffff;font-size:16px;font-weight:800;cursor:pointer;">✅ Submit Round</button>

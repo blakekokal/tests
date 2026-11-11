@@ -77,6 +77,7 @@ export const S = {
 
   // round/setup
   entryMode: 'shot',
+  simpleHasStats: false,   // the simple round being submitted carries fairway/green/putt stats
 
   // practice/drills
   drillsOnPracticeHub: false,

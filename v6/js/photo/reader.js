@@ -2,12 +2,12 @@
 //
 // Two readers, same result shape:
 //   1. AI vision  - the "read-round-photo" Supabase Edge Function (see supabase/functions/).
-//                   Used automatically once that function is deployed; handles handwriting well.
+//                   Used automatically once that function is deployed; handles handwriting,
+//                   including the check and x marks.
 //   2. On device  - Tesseract.js OCR in the browser. Free, no setup, best on clear printed text.
 import { S } from '../core/state.js';
 import { _sb } from '../core/supabase.js';
-import { marksToHoles, readCardMarks } from './card-scan.js';
-import { parseScorecardText, parseShotNotesText } from './parse-text.js';
+import { parseScorecardText } from './parse-text.js';
 
 var AI_FUNCTION = 'read-round-photo';
 var TESSERACT_URL = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
@@ -46,9 +46,9 @@ function loadTesseract() {
   });
 }
 
-async function readWithAI(kind, dataUrls) {
+async function readWithAI(dataUrls) {
   var images = dataUrls.map(function(d) { return { media_type: 'image/jpeg', data: d.split(',')[1] }; });
-  var res = await _sb.functions.invoke(AI_FUNCTION, { body: { kind: kind, images: images } });
+  var res = await _sb.functions.invoke(AI_FUNCTION, { body: { images: images } });
   if (res.error) throw res.error;
   if (!res.data || !Array.isArray(res.data.holes) || res.data.holes.length === 0) {
     throw new Error((res.data && res.data.error) || 'No holes found in the photo.');
@@ -56,11 +56,10 @@ async function readWithAI(kind, dataUrls) {
   return res.data.holes;
 }
 
-// Tesseract page layout modes: a scorecard is a table (rows of varying size),
-// shot notes are one uniform block of lines.
-var OCR_LAYOUT = { scorecard: '4', shots: '6' };
+// Tesseract page layout mode 4: a table whose rows vary in size, which is what a scorecard is.
+var OCR_LAYOUT = '4';
 
-async function readOnDevice(kind, dataUrls, onStatus) {
+async function readOnDevice(dataUrls, onStatus) {
   var Tesseract = await loadTesseract();
   var label = 'Reading photo';
   var worker = await Tesseract.createWorker('eng', 1, {
@@ -70,7 +69,7 @@ async function readOnDevice(kind, dataUrls, onStatus) {
   });
   var text = '';
   try {
-    await worker.setParameters({ tessedit_pageseg_mode: OCR_LAYOUT[kind] });
+    await worker.setParameters({ tessedit_pageseg_mode: OCR_LAYOUT });
     for (var i = 0; i < dataUrls.length; i++) {
       if (dataUrls.length > 1) label = 'Reading photo ' + (i + 1) + ' of ' + dataUrls.length;
       var result = await worker.recognize(dataUrls[i]);
@@ -79,45 +78,16 @@ async function readOnDevice(kind, dataUrls, onStatus) {
   } finally {
     await worker.terminate();
   }
-  return kind === 'shots' ? parseShotNotesText(text) : parseScorecardText(text);
-}
-
-function loadImage(file) {
-  return new Promise(function(resolve, reject) {
-    var url = URL.createObjectURL(file);
-    var img = new Image();
-    img.onload = function() { URL.revokeObjectURL(url); resolve(img); };
-    img.onerror = function() { URL.revokeObjectURL(url); reject(new Error('Could not open that image.')); };
-    img.src = url;
-  });
+  return parseScorecardText(text);
 }
 
 /**
- * Printed scan card: read the checkboxes. Several photos (for example one per nine) are combined.
- * @returns {Promise<{source:'card', holes:object[], warnings:string[]}>}
- */
-export async function readScanCard(files, onStatus) {
-  onStatus('Reading card...');
-  var marks = [];
-  for (var i = 0; i < files.length; i++) {
-    marks = marks.concat(readCardMarks(await loadImage(files[i])));
-  }
-  var result = marksToHoles(marks);
-  if (result.holes.length === 0) {
-    throw new Error('No checked boxes were found. Use a dark pen, and make sure the photo is sharp and well lit.');
-  }
-  return { source: 'card', holes: result.holes, warnings: result.warnings };
-}
-
-/**
- * @param {File[]} files  photos, in hole order
- * @param {'scorecard'|'shots'} kind
+ * @param {File[]} files  photos of the scorecard (for example one per nine), in hole order
  * @param {(msg:string)=>void} onStatus  progress text for the UI
  * @returns {Promise<{source:'ai'|'device', holes:object[]}>}
- *   scorecard holes: {hole, par, yards, score}
- *   shots holes:     {hole, par, yards, shots:[{lie, dist}]}
+ *   holes: {hole, par, yards, score, fairway, gir, putts, penalties} (see parse-text.js)
  */
-export async function readRoundPhoto(files, kind, onStatus) {
+export async function readRoundPhoto(files, onStatus) {
   onStatus('Preparing photo...');
   var dataUrls = [];
   for (var i = 0; i < files.length; i++) dataUrls.push(await toJpegDataUrl(files[i]));
@@ -126,7 +96,7 @@ export async function readRoundPhoto(files, kind, onStatus) {
   if (aiAvailable !== false && S.currentUser && _sb.functions) {
     try {
       onStatus('Reading photo...');
-      var aiHoles = await readWithAI(kind, dataUrls);
+      var aiHoles = await readWithAI(dataUrls);
       aiAvailable = true;
       return { source: 'ai', holes: aiHoles };
     } catch (e) {
@@ -136,11 +106,9 @@ export async function readRoundPhoto(files, kind, onStatus) {
   }
 
   onStatus('Reading photo on this device...');
-  var holes = await readOnDevice(kind, dataUrls, onStatus);
+  var holes = await readOnDevice(dataUrls, onStatus);
   if (!holes) {
-    throw new Error(kind === 'shots'
-      ? 'Could not find any holes in that photo. Check the notes format below and try a sharper, closer photo.'
-      : 'Could not find a row of scores in that photo. Try a sharper, straight-on photo of the scorecard.');
+    throw new Error('Could not find a row of scores in that photo. Try a sharper, straight-on photo of the scorecard.');
   }
   return { source: 'device', holes: holes };
 }

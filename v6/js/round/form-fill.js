@@ -1,8 +1,13 @@
 // Fill the Simple and Hole-by-Hole entry forms from saved data.
 // Used when resuming an unfinished round and when a photo has been read.
 import { hbhAddShot, hbhLieChanged, hbhSetPar } from './hole-entry.js';
+import { simpleSetStat } from './simple-entry.js';
 
-/** @param {{hole:number, par:number, score:number, yards:number}[]} simpleFormData */
+/**
+ * @param {{hole:number, par:number, score:number, yards:number,
+ *   fairway?:'hit'|'miss'|'', gir?:'hit'|'miss'|'', putts?:number|null, penalties?:number}[]} simpleFormData
+ *   The stats fields only apply when the form was built with its stats row.
+ */
 export function fillSimpleForm(simpleFormData) {
   simpleFormData.forEach(function(hd) {
     var card = document.getElementById('simple_hole_' + hd.hole);
@@ -19,6 +24,14 @@ export function fillSimpleForm(simpleFormData) {
     if (scoreEl && hd.score) scoreEl.value = hd.score;
     var yardsEl = document.getElementById('simple_yards_' + hd.hole);
     if (yardsEl && hd.yards) yardsEl.value = hd.yards;
+    if (document.getElementById('simple_stats_' + hd.hole)) {
+      var fwWrap = document.getElementById('simple_fwwrap_' + hd.hole);
+      fwWrap.style.visibility = hd.par === 3 ? 'hidden' : 'visible';
+      if (hd.fairway && hd.par !== 3) simpleSetStat(hd.hole, 'fw', hd.fairway);
+      if (hd.gir) simpleSetStat(hd.hole, 'gir', hd.gir);
+      if (hd.putts !== null && hd.putts !== undefined) document.getElementById('simple_putts_' + hd.hole).value = hd.putts;
+      if (hd.penalties) document.getElementById('simple_pen_' + hd.hole).value = hd.penalties;
+    }
   });
 }
 

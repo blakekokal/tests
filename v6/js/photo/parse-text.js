@@ -28,33 +28,64 @@ function isHoleNumberRow(nums) {
   return true;
 }
 
+/** "✓ x ✓ ..." cells -> ['hit','miss',...]; null when the row cannot be lined up with the holes. */
+function marksIn(line, label, count) {
+  var cells = line.slice(label.length).split(/[\s|:]+/).filter(Boolean);
+  var marks = cells.map(function(c) {
+    if (/^[x✗✘×]$/i.test(c)) return 'miss';
+    if (/^[✓✔√vy\/]$/i.test(c)) return 'hit';
+    if (/^[-–—.]$/.test(c)) return '';
+    return null;
+  });
+  if (marks.some(function(m) { return m === null; })) return null;
+  return count && marks.length !== count ? null : marks;
+}
+
 /**
- * Scorecard text -> [{hole, par, yards, score}].
- * Works on rows such as "Par 4 3 5 ...", "Blue 385 160 ...", "Sam 5 3 6 ...".
+ * Scorecard text -> one entry per hole.
+ * Reads the printed rows (Hole, yardage, Par) and the player's rows:
+ *   score          strokes per hole
+ *   F              fairway: check = hit, x = missed (blank on par 3s)
+ *   G              green in regulation: check = hit, x = missed
+ *   Putts          putts per hole
+ *   Pen            penalty strokes (blank = none)
  * With several players on the card, the first score row is used.
- * @returns {{hole:number, par:number, yards:number, score:number}[]|null}
+ * @returns {{hole:number, par:number, yards:number, score:number,
+ *   fairway:'hit'|'miss'|'', gir:'hit'|'miss'|'', putts:number|null, penalties:number}[]|null}
  */
 export function parseScorecardText(text) {
-  var pars = [], yards = [], scores = [];
+  var pars = [], yards = [], scores = [], putts = [], pens = [], fairways = [], greens = [];
   // A card is usually two tables (front nine, back nine); each "Hole" row starts a new one.
-  var seg = { par: false, yards: false, score: false };
+  var seg = { par: false, yards: false, score: false, holes: 0 };
 
   String(text || '').split(/\r?\n/).forEach(function(rawLine) {
     var line = rawLine.trim();
     if (!line) return;
-    var label = (line.match(/^[^\d]*/)[0] || '').toLowerCase();
+    var label = (line.match(/^[^\d✓✔√✗✘×|]*/)[0] || '');
+    var name = label.toLowerCase().replace(/[^a-z]/g, '');
     var all = integersIn(line);
-    if (all.length < 3) return;
 
-    if (/hole/.test(label) || isHoleNumberRow(all)) {
-      seg = { par: false, yards: false, score: false };
+    if (/hole/.test(name) || isHoleNumberRow(all)) {
+      seg = { par: false, yards: false, score: false, holes: Math.min(9, stripTotals(all).length) };
       return;
     }
-    if (/h(an)?d?i?ca?p|index|hdcp|s\.?i\.?/.test(label)) return;
-    if (/putt/.test(label)) return;
+    // Check / x rows: F (fairways) and G (greens)
+    var firstWord = line.split(/[\s|:]+/)[0];
+    var rowName = firstWord.toLowerCase().replace(/[^a-z]/g, '');
+    if (/^(f|fw|fir|fairways?)$/.test(rowName) || /^(g|gir|greens?)$/.test(rowName)) {
+      var marks = marksIn(line, firstWord, seg.holes);
+      if (marks) {
+        if (rowName.charAt(0) === 'f') fairways = fairways.concat(marks); else greens = greens.concat(marks);
+      }
+      return;
+    }
+    if (all.length < 3) return;
+    if (/h(an)?d?i?ca?p|index|hdcp/.test(name)) return;
 
     var nums = stripTotals(all);
-    if (/\bpar\b/.test(label) || (!label && !seg.par && allBetween(nums, 3, 5) && seg.yards)) {
+    if (/putt/.test(name)) { putts = putts.concat(nums); return; }
+    if (/^pen/.test(name)) { pens = pens.concat(nums); return; }
+    if (/^par$/.test(name) || (!name && !seg.par && allBetween(nums, 3, 5) && seg.yards)) {
       if (!seg.par && allBetween(nums, 3, 6)) { pars = pars.concat(nums); seg.par = true; }
       return;
     }
@@ -70,61 +101,17 @@ export function parseScorecardText(text) {
 
   scores = scores.slice(0, MAX_HOLES);
   if (scores.length < 3) return null;
+  // A stats row is only trusted when it has one value per hole
+  var whole = function(list) { return list.length === scores.length ? list : []; };
+  putts = whole(putts); pens = whole(pens); fairways = whole(fairways); greens = whole(greens);
   return scores.map(function(score, i) {
-    return { hole: i + 1, par: pars[i] >= 3 && pars[i] <= 5 ? pars[i] : 4, yards: yards[i] || 0, score: score };
+    var par = pars[i] >= 3 && pars[i] <= 5 ? pars[i] : 4;
+    return {
+      hole: i + 1, par: par, yards: yards[i] || 0, score: score,
+      fairway: par === 3 ? '' : (fairways[i] || ''),
+      gir: greens[i] || '',
+      putts: putts.length ? putts[i] : null,
+      penalties: pens[i] || 0
+    };
   });
-}
-
-// Shot notes: where each shot finished + how far was left.
-// Longer names first so "fairway bunker" wins over "fairway".
-var LIE_WORDS = [
-  ['left rough', 'LEFT ROUGH'], ['right rough', 'RIGHT ROUGH'],
-  ['fairway bunker', 'FW BUNKER'], ['fw bunker', 'FW BUNKER'],
-  ['greenside bunker', 'GS BUNKER'], ['gs bunker', 'GS BUNKER'],
-  ['missed green', 'MISSED GREEN'], ['out of bounds', 'OB'],
-  ['fairway', 'FAIRWAY'], ['bunker', 'GS BUNKER'], ['recovery', 'RECOVERY'],
-  ['holed', 'HOLE'], ['water', 'WATER'], ['green', 'GREEN'], ['rough', 'LEFT ROUGH'],
-  ['hole', 'HOLE'], ['miss', 'MISSED GREEN'], ['sand', 'GS BUNKER'], ['putt', 'GREEN'],
-  ['rec', 'RECOVERY'], ['lr', 'LEFT ROUGH'], ['rr', 'RIGHT ROUGH'], ['fb', 'FW BUNKER'],
-  ['gb', 'GS BUNKER'], ['mg', 'MISSED GREEN'], ['fw', 'FAIRWAY'], ['ob', 'OB'], ['in', 'HOLE'],
-  ['f', 'FAIRWAY'], ['g', 'GREEN'], ['b', 'GS BUNKER'], ['r', 'RECOVERY'], ['w', 'WATER'],
-  ['h', 'HOLE'], ['p', 'GREEN']
-];
-var LIE_LOOKUP = {};
-LIE_WORDS.forEach(function(pair) { LIE_LOOKUP[pair[0]] = pair[1]; });
-var SHOT_RE = new RegExp(
-  '(?:^|[^a-z])(' + LIE_WORDS.map(function(p) { return p[0]; }).join('|') + ')\\s*[-:=]?\\s*(\\d{1,3})?(?![a-z\\d])', 'gi');
-var HOLE_HEADER_RE = /^\s*(?:hole|h|#)?\s*(\d{1,2})\s*[:.)\-]?\s*(?:par|p)\s*([345])(?:\s*[,\/\-]?\s*(\d{2,3})\s*(?:y(?:ar)?ds?|y)?)?/i;
-
-/**
- * Shot notes text -> [{hole, par, yards, shots:[{lie, dist}]}], the Hole-by-Hole form's own shape.
- * Each hole starts with "<hole> par <par> <yards>" followed by one entry per shot:
- * where it finished and how far was left (yards, or feet once on the green), e.g.
- *   1 P4 385: F 150, G 20, G 3, H
- * @returns {{hole:number, par:number, yards:number, shots:{lie:string, dist:string}[]}[]|null}
- */
-export function parseShotNotesText(text) {
-  var holes = [], current = null;
-  String(text || '').split(/\r?\n/).forEach(function(rawLine) {
-    var line = rawLine.trim();
-    if (!line) return;
-    var header = line.match(HOLE_HEADER_RE);
-    if (header) {
-      current = { hole: Number(header[1]), par: Number(header[2]), yards: Number(header[3]) || 0, shots: [] };
-      holes.push(current);
-      line = line.slice(header[0].length);
-    }
-    if (!current) return;
-    var m;
-    SHOT_RE.lastIndex = 0;
-    while ((m = SHOT_RE.exec(line)) !== null) {
-      var lie = LIE_LOOKUP[m[1].toLowerCase()];
-      current.shots.push({ lie: lie, dist: lie === 'HOLE' ? '' : (m[2] || '') });
-    }
-  });
-
-  holes = holes.filter(function(h) { return h.hole >= 1 && h.hole <= MAX_HOLES && h.shots.length > 0; });
-  if (holes.length === 0) return null;
-  holes.sort(function(a, b) { return a.hole - b.hole; });
-  return holes.slice(0, MAX_HOLES);
 }

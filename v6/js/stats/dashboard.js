@@ -129,14 +129,16 @@ export function renderDashboard(data, hcp, targetId) {
     var holes = rd.allHoles || [];
     var st = rd.stats || {};
     var isSimple = rd.entryMode === 'simple';
+    // Simple rounds from a scorecard photo carry fairway / green / putt counts but no shots
+    var hasStats = !isSimple || rd.basicStats === true;
     A.holes += holes.length;
     A.totScore += r.score; A.totPar += r.par;
     if (r.to_par < A.bestToPar) { A.bestToPar = r.to_par; A.bestRound = r; }
     if (holes.length >= 14) { A.r18s.push(r.score); A.r18tp.push(r.to_par); }
     else { A.r9s.push(r.score); A.r9tp.push(r.to_par); }
 
-    // Simple rounds: only count scoring, skip shot-level stats
-    if (!isSimple) {
+    // Score-only rounds: only count scoring, skip fairway / green / putt stats
+    if (hasStats) {
       A.fwHit += st.fwHit||0; A.fwOpp += st.fwOpp||0; A.fwLeft += st.fwLeft||0; A.fwRight += st.fwRight||0;
       A.girHit += st.girHit||0;
       A.scrMade += st.scrMade||0; A.scrOpp += st.scrOpp||0;
@@ -148,7 +150,7 @@ export function renderDashboard(data, hcp, targetId) {
     var roundPBP = [];
 
     holes.forEach(function(h) {
-      if (!isSimple) A.totPutts += h.putts||0;
+      if (hasStats) A.totPutts += h.putts||0;
       var diff = h.score - h.par;
       if (diff <= -2) A.eagles++; else if (diff === -1) A.birdies++; else if (diff === 0) A.pars++; else if (diff === 1) A.bogeys++; else A.dblPlus++;
       if (h.par===3) { A.c3++; A.p3+=h.score; } if (h.par===4) { A.c4++; A.p4+=h.score; } if (h.par===5) { A.c5++; A.p5+=h.score; }
@@ -325,8 +327,9 @@ export function renderDashboard(data, hcp, targetId) {
   var bestStr=A.bestRound?A.bestRound.score+' ('+ftp(A.bestRound.to_par)+') \u2014 '+A.bestRound.course_name:'\u2013';
   var avgDrv=davg(A.drives);
   var avgFirstPutt=davg(A.firstPuttDists);
-  // Count holes from detailed rounds only for putting stats
-  var detailedHoles = data.reduce(function(sum, r) { return sum + (r.round_data && r.round_data.entryMode === 'simple' ? 0 : (r.round_data && r.round_data.allHoles ? r.round_data.allHoles.length : 0)); }, 0);
+  // Rounds and holes that have fairway / green / putt stats (everything except score-only rounds)
+  var nWithStats = data.filter(function(r){ var rd = r.round_data; return !rd || rd.entryMode !== 'simple' || rd.basicStats === true; }).length || 1;
+  var detailedHoles = data.reduce(function(sum, r) { return sum + (r.round_data && r.round_data.entryMode === 'simple' && r.round_data.basicStats !== true ? 0 : (r.round_data && r.round_data.allHoles ? r.round_data.allHoles.length : 0)); }, 0);
   var twoPutts=detailedHoles-A.onePutt-A.threePutt;
   var sgTot=A.sgOTT+A.sgAPP+A.sgARG+A.sgPutt;
   
@@ -366,7 +369,7 @@ export function renderDashboard(data, hcp, targetId) {
     sandSave: A.bunOpp > 0 ? Math.round(A.bunMade/A.bunOpp*100) : 0,
     scr30In: A.scrOpp > 0 ? Math.round(A.scrMade/A.scrOpp*100) : 0,
     // Putting
-    puttsPerRound: A.totPutts/nDetailed,
+    puttsPerRound: A.totPutts/nWithStats,
     make9ft: A.allPuttRanges[0].t + A.allPuttRanges[1].t + A.allPuttRanges[2].t > 0 ? Math.round((A.allPuttRanges[0].m + A.allPuttRanges[1].m + A.allPuttRanges[2].m) / (A.allPuttRanges[0].t + A.allPuttRanges[1].t + A.allPuttRanges[2].t) * 100) : 70,
     sgPutt: A.sgPutt/nDetailed,
     avgMadeDist: A.longestMadePutt > 0 ? Math.min(A.longestMadePutt/2, 15) : 5,

@@ -14,8 +14,11 @@ import { renderSummary } from './summary.js';
 function buildRoundBlob() {
   return {
     entryMode: S.entryMode || 'shot',
+    // Simple rounds that also carry fairway / green / putts / penalties (from a scorecard photo)
+    ...(S.entryMode === 'simple' && S.simpleHasStats ? { basicStats: true } : {}),
     allHoles: S.allHoles.map(h => ({
       hole: h.hole, par: h.par, yards: h.yards, score: h.score, putts: h.putts,
+      ...(h.gir !== undefined ? { fairway: h.fairway, gir: h.gir, penalties: h.penalties } : {}),
       firstPuttDist: h.firstPuttDist, expectedPutts: h.expectedPutts,
       sgOTT: h.sgOTT, sgAPP: h.sgAPP, sgARG: h.sgARG, sgPutting: h.sgPutting,
       shots: h.shots.map(s => ({
@@ -330,7 +333,7 @@ async function resumeIncompleteRound(roundId) {
     setEntryMode('simple');
     var customHolesEl = document.getElementById('customHoles');
     if (customHolesEl) customHolesEl.value = S.totalHoles;
-    buildSimpleForm();
+    buildSimpleForm(rd.simpleFormData.some(function(hd) { return hd.gir !== undefined; }));
     var sCN = document.getElementById('simplCourseName');
     if (sCN) { sCN.innerText = data.course_name || ''; sCN.style.display = data.course_name ? 'block' : 'none'; }
     fillSimpleForm(rd.simpleFormData);

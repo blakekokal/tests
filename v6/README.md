@@ -31,7 +31,7 @@ js/
   data/               course database, drill library, combine presets
   round/              setup, shot-by-shot, hole-by-hole, simple entry, summary,
                       save/resume, history, edit, Excel/CSV import + export
-  photo/              photo entry (new): parsers, reader, screen
+  photo/              photo entry (new): scorecard text parser, reader, screen
   stats/              dashboard, full stats, radar charts, handicap index, goals
   performance/        performance analysis (rounds + combines)
   combines/           table combines, line drill, driver drill, evaluation test
@@ -56,16 +56,28 @@ Conventions:
 ## Photo entry
 
 New Round → Entry Mode → **Photo** (or Round History → *Add Round from Photo*).
-Pick *Scorecard* or *Shot-by-Shot Notes*, take or choose the photo, and the result opens
-in the normal Simple or Hole-by-Hole form to check before submitting. The saved round is
-identical to one typed by hand, so nothing in Supabase changes shape.
+Take or choose a photo of a normal scorecard. The player writes one row each for:
+
+| Row | What to write |
+|---|---|
+| Score | strokes on each hole |
+| F | fairway: check = hit, x = missed (blank on par 3s) |
+| G | green in regulation: check = hit, x = missed |
+| Putts | number of putts |
+| Pen | penalty strokes (blank = none) |
+
+The result opens in the Simple form, with a stats row per hole, to check before submitting.
+It is saved as a simple round (`entryMode: 'simple'`, no shots, so no strokes gained) with
+`basicStats: true`, per-hole `putts` / `fairway` / `gir` / `penalties`, and the usual `stats`
+totals. The dashboard counts these rounds toward fairways, greens and putting. Nothing in
+Supabase changes shape; the extra fields live inside the existing `round_data` JSON.
 
 Two readers:
 
-- **On device** (default, free, no setup): Tesseract.js in the browser. Reliable on clear
-  printed text; weak on handwriting.
-- **AI vision** (optional, reads handwriting): the `read-round-photo` Supabase Edge
-  Function in `supabase/functions/`. The app uses it automatically once deployed, for
+- **On device** (default, free, no setup): Tesseract.js in the browser. Reads clear printed
+  numbers; it cannot be relied on for handwriting or for the check / x marks.
+- **AI vision** (optional, reads handwriting and the marks): the `read-round-photo` Supabase
+  Edge Function in `supabase/functions/`. The app uses it automatically once deployed, for
   signed-in users, and falls back to on-device reading otherwise.
 
   ```bash
